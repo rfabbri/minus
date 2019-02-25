@@ -8,6 +8,7 @@
 #include "Eigen/Dense"
 
 /* Lapack .h */
+#if 0
 extern "C" {
 int sgesv_(int *n,      // number of rows in A
            int *nrhs,   // number of right hand sides
@@ -19,6 +20,7 @@ int sgesv_(int *n,      // number of rows in A
            int *info);  // error info
 
 };
+#endif
 
 // Evaluates Hx by itself
 // 
@@ -15122,6 +15124,7 @@ evaluate_HxH(const complex* x /*x, t and params*/, complex* y /*HxH*/)
 // Place any specific-type functions here
 
 
+#if 0
 // Original code solve_via_lapack_without_transposition
 //
 // \returns  lapack info code. 
@@ -15150,6 +15153,7 @@ bool linear(
 
   return info == 0;
 }
+#endif
 
 bool linear_eigen(
     const complex* A,  // NNN-by-NNN matrix of complex #s
