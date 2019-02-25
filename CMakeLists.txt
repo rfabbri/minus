@@ -120,6 +120,14 @@ else()
   include( ${PROJECT_BINARY_DIR}/CMakeListsLocal.txt OPTIONAL )
 endif()
 
+set(COMPS_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR})    #Source includes
+set(COMPS_BINARY_INCLUDE_DIR ${PROJECT_BINARY_DIR}) #Generated includes
+set(COMPS_INCLUDE_DIRS ${COMPS_BINARY_INCLUDE_DIR} ${COMPS_INCLUDE_DIR})
+set(COMPS_INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include/)
+
+include_directories(${COMPS_INCLUDE_DIRS})
+
+
 # Optinonally look for VXL if you want to built tests
 #
 option(USE_VXL "Use VXL libraries" NO)
@@ -183,7 +191,9 @@ set (comps_sources
 # add_subdirectory(cmd) 
   
 if(VXL_FOUND)  # For now we need vxl to build tests
-  add_subdirectory(tests)
+  if( BUILD_TESTING )
+    add_subdirectory(tests)
+  endif()
 endif()
 
 # For now, we have a library
