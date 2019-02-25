@@ -1,1 +1,4 @@
-	tests/eval-nag/ tests/chopped-nag/ tests/compare-linear-system/ tests/eigen-hc/
+	tests/eval-nag
+  tests/chopped-nag
+  tests/compare-linear-system
+  tests/eigen-hc
