@@ -165,7 +165,26 @@ TEST_BIG_ENDIAN(MY_BIG_ENDIAN)
 # For use in client projects that use CMake and not installed version
 set(COMPS_LIBRARY_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} CACHE STATIC "Where all the vxd libraries are, for clients to use." )
 
+
+# For comparison purposes
+find_package(BLAS)
+find_package(LAPACK)
+if(LAPACK_FOUND AND BLAS_FOUND)
+  message("FOUND YEAH" ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+  target_link_libraries( bnld_algo bnld vnl_algo vil brent ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+else()
+  message("FOUND NO")
+  target_link_libraries( bnld_algo bnld vnl_algo vil brent)
+endif()
+
+# For now, we have a library
+add_library( bnld_algo ${bnld_algo_sources} )
+
+
+
 # This command must be the last command in this file
 if(NOT COMPS_NO_EXPORT)
   include(${CMAKE_CURRENT_LIST_DIR}/config/cmake/export/COMPSCreateProject.cmake)
 endif()
+
+
