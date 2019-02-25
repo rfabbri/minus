@@ -12,7 +12,7 @@ project(COMPS #Project name must be all caps to have properly generated COMPS_VE
     DESCRIPTION "Continuation-based Minimal Problem Solver"
     LANGUAGES CXX C)
 include(CMakeDependentOption)
-include(${CMAKE_CURRENT_SOURCE_DIR}/config/cmake/VXDInitializeBuildType.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/config/cmake/COMPSInitializeBuildType.cmake)
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG(-Wno-undefined-var-template HAS_NO_UNDEFINED_VAR_TEMPLATE)
 if( HAS_NO_UNDEFINED_VAR_TEMPLATE )
@@ -48,7 +48,7 @@ SETIFEMPTY(CMAKE_INSTALL_RUNTIME_DESTINATION bin)
 SETIFEMPTY(COMPS_INSTALL_RUNTIME_DIR bin)
 SETIFEMPTY(COMPS_INSTALL_LIBRARY_DIR lib)
 SETIFEMPTY(COMPS_INSTALL_ARCHIVE_DIR lib)
-SETIFEMPTY(COMPS_INSTALL_INCLUDE_DIR include/vxd)
+SETIFEMPTY(COMPS_INSTALL_INCLUDE_DIR include/)
 if(NOT COMPS_LIB_PREFIX)
   set( COMPS_LIB_PREFIX "") # This is typically empty
 endif()
@@ -134,14 +134,11 @@ if (USE_VXL)
   endif()
 endif()
 
-add_subdirectory(cmd) 
 
 if(VXL_FOUND)
   # This is required on some platforms because various libraries
   # include OpenGL indirectly even when it is not used
   include_directories( ${VXL_VGUI_INCLUDE_DIR} )
-  # xxx  tests
-  add_subdirectory(tests)
 endif()
 
 option(USE_Boost "Use Boost libraries" NO)
@@ -167,24 +164,32 @@ set(COMPS_LIBRARY_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} CACHE STATIC "Where all
 
 
 # For comparison purposes
-find_package(BLAS)
-find_package(LAPACK)
-if(LAPACK_FOUND AND BLAS_FOUND)
-  message("FOUND YEAH" ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
-  target_link_libraries( bnld_algo bnld vnl_algo vil brent ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
-else()
-  message("FOUND NO")
-  target_link_libraries( bnld_algo bnld vnl_algo vil brent)
+# find_package(BLAS)
+# find_package(LAPACK)
+# if(LAPACK_FOUND AND BLAS_FOUND)
+#   message("FOUND YEAH" ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+#   target_link_libraries( bnld_algo bnld vnl_algo vil brent ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+# else()
+#   message("FOUND NO")
+#   target_link_libraries( bnld_algo bnld vnl_algo vil brent)
+# endif()
+
+
+# XXX: to be removed when header-only library is deployed
+set (comps_sources
+  comps.cxx              comps.hxx comps.h
+)
+
+# add_subdirectory(cmd) 
+  
+if(VXL_FOUND)  # For now we need vxl to build tests
+  add_subdirectory(tests)
 endif()
 
 # For now, we have a library
-add_library( bnld_algo ${bnld_algo_sources} )
-
-
+add_library( comps ${comps_sources} )
 
 # This command must be the last command in this file
-if(NOT COMPS_NO_EXPORT)
-  include(${CMAKE_CURRENT_LIST_DIR}/config/cmake/export/COMPSCreateProject.cmake)
-endif()
-
-
+#if(NOT COMPS_NO_EXPORT)
+#  include(${CMAKE_CURRENT_LIST_DIR}/config/cmake/export/COMPSCreateProject.cmake)
+#endif()
