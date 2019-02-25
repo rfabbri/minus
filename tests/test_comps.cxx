@@ -1,4 +1,4 @@
-#include <bnld/algo/bnld_vnag.h>
+#include <comps.h>
 #include <testlib/testlib_test.h>
 #include <cstdio>
 #include <iostream>
@@ -5105,7 +5105,7 @@ test_ptrack()
   printf("TRACKER ---------------------------------\n");
   Solution solutions[NSOLS];
   unsigned retval = 
-  ptrack(&VNAG_DEFAULT, start_sols, params, solutions);
+  ptrack(&comps_DEFAULT, start_sols, params, solutions);
 
   report(solutions);
 
@@ -5113,11 +5113,11 @@ test_ptrack()
 }
 
 void
-test_vnag()
+test_comps()
 {
   test_linear();
   test_ptrack();
 }
 
 
-TESTMAIN(test_vnag);
+TESTMAIN(test_comps);

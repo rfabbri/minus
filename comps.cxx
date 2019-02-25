@@ -2,7 +2,7 @@
 // \author Ricardo Fabbri based on original code by Anton Leykin 
 // \date Created: Fri Feb  8 17:42:49 EST 2019
 // 
-#include "bnld_vnag.h"
+#include "comps.h"
 #include <cstdio>
 #include <iostream>
 #include "Eigen/Dense"

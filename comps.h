@@ -1,5 +1,5 @@
-#ifndef bnld_vnag_h_
-#define bnld_vnag_h_
+#ifndef comps_h_
+#define comps_h_
 //:
 // \file
 // \brief Vision Numerical Algebraic Geometry package for multiview problems
@@ -82,7 +82,7 @@ struct TrackerSettings {
 //                      tStep => .05
 //                      tStepMin => 1e-7
 
-static const TrackerSettings VNAG_DEFAULT;
+static const TrackerSettings comps_DEFAULT;
 
 enum SolutionStatus {
   UNDETERMINED,
@@ -176,4 +176,4 @@ bool linear_eigen3(
     );
 
 
-#endif  // bnld_vnag_h_
+#endif  // comps_h_
