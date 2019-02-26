@@ -236,7 +236,7 @@ array_add_scalar_to_self(complex *a, complex b)
   for (unsigned int i=0; i < NNN; ++i,++a) *a += b;
 }
 
-void 
+inline void 
 array_copy(
   const complex *a,
   complex *b)
@@ -245,7 +245,7 @@ array_copy(
   memcpy(b, a, NNN*sizeof(complex));
 }
 
-void 
+inline void 
 array_copy_NNNplus1(
   const complex *a,
   complex *b)
@@ -255,7 +255,7 @@ array_copy_NNNplus1(
 }
 
 
-double
+inline double
 array_norm2(const complex *a)
 {
   double val = 0;
