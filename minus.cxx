@@ -5,6 +5,7 @@
 #include "minus.h"
 #include <cstdio>
 #include <iostream>
+#include <iomanip>
 #include "Eigen/Dense"
 #include "chicago.hxx"
 
@@ -193,8 +194,38 @@ array_print_H(std::string name, const complex *a)
   std::cerr << a[0] << " , " << a[1] << " , ... " <<  a[NNN*NNN-1] << std::endl;
   std::cerr << "\tlast col: ";
   std::cerr << a[NNN*NNN] << " , " << a[NNN*NNN+1] << " , ... " <<  a[NNN*(NNN+1)-1] << std::endl;
-  std::cerr << "\tlast col line-based: ";
-  std::cerr << a[NNN] << " , " << a[2*NNN+1] << " , ... " <<  a[NNN*(NNN+1)-1] << std::endl;
+//  std::cerr << "\tlast col line-based: ";
+//  std::cerr << a[NNN] << " , " << a[2*NNN+1] << " , ... " <<  a[NNN*(NNN+1)-1] << std::endl;
+}
+
+void
+array_print_H_full(const complex *a)
+{
+  std::cerr << "Full Hx real[][]: " << std::setprecision(20) << std::endl;
+  for (unsigned r=0; r < NNN; ++r) {
+    for (unsigned c=0; c < NNN; ++c)
+      std::cerr << a[r+c*NNN].real() << "  ";
+    std::cerr << std::endl;
+  }
+  
+  std::cerr << "Full Hx imag[][]: " << std::setprecision(20) << std::endl;
+  for (unsigned r=0; r < NNN; ++r) {
+    for (unsigned c=0; c < NNN; ++c)
+      std::cerr << a[r+c*NNN].imag() << "  ";
+    std::cerr << std::endl;
+  }
+  
+  std::cerr << "Full Ht real[]:" << std::endl;
+  for (unsigned r=0; r < NNN; ++r) {
+      std::cerr << a[r+NNN*NNN].real() << "  ";
+    std::cerr << std::endl;
+  }
+  
+  std::cerr << "Full Ht imag[]:" << std::endl;
+  for (unsigned r=0; r < NNN; ++r) {
+      std::cerr << a[r+NNN*NNN].imag() << "  ";
+    std::cerr << std::endl;
+  }
 }
 
 inline void 
@@ -264,6 +295,8 @@ array_norm2(const complex *a)
     val += std::norm(*a++);
   return val;
 }
+
+#define linear linear_eigen4
 
 //void 
 //array_copy_n(size_t n, const complex *a, complex *b)
@@ -363,7 +396,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       array_negate_self(RHS);
       array_print("minus RHS",RHS);
       // was: solve_via_lapack_without_transposition(n, LHS, 1, RHS, dx1);
-      Axb_success &= linear_eigen3(LHS,RHS,dx1);
+      Axb_success &= linear(LHS,RHS,dx1);
       array_print("dx1",dx1);
       // TODO: once this is working, use eigen2 for LU partial pivots, faster.
       // this is QR full collumn pivoting, which is as fast as lapack LU
@@ -386,7 +419,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       LHS = Hxt;
       RHS = Hxt + NNN2;
       array_negate_self(RHS);
-      Axb_success &= linear_eigen3(LHS,RHS,dx2);
+      Axb_success &= linear(LHS,RHS,dx2);
       std::cerr << "second eval ---------" << std::endl;
       array_print_NNNplus1("xt", xt);
       array_print_H("Hxt",Hxt);
@@ -405,10 +438,11 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       // xt[n] += one_half*(*dt); // t0+.5dt (SAME)
       //
       evaluate_Hxt(xt, Hxt);
+      array_print_H_full(Hxt);
       LHS = Hxt;
       RHS = Hxt + NNN2;
       array_negate_self(RHS);
-      Axb_success &= linear_eigen3(LHS,RHS,dx3);
+      Axb_success &= linear(LHS,RHS,dx3);
       std::cerr << "third eval ---------" << std::endl;
       array_print_NNNplus1("xt", xt);
       array_print_H("Hxt",Hxt);
@@ -423,13 +457,19 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       }
 
       // dx4
+      std::cerr << "fourth eval ---------" << std::endl;
       array_multiply_scalar_to_self(dx3, *dt);
       array_copy_NNNplus1(x0t0, xt);
       array_add_to_self(xt, dx3); // x0+dx3*dt
       xt[NNN] += *dt;               // t0+dt
       //
       evaluate_Hxt(xt, Hxt);
-      std::cerr << "fourth eval ---------" << std::endl;
+      array_print_NNNplus1("xt", xt);
+        std::cerr << "\txt full: {" << std::setprecision(20);
+      for (unsigned id=0; id < NNN; ++id) {
+        std::cerr << "{" << xt[id] << "} ,";
+      }
+      std::cerr << "{" << xt[NNN]  << "}};" << std::endl;
       
       if (std::abs(Hxt[0] - complex(72802.2,-81551.9)) <= 10*dbgtol &&
           std::abs(Hxt[NNN*NNN-1] - complex(0,0)) <= dbgtol)
@@ -437,24 +477,28 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       else
         std::cerr << "Hx from Hxt FAIL\n";
       
-      if (std::abs(Hxt[NNN*NNN] - complex(-248323000+163093000)) <= 1 &&
+      if (std::abs(Hxt[NNN*NNN] - complex(-248323000,+163093000)) <= 1e3 &&
           std::abs(Hxt[NNN*NNN+NNN-1] - complex(-.221521,-.47423)) <= dbgtol)
         std::cerr << "Ht from Hxt PASS \n";
       else
         std::cerr << "Ht from Hxt FAIL\n";
+      array_print_H("Hxt",Hxt);
+      array_print_H_full(Hxt);
       LHS = Hxt;
       RHS = Hxt + NNN2;
       array_negate_self(RHS);
-      Axb_success &= linear_eigen3(LHS,RHS,dx4);
+      Axb_success &= linear(LHS,RHS,dx4);
       array_print_NNNplus1("xt", xt);
-      array_print_H("Hxt",Hxt);
       array_print("dx4", dx4);
       
-      if (std::abs(dx4[0] - complex(-559.896,+740.211)) <= dbgtol &&
-          std::abs(dx4[NNN-1] - complex(-882.69,-237.396)) <= dbgtol)
+      if (std::abs(dx4[0] - complex(885846,811668)) <= 1000*dbgtol &&
+          std::abs(dx4[NNN-1] - complex(823211,-2145640)) <= 1000*dbgtol)
         std::cerr << "dx4 PASS\n";
-      else
+      else {
         std::cerr << "dx4 FAIL\n";
+        std::cerr << "\t\t" << dx4[0] - complex(885846,811668)
+          << dx4[NNN-1] -  complex(823211,-2145640) << std::endl;
+      }
 
       // "dx1" = .5*dx1*dt, "dx2" = .5*dx2*dt, "dx3" = dx3*dt
       // TODO: make this into a single function loop directly
@@ -473,14 +517,15 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       array_add_to_self_NNNplus1(x1t1, dxdt);
       
       // CORRECTOR
-      unsigned n_corr_steps = 1;  // since its a do-while, it starts at 1
+      unsigned n_corr_steps = 0;
       bool is_successful;
       do {
+        ++n_corr_steps;
         std::cerr << "\tCorrection step " << n_corr_steps << std::endl;
         evaluate_HxH(x1t1, HxH);
         array_print_NNNplus1("x1t1",x1t1);
         
-        if (n_corr_steps = 1) {
+        if (n_corr_steps == 1) {
           if (std::abs(HxH[0] - complex(26113200,11590100)) <= dbgtol &&
               std::abs(HxH[NNN*NNN-1] - complex(0,0)) <= dbgtol)
             std::cerr << "Hx from HxH PASS\n";
@@ -495,14 +540,15 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
         }
         
         array_print_H("HxH",HxH);
+        
         LHS = HxH;         // Hx
         RHS = HxH + NNN2;  // H
         array_negate_self(RHS); // TODO: put into eval function
-        Axb_success &= linear_eigen3(LHS,RHS,dx);
+        Axb_success &= linear(LHS,RHS,dx);
         array_print_n("LHS corr",LHS,NNN2);
         array_print("RHS corr",RHS);
         array_print("dx",dx);
-        if (n_corr_steps = 1) {
+        if (n_corr_steps == 1) {
           if (std::abs(dx[0] - complex(-2206.68,-2378.66)) <= dbgtol &&
               std::abs(dx[NNN-1] - complex(-1731.72,+6593.05)) <= dbgtol)
             std::cerr << "dx from first correction PASS \n";
@@ -513,7 +559,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
         is_successful = array_norm2(dx) < s->epsilon2_ * array_norm2(x1t1);
         // printf("c: |dx|^2 = %lf\n",
         // norm2_complex_array<ComplexField>(n,dx));
-      } while (!is_successful && n_corr_steps++ < s->max_corr_steps_);
+      } while (!is_successful && n_corr_steps < s->max_corr_steps_);
       
       if (!is_successful) { // predictor failure
         std::cerr << "\tPred failure" << std::endl;
@@ -587,3 +633,5 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
 //int
 //linear_bundle
 #endif
+
+#undef linear

@@ -185,7 +185,7 @@ set(MINUS_LIBRARY_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} CACHE STATIC "Where all
 
 # XXX: to be removed when header-only library is deployed
 set (minus_sources
-  minus.cxx              minus.hxx minus.h chicago.h
+  minus.cxx              minus.hxx minus.h chicago.hxx
 )
 
 # add_subdirectory(cmd) 
