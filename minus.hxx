@@ -1,10 +1,10 @@
-#ifndef comps_hxx_
-#define comps_hxx_
+#ifndef minus_hxx_
+#define minus_hxx_
 // 
 // \author Ricardo Fabbri based on original code by Anton Leykin 
 // \date Created: Fri Feb  8 17:42:49 EST 2019
 //
 
-#include "comps.h" 
+#include "minus.h" 
 
-#endif // comps_hxx_
+#endif // minus_hxx_

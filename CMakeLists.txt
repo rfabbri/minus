@@ -1,4 +1,4 @@
-# COMPS
+# MINUS
 #
 
 cmake_minimum_required(VERSION 3.10.2 FATAL_ERROR)
@@ -7,12 +7,12 @@ if(NOT CMAKE_CXX_STANDARD_REQUIRED)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
-project(COMPS #Project name must be all caps to have properly generated COMPS_VERSION_* variables
+project(MINUS #Project name must be all caps to have properly generated MINUS_VERSION_* variables
     VERSION 1
     DESCRIPTION "Continuation-based Minimal Problem Solver"
     LANGUAGES CXX C)
 include(CMakeDependentOption)
-include(${CMAKE_CURRENT_SOURCE_DIR}/config/cmake/COMPSInitializeBuildType.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/config/cmake/MINUSInitializeBuildType.cmake)
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG(-Wno-undefined-var-template HAS_NO_UNDEFINED_VAR_TEMPLATE)
 if( HAS_NO_UNDEFINED_VAR_TEMPLATE )
@@ -45,43 +45,43 @@ SETIFEMPTY(CMAKE_INSTALL_RUNTIME_DESTINATION bin)
 #   SETIFEMPTY(COMP_INSTALL_EXPORT_NAME COMPTargets)
 # endif()
 
-SETIFEMPTY(COMPS_INSTALL_RUNTIME_DIR bin)
-SETIFEMPTY(COMPS_INSTALL_LIBRARY_DIR lib)
-SETIFEMPTY(COMPS_INSTALL_ARCHIVE_DIR lib)
-SETIFEMPTY(COMPS_INSTALL_INCLUDE_DIR include/)
-if(NOT COMPS_LIB_PREFIX)
-  set( COMPS_LIB_PREFIX "") # This is typically empty
+SETIFEMPTY(MINUS_INSTALL_RUNTIME_DIR bin)
+SETIFEMPTY(MINUS_INSTALL_LIBRARY_DIR lib)
+SETIFEMPTY(MINUS_INSTALL_ARCHIVE_DIR lib)
+SETIFEMPTY(MINUS_INSTALL_INCLUDE_DIR include/)
+if(NOT MINUS_LIB_PREFIX)
+  set( MINUS_LIB_PREFIX "") # This is typically empty
 endif()
 
 # CMake support directory.
-set(COMPS_ROOT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
-set(COMPS_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR}/config/cmake/Modules)
+set(MINUS_ROOT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
+set(MINUS_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR}/config/cmake/Modules)
 
-include(${COMPS_CMAKE_DIR}/COMPSStandardOptions.cmake)
+include(${MINUS_CMAKE_DIR}/MINUSStandardOptions.cmake)
 include( GenerateExportHeader )
 #include(${CMAKE_CURRENT_LIST_DIR}/config/cmake/doxygen/doxygen.cmake)
 # Only include these if we have vxd-specific cmake utilities. We currently use VXL's:
-#include(${CMAKE_CURRENT_LIST_DIR}/config/cmake/config/COMPS_utils.cmake)
+#include(${CMAKE_CURRENT_LIST_DIR}/config/cmake/config/MINUS_utils.cmake)
 
 # Location of VXD's FindXXX.cmake CMake modules.
-# This is identical to COMPS_CMAKE_DIR.  Perhaps we should eliminate MODULE_PATH?
-set( MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/config/cmake/Modules CACHE STATIC "COMPS module path" )
+# This is identical to MINUS_CMAKE_DIR.  Perhaps we should eliminate MODULE_PATH?
+set( MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/config/cmake/Modules CACHE STATIC "MINUS module path" )
 
 # Options to add extra compiler and linker flags
 #
 # These options allow you to specify additional flags without
 # affecting the default flags for a particular platform or build type.
 # This is especially useful for adding extra warning flags.
-set( COMPS_EXTRA_CMAKE_C_FLAGS             CACHE STRING "Extra flags appended to CMAKE_C_FLAGS" )
-set( COMPS_EXTRA_CMAKE_CXX_FLAGS           CACHE STRING "Extra flags appended to CMAKE_CXX_FLAGS" )
-set( COMPS_EXTRA_CMAKE_EXE_LINKER_FLAGS    CACHE STRING "Extra flags appended to CMAKE_EXE_LINKER_FLAGS" )
-set( COMPS_EXTRA_CMAKE_MODULE_LINKER_FLAGS CACHE STRING "Extra flags appended to CMAKE_MODULE_LINKER_FLAGS" )
-set( COMPS_EXTRA_CMAKE_SHARED_LINKER_FLAGS CACHE STRING "Extra flags appended to CMAKE_SHARED_LINKER_FLAGS" )
-set( CMAKE_C_FLAGS             "${CMAKE_C_FLAGS} ${COMPS_EXTRA_CMAKE_C_FLAGS}" )
-set( CMAKE_CXX_FLAGS           "${CMAKE_CXX_FLAGS} ${COMPS_EXTRA_CMAKE_CXX_FLAGS}" )
-set( CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS} ${COMPS_EXTRA_CMAKE_EXE_LINKER_FLAGS}" )
-set( CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${COMPS_EXTRA_CMAKE_MODULE_LINKER_FLAGS}" )
-set( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${COMPS_EXTRA_CMAKE_SHARED_LINKER_FLAGS}" )
+set( MINUS_EXTRA_CMAKE_C_FLAGS             CACHE STRING "Extra flags appended to CMAKE_C_FLAGS" )
+set( MINUS_EXTRA_CMAKE_CXX_FLAGS           CACHE STRING "Extra flags appended to CMAKE_CXX_FLAGS" )
+set( MINUS_EXTRA_CMAKE_EXE_LINKER_FLAGS    CACHE STRING "Extra flags appended to CMAKE_EXE_LINKER_FLAGS" )
+set( MINUS_EXTRA_CMAKE_MODULE_LINKER_FLAGS CACHE STRING "Extra flags appended to CMAKE_MODULE_LINKER_FLAGS" )
+set( MINUS_EXTRA_CMAKE_SHARED_LINKER_FLAGS CACHE STRING "Extra flags appended to CMAKE_SHARED_LINKER_FLAGS" )
+set( CMAKE_C_FLAGS             "${CMAKE_C_FLAGS} ${MINUS_EXTRA_CMAKE_C_FLAGS}" )
+set( CMAKE_CXX_FLAGS           "${CMAKE_CXX_FLAGS} ${MINUS_EXTRA_CMAKE_CXX_FLAGS}" )
+set( CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS} ${MINUS_EXTRA_CMAKE_EXE_LINKER_FLAGS}" )
+set( CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${MINUS_EXTRA_CMAKE_MODULE_LINKER_FLAGS}" )
+set( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${MINUS_EXTRA_CMAKE_SHARED_LINKER_FLAGS}" )
 
 #-------------------------------------------------------------------
 #-- BUILD CONFIG OPTIONS
@@ -120,12 +120,12 @@ else()
   include( ${PROJECT_BINARY_DIR}/CMakeListsLocal.txt OPTIONAL )
 endif()
 
-set(COMPS_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR})    #Source includes
-set(COMPS_BINARY_INCLUDE_DIR ${PROJECT_BINARY_DIR}) #Generated includes
-set(COMPS_INCLUDE_DIRS ${COMPS_BINARY_INCLUDE_DIR} ${COMPS_INCLUDE_DIR})
-set(COMPS_INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include/)
+set(MINUS_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR})    #Source includes
+set(MINUS_BINARY_INCLUDE_DIR ${PROJECT_BINARY_DIR}) #Generated includes
+set(MINUS_INCLUDE_DIRS ${MINUS_BINARY_INCLUDE_DIR} ${MINUS_INCLUDE_DIR})
+set(MINUS_INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include/)
 
-include_directories(${COMPS_INCLUDE_DIRS})
+include_directories(${MINUS_INCLUDE_DIRS})
 
 
 # Optinonally look for VXL if you want to built tests
@@ -168,7 +168,7 @@ include(TestBigEndian)
 TEST_BIG_ENDIAN(MY_BIG_ENDIAN)
 
 # For use in client projects that use CMake and not installed version
-set(COMPS_LIBRARY_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} CACHE STATIC "Where all the vxd libraries are, for clients to use." )
+set(MINUS_LIBRARY_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} CACHE STATIC "Where all the vxd libraries are, for clients to use." )
 
 
 # For comparison purposes
@@ -184,8 +184,8 @@ set(COMPS_LIBRARY_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} CACHE STATIC "Where all
 
 
 # XXX: to be removed when header-only library is deployed
-set (comps_sources
-  comps.cxx              comps.hxx comps.h
+set (minus_sources
+  minus.cxx              minus.hxx minus.h
 )
 
 # add_subdirectory(cmd) 
@@ -197,9 +197,9 @@ if(VXL_FOUND)  # For now we need vxl to build tests
 endif()
 
 # For now, we have a library
-add_library( comps ${comps_sources} )
+add_library( minus ${minus_sources} )
 
 # This command must be the last command in this file
-#if(NOT COMPS_NO_EXPORT)
-#  include(${CMAKE_CURRENT_LIST_DIR}/config/cmake/export/COMPSCreateProject.cmake)
+#if(NOT MINUS_NO_EXPORT)
+#  include(${CMAKE_CURRENT_LIST_DIR}/config/cmake/export/MINUSCreateProject.cmake)
 #endif()

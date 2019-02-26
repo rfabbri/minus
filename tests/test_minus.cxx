@@ -1,4 +1,4 @@
-#include <comps.h>
+#include <minus.h>
 #include <testlib/testlib_test.h>
 #include <cstdio>
 #include <iostream>
@@ -5105,7 +5105,7 @@ test_ptrack()
   printf("TRACKER ---------------------------------\n");
   Solution solutions[NSOLS];
   unsigned retval = 
-  ptrack(&comps_DEFAULT, start_sols, params, solutions);
+  ptrack(&minus_DEFAULT, start_sols, params, solutions);
 
   report(solutions);
 
@@ -5113,11 +5113,11 @@ test_ptrack()
 }
 
 void
-test_comps()
+test_minus()
 {
   test_linear();
   test_ptrack();
 }
 
 
-TESTMAIN(test_comps);
+TESTMAIN(test_minus);

@@ -1,18 +1,18 @@
 # This is comp/tests/CMakeLists.txt
 
 
-set(comps_test_all_sources
+set(minus_test_all_sources
   test_driver.cxx
-  test_comps.cxx
+  test_minus.cxx
 )
-aux_source_directory(Templates comps_test_all_sources)
+aux_source_directory(Templates minus_test_all_sources)
 
-add_executable(comps_test_all ${comps_test_all_sources})
+add_executable(minus_test_all ${minus_test_all_sources})
 
 
-target_link_libraries(comps_test_all comps ${VXL_LIB_PREFIX}vnl ${VXL_LIB_PREFIX}testlib)
-add_test( NAME test_comps COMMAND comps_test_all test_comps )
+target_link_libraries(minus_test_all minus ${VXL_LIB_PREFIX}vnl ${VXL_LIB_PREFIX}testlib)
+add_test( NAME test_minus COMMAND minus_test_all test_minus )
 
-add_executable(comps_test_include test_include.cxx)
-target_link_libraries(comps_test_include comps)
+add_executable(minus_test_include test_include.cxx)
+target_link_libraries(minus_test_include minus)
 

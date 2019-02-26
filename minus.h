@@ -1,8 +1,8 @@
-#ifndef comps_h_
-#define comps_h_
+#ifndef minus_h_
+#define minus_h_
 //:
 // \file
-// \brief Vision Numerical Algebraic Geometry package for multiview problems
+// \brief MInimal problem NUmerical continuation package
 // \author Ricardo Fabbri based on original code by Anton Leykin 
 // \date Fri Feb  8 17:42:49 EST 2019
 //
@@ -82,7 +82,7 @@ struct TrackerSettings {
 //                      tStep => .05
 //                      tStepMin => 1e-7
 
-static const TrackerSettings comps_DEFAULT;
+static const TrackerSettings minus_DEFAULT;
 
 enum SolutionStatus {
   UNDETERMINED,
@@ -178,4 +178,4 @@ bool linear_eigen3(
     );
 
 
-#endif  // comps_h_
+#endif  // minus_h_

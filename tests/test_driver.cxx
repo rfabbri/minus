@@ -1,11 +1,11 @@
 #include <testlib/testlib_register.h>
 
-DECLARE( test_comps );
+DECLARE( test_minus );
 
 void
 register_tests()
 {
-   REGISTER( test_comps );
+   REGISTER( test_minus );
 }
 
 DEFINE_MAIN;
