@@ -1,5 +1,5 @@
-#ifndef chicago_h_
-#define chicago_h_
+#ifndef chicago_hxx_
+#define chicago_hxx_
 // Evaluates Hx and Ht at the same time, reusing expressions.
 // 
 // Map from a multivariate poly with x 127-dimensional to y NNNxNNNPLUS1 dimensional
@@ -6983,4 +6983,4 @@ evaluate_HxH(const complex* x /*x, t and params*/, complex* y /*HxH*/)
   y[208] = G2828;
   y[209] = G2836;
 }
-#endif // chicago_h
+#endif // chicago_hxx

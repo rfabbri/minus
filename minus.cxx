@@ -6,7 +6,7 @@
 #include <cstdio>
 #include <iostream>
 #include "Eigen/Dense"
-#include "chicago.h"
+#include "chicago.hxx"
 
 /* Lapack .h */
 #if 0
