@@ -1,9 +1,9 @@
-# comps/config/cmake/COMPSStandardOptions.cmake
+# minus/config/cmake/MINUSStandardOptions.cmake
 #
-# This CMake module is included by comps/CMakeLists.txt.  It adds
-# several comps-standard testing and build options to the project:
+# This CMake module is included by minus/CMakeLists.txt.  It adds
+# several minus-standard testing and build options to the project:
 #
-#  COMPS_BUILD_SHARED_LIBS
+#  MINUS_BUILD_SHARED_LIBS
 #  BUILD_TESTING
 #  BUILD_EXAMPLES
 #  WARN_DEPRECATED
@@ -12,13 +12,13 @@
 #
 # These options may be introduced into client projects with this line:
 #
-#  include(${COMPS_CMAKE_DIR}/COMPSStandardOptions.cmake)
+#  include(${MINUS_CMAKE_DIR}/MINUSStandardOptions.cmake)
 #
-# This module may be automatically included by UseCOMPS.cmake.
-# See comps/config/cmake/UseCOMPS.cmake for details.
+# This module may be automatically included by UseMINUS.cmake.
+# See minus/config/cmake/UseMINUS.cmake for details.
 #
 
-# Everything here should be valid for both the comps source and for
+# Everything here should be valid for both the minus source and for
 # client projects.
 
 include(CTest)
@@ -32,7 +32,7 @@ if( WIN32 )
 else()
   option( BUILD_SHARED_LIBS "Build shared libraries." OFF)
 endif()
-set( COMPS_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS} )
+set( MINUS_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS} )
 mark_as_advanced(BUILD_SHARED_LIBS)
 
 option( WARN_DEPRECATED "Enable runtime warnings for deprecated functions?" ON )
@@ -42,12 +42,12 @@ option( WARN_DEPRECATED_ABORT "Abort on executing a deprecated function (if runt
 mark_as_advanced( WARN_DEPRECATED WARN_DEPRECATED_ONCE WARN_DEPRECATED_ABORT )
 
 if(WARN_DEPRECATED)
-  add_definitions( -DCOMPS_WARN_DEPRECATED )
+  add_definitions( -DMINUS_WARN_DEPRECATED )
   if(WARN_DEPRECATED_ONCE)
-    add_definitions( -DCOMPS_WARN_DEPRECATED_ONCE )
+    add_definitions( -DMINUS_WARN_DEPRECATED_ONCE )
   endif()
   if(WARN_DEPRECATED_ABORT)
-    add_definitions( -DCOMPS_WARN_DEPRECATED_ABORT )
+    add_definitions( -DMINUS_WARN_DEPRECATED_ABORT )
   endif()
 endif()
 
@@ -56,7 +56,7 @@ endif()
 # On Visual Studio 8 MS deprecated C. This removes many security warnings
 if(WIN32)
        if(NOT MINGW)
-         if(NOT COMPS_ENABLE_VISUAL_STUDIO_DEPRECATED_C_WARNINGS)
+         if(NOT MINUS_ENABLE_VISUAL_STUDIO_DEPRECATED_C_WARNINGS)
            add_definitions(
              -D_CRT_FAR_MAPPINGS_NO_DEPRECATE
              -D_CRT_IS_WCTYPE_NO_DEPRECATE
@@ -75,7 +75,7 @@ if(WIN32)
          # format.
          # see http://msdn.microsoft.com/en-us/library/ms173499.aspx
          if(MSVC_VERSION GREATER 1310)
-           set(COMPS_REQUIRED_CXX_FLAGS "${COMPS_REQUIRED_CXX_FLAGS} /bigobj")
+           set(MINUS_REQUIRED_CXX_FLAGS "${MINUS_REQUIRED_CXX_FLAGS} /bigobj")
          endif()
        endif()
 endif()

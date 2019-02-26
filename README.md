@@ -32,8 +32,8 @@ This is not dynamic code, so no allocations are performed.
 
 ## Authors
 
-Adapted and improved over Anton Leykin and Timothy Duff's code from Macaulay2 by
-Ricardo Fabbri
+Adapted and improved over Anton Leykin's and Timothy Duff's codes from Macaulay2 by
+Ricardo Fabbri. The core code grew out of Macaulay2/e/NAG.cpp.
 
 ## Acknowledgements
 This grew as part of ICERM's 2018 Nonlinear Algebra Program (Computer Vision
