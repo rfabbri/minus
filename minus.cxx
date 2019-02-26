@@ -7342,7 +7342,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
         std::cerr << "Hx from Hxt FAIL\n";
       
       if (std::abs(Hxt[NNN*NNN] - complex(.0901308,.0653859)) <= 1e3 &&
-          std::abs(Hxt[NNN*NNN+NNN] - complex(-.0644011,-.470543)) <= 1e3)
+          std::abs(Hxt[NNN*NNN+NNN-1] - complex(-.0644011,-.470543)) <= 1e3)
         std::cerr << "Ht from Hxt PASS \n";
       else
         std::cerr << "Ht from Hxt FAIL\n";
@@ -7429,7 +7429,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
             std::cerr << "Hx from HxH FAIL\n";
           
           if (std::abs(HxH[NNN*NNN] - complex(+1.741e11,-15110700000)) <= 1e3 &&
-              std::abs(HxH[NNN*NNN+NNN] - complex(-3.71869e-13,+4.6629e-15)) <= 1e3)
+              std::abs(HxH[NNN*NNN+NNN-1] - complex(-3.71869e-13,+4.6629e-15)) <= 1e3)
             std::cerr << "H from HxH PASS \n";
           else
             std::cerr << "H from HxH FAIL \n";
