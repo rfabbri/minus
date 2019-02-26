@@ -332,7 +332,9 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
   Solution* t_s = raw_solutions;  // current target solution
   const complex* s_s = s_sols;          // current start solution
   for (unsigned sol_n = 0; sol_n < NSOLS; ++sol_n, s_s += NNN, ++t_s) { // outer loop
+    #ifndef NDEBUG
     std::cerr << "Trying solution #" << sol_n << std::endl;
+    #endif
     t_s->make(s_s);  // cook a Solution: copy s_s to start node of path
     t_s->status = PROCESSING;
     bool end_zone = false;
@@ -362,17 +364,23 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
           dx4 := solveHxTimesDXequalsMinusHt(x0+dx3*dt,t0+dt);
           (1/6)*dt*(dx1+2*dx2+2*dx3+dx4)
       */
+      #ifndef NDEBUG
       std::cerr << "\tEntered while loop" << std::endl;
       std::cerr << "t0 real" << t0->real() << std::endl;
+      #endif
       
       bool Axb_success = true;
       array_copy_NNNplus1(x0t0, xt);
+
+      #ifndef NDEBUG
       array_print_NNNplus1("x0t0", x0t0);
       array_print_NNNplus1("xt", xt);
       array_print_n("xt(params)", xt+NNNPLUS1,2*NPARAMS);
+      #endif
       
       // dx1
       evaluate_Hxt(xt, Hxt); // Outputs Hxt
+      #ifndef NDEBUG
       array_print_H("Hxt",Hxt);
 
       if (std::abs(Hxt[0] - complex(-.0142658,+.0314315)) <= dbgtol &&
@@ -389,14 +397,18 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
         std::cerr << "\t" << Hxt[NNN*NNN] - complex(.0901308,.0653859)
           << Hxt[NNN*NNN+NNN-1] - complex(-.0644011,-.470543);
       }
+      #endif
       
       LHS = Hxt;
-      array_print_n("LHS",LHS, NNN*NNN);
       RHS = Hxt + NNN2;
       array_negate_self(RHS);
+      #ifndef NDEBUG
+      array_print_n("LHS",LHS, NNN*NNN);
       array_print("minus RHS",RHS);
+      #endif
       // was: solve_via_lapack_without_transposition(n, LHS, 1, RHS, dx1);
       Axb_success &= linear(LHS,RHS,dx1);
+      #ifndef NDEBUG
       array_print("dx1",dx1);
       // TODO: once this is working, use eigen2 for LU partial pivots, faster.
       // this is QR full collumn pivoting, which is as fast as lapack LU
@@ -407,6 +419,8 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       else
         std::cerr << "dx1 FAIL\n";
 
+      #endif
+      
       // dx2
       complex one_half_dt = one_half* *dt;
       array_multiply_scalar_to_self(dx1, one_half_dt);
@@ -420,6 +434,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       RHS = Hxt + NNN2;
       array_negate_self(RHS);
       Axb_success &= linear(LHS,RHS,dx2);
+      #ifndef NDEBUG
       std::cerr << "second eval ---------" << std::endl;
       array_print_NNNplus1("xt", xt);
       array_print_H("Hxt",Hxt);
@@ -430,6 +445,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
         std::cerr << "dx2 PASS\n";
       else
         std::cerr << "dx2 FAIL\n";
+      #endif
 
       // dx3
       array_multiply_scalar_to_self(dx2, one_half_dt);
@@ -438,11 +454,14 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       // xt[n] += one_half*(*dt); // t0+.5dt (SAME)
       //
       evaluate_Hxt(xt, Hxt);
+      #ifndef NDEBUG
       array_print_H_full(Hxt);
+      #endif
       LHS = Hxt;
       RHS = Hxt + NNN2;
       array_negate_self(RHS);
       Axb_success &= linear(LHS,RHS,dx3);
+      #ifndef NDEBUG
       std::cerr << "third eval ---------" << std::endl;
       array_print_NNNplus1("xt", xt);
       array_print_H("Hxt",Hxt);
@@ -455,15 +474,17 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
         std::cerr << "\t\t" << dx3[0] - complex(-11197.9,+14804.2)
           << dx3[NNN-1] - complex(-17653.8,-4747.93) << std::endl;
       }
+      #endif
 
       // dx4
-      std::cerr << "fourth eval ---------" << std::endl;
       array_multiply_scalar_to_self(dx3, *dt);
       array_copy_NNNplus1(x0t0, xt);
       array_add_to_self(xt, dx3); // x0+dx3*dt
       xt[NNN] += *dt;               // t0+dt
       //
       evaluate_Hxt(xt, Hxt);
+      #ifndef NDEBUG
+      std::cerr << "fourth eval ---------" << std::endl;
       array_print_NNNplus1("xt", xt);
         std::cerr << "\txt full: {" << std::setprecision(20);
       for (unsigned id=0; id < NNN; ++id) {
@@ -484,10 +505,12 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
         std::cerr << "Ht from Hxt FAIL\n";
       array_print_H("Hxt",Hxt);
       array_print_H_full(Hxt);
+      #endif
       LHS = Hxt;
       RHS = Hxt + NNN2;
       array_negate_self(RHS);
       Axb_success &= linear(LHS,RHS,dx4);
+      #ifndef NDEBUG
       array_print_NNNplus1("xt", xt);
       array_print("dx4", dx4);
       
@@ -499,6 +522,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
         std::cerr << "\t\t" << dx4[0] - complex(885846,811668)
           << dx4[NNN-1] -  complex(823211,-2145640) << std::endl;
       }
+      #endif
 
       // "dx1" = .5*dx1*dt, "dx2" = .5*dx2*dt, "dx3" = dx3*dt
       // TODO: make this into a single function loop directly
@@ -521,8 +545,9 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       bool is_successful;
       do {
         ++n_corr_steps;
-        std::cerr << "\tCorrection step " << n_corr_steps << std::endl;
         evaluate_HxH(x1t1, HxH);
+        #ifndef NDEBUG
+        std::cerr << "\tCorrection step " << n_corr_steps << std::endl;
         array_print_NNNplus1("x1t1",x1t1);
         
         if (n_corr_steps == 1) {
@@ -538,13 +563,15 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
           else
             std::cerr << "H from HxH FAIL \n";
         }
-        
         array_print_H("HxH",HxH);
+        #endif
+        
         
         LHS = HxH;         // Hx
         RHS = HxH + NNN2;  // H
         array_negate_self(RHS); // TODO: put into eval function
         Axb_success &= linear(LHS,RHS,dx);
+        #ifndef NDEBUG
         array_print_n("LHS corr",LHS,NNN2);
         array_print("RHS corr",RHS);
         array_print("dx",dx);
@@ -555,34 +582,44 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
           else
             std::cerr << "dx from first correction FAIL \n";
         }
+        #endif
         array_add_to_self(x1t1, dx);
         is_successful = array_norm2(dx) < s->epsilon2_ * array_norm2(x1t1);
+        #ifndef NDEBUG
         // printf("c: |dx|^2 = %lf\n",
         // norm2_complex_array<ComplexField>(n,dx));
+        #endif
       } while (!is_successful && n_corr_steps < s->max_corr_steps_);
       
       if (!is_successful) { // predictor failure
-        std::cerr << "\tPred failure" << std::endl;
         predictor_successes = 0;
         *dt *= s->dt_decrease_factor_;
         if (dt->real() < s->min_dt_) t_s->status = MIN_STEP_FAILED; // slight difference to SLP-imp.hpp:612
-        std::cerr << "decreasing dt: " << dt;
+        #ifndef NDEBUG
+        std::cerr << "\tPred failure" << std::endl;
+        std::cerr << "decreasing dt: " << *dt;
+        #endif
       } else { // predictor success
         ++predictor_successes; count++;
-        array_copy(x1t1, x0t0);
+        array_copy_NNNplus1(x1t1, x0t0);
         if (predictor_successes >= s->num_successes_before_increase_) {
           predictor_successes = 0;
           *dt *= s->dt_increase_factor_;
-          std::cerr << "increasing dt: " << dt;
+          #ifndef NDEBUG
+          std::cerr << "\tPred success" << std::endl;
+          std::cerr << "increasing dt: " << *dt;
+          #endif
         }
       }
-      if (array_norm2(s_s) > s->infinity_threshold2_) // isn't it supposed to be t_s->x?
+      if (array_norm2(x0) > s->infinity_threshold2_) // isn't it supposed to be t_s->x?
         t_s->status = INFINITY_FAILED;
       if (!Axb_success) t_s->status = SINGULAR;
+      #ifndef NDEBUG
       std::cerr << "\tAxb_success" << Axb_success << std::endl;
+      #endif
     } // while 
     // record the solution
-    array_copy(s_s, t_s->x);
+    array_copy(x0, t_s->x);
     t_s->t = t0->real();
     if (t_s->status == PROCESSING) t_s->status = REGULAR;
     // evaluate_HxH(x0t0, HxH);
