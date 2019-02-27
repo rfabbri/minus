@@ -403,7 +403,6 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       
       LHS = Hxt;
       RHS = Hxt + NNN2;
-      array_negate_self(RHS);
       #ifndef NDEBUG
       array_print_n("LHS",LHS, NNN*NNN);
       array_print("minus RHS",RHS);
@@ -434,7 +433,6 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       
       LHS = Hxt;
       RHS = Hxt + NNN2;
-      array_negate_self(RHS);
       Axb_success &= linear(LHS,RHS,dx2);
       #ifndef NDEBUG
       std::cerr << "second eval ---------" << std::endl;
@@ -461,7 +459,6 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       #endif
       LHS = Hxt;
       RHS = Hxt + NNN2;
-      array_negate_self(RHS);
       Axb_success &= linear(LHS,RHS,dx3);
       #ifndef NDEBUG
       std::cerr << "third eval ---------" << std::endl;
@@ -510,7 +507,6 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       #endif
       LHS = Hxt;
       RHS = Hxt + NNN2;
-      array_negate_self(RHS);
       Axb_success &= linear(LHS,RHS,dx4);
       #ifndef NDEBUG
       array_print_NNNplus1("xt", xt);
@@ -570,8 +566,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
         
         
         LHS = HxH;         // Hx
-        RHS = HxH + NNN2;  // H
-        array_negate_self(RHS); // TODO: put into eval function
+        RHS = HxH + NNN2;  // -H
         Axb_success &= linear(LHS,RHS,dx);
         #ifndef NDEBUG
         array_print_n("LHS corr",LHS,NNN2);
