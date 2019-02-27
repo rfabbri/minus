@@ -7,7 +7,7 @@
 // 
 // cCode(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"Ht",gateMatrix{cameraVars})
 // (Ask Tim for the way to use cCode so that the input orders are like this.
-inline void 
+static inline void 
 evaluate_Hxt(const complex *x /*x, t*/, const complex *params, complex *y /*HxH*/) 
 {
   const complex &X0 = x[0];
@@ -3796,7 +3796,6 @@ evaluate_Hxt(const complex *x /*x, t*/, const complex *params, complex *y /*HxH*
   y[209] = -G3439;
 }
 
-
 // Evaluates Hx and H at the same time, reusing expressions.
 // 
 // Map from a multivariate poly with x 127-dimensional to y NNNxNNNPLUS1 dimensional
@@ -3804,7 +3803,7 @@ evaluate_Hxt(const complex *x /*x, t*/, const complex *params, complex *y /*HxH*
 // 
 // cCode(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H",gateMatrix{cameraVars})
 // (Ask Tim for the way to use cCode so that the input orders are like this.
-inline void 
+static inline void 
 evaluate_HxH(const complex* x /*x and t*/, const complex *params, complex* y /*HxH*/) 
 {
   const complex &X0 = x[0];

@@ -59,7 +59,7 @@ bool linear(
 }
 #endif
 
-bool
+static bool
 linear_eigen(
     const complex* A,  // NNN-by-NNN matrix of complex #s
     const complex* b,  // 1-by-NNN RHS of Ax=b  (bsize-by-NNN)
@@ -77,7 +77,7 @@ linear_eigen(
 }
   
 
-bool 
+static bool 
 linear_eigen2(
     const complex* A,  // NNN-by-NNN matrix of complex #s
     const complex* b,  // 1-by-NNN RHS of Ax=b  (bsize-by-NNN)
@@ -94,7 +94,7 @@ linear_eigen2(
   return true; // TODO: better error handling
 }
 
-bool 
+static bool 
 linear_eigen3(
     const complex* A,  // NNN-by-NNN matrix of complex #s
     const complex* b,  // 1-by-NNN RHS of Ax=b  (bsize-by-NNN)
@@ -111,7 +111,7 @@ linear_eigen3(
   return true;
 }
 
-bool 
+static bool 
 linear_eigen4(
     const complex* A,  // NNN-by-NNN matrix of complex #s
     const complex* b,  // 1-by-NNN RHS of Ax=b  (bsize-by-NNN)
@@ -169,21 +169,21 @@ bool linear_bundler(
 static const double the_smallest_number = 1e-13;
 static const double dbgtol = 1e-2;
 
-void
+static void
 array_print(std::string name, const complex *a)
 {
   std::cerr << name + "[NNN]: ";
   std::cerr << a[0] << " , " << a[1] << " , ... " <<  a[NNN-1] << std::endl;
 }
 
-void
+static void
 array_print_NNNplus1(std::string name, const complex *a)
 {
   std::cerr << name + "[NNN+1]: ";
   std::cerr << a[0] << " , " << a[1] << " , ... " <<  a[NNN] << std::endl;
 }
 
-void
+static void
 array_print_n(std::string name, const complex *a, unsigned n)
 {
   assert(n > 3);
@@ -191,7 +191,7 @@ array_print_n(std::string name, const complex *a, unsigned n)
   std::cerr << a[0] << " , " << a[1] << " , ... " <<  a[n-1] << std::endl;
 }
 
-void
+static void
 array_print_H(std::string name, const complex *a)
 {
   std::cerr << name + "[][]: ";
@@ -202,7 +202,7 @@ array_print_H(std::string name, const complex *a)
 //  std::cerr << a[NNN] << " , " << a[2*NNN+1] << " , ... " <<  a[NNN*(NNN+1)-1] << std::endl;
 }
 
-void
+static void
 array_print_H_full(const complex *a)
 {
   std::cerr << "Full Hx real[][]: " << std::setprecision(20) << std::endl;
@@ -232,14 +232,14 @@ array_print_H_full(const complex *a)
   }
 }
 
-inline void 
+static inline void 
 array_multiply_scalar_to_self(complex *a, complex b)
 {
   // TODO: optimize. Idea: use Eigen's parallizable structures or VNL SSE
   for (unsigned i = 0; i < NNN; ++i, ++a) *a = *a * b;
 }
 
-inline void
+static inline void
 array_negate_self(complex *a)
 {
   // TODO: optimize. Idea: use Eigen's parallizable structures or VNL SSE
@@ -247,31 +247,31 @@ array_negate_self(complex *a)
 }
 
 
-inline void 
+static inline void 
 array_multiply_self(complex *a, const complex *b)
 {
   for (unsigned int i=0; i < NNN; ++i,++a,++b) *a *= *b;
 }
 
-inline void 
+static inline void 
 array_add_to_self(complex *a, const complex *b)
 {
   for (unsigned int i=0; i < NNN; ++i,++a,++b) *a += *b;
 }
 
-inline void 
+static inline void 
 array_add_to_self_NNNplus1(complex *a, const complex *b)
 {
   for (unsigned int i=0; i < NNNPLUS1; ++i,++a,++b) *a += *b;
 }
 
-inline void 
+static inline void 
 array_add_scalar_to_self(complex *a, complex b)
 {
   for (unsigned int i=0; i < NNN; ++i,++a) *a += b;
 }
 
-inline void 
+static inline void 
 array_copy(
   const complex *a,
   complex *b)
@@ -280,7 +280,7 @@ array_copy(
   memcpy(b, a, NNN*sizeof(complex));
 }
 
-inline void 
+static inline void 
 array_copy_NNNplus1(
   const complex *a,
   complex *b)
@@ -290,10 +290,10 @@ array_copy_NNNplus1(
 }
 
 
-inline double
+static inline double
 array_norm2(const complex *a)
 {
-  double val = 0;
+  register double val = 0;
   complex const* end = a+NNN;
   while (a != end)
     val += std::norm(*a++);
@@ -325,7 +325,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
   //  complex* x1 =  x1t1;
   //  complex* t1 = x1t1+NNN;
   complex dxdt[NNNPLUS1], *dx = dxdt, *dt = dxdt + NNN;
-  complex Hxt[NNNPLUS1 * NNN], HxH[NNNPLUS1 * NNN], Hxt_tr[NNNPLUS1 * NNN];
+  complex Hxt[NNNPLUS1 * NNN], *HxH=Hxt;  // HxH is reusing Hxt
   complex *LHS, *RHS;
   complex xt[NNNPLUS1];
   complex dx1[NNN], dx2[NNN], dx3[NNN], dx4[NNN];
@@ -608,7 +608,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
           #endif
         }
       }
-      if (array_norm2(x0) > s->infinity_threshold2_) // isn't it supposed to be t_s->x?
+      if (array_norm2(x0) > s->infinity_threshold2_)
         t_s->status = INFINITY_FAILED;
       if (!Axb_success) t_s->status = SINGULAR;
       #ifndef NDEBUG
@@ -640,30 +640,6 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
         */
     return 0;
 }
-                            //    if (M2_numericalAlgebraicGeometryTrace > 0)
-                            //      {
-                            //        if (sol_n % 50 == 0) printf("\n");
-                            //        switch (t_s->status)
-                            //          {
-                            //            case REGULAR:
-                            //              printf(".");
-                            //              break;
-                            //            case INFINITY_FAILED:
-                            //              printf("I");
-                            //              break;
-                            //            case MIN_STEP_FAILED:
-                            //              printf("M");
-                            //              break;
-                            //            case SINGULAR:
-                            //              printf("S");
-                            //              break;
-                            //            default:
-                            //              printf("-");
-                            //          }
-                            //        fflush(stdout);
-                            //      }
-
-
 //int
 //linear_bundle
 #endif

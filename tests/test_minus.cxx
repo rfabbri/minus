@@ -152,6 +152,7 @@ multiply(const complex *A, const complex *b, complex *res)
   res_vnl.copy_out(res);
 }
 
+#if 0
 // tests solution of linear system in complex numbers
 void 
 test_linear()
@@ -213,6 +214,7 @@ test_linear()
   
   TEST_NEAR("solution", 2, 2, eps);
 }
+#endif
 
 void
 report(const Solution s[NSOLS])
@@ -5171,7 +5173,7 @@ test_ptrack()
 void
 test_minus()
 {
-  test_linear();
+  // test_linear();
   test_ptrack();
 }
 

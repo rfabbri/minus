@@ -146,7 +146,7 @@ unsigned ptrack(const TrackerSettings *t, const complex s_sols[NNN*NSOLS], const
 // --- TESTING ONLY: REMOVE ---------------------------------------------------
 
 // in .h just for testing purposes
-/*
+#if 0
 bool linear(
     const complex* A,  // size-by-size matrix of complex #s
     const complex* b,  // bsize-by-size RHS of Ax=b
@@ -154,6 +154,7 @@ bool linear(
     );
     */
 
+/*
 bool linear_eigen(
     const complex* A,  // NNN-by-NNN matrix of complex #s
     const complex* b,  // 1-by-NNN RHS of Ax=b  (bsize-by-NNN)
@@ -176,6 +177,8 @@ bool linear_eigen3(
     const complex* b,  // 1-by-NNN RHS of Ax=b  (bsize-by-NNN)
     complex* x   // solution
     );
+    */
+#endif
 
 
 #endif  // minus_h_
