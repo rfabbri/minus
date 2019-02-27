@@ -334,7 +334,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
   Solution* t_s = raw_solutions;  // current target solution
   const complex* s_s = s_sols;          // current start solution
   for (unsigned sol_n = 0; sol_n < NSOLS; ++sol_n, s_s += NNN, ++t_s) { // outer loop
-    #ifndef NDEBUG
+    #ifdef M_VERBOSE
     std::cerr << "Trying solution #" << sol_n << std::endl;
     #endif
     t_s->make(s_s);  // cook a Solution: copy s_s to start node of path
@@ -366,7 +366,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
           dx4 := solveHxTimesDXequalsMinusHt(x0+dx3*dt,t0+dt);
           (1/6)*dt*(dx1+2*dx2+2*dx3+dx4)
       */
-      #ifndef NDEBUG
+      #ifdef M_VERBOSE
       std::cerr << "\tEntered while loop" << std::endl;
       std::cerr << "t0 real" << t0->real() << std::endl;
       #endif
@@ -374,7 +374,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       bool Axb_success = true;
       array_copy_NNNplus1(x0t0, xt);
 
-      #ifndef NDEBUG
+      #ifdef M_VERBOSE
       array_print_NNNplus1("x0t0", x0t0);
       array_print_NNNplus1("xt", xt);
       array_print_n("xt(params)", xt+NNNPLUS1,2*NPARAMS);
@@ -382,7 +382,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       
       // dx1
       evaluate_Hxt(xt, params, Hxt); // Outputs Hxt
-      #ifndef NDEBUG
+      #ifdef M_VERBOSE
       array_print_H("Hxt",Hxt);
 
       if (std::abs(Hxt[0] - complex(-.0142658,+.0314315)) <= dbgtol &&
@@ -403,13 +403,13 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       
       LHS = Hxt;
       RHS = Hxt + NNN2;
-      #ifndef NDEBUG
+      #ifdef M_VERBOSE
       array_print_n("LHS",LHS, NNN*NNN);
       array_print("minus RHS",RHS);
       #endif
       // was: solve_via_lapack_without_transposition(n, LHS, 1, RHS, dx1);
       Axb_success &= linear(LHS,RHS,dx1);
-      #ifndef NDEBUG
+      #ifdef M_VERBOSE
       array_print("dx1",dx1);
       // TODO: once this is working, use eigen2 for LU partial pivots, faster.
       // this is QR full collumn pivoting, which is as fast as lapack LU
@@ -434,7 +434,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       LHS = Hxt;
       RHS = Hxt + NNN2;
       Axb_success &= linear(LHS,RHS,dx2);
-      #ifndef NDEBUG
+      #ifdef M_VERBOSE
       std::cerr << "second eval ---------" << std::endl;
       array_print_NNNplus1("xt", xt);
       array_print_H("Hxt",Hxt);
@@ -454,13 +454,13 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       // xt[n] += one_half*(*dt); // t0+.5dt (SAME)
       //
       evaluate_Hxt(xt, params, Hxt);
-      #ifndef NDEBUG
+      #ifdef M_VERBOSE
       array_print_H_full(Hxt);
       #endif
       LHS = Hxt;
       RHS = Hxt + NNN2;
       Axb_success &= linear(LHS,RHS,dx3);
-      #ifndef NDEBUG
+      #ifdef M_VERBOSE
       std::cerr << "third eval ---------" << std::endl;
       array_print_NNNplus1("xt", xt);
       array_print_H("Hxt",Hxt);
@@ -482,7 +482,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       xt[NNN] += *dt;               // t0+dt
       //
       evaluate_Hxt(xt, params, Hxt);
-      #ifndef NDEBUG
+      #ifdef M_VERBOSE
       std::cerr << "fourth eval ---------" << std::endl;
       array_print_NNNplus1("xt", xt);
         std::cerr << "\txt full: {" << std::setprecision(20);
@@ -508,7 +508,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       LHS = Hxt;
       RHS = Hxt + NNN2;
       Axb_success &= linear(LHS,RHS,dx4);
-      #ifndef NDEBUG
+      #ifdef M_VERBOSE
       array_print_NNNplus1("xt", xt);
       array_print("dx4", dx4);
       
@@ -544,7 +544,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       do {
         ++n_corr_steps;
         evaluate_HxH(x1t1, params, HxH);
-        #ifndef NDEBUG
+        #ifdef M_VERBOSE
         std::cerr << "\tCorrection step " << n_corr_steps << std::endl;
         array_print_NNNplus1("x1t1",x1t1);
         
@@ -568,7 +568,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
         LHS = HxH;         // Hx
         RHS = HxH + NNN2;  // -H
         Axb_success &= linear(LHS,RHS,dx);
-        #ifndef NDEBUG
+        #ifdef M_VERBOSE
         array_print_n("LHS corr",LHS,NNN2);
         array_print("RHS corr",RHS);
         array_print("dx",dx);
@@ -582,7 +582,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
         #endif
         array_add_to_self(x1t1, dx);
         is_successful = array_norm2(dx) < s->epsilon2_ * array_norm2(x1t1);
-        #ifndef NDEBUG
+        #ifdef M_VERBOSE
         // printf("c: |dx|^2 = %lf\n",
         // norm2_complex_array<ComplexField>(n,dx));
         #endif
@@ -592,7 +592,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
         predictor_successes = 0;
         *dt *= s->dt_decrease_factor_;
         if (dt->real() < s->min_dt_) t_s->status = MIN_STEP_FAILED; // slight difference to SLP-imp.hpp:612
-        #ifndef NDEBUG
+        #ifdef M_VERBOSE
         std::cerr << "\tPred failure" << std::endl;
         std::cerr << "decreasing dt: " << *dt;
         #endif
@@ -602,7 +602,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
         if (predictor_successes >= s->num_successes_before_increase_) {
           predictor_successes = 0;
           *dt *= s->dt_increase_factor_;
-          #ifndef NDEBUG
+          #ifdef M_VERBOSE
           std::cerr << "\tPred success" << std::endl;
           std::cerr << "increasing dt: " << *dt;
           #endif
@@ -611,7 +611,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       if (array_norm2(x0) > s->infinity_threshold2_)
         t_s->status = INFINITY_FAILED;
       if (!Axb_success) t_s->status = SINGULAR;
-      #ifndef NDEBUG
+      #ifdef M_VERBOSE
       std::cerr << "\tAxb_success" << Axb_success << std::endl;
       #endif
     } // while 
