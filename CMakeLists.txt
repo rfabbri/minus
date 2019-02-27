@@ -203,3 +203,6 @@ add_library( minus ${minus_sources} )
 #if(NOT MINUS_NO_EXPORT)
 #  include(${CMAKE_CURRENT_LIST_DIR}/config/cmake/export/MINUSCreateProject.cmake)
 #endif()
+
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffast-math")
