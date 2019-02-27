@@ -8,6 +8,9 @@
 #include <vnl/vnl_vector.h>
 #include <vbl/vbl_array_1d.h>
 #include <vbl/vbl_attributes.h>
+#include <chrono>
+
+using namespace std::chrono;
 
 
 static const float eps = 1e-4; // M2 is giving Ax-b up to 1e-5 
@@ -212,7 +215,7 @@ test_linear()
 }
 
 void
-report(Solution s[NSOLS])
+report(const Solution s[NSOLS])
 {
   for (unsigned i=0; i < NSOLS; ++i) {
     std::cerr << "============================================\n";
@@ -251,11 +254,17 @@ report(Solution s[NSOLS])
   }
 }
 
-void 
-test_sol_against_m2()
+double
+test_sol_against_m2(const Solution s[NSOLS])
 {
   #include "sols-from-m2-for-testing.h"
-  #include "sols-from-minus-firstrun.h"
+  // #include "sols-from-minus-firstrun.h"
+
+  complex s_minus[NSOLS*NNN];
+  unsigned fullid = 0;
+  for (unsigned i=0; i <NSOLS; ++i)
+    for (unsigned var=0; var < NNN; ++var, ++fullid)
+      s_minus[fullid] = s[i].x[var];
 
     
   double maxerr = std::abs(s_minus[0] - s_m2[0]);
@@ -267,9 +276,9 @@ test_sol_against_m2()
       imax = i;
     }
   }
-  std::cout << std::setprecision(20);
-  std::cout << "Maximum solution error " << maxerr << " at solution " << imax/NNN  << "variable " << imax%NNN << std::endl;
-  std::cout << "MINUS solver value: " << s_minus[imax] << " M2 value: " << s_m2[imax] << " difference: " << s_minus[imax]-s_m2[imax] << std::endl;
+  std::cerr << std::setprecision(20);
+  std::cerr << "Maximum solution error " << maxerr << " at solution " << imax/NNN  << "variable " << imax%NNN << std::endl;
+  std::cerr << "MINUS solver value: " << s_minus[imax] << " M2 value: " << s_m2[imax] << " difference: " << s_minus[imax]-s_m2[imax] << std::endl;
 
   
   double absv[NNN*NSOLS];
@@ -278,14 +287,14 @@ test_sol_against_m2()
   }
 
   vbl_array_1d<double> v(absv, absv+NNN);
-  std::cout << "Median error " << median(v) << std::endl;
-  std::cout << "Mean error " << mean(v) << " Minimum error " << minval(v) << std::endl;
+  std::cerr << "Median error " << median(v) << std::endl;
+  std::cerr << "Mean error " << mean(v) << " Minimum error " << minval(v) << std::endl;
+  return median(v);
 }
 
 void
 test_ptrack()
 {
-  test_sol_against_m2();
   const complex p0[NPARAMS] = { // from startSys 
     {.13016671344237549,-.36891394723672405},
     {.2649393534275909,-.23418132862391827},
@@ -5145,10 +5154,16 @@ test_ptrack()
   
   printf("TRACKER ---------------------------------\n");
   Solution solutions[NSOLS];
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
   unsigned retval = 
   ptrack(&minus_DEFAULT, start_sols, params, solutions);
-
+  high_resolution_clock::time_point t2 = high_resolution_clock::now();
+  auto duration = duration_cast<seconds>( t2 - t1 ).count();
   report(solutions);
+  double median_error = 
+  test_sol_against_m2(solutions);
+  TEST_NEAR("solution  matches m2", median_error, 0, 10*eps);
+  std::cerr << "Time of tracker " << duration << "s" << std::endl;
 
   TEST("ptrack retval", retval, 0);
 }
