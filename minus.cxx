@@ -59,7 +59,8 @@ bool linear(
 }
 #endif
 
-bool linear_eigen(
+bool
+linear_eigen(
     const complex* A,  // NNN-by-NNN matrix of complex #s
     const complex* b,  // 1-by-NNN RHS of Ax=b  (bsize-by-NNN)
     complex* x   // solution
@@ -76,7 +77,8 @@ bool linear_eigen(
 }
   
 
-bool linear_eigen2(
+bool 
+linear_eigen2(
     const complex* A,  // NNN-by-NNN matrix of complex #s
     const complex* b,  // 1-by-NNN RHS of Ax=b  (bsize-by-NNN)
     complex* x   // solution
@@ -92,7 +94,8 @@ bool linear_eigen2(
   return true; // TODO: better error handling
 }
 
-bool linear_eigen3(
+bool 
+linear_eigen3(
     const complex* A,  // NNN-by-NNN matrix of complex #s
     const complex* b,  // 1-by-NNN RHS of Ax=b  (bsize-by-NNN)
     complex* x   // solution
@@ -108,7 +111,8 @@ bool linear_eigen3(
   return true;
 }
 
-bool linear_eigen4(
+bool 
+linear_eigen4(
     const complex* A,  // NNN-by-NNN matrix of complex #s
     const complex* b,  // 1-by-NNN RHS of Ax=b  (bsize-by-NNN)
     complex* x   // solution
@@ -296,7 +300,7 @@ array_norm2(const complex *a)
   return val;
 }
 
-#define linear linear_eigen4
+#define linear linear_eigen2
 
 //void 
 //array_copy_n(size_t n, const complex *a, complex *b)

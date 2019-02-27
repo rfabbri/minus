@@ -2,8 +2,12 @@
 #include <testlib/testlib_test.h>
 #include <cstdio>
 #include <iostream>
+#include <iomanip>
 #include <vnl/vnl_matrix_fixed.h>
 #include <vnl/vnl_vector_fixed.h>
+#include <vnl/vnl_vector.h>
+#include <vbl/vbl_array_1d.h>
+#include <vbl/vbl_attributes.h>
 
 
 static const float eps = 1e-4; // M2 is giving Ax-b up to 1e-5 
@@ -233,18 +237,55 @@ report(Solution s[NSOLS])
           statstring = '-';
       }
     std::cerr << statstring << std::endl;
-    std::cerr << "num_steps: " << s[i].num_steps << std::endl;
-    for (unsigned var=0; var < NSOLS; ++var) {
+    std::cerr << "num_steps: " << s[i].num_steps << std::endl; 
+    for (unsigned var=0; var < NNN; ++var) {
       // solution to std::cout, debug info to std::cerr 
       std::cerr << s[i].start_x[var] << std::endl;
-      std::cout << s[i].x[var] << std::endl;
+    }
+    
+    std::cout << std::setprecision(20);
+    for (unsigned var=0; var +1 < NNN; ++var) {
+      std::cout << "{ " << s[i].x[var].real() << ", " << s[i].x[var].imag() << "}," << std::endl;
+    }
+    std::cout << "{ " << s[i].x[NNN-1].real() << ", " << s[i].x[NNN-1].imag() << "}\n" << std::endl;
+  }
+}
+
+void 
+test_sol_against_m2()
+{
+  #include "sols-from-m2-for-testing.h"
+  #include "sols-from-minus-firstrun.h"
+
+    
+  double maxerr = std::abs(s_minus[0] - s_m2[0]);
+  unsigned imax = 0;
+  for (unsigned i=1; i < NNN*NSOLS; ++i) {
+    double err = std::abs(s_minus[i] - s_m2[i]);
+    if (maxerr < err) {
+      maxerr = err;
+      imax = i;
     }
   }
+  std::cout << std::setprecision(20);
+  std::cout << "Maximum solution error " << maxerr << " at solution " << imax/NNN  << "variable " << imax%NNN << std::endl;
+  std::cout << "MINUS solver value: " << s_minus[imax] << " M2 value: " << s_m2[imax] << " difference: " << s_minus[imax]-s_m2[imax] << std::endl;
+
+  
+  double absv[NNN*NSOLS];
+  for (unsigned i=1; i < NNN*NSOLS; ++i) {
+    absv[i] = std::abs(s_minus[i] - s_m2[i]);
+  }
+
+  vbl_array_1d<double> v(absv, absv+NNN);
+  std::cout << "Median error " << median(v) << std::endl;
+  std::cout << "Mean error " << mean(v) << " Minimum error " << minval(v) << std::endl;
 }
 
 void
 test_ptrack()
 {
+  test_sol_against_m2();
   const complex p0[NPARAMS] = { // from startSys 
     {.13016671344237549,-.36891394723672405},
     {.2649393534275909,-.23418132862391827},
