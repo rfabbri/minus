@@ -327,12 +327,10 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
   complex dxdt[NNNPLUS1], *dx = dxdt, *dt = dxdt + NNN;
   complex Hxt[NNNPLUS1 * NNN], HxH[NNNPLUS1 * NNN], Hxt_tr[NNNPLUS1 * NNN];
   complex *LHS, *RHS;
-  complex xt[NNNPLUS1+2*NPARAMS];  // concatenating parameters to x and t, used together in evals
+  complex xt[NNNPLUS1];
   complex dx1[NNN], dx2[NNN], dx3[NNN], dx4[NNN];
   complex *x1t1 = xt;  // reusing xt's space to represent x1t1
 
-  memcpy(xt+NNNPLUS1, params, 2*NPARAMS*sizeof(complex));
-  
   Solution* t_s = raw_solutions;  // current target solution
   const complex* s_s = s_sols;          // current start solution
   for (unsigned sol_n = 0; sol_n < NSOLS; ++sol_n, s_s += NNN, ++t_s) { // outer loop
@@ -383,7 +381,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       #endif
       
       // dx1
-      evaluate_Hxt(xt, Hxt); // Outputs Hxt
+      evaluate_Hxt(xt, params, Hxt); // Outputs Hxt
       #ifndef NDEBUG
       array_print_H("Hxt",Hxt);
 
@@ -431,7 +429,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       array_add_to_self(xt, dx1); // x0+.5dx1*dt
       xt[NNN] += one_half_dt;  // t0+.5dt
       //
-      evaluate_Hxt(xt, Hxt);
+      evaluate_Hxt(xt, params, Hxt);
 
       
       LHS = Hxt;
@@ -457,7 +455,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       array_add_to_self(xt, dx2); // x0+.5dx2*dt
       // xt[n] += one_half*(*dt); // t0+.5dt (SAME)
       //
-      evaluate_Hxt(xt, Hxt);
+      evaluate_Hxt(xt, params, Hxt);
       #ifndef NDEBUG
       array_print_H_full(Hxt);
       #endif
@@ -486,7 +484,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       array_add_to_self(xt, dx3); // x0+dx3*dt
       xt[NNN] += *dt;               // t0+dt
       //
-      evaluate_Hxt(xt, Hxt);
+      evaluate_Hxt(xt, params, Hxt);
       #ifndef NDEBUG
       std::cerr << "fourth eval ---------" << std::endl;
       array_print_NNNplus1("xt", xt);
@@ -549,7 +547,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       bool is_successful;
       do {
         ++n_corr_steps;
-        evaluate_HxH(x1t1, HxH);
+        evaluate_HxH(x1t1, params, HxH);
         #ifndef NDEBUG
         std::cerr << "\tCorrection step " << n_corr_steps << std::endl;
         array_print_NNNplus1("x1t1",x1t1);
