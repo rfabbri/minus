@@ -5,9 +5,9 @@
 static void
 print_usage()
 {
-  std::cerr << "Usage: minus-chicago [input solutions]\n";
-  std::cerr << "If no arg is given, 'input' is assumed input.txt,\n\
-  'solutions' will be output to solutions.txt\n";
+  std::cerr << "Usage: minus-chicago [input solutions]\n\n";
+  std::cerr << "If no argument is given, 'input' is assumed stdin,\n\
+  'solutions' will be output to stdout\n";
   exit(1);
 }
 
@@ -20,21 +20,21 @@ print_usage()
 int
 main(int argc, char **argv)
 {
-  const char *input="input.txt";
-  const char *output="solutions.txt";
+  const char *input="stdin";
+  const char *output="stdout";
   --argc;
     
   if (argc == 2) {
     input = argv[1];
     output = argv[2];
   } else if (argc != 0) {
-    std::cout << "minus-chicago: \033[1;91m error\e[m\n";
+    std::cerr << "minus-chicago: \033[1;91m error\e[m\n";
     print_usage();
   }
 
 #ifdef M_VERBOSE
-  std::cout << "LOG: Input being read from " << input << std::endl;
-  std::cout << "LOG: Output being written to " << output << std::endl;
+  std::cerr << "LOG: Input being read from " << input << std::endl;
+  std::cerr << "LOG: Output being written to " << output << std::endl;
 #endif 
   
   return 0;
