@@ -38,18 +38,33 @@ typedef std::complex<double> complex;
 // We use underscore in case we want to make setters/getters with same name,
 // or members of Tracker class if more complete C++ desired
 struct TrackerSettings {
-  double init_dt_ = 0.05;   // m2 tStep, t_step, raw interface code initDt
-  double min_dt_ = 1e-7;        // m2 tStepMin, raw interface code minDt
-  double end_zone_factor_ = 0.05;
-  double epsilon_ = .000001; // m2 CorrectorTolerance (chicago.m2, track.m2), raw interface code epsilon (interface2.d, NAG.cpp:rawSwetParametersPT)
-  double epsilon2_ = epsilon_ * epsilon_; 
-  unsigned max_corr_steps_ = 3;  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
-  double dt_increase_factor_ = 2.;  // m2 stepIncreaseFactor
-  double dt_decrease_factor_ = 1./dt_increase_factor_;  // m2 stepDecreaseFactor not existent in DEFAULT, using what is in track.m2:77 
-  unsigned num_successes_before_increase_ = 2; // m2 numberSuccessesBeforeIncrease
-  double infinity_threshold_ = 1e7; // m2 InfinityThreshold
-  double infinity_threshold2_ = infinity_threshold_ * infinity_threshold_;
+  TrackerSettings():
+    init_dt_(0.05),   // m2 tStep, t_step, raw interface code initDt
+    min_dt_(1e-7),        // m2 tStepMin, raw interface code minDt
+    end_zone_factor_(0.05),
+    epsilon_(.000001), // m2 CorrectorTolerance (chicago.m2, track.m2), raw interface code epsilon (interface2.d, NAG.cpp:rawSwetParametersPT)
+    epsilon2_(epsilon_ * epsilon_), 
+    max_corr_steps_(3),  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
+    dt_increase_factor_(2.),  // m2 stepIncreaseFactor
+    dt_decrease_factor_(1./dt_increase_factor_),  // m2 stepDecreaseFactor not existent in DEFAULT, using what is in track.m2:77 
+    num_successes_before_increase_(2), // m2 numberSuccessesBeforeIncrease
+    infinity_threshold_(1e7), // m2 InfinityThreshold
+    infinity_threshold2_(infinity_threshold_ * infinity_threshold_)
+  { }
+  
+  double init_dt_;   // m2 tStep, t_step, raw interface code initDt
+  double min_dt_;        // m2 tStepMin, raw interface code minDt
+  double end_zone_factor_;
+  double epsilon_; // m2 CorrectorTolerance (chicago.m2, track.m2), raw interface code epsilon (interface2.d, NAG.cpp:rawSwetParametersPT)
+  double epsilon2_; 
+  unsigned max_corr_steps_;  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
+  double dt_increase_factor_;  // m2 stepIncreaseFactor
+  double dt_decrease_factor_;  // m2 stepDecreaseFactor not existent in DEFAULT, using what is in track.m2:77 
+  unsigned num_successes_before_increase_; // m2 numberSuccessesBeforeIncrease
+  double infinity_threshold_; // m2 InfinityThreshold
+  double infinity_threshold2_;
 };
+
 // Current settings from Tim: Fri Feb 22 12:00:06 -03 2019 Git 0ec3340
 // o9 = MutableHashTable{AffinePatches => DynamicPatch     }
 //                      Attempts => 5
