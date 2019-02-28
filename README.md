@@ -2,7 +2,7 @@
 
 
 ## MINUS: MInimial problem NUmerical continuation Solver
-This package originated in solving medium-sized  (degree > 100) square problems
+This package originated in solving medium-sized  (eg, degree > 100) square problems
 (ie, exactly-determined, 0-dimensional), notably in computer vision where
 trifocal minimal problems from points and lines are of importance (as in
 curve-based structure from motion, where lines are tangents to curves).
