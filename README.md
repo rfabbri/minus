@@ -7,12 +7,13 @@ This package originated in solving medium-sized  (degree > 100) square problems
 trifocal minimal problems from points and lines are of importance (as in
 curve-based structure from motion, where lines are tangents to curves).
 As of this date, such problems are too high degree to be solved symbolically,
-while being low enough degree to allow a global technique rather than local
-Levenberg-Marquardt.
+while being low enough degree to allow a global technique rather than the usual
+local Levenberg-Marquardt in structure from motion that requires an
+initialization.
 
 Minus is split into three parts:
 - An efficient library for use in your C++ programs, no dependencies beyond C++
-  standard and the seeemless Eigen library
+  standard and the seamless Eigen library
 - A simple commandline program easy to interface with other programs (eg, Matlab and Macaulay2)
 - Optional: extensive tests useful for tuning the algorithm to a machine architecture and
   compiler. These are disabled by default, and requires [VXL core library](https://vxl.github.io) (*optional* - most users don't need this).
