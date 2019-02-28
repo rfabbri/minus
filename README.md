@@ -8,8 +8,9 @@ trifocal minimal problems from points and lines are of importance (as in
 curve-based structure from motion, where lines are tangents to curves).
 As of this date, such problems are too high degree to be solved symbolically,
 while being low enough degree to allow a global technique rather than the usual
-local Levenberg-Marquardt in structure from motion that requires an
-initialization.
+local Levenberg-Marquardt of structure from motion that requires an
+initialization. In fact, the solutions found using this technique for square
+problems can be used to initialize Levenberg-Marquardt for an overconstrained problem.
 
 Minus is split into three parts:
 - An efficient library for use in your C++ programs, no dependencies beyond C++
