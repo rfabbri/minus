@@ -5003,10 +5003,10 @@ main(int argc, char **argv)
 
 #ifdef M_VERBOSE
   if (!profile) {
-    std::cerr << "LOG: Input being read from " << input << std::endl;
-    std::cerr << "LOG: Output being written to " << output << std::endl;
+    std::cerr << "LOG Input being read from " << input << std::endl;
+    std::cerr << "LOG Output being written to " << output << std::endl;
   } else
-    std::cerr << "LOG: Running default solve for profiling\n";
+    std::cerr << "LOG Running default solve for profiling\n";
 #endif 
 
   if (!profile && !mread(input)) return 1; // reads into global params_
@@ -5014,7 +5014,7 @@ main(int argc, char **argv)
   static Solution solutions[NSOLS];
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
 #ifdef M_VERBOSE
-  std::cerr << "LOG: \033[0;33mstarting path tracker\e[m\n" << std::endl;
+  std::cerr << "LOG \033[0;33mStarting path tracker\e[m\n" << std::endl;
 #endif 
   unsigned retval = 
   ptrack(&minus_DEFAULT, start_sols_, params_, solutions);
@@ -5022,7 +5022,7 @@ main(int argc, char **argv)
   auto duration = duration_cast<seconds>( t2 - t1 ).count();
   if (!profile && !mwrite(solutions, output)) return 2;
 #ifdef M_VERBOSE
-  std::cerr << "LOG: \033[1;32mTime of solver " << duration << "s\e[m" << std::endl;
+  std::cerr << "LOG \033[1;32mTime of solver: " << duration << "s\e[m" << std::endl;
 #endif
   
   return 0;
