@@ -293,7 +293,7 @@ array_copy_NNNplus1(
 static inline double
 array_norm2(const complex *a)
 {
-  register double val = 0;
+  double val = 0;
   complex const* end = a+NNN;
   while (a != end)
     val += std::norm(*a++);

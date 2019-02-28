@@ -209,17 +209,22 @@ add_library( minus ${minus_sources} )
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
 
 # Crucial flags for performance
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffast-math -march=native")
-# Good to have / secondary
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffast-math")
 
+# Good to have / secondary -------
+#
 # vectorize - used by eigen casually, reportedly giving 1.3x speedup in eg
 # matrix multiplication, but no gain seen here so far
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mavx -mfma")
+# already enabled by -march=native mostly. If you enable one of these and the
+# arch is does not support this well, the software may crash with invalid
+# instructions
+# set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mavx -mfma")
 
 # Use naive and fast complex multiplication without checking for corner cases
 # most compiler will have this as part of -ffast-math
 # later on, we can use only this flag if equivalent gains to the more aggressive
 # -fast-math
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fcx-limited-range")
+# set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fcx-limited-range")
 
 
