@@ -4987,8 +4987,12 @@ main(int argc, char **argv)
   const char *input="stdin";
   const char *output="stdout";
   --argc;
+  bool profile = false;   // run some default solves for profiling
     
-  if (argc == 2) {
+  if (argc == 1) {
+    if (std::string (argv[1]) == "-g" || std::string (argv[1]) == "--profile")
+      profile = true;
+  } else if (argc == 2) {
     input = argv[1];
     output = argv[2];
     stdio_ = false;
@@ -4998,24 +5002,27 @@ main(int argc, char **argv)
   }
 
 #ifdef M_VERBOSE
-  std::cerr << "LOG: Input being read from " << input << std::endl;
-  std::cerr << "LOG: Output being written to " << output << std::endl;
+  if (!profile) {
+    std::cerr << "LOG: Input being read from " << input << std::endl;
+    std::cerr << "LOG: Output being written to " << output << std::endl;
+  } else
+    std::cerr << "LOG: Running default solve for profiling\n";
 #endif 
 
-  if (!mread(input)) return 1; // reads into global params_
+  if (!profile && !mread(input)) return 1; // reads into global params_
   
   static Solution solutions[NSOLS];
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
 #ifdef M_VERBOSE
-  std::cerr << "LOG: starting path tracker\n" << std::endl;
+  std::cerr << "LOG: \033[0;33mstarting path tracker\e[m\n" << std::endl;
 #endif 
   unsigned retval = 
   ptrack(&minus_DEFAULT, start_sols_, params_, solutions);
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   auto duration = duration_cast<seconds>( t2 - t1 ).count();
-  if (!mwrite(solutions, output)) return 2;
+  if (!profile && !mwrite(solutions, output)) return 2;
 #ifdef M_VERBOSE
-  std::cerr << "LOG: Time of solver " << duration << "s" << std::endl;
+  std::cerr << "LOG: \033[1;32mTime of solver " << duration << "s\e[m" << std::endl;
 #endif
   
   return 0;
