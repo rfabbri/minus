@@ -29,6 +29,29 @@ To solve a 14x14 precompiled trifocal problem from lines on points ("Chicago").
 You do need to know the size of the system in advance, for efficiency reasons.
 This is not dynamic code, so no allocations are performed.
 
+## Hacking
+
+### Mem leak with AddressSanitizer from Google
+
+https://github.com/google/sanitizers/wiki/AddressSanitizer
+
+You can build release with this
+This is very fast
+Highly recommended for developing efficient code using vectors, pointers and buffers
+
+Add this to `MINUS_EXTRA_CMAKE_CXX_FLAGS`:
+```-fsanitize=address -fno-omit-frame-pointer```
+
+### Profiling
+
+The best way is with kcachegrind + valgrind, by far.
+In any system without valgrind or kcachegrind (eg, Macs), the easiest way is with gprof
+
+### Compilers
+
+This was extensively tested with GCC 5
+Do not use GCC 4
+
 
 ## Authors
 

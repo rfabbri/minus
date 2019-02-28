@@ -4945,7 +4945,7 @@ mread(const char *fname)
     
   unsigned i=0;
   double *dparams = (double *)params_;
-  while (!infp.eof()) {
+  while (!infp.eof() && dparams != (double *)params_+2*NPARAMS) {
       infp >> *dparams++;
       std::cerr << "reading " <<  *(dparams-1) << std::endl;;
       if (infp.eof()) {
