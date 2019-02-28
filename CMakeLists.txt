@@ -210,7 +210,19 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
 
 # Crucial flags for performance
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
+
+# This one is the most important one - order of magnitude faster
+# See this: https://gcc.gnu.org/ml/gcc/2001-07/msg02150.html
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffast-math")
+# --fast-math breaks into these:
+#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-math-errno -ffinite-math-only -fno-rounding-math -fno-signaling-nans -fcx-limited-range -fexcess-precision=fast")
+
+# This is the --fast-math flag that does a big job but sometimes gives wrong
+# results in GCC8: -funsafe-math-optimizations
+# of the flags implied by this one, the most impact comes from
+# -fno-signed-zeros, which is also what breaks GCC8 build
+#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-signed-zeros -fno-trapping-math -fassociative-math -freciprocal-math")
+#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast")
 
 # Good to have / secondary -------
 #
@@ -225,6 +237,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffast-math")
 # most compiler will have this as part of -ffast-math
 # later on, we can use only this flag if equivalent gains to the more aggressive
 # -fast-math
-# set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fcx-limited-range")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fcx-limited-range")
+
 
 

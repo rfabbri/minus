@@ -1,3 +1,7 @@
+// 
+// \author Ricardo Fabbri based on original code by Anton Leykin 
+// \date February 2019
+// 
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -5038,6 +5042,11 @@ main(int argc, char **argv)
 #ifdef M_VERBOSE
   std::cerr << "LOG \033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
 #endif
+   
+  // test openmp
+  // #pragma omp parallel for
+  for(int n=0; n<10; ++n) printf(" %d", n);
+    printf(".\n");
   
   return 0;
 }

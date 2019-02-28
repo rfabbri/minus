@@ -309,6 +309,7 @@ array_norm2(const complex *a)
 //  memcpy(b, a, n*sizeof(complex));
 //}
 
+// THE MEAT //////////////////////////////////////////////////////////////////
 // t: tracker settings
 // s_sols: start sols      
 // params: params of target as specialized homotopy params - P01 in SolveChicago
@@ -332,8 +333,9 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
   complex *x1t1 = xt;  // reusing xt's space to represent x1t1
 
   Solution* t_s = raw_solutions;  // current target solution
-  const complex* s_s = s_sols;          // current start solution
-  for (unsigned sol_n = 0; sol_n < NSOLS; ++sol_n, s_s += NNN, ++t_s) { // outer loop
+  const complex* s_s = s_sols;    // current start solution
+  // #pragma parallel for 
+  for (unsigned sol_n = 0; sol_n < NSOLS; ++sol_n) { // outer loop
     #ifdef M_VERBOSE
     std::cerr << "Trying solution #" << sol_n << std::endl;
     #endif
@@ -622,6 +624,8 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
     // evaluate_HxH(x0t0, HxH);
     // cond_number_via_svd(HxH /*Hx*/, t_s->cond);
     t_s->num_steps = count;
+    ++t_s;
+    s_s += NNN;
   } // outer solution loop
 
   return 0;  // in the past, n_sols was returned, which now is NSOLS
