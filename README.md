@@ -6,30 +6,175 @@ This package originated in solving medium-sized  (degree > 100) square problems
 (ie, exactly-determined, 0-dimensional), notably in computer vision where
 trifocal minimal problems from points and lines are of importance (as in
 curve-based structure from motion, where lines are tangents to curves).
-As of this date, such problems are too high degree to be solved symbolically.
- 
-For more details, see the
-[website](http://multiview-3d-drawings.sourceforge.net)
+As of this date, such problems are too high degree to be solved symbolically,
+while being low enough degree to allow a global technique rather than local
+Levenberg-Marquardt.
 
-## Usage
-For use in your program, we provide a header-only library.
+Minus is split into three parts:
+- An efficient library for use in your C++ programs, no dependencies beyond C++
+  standard and the seeemless Eigen library
+- A simple commandline program easy to interface with other programs (eg, Matlab and Macaulay2)
+- Optional: extensive tests useful for tuning the algorithm to a machine architecture and
+  compiler. These are disabled by default, and requires [VXL core library](https://vxl.github.io).
+ 
+For more details, see the [website](http://multiview-3d-drawings.sourceforge.net)
+
+## Usage in C++ programs
+For use in your program, we provide a C++ standard library (soon to be made header-only)
 Simply do:
 ```
-#include <minus>
+#include <minus.h>
 ```
 
-Examples are avaialble in the tests/ subfolder
 In your program, you can then use
 
 ```
-  ptrack<14>(&VNAG_DEFAULT, start_sols, params, solutions);
+  ptrack<CHICAGO>(&VNAG_DEFAULT, start_sols, params, solutions);
 
 ```
 To solve a 14x14 precompiled trifocal problem from lines on points ("Chicago").
-You do need to know the size of the system in advance, for efficiency reasons.
+you do need to know the size of the system in advance, for efficiency reasons.
 This is not dynamic code, so no allocations are performed.
 
+## Commandline programs
+
+You will need to compile the commandline program to take advantage of
+processor-specific code optimization. 
+
+### Compiling
+This requires CMake configure and make. Developer
+tools are required. GCC 5 to 7 is strongly recommended.
+You will have to have a recent version of Cmake installed (try it with your
+system cmake, and if it doesn't work we recommend installing Cmake from git, it is
+straightforward).  
+
+```
+cd minus
+ccmake .           # press 'c' repreatedly (configure), then 'g' (generate)
+make
+```
+
+The executables are located in the ``bin`` folder (``minus/bin``).
+Each executable is optimized for a different minimal problem.
+```
+minus-chicago      # annihilates the Chicago problem!
+```
+
+Do an initial test
+
+```
+cd cmd
+./minus-chicago -g         # -g profiles with a predefined input, to get a time
+
+Output:
+  LOG Time of solver: xxxms
+```
+
+
+
+### Running
+
+We will use Chicago as the basic example of a minimal problem to be solved.
+
+The usage is as follows
+```
+minus-chicago input output 
+```
+
+Where input and output are ASCII text files. 
+```input``` encodes points and lines, and `output` has the solutions
+
+If you are communicating to/from another program (Matlab or Macaulay2),
+you should not use physical files, but use pipes (standard input and output).
+Without any arguments, `minus` will read from stdin, and write to stdout.
+That way, your script can do this:
+```
+cat input | minus-chicago 
+# or
+minus-chicago < input >output
+# In Matlab, something like this:
+solutions = system( pipe input to minus-chicago )  
+# solutions are output of the command that goes directly into Matlab
+```
+
+For now, each time you run minus-chicago inside RANSAC, you will have to call
+minus again. But this is OK since you can parallelize your RANSAC using GNU
+Parallel. Example:
+
+```parallel minus-chicago {1} {2} ::: "$inputfiles" ::: "$outputfiles"```
+
+Will identify the number of cores and threads in your CPU and distribute a copy
+of minus-chicago for each input file describing a point/line configuration.
+
+Parallel can be easily configured to run across many machines in the lab, for
+instance.
+
+(I've tried running at the cluster at Brown but it seems each Xeon is far less
+strong than a i7 for a single run, though for parallel tasks it may overcome
+that. I recommend running on a couple of machines you now minus runs fast)
+
+Their format are as follows
+```
+input:
+    Encodes input points and lines in text form.
+    Represented as start-target parameter pairs as P01 in solveChicago/chicago.m2 from Tim.
+    The format is close to that needed by the homotopy continuation code, to
+    minimize bug in brittle C++ code.  The user can write scripts to get
+    user-friendly data into this format.
+    
+    It looks like
+    
+    .391195550619826 -.00262962533857666
+    .310140709227333 +.169842562835882
+    -.725705624433656 +.441901252816163
+    .139236887010717 +.482571706362417
+    -.244506857304198 +.606302490573926
+    -.394166300679963 -.40618253480102
+    -.195460311312153 +.426521133558775
+    ....
+
+    Which is:
+
+    real 0 imag 0
+    real 1 imag 1
+    real 2 imag 2
+    ...
+
+    You will have 2*NPARAMS lines (NPARAMS = 56 for Chicago)
+    
+
+    Example in bin/P01-chicago-5lines-spherical-case1
+
+    It can also be formatted row-wise into a 1D text array.
+    
+output: 
+    312 solutions in Matlab text format
+
+    It looks like 
+    [1.0256116377780581939+i*0.95290270838548252197
+     0.087212057713832114025+i*0.010110978306756317896
+     0.048192069754345270849+i*0.03896717224674180885
+     1.5403585146403313555+i*0.018243345455052351056
+     ...
+     -0.00074739537885242771+i*-0.0029906069387749742439]
+
+    Notice the i multiplying the imaginary part. If you need another format,
+    please let me know.
+
+    This matrix is NSOLS by NNN, where NSOLS 312 and NNN is 14 (number of
+    variables).
+```
+
+(For developers: the start system is compiled and don't need to be input)
+
+
+
 ## Hacking
+
+### Test Suite
+  Enable tests in cmake, then indicate where your vxl build folder is located.
+  When building VXL, only build VNL.
+
 
 Every single advanced development tool works best under Linux.
 
