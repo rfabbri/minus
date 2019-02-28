@@ -5020,7 +5020,7 @@ main(int argc, char **argv)
   ptrack(&minus_DEFAULT, start_sols_, params_, solutions);
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   auto duration = duration_cast<seconds>( t2 - t1 ).count();
-  if (!profile && !mwrite(solutions, output)) return 2;
+  if (!mwrite(solutions, output)) return 2;
 #ifdef M_VERBOSE
   std::cerr << "LOG \033[1;32mTime of solver: " << duration << "s\e[m" << std::endl;
 #endif
