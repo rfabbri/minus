@@ -4707,7 +4707,7 @@ static complex const start_sols_[NNN*NSOLS] = {
 // Example specialized homotopy for a specific given inputk
 // these take almost 1min in Macaulay2
 // Used for testing.
-static complex params_[2*NPARAMS];/*= { // start-target param pairs, P01 in chicago.m2
+static complex params_[2*NPARAMS] = { // start-target param pairs, P01 in chicago.m2
   {.391195550619826,-.00262962533857666},
   {.310140709227333,+.169842562835882},
   {-.725705624433656,+.441901252816163},
@@ -4821,7 +4821,6 @@ static complex params_[2*NPARAMS];/*= { // start-target param pairs, P01 in chic
   {-.106561340161159,+.495572246957103},
   {.0663667102234161,-.308643825789244}
 };
-*/
 
 // Hongy's format (intermediate, after inverting K, specific for line/minur
 // formulation)
@@ -4935,25 +4934,33 @@ mwrite(const Solution s[NSOLS], const char *fname)
 static bool
 mread(const char *fname)
 {
-  // read the whole thing
-  std::ifstream infp(fname, std::ios::in);
-  if (!infp) {
-    std::cerr << "I/O Error opening input " << fname << std::endl;
-    return false;
+  std::ifstream infp;
+  std::istream *inp = &std::cin;
+  
+  
+  if (!stdio_) {
+    infp.open(fname, std::ios::in);
+    if (!infp) {
+      std::cerr << "I/O Error opening input " << fname << std::endl;
+      return false;
+    }
+    inp = &infp;
   }
+  
+  std::istream &in = *inp;
     
-  infp.exceptions(std::istream::failbit | std::istream::badbit);
+  in.exceptions(std::istream::failbit | std::istream::badbit);
   unsigned i=0;
   double *dparams = (double *)params_;
-  while (!infp.eof() && dparams != (double *)params_+2*2*NPARAMS) {
+  while (!in.eof() && dparams != (double *)params_+2*2*NPARAMS) {
       try {
-      infp >> *dparams++;
+      in >> *dparams++;
       // std::cerr << "reading " <<  *(dparams-1) << std::endl;;
-      if (infp.eof()) {
+      if (in.eof()) {
         std::cerr << "I/O Error: Premature input termination\n";
         return false;
       }
-      infp >> *dparams++;
+      in >> *dparams++;
       } catch (std::istream::failure &E) {
         std::cerr << "I/O Error: Invalid input conversion or other error\n";
         return false;

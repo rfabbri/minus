@@ -50,13 +50,21 @@ a colorful output showing where it came from, specially under Linux.
 
 ### Profiling
 
-The best way is with kcachegrind + valgrind, by far.
+The best way is with kcachegrind + valgrind, by far. 
+See https://www.blogger.com/comment.g?blogID=7395958&postID=116062684092668856&bpli=1&pli=1
+
 In any system without valgrind or kcachegrind (eg, Macs), the easiest way is with gprof
+
+Expect your program to take very very long - so reduce the problem / iterations
+before running.
 
 ### Compilers
 
 This was extensively tested with GCC 5
 Do not use GCC 4
+
+Intel ICC compiler with the same optimization flags as usual in Minus provided
+a 2x DECREASE in speed. TODO: try other ICC-specific optimization flags
 
 
 ## Authors
