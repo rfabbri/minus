@@ -101,6 +101,20 @@ if(UNIX)
   endif()
 endif()
 
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    # require at least gcc 4.8
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
+      message(WARNING "***********************************")
+      message(WARNING "GCC must be at least 5.0 for speed!")
+      message(WARNING "*********************************")
+    elseif(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.9)
+      message(WARNING "******************************************\nGCC must be less than 8.0 for reliability!\n******************************************\n")
+    endif()
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+else()
+    message(WARNING "You are using an unsupported compiler! Compilation has only been tested with Clang and GCC.")
+endif()
+
 
 # Some types of path names can cause havoc with regular expressions,
 # so avoid those.
