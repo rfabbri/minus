@@ -31,6 +31,8 @@ This is not dynamic code, so no allocations are performed.
 
 ## Hacking
 
+Every single advanced development tool works best under Linux.
+
 ### Mem leak with AddressSanitizer from Google
 
 https://github.com/google/sanitizers/wiki/AddressSanitizer
@@ -41,6 +43,10 @@ Highly recommended for developing efficient code using vectors, pointers and buf
 
 Add this to `MINUS_EXTRA_CMAKE_CXX_FLAGS`:
 ```-fsanitize=address -fno-omit-frame-pointer```
+
+Now recompile minus and simply run it.
+If nothing happens, you're golden. In the event of any memleak, there will be
+a colorful output showing where it came from, specially under Linux.
 
 ### Profiling
 

@@ -4938,24 +4938,32 @@ mread(const char *fname)
   // read the whole thing
   std::ifstream infp(fname, std::ios::in);
   if (!infp) {
-    std::cerr << "I/O Error opening output " << fname << std::endl;
+    std::cerr << "I/O Error opening input " << fname << std::endl;
     return false;
   }
     
-    
+  infp.exceptions(std::istream::failbit | std::istream::badbit);
   unsigned i=0;
   double *dparams = (double *)params_;
-  while (!infp.eof() && dparams != (double *)params_+2*NPARAMS) {
+  while (!infp.eof() && dparams != (double *)params_+2*2*NPARAMS) {
+      try {
       infp >> *dparams++;
-      std::cerr << "reading " <<  *(dparams-1) << std::endl;;
+      // std::cerr << "reading " <<  *(dparams-1) << std::endl;;
       if (infp.eof()) {
         std::cerr << "I/O Error: Premature input termination\n";
         return false;
       }
       infp >> *dparams++;
+      } catch (std::istream::failure &E) {
+        std::cerr << "I/O Error: Invalid input conversion or other error\n";
+        return false;
+      }
   }
-  if (dparams != (double *)params_+2*NPARAMS)
+  if (dparams != (double *)params_+2*2*NPARAMS)
     std::cerr << "I/O Premature input termination\n";
+
+//  for (unsigned i=0; i < 2*NPARAMS; ++i)
+//    std::cerr << "D " << params_[i] << std::endl;
 
   return true;
 }
@@ -4987,7 +4995,7 @@ main(int argc, char **argv)
   std::cerr << "LOG: Output being written to " << output << std::endl;
 #endif 
 
-  mread(input); // reads into global params_
+  if (!mread(input)) return 1; // reads into global params_
   
   static Solution solutions[NSOLS];
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
@@ -4998,7 +5006,7 @@ main(int argc, char **argv)
   ptrack(&minus_DEFAULT, start_sols_, params_, solutions);
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   auto duration = duration_cast<seconds>( t2 - t1 ).count();
-  mwrite(solutions, output);
+  if (!mwrite(solutions, output)) return 2;
 #ifdef M_VERBOSE
   std::cerr << "LOG: Time of solver " << duration << "s" << std::endl;
 #endif
