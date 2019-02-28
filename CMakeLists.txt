@@ -189,6 +189,8 @@ set (minus_sources
 )
 
 add_subdirectory(cmd) 
+
+set(BUILD_TESTING OFF CACHE BOOL "Build tests for minus")
   
 if(VXL_FOUND)  # For now we need vxl to build tests
   if( BUILD_TESTING )

@@ -18,7 +18,11 @@ print_usage()
 
 bool stdio_=true;
 
-complex start_sols[NNN*NSOLS] = {
+// Hardcoded for efficiency.
+// If you want to play with different start sols,
+// write another program that accepts start sols in runtime,
+// but keep this one lean & mean.
+static complex const start_sols_[NNN*NSOLS] = {
   {-.59336028545681196,-.11013183013512155},
   {.11944671140724233,-.13633687755694085},
   {-.7527462639007193e-1,.36383005180054401},
@@ -4700,8 +4704,10 @@ complex start_sols[NNN*NSOLS] = {
   {-.1721304990664842,-.12755642206752138}
 };
 
+// Example specialized homotopy for a specific given inputk
 // these take almost 1min in Macaulay2
-const complex params[2*NPARAMS] = { // start-target param pairs, P01 in chicago.m2
+// Used for testing.
+static complex params_[2*NPARAMS];/*= { // start-target param pairs, P01 in chicago.m2
   {.391195550619826,-.00262962533857666},
   {.310140709227333,+.169842562835882},
   {-.725705624433656,+.441901252816163},
@@ -4815,6 +4821,34 @@ const complex params[2*NPARAMS] = { // start-target param pairs, P01 in chicago.
   {-.106561340161159,+.495572246957103},
   {.0663667102234161,-.308643825789244}
 };
+*/
+
+// Hongy's format (intermediate, after inverting K, specific for line/minur
+// formulation)
+// 
+// 5 lines (rows), each row is abc abc abc coordinates of the line in views
+//
+// For now, I've decided to let this part up to Hongy and Tim.
+// 
+/*
+const double line_complex[5][9] = 
+{-0.426969431923225,0.904266058305386,-0.016257269406856,-0.816072704668987,-0.577949254428315,-0.009179452406351,-0.993088446036754,0.117368387346443,-0.029703527876673,
+-0.149461931332694,-0.988767480797331,0.004975098378423,-0.827240334657613,0.561848225694057,0.024197404596199,-0.597717077858896,-0.801707112875907,-0.028500946061100,
+0.172393614116450,-0.985028142649675,0.022234985218359,0.423489709753312,0.905900913860371,-0.012689283106900,0.262160299599274,-0.965024340270244,0.032904909920433,
+0.802998962043030,0.595980424978721,0.011808624853467,-0.995300785555798,0.096831535524387,0.012207135917184,-0.648437660586816,0.761267758632071,-0.011057787335086,
+0.759549972139411,-0.650448952511279,0.004698833872896,-0.828973590956651,0.559287748387568,-0.042341162332057,-0.953901010343209,-0.300121412875198,-0.017452966108078,
+0,0,0,0,0,0,0,0,0
+};
+*/
+//    'matrix{{-0.42696943-0.14946193*ii,0.90426606-0.98876748*ii,-0.01625727+0.00497510*ii},{-0.81607270-0.82724033*ii,-0.57794925+0.56184823*ii,-0.00917945+0.02419740*ii},{-0.99308845-0.59771708*ii,0.11736839-0.80170711*ii,-0.02970353-0.02850095*ii}}'
+/*
+[-0.426969431923225 0.904266058305386 -0.016257269406856 -0.816072704668987 -0.577949254428315 -0.009179452406351 -0.993088446036754 0.117368387346443 -0.029703527876673
+-0.149461931332694 -0.988767480797331 0.004975098378423 -0.827240334657613 0.561848225694057 0.024197404596199 -0.597717077858896 -0.801707112875907 -0.028500946061100
+0.172393614116450 -0.985028142649675 0.022234985218359 0.423489709753312 0.905900913860371 -0.012689283106900 0.262160299599274 -0.965024340270244 0.032904909920433
+0.802998962043030 0.595980424978721 0.011808624853467 -0.995300785555798 0.096831535524387 0.012207135917184 -0.648437660586816 0.761267758632071 -0.011057787335086
+0.759549972139411 -0.650448952511279 0.004698833872896 -0.828973590956651 0.559287748387568 -0.042341162332057 -0.953901010343209 -0.300121412875198 -0.017452966108078
+0 0 0 0 0 0 0 0 0]
+ * */
 
 // Output solutions in ASCII matlab format
 //
@@ -4832,7 +4866,7 @@ const complex params[2*NPARAMS] = { // start-target param pairs, P01 in chicago.
 // a = a_raw(1:2:end) + i*a_raw(2:2:end);
 // 
 static bool
-write(const Solution s[NSOLS], const char *fname)
+mwrite(const Solution s[NSOLS], const char *fname)
 {
   bool scilab=false;
 
@@ -4876,6 +4910,56 @@ write(const Solution s[NSOLS], const char *fname)
   return true;
 }
 
+// reads into the global variable start_sols_
+// Format is just like P01 variable in solveChicago in chicago.m2
+// But here there is no imaginary 'i' string:
+//
+// P01(0).real()  P01(0).imag()      // I mean P01(0) or P01#0
+// P01(1).real()  P01(1).imag()
+// P01(2).real()  P01(2).imag()
+// P01(3).real()  P01(3).imag()
+// ...
+//
+// The file can also be one line, listing the above in row-major order like so:
+// 
+// P01(0).real()  
+// P01(0).imag() 
+// P01(1).real()
+// P01(1).imag()
+// ...
+// 
+// It is up to the user to build this from an actual input for a target system,
+// be it point-tangents as in Ric's format, be it a linecomplex as in Hongy's format
+//
+// This format is generic enough to be adapted to M2 or matlab
+static bool
+mread(const char *fname)
+{
+  // read the whole thing
+  std::ifstream infp(fname, std::ios::in);
+  if (!infp) {
+    std::cerr << "I/O Error opening output " << fname << std::endl;
+    return false;
+  }
+    
+    
+  unsigned i=0;
+  double *dparams = (double *)params_;
+  while (!infp.eof()) {
+      infp >> *dparams++;
+      std::cerr << "reading " <<  *(dparams-1) << std::endl;;
+      if (infp.eof()) {
+        std::cerr << "I/O Error: Premature input termination\n";
+        return false;
+      }
+      infp >> *dparams++;
+  }
+  if (dparams != (double *)params_+2*NPARAMS)
+    std::cerr << "I/O Premature input termination\n";
+
+  return true;
+}
+
 // Simplest possible command to compute the Chicago problem
 // for estimating calibrated trifocal geometry from points and lines at points
 //
@@ -4902,17 +4986,19 @@ main(int argc, char **argv)
   std::cerr << "LOG: Input being read from " << input << std::endl;
   std::cerr << "LOG: Output being written to " << output << std::endl;
 #endif 
+
+  mread(input); // reads into global params_
   
-  Solution solutions[NSOLS];
+  static Solution solutions[NSOLS];
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
 #ifdef M_VERBOSE
   std::cerr << "LOG: starting path tracker\n" << std::endl;
 #endif 
   unsigned retval = 
-  ptrack(&minus_DEFAULT, start_sols, params, solutions);
+  ptrack(&minus_DEFAULT, start_sols_, params_, solutions);
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   auto duration = duration_cast<seconds>( t2 - t1 ).count();
-  write(solutions, output);
+  mwrite(solutions, output);
 #ifdef M_VERBOSE
   std::cerr << "LOG: Time of solver " << duration << "s" << std::endl;
 #endif
