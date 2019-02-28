@@ -15,7 +15,7 @@ Minus is split into three parts:
   standard and the seeemless Eigen library
 - A simple commandline program easy to interface with other programs (eg, Matlab and Macaulay2)
 - Optional: extensive tests useful for tuning the algorithm to a machine architecture and
-  compiler. These are disabled by default, and requires [VXL core library](https://vxl.github.io).
+  compiler. These are disabled by default, and requires [VXL core library](https://vxl.github.io) (*optional* - most users don't need this).
  
 For more details, see the [website](http://multiview-3d-drawings.sourceforge.net)
 
