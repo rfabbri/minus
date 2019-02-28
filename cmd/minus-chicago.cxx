@@ -4,6 +4,8 @@
 #include <chrono>
 #include <minus.h>
 
+static const double dbgtol = 1e-3;
+
 #define M_VERBOSE 1
 using namespace std::chrono;
 
@@ -5019,10 +5021,22 @@ main(int argc, char **argv)
   unsigned retval = 
   ptrack(&minus_DEFAULT, start_sols_, params_, solutions);
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
-  auto duration = duration_cast<seconds>( t2 - t1 ).count();
+  auto duration = duration_cast<milliseconds>( t2 - t1 ).count();
+  if (profile) {
+    // compare solutions to certain values from M2
+    // two random entries
+    if (std::abs(solutions[1].x[1] - complex(-.25177177692982444e1, -.84845195030295639)) <= dbgtol &&
+        std::abs(solutions[NSOLS-2].x[2] - complex(.7318330016224166, .10129116603501138)) <= dbgtol)
+      std::cerr << "LOG solutions look OK\n";
+    else  {
+      std::cerr << "LOG \033[1;91merror:\e[m solutions dont match m2. Errors: ";
+      std::cerr << std::abs(solutions[1].x[2] - complex(-.25177177692982444e1, -.84845195030295639)) << ", "
+          << std::abs(solutions[NSOLS-2].x[2] - complex(.7318330016224166, .10129116603501138)) << std::endl;
+    }
+  }
   if (!mwrite(solutions, output)) return 2;
 #ifdef M_VERBOSE
-  std::cerr << "LOG \033[1;32mTime of solver: " << duration << "s\e[m" << std::endl;
+  std::cerr << "LOG \033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
 #endif
   
   return 0;
