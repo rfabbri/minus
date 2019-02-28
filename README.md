@@ -22,13 +22,13 @@ For more details, see the [website](http://multiview-3d-drawings.sourceforge.net
 ## Usage in C++ programs
 For use in your program, we provide a C++ standard library (soon to be made header-only)
 Simply do:
-```
+```C
 #include <minus.h>
 ```
 
 In your program, you can then use
 
-```
+```C
   ptrack<CHICAGO>(&VNAG_DEFAULT, start_sols, params, solutions);
 
 ```
@@ -48,21 +48,21 @@ You will have to have a recent version of Cmake installed (try it with your
 system cmake, and if it doesn't work we recommend installing Cmake from git, it is
 straightforward).  
 
-```
+```bash
 cd minus
 ccmake .           # press 'c' repreatedly (configure), then 'g' (generate)
 make
 ```
 
-The executables are located in the ``bin`` folder (``minus/bin``).
+The executables are located in the `bin` folder (`minus/bin`).
 Each executable is optimized for a different minimal problem.
-```
+```bash
 minus-chicago      # annihilates the Chicago problem!
 ```
 
 Do an initial test
 
-```
+```bash
 cd cmd
 ./minus-chicago -g         # -g profiles with a predefined input, to get a time
 
@@ -70,19 +70,17 @@ Output:
   LOG Time of solver: xxxms
 ```
 
-
-
 ### Running
 
 We will use Chicago as the basic example of a minimal problem to be solved.
 
 The usage is as follows
-```
+```bash
 minus-chicago input output 
 ```
 
 Where input and output are ASCII text files. 
-```input``` encodes points and lines, and `output` has the solutions
+`input` encodes points and lines, and `output` has the solutions
 
 If you are communicating to/from another program (Matlab or Macaulay2),
 you should not use physical files, but use pipes (standard input and output).
@@ -101,7 +99,9 @@ For now, each time you run minus-chicago inside RANSAC, you will have to call
 minus again. But this is OK since you can parallelize your RANSAC using GNU
 Parallel. Example:
 
-```parallel minus-chicago {1} {2} ::: "$inputfiles" ::: "$outputfiles"```
+```bash
+parallel minus-chicago {1} {2} ::: "$inputfiles" ::: "$outputfiles"
+```
 
 Will identify the number of cores and threads in your CPU and distribute a copy
 of minus-chicago for each input file describing a point/line configuration.
@@ -165,8 +165,7 @@ output:
     variables).
 ```
 
-(For developers: the start system is compiled and don't need to be input)
-
+For developers: the start system is compiled and don't need to be input
 
 
 ## Hacking
@@ -176,27 +175,26 @@ output:
   When building VXL, only build VNL.
 
 
-Every single advanced development tool works best under Linux.
+Most advanced programming tools work best under Linux.
 
 ### Mem leak with AddressSanitizer from Google
 
-https://github.com/google/sanitizers/wiki/AddressSanitizer
+[https://github.com/google/sanitizers/wiki/AddressSanitizer]
 
-You can build release with this
-This is very fast
+You can build release with it, no need for slow debug. This is very fast.
 Highly recommended for developing efficient code using vectors, pointers and buffers
 
 Add this to `MINUS_EXTRA_CMAKE_CXX_FLAGS`:
 ```-fsanitize=address -fno-omit-frame-pointer```
 
-Now recompile minus and simply run it.
-If nothing happens, you're golden. In the event of any memleak, there will be
-a colorful output showing where it came from, specially under Linux.
+Now recompile minus and simply run it.  If nothing happens, you're golden. In
+the event of any memleak, there will be a colorful output showing where it came
+from, specially under Linux.
 
 ### Profiling
 
 The best way is with kcachegrind + valgrind, by far. 
-See https://www.blogger.com/comment.g?blogID=7395958&postID=116062684092668856&bpli=1&pli=1
+See [https://www.blogger.com/comment.g?blogID=7395958&postID=116062684092668856&bpli=1&pli=1]
 
 In any system without valgrind or kcachegrind (eg, Macs), the easiest way is with gprof
 
@@ -206,10 +204,12 @@ before running.
 ### Compilers
 
 This was extensively tested with GCC 5
-Do not use GCC 4
+Do not use GCC 4 or 8
 
 Intel ICC compiler with the same optimization flags as usual in Minus provided
 a 2x DECREASE in speed. TODO: try other ICC-specific optimization flags
+
+Also no success with GCC8 - slow or breaks fastmath.
 
 
 ## Authors
@@ -220,4 +220,4 @@ Ricardo Fabbri. The core code grew out of Macaulay2/e/NAG.cpp.
 ## Acknowledgements
 This grew as part of ICERM's 2018 Nonlinear Algebra Program (Computer Vision
 Working group) and 2019 Algebraic Vision research cluster. Both co-organized by
-the authors.
+the authors. We also thank our ICCV'19 paper co-authors.
