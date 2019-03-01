@@ -5023,7 +5023,7 @@ main(int argc, char **argv)
   std::cerr << "LOG \033[0;33mStarting path tracker\e[m\n" << std::endl;
 #endif 
   unsigned retval = 
-  ptrack(&minus_DEFAULT, start_sols_, params_, solutions);
+  ptrack(&MINUS_DEFAULT, start_sols_, params_, solutions);
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   auto duration = duration_cast<milliseconds>( t2 - t1 ).count();
   if (profile) {

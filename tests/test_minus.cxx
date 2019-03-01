@@ -242,11 +242,11 @@ report(const Solution s[NSOLS])
           statstring = '-';
       }
     std::cerr << statstring << std::endl;
-    std::cerr << "num_steps: " << s[i].num_steps << std::endl; 
-    for (unsigned var=0; var < NNN; ++var) {
+//    std::cerr << "num_steps: " << s[i].num_steps << std::endl; 
+//    for (unsigned var=0; var < NNN; ++var) {
       // solution to std::cout, debug info to std::cerr 
-      std::cerr << s[i].start_x[var] << std::endl;
-    }
+      // std::cerr << s[i].start_x[var] << std::endl;
+    // // // // // // // // }
     
     std::cout << std::setprecision(20);
     for (unsigned var=0; var +1 < NNN; ++var) {
@@ -5158,7 +5158,7 @@ test_ptrack()
   Solution solutions[NSOLS];
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   unsigned retval = 
-  ptrack(&minus_DEFAULT, start_sols, params, solutions);
+  ptrack(&MINUS_DEFAULT, start_sols, params, solutions);
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   auto duration = duration_cast<seconds>( t2 - t1 ).count();
   report(solutions);

@@ -339,13 +339,12 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
     #ifdef M_VERBOSE
     std::cerr << "Trying solution #" << sol_n << std::endl;
     #endif
-    t_s->make(s_s);  // cook a Solution: copy s_s to start node of path
     t_s->status = PROCESSING;
     bool end_zone = false;
     array_copy(s_s, x0);
     *t0 = 0;
     *dt = t_step;
-    unsigned predictor_successes = 0, count = 0;  // number of steps
+    unsigned predictor_successes = 0;
 
     // print start solution
 
@@ -599,7 +598,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
         std::cerr << "decreasing dt: " << *dt;
         #endif
       } else { // predictor success
-        ++predictor_successes; count++;
+        ++predictor_successes;
         array_copy_NNNplus1(x1t1, x0t0);
         if (predictor_successes >= s->num_successes_before_increase_) {
           predictor_successes = 0;
@@ -623,7 +622,6 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
     if (t_s->status == PROCESSING) t_s->status = REGULAR;
     // evaluate_HxH(x0t0, HxH);
     // cond_number_via_svd(HxH /*Hx*/, t_s->cond);
-    t_s->num_steps = count;
     ++t_s;
     s_s += NNN;
   } // outer solution loop

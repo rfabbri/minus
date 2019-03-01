@@ -31,7 +31,7 @@ Simply do:
 In your program, you can then use
 
 ```C
-  ptrack<CHICAGO>(&VNAG_DEFAULT, start_sols, params, solutions);
+  ptrack<CHICAGO>(&MINUS_DEFAULT, start_sols, params, solutions);
 
 ```
 To solve a 14x14 trifocal problem from lines on points ("Chicago").

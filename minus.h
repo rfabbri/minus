@@ -97,7 +97,7 @@ struct TrackerSettings {
 //                      tStep => .05
 //                      tStepMin => 1e-7
 
-static const TrackerSettings minus_DEFAULT;
+static const TrackerSettings MINUS_DEFAULT;
 
 enum SolutionStatus {
   UNDETERMINED,
@@ -115,11 +115,9 @@ struct Solution
 {
   complex x[NNN];        // array of n coordinates
   double t;          // last value of parameter t used
-  complex start_x[NNN];  // start of the path that produced x
   SolutionStatus status;
-  unsigned num_steps;  // number of steps taken along the path
+//  unsigned num_steps;  // number of steps taken along the path
   Solution() : status(UNDETERMINED) { }
-  void make(const complex* s_s) { memcpy(start_x, s_s, NNN*sizeof(complex)); }
 };
 
 
