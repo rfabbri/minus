@@ -12,11 +12,12 @@
 #include <minus.h>
 
 // debug number of samples to output
-#define NSAMPLES
+#define MAX_NSAMPLES 1000
+
 
 struct SolutionExp
 {
-  complex path[MAX_NSAMPLES][NNN]; 
+  complex path[MAX_NSAMPLES*NNN]; 
   complex x[NNN];        // array of n coordinates. Should equal path[num_steps-1];
   double t;          // last value of parameter t used
   complex start_x[NNN];  // start of the path that produced x

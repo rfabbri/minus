@@ -127,44 +127,6 @@ linear_eigen4(
   xx = AA.householderQr().solve(bb);
   return true;
 }
-// from compute_Grabner_basis, 5point.c
-#if 0
-bool linear_bundler(
-    const complex* A,  // NNN-by-NNN matrix of complex #s
-    const complex* b,  // 1-by-NNN RHS of Ax=b  (bsize-by-NNN)
-    complex* x   // solution
-    )
-{
-    for (unsigned i = 0; i < 10; i++) {
-        /* Make the leading coefficient of row i = 1 */
-        double leading = A[20 * i + i];
-        matrix_scale(20, 1, A + 20 * i, 1.0 / leading, A + 20 * i);
-
-        /* Subtract from other rows */
-        for (j = i+1; j < 10; j++) {
-            double leading2 = A[20 * j + i];
-            double scaled_row[20];
-            matrix_scale(20, 1, A + 20 * i, leading2, scaled_row);
-            matrix_diff(20, 1, 20, 1, A + 20 * j, scaled_row, A + 20 * j);
-        }
-    }
-
-    /* Now, do the back substitution */
-    for (i = 9; i >= 0; i--) {
-        for (j = 0; j < i; j++) {
-            double scale = A[20 * j + i];
-            double scaled_row[20];
-            matrix_scale(20, 1, A + 20 * i, scale, scaled_row);
-            matrix_diff(20, 1, 20, 1, A + 20 * j, scaled_row, A + 20 * j);
-        }
-    }
-    
-    /* Copy out results */
-    for (i = 0; i < 10; i++) {
-        memcpy(Gbasis + i * 10, A + i * 20 + 10, sizeof(double) * 10);
-    }
-}
-#endif
 
 static const double the_smallest_number = 1e-13;
 static const double dbgtol = 1e-2;
@@ -333,7 +295,7 @@ exp_ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const comp
 
   SolutionExp* t_s = raw_solutions;  // current target solution
   const complex* s_s = s_sols;    // current start solution
-  complex p=t_s->path;
+  // complex *p = t_s->path;
   // #pragma parallel for 
   for (unsigned sol_n = 0; sol_n < NSOLS; ++sol_n) { // outer loop
     #ifdef M_VERBOSE
@@ -616,9 +578,12 @@ exp_ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const comp
       #ifdef M_VERBOSE
       std::cerr << "\tAxb_success" << Axb_success << std::endl;
       #endif
-      if (count < MAX_NSAMPLES)
-      array_copy(x0, p);
-      p += NNN;
+      if (count < MAX_NSAMPLES) {
+//        if (count % 10 == 0) { 
+         // array_copy(x0, p);
+          // p += NNN;
+        // }
+      }
     } // while 
     // record the solution
     array_copy(x0, t_s->x);
