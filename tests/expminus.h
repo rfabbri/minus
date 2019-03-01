@@ -12,7 +12,7 @@
 #include <minus.h>
 
 // debug number of samples to output
-#define MAX_NSAMPLES 1000
+#define MAX_NSAMPLES 100
 
 
 struct SolutionExp

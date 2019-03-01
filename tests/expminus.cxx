@@ -5,6 +5,7 @@
 #include "expminus.h"
 #include <cstdio>
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 #include "Eigen/Dense"
 #include "chicago.hxx"
@@ -296,8 +297,12 @@ exp_ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const comp
   SolutionExp* t_s = raw_solutions;  // current target solution
   const complex* s_s = s_sols;    // current start solution
   // complex *p = t_s->path;
-  // #pragma parallel for 
-  for (unsigned sol_n = 0; sol_n < NSOLS; ++sol_n) { // outer loop
+  for (unsigned sol_n = 0; sol_n < 10; ++sol_n) { // outer loop
+     std::ofstream fpaths("path-solution-" + std::to_string(sol_n),std::ios::out);
+     fpaths << std::setprecision(20);
+     std::ofstream finfo("info-solution-" + std::to_string(sol_n), std::ios::out);
+     finfo << std::setprecision(20);
+     
     #ifdef M_VERBOSE
     std::cerr << "Trying solution #" << sol_n << std::endl;
     #endif
@@ -571,6 +576,9 @@ exp_ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const comp
           std::cerr << "increasing dt: " << *dt;
           #endif
         }
+        for (unsigned kk=0; kk < NNN; ++kk)
+          fpaths << x0[kk] << ' ';
+        fpaths << std::endl;
       }
       if (array_norm2(x0) > s->infinity_threshold2_)
         t_s->status = INFINITY_FAILED;
@@ -578,22 +586,33 @@ exp_ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const comp
       #ifdef M_VERBOSE
       std::cerr << "\tAxb_success" << Axb_success << std::endl;
       #endif
-      if (count < MAX_NSAMPLES) {
-//        if (count % 10 == 0) { 
-         // array_copy(x0, p);
-          // p += NNN;
-        // }
-      }
+//      if (count < MAX_NSAMPLES) {
+//        if (count > 0.5*MAX_NSAMPLES) && count % 10 == 0)
+//         array_copy(x0, p);
+//         p += NNN;
+//      }
     } // while 
     // record the solution
+    for (unsigned kk=0; kk < NNN; ++kk)
+      finfo << x0[kk] << ' ';
+    finfo << " \% final solution" << std::endl;
+    
     array_copy(x0, t_s->x);
     t_s->t = t0->real();
+    finfo << t_s->t;
+    finfo << " \% final time (<= 1)" << std::endl;
     if (t_s->status == PROCESSING) t_s->status = REGULAR;
     // evaluate_HxH(x0t0, HxH);
     // cond_number_via_svd(HxH /*Hx*/, t_s->cond);
     t_s->num_steps = count;
+    finfo << count;
+    finfo << " \% number of steps in path" << std::endl;
+    finfo << t_s->status ;
+    finfo << " \% status: " << std::endl;
     ++t_s;
     s_s += NNN;
+    fpaths.close();
+    finfo.close();
   } // outer solution loop
 
   return 0;  // in the past, n_sols was returned, which now is NSOLS
