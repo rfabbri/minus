@@ -51,3 +51,12 @@
         memcpy(Gbasis + i * 10, A + i * 20 + 10, sizeof(double) * 10);
     }
 
+
+
+rfabbri@cortex:~/..inus/tests$ st n_ff
+N	min	max	sum	mean	stddev
+312	42	19258	218792	701.256	2106.94
+rfabbri@cortex:~/..inus/tests$ man st
+rfabbri@cortex:~/..inus/tests$ st n
+N	min	max	sum	mean	stddev
+312	42	19255	218733	701.067	2105.56

@@ -1,8 +1,8 @@
 // 
 // \author Ricardo Fabbri based on original code by Anton Leykin 
-// \date Created: Fri Feb  8 17:42:49 EST 2019
+// \date Created: Fri Mar  1 13:46:21 -03 2019
 // 
-#include "minus.h"
+#include "expminus.h"
 #include <cstdio>
 #include <iostream>
 #include <iomanip>
@@ -59,7 +59,7 @@ bool linear(
 }
 #endif
 
-static bool
+bool
 linear_eigen(
     const complex* A,  // NNN-by-NNN matrix of complex #s
     const complex* b,  // 1-by-NNN RHS of Ax=b  (bsize-by-NNN)
@@ -77,7 +77,7 @@ linear_eigen(
 }
   
 
-static bool 
+bool 
 linear_eigen2(
     const complex* A,  // NNN-by-NNN matrix of complex #s
     const complex* b,  // 1-by-NNN RHS of Ax=b  (bsize-by-NNN)
@@ -94,7 +94,7 @@ linear_eigen2(
   return true; // TODO: better error handling
 }
 
-static bool 
+bool 
 linear_eigen3(
     const complex* A,  // NNN-by-NNN matrix of complex #s
     const complex* b,  // 1-by-NNN RHS of Ax=b  (bsize-by-NNN)
@@ -314,14 +314,14 @@ array_norm2(const complex *a)
 // s_sols: start sols      
 // params: params of target as specialized homotopy params - P01 in SolveChicago
 unsigned    
-ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex params[2*NPARAMS], Solution raw_solutions[NSOLS])
+exp_ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex params[2*NPARAMS], SolutionExp raw_solutions[NSOLS])
 {
   // TODO: test by making variables static for a second run, some of these arrays may have to be zeroed
   // One huge clear instruction will work as they are sequential in mem.
   const complex one_half(0.5, 0);
   const double t_step = s->init_dt_;  // initial step
   complex x0t0[NNNPLUS1];  // t = real running in [0,1]
-  complex *x0 = x0t0; double *t0 = (double *) (x0t0 + NNN);
+  complex *x0 = x0t0; complex *t0 = x0t0 + NNN;
   //  complex* x1 =  x1t1;
   //  complex* t1 = x1t1+NNN;
   complex dxdt[NNNPLUS1], *dx = dxdt, *dt = dxdt + NNN;
@@ -331,31 +331,33 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
   complex dx1[NNN], dx2[NNN], dx3[NNN], dx4[NNN];
   complex *x1t1 = xt;  // reusing xt's space to represent x1t1
 
-  Solution* t_s = raw_solutions;  // current target solution
+  SolutionExp* t_s = raw_solutions;  // current target solution
   const complex* s_s = s_sols;    // current start solution
+  complex p=t_s->path;
   // #pragma parallel for 
   for (unsigned sol_n = 0; sol_n < NSOLS; ++sol_n) { // outer loop
     #ifdef M_VERBOSE
     std::cerr << "Trying solution #" << sol_n << std::endl;
     #endif
+    t_s->make(s_s);  // cook a Solution: copy s_s to start node of path
     t_s->status = PROCESSING;
     bool end_zone = false;
     array_copy(s_s, x0);
     *t0 = 0;
     *dt = t_step;
-    unsigned predictor_successes = 0;
+    unsigned predictor_successes = 0, count = 0;  // number of steps
 
     // print start solution
 
     // PASS array_print("s_s",s_s);
     
     // track H(x,t) for t in [0,1]
-    while (t_s->status == PROCESSING && 1 - *t0 > the_smallest_number) {
-      if (1 - *t0 <= s->end_zone_factor_ + the_smallest_number && !end_zone)
+    while (t_s->status == PROCESSING && 1 - t0->real() > the_smallest_number) {
+      if (1 - t0->real() <= s->end_zone_factor_ + the_smallest_number && !end_zone)
         end_zone = true; // TODO: see if this path coincides with any other path on entry to the end zone
       if (end_zone) {
-          if (dt->real() > 1 - *t0) *dt = 1 - *t0;
-      } else if (dt->real() > 1 - s->end_zone_factor_ - *t0) *dt = 1 - s->end_zone_factor_ - *t0;
+          if (dt->real() > 1 - t0->real()) *dt = 1 - t0->real();
+      } else if (dt->real() > 1 - s->end_zone_factor_ - t0->real()) *dt = 1 - s->end_zone_factor_ - t0->real();
       // PREDICTOR in: x0t0,dt
       //           out: dx
       // Runge Kutta
@@ -368,7 +370,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       */
       #ifdef M_VERBOSE
       std::cerr << "\tEntered while loop" << std::endl;
-      std::cerr << "t0 real" << *t0 << std::endl;
+      std::cerr << "t0 real" << t0->real() << std::endl;
       #endif
       
       bool Axb_success = true;
@@ -429,8 +431,10 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       xt[NNN] += one_half_dt;  // t0+.5dt
       //
       evaluate_Hxt(xt, params, Hxt);
+
       
-      LHS = Hxt; RHS = Hxt + NNN2;
+      LHS = Hxt;
+      RHS = Hxt + NNN2;
       Axb_success &= linear(LHS,RHS,dx2);
       #ifdef M_VERBOSE
       std::cerr << "second eval ---------" << std::endl;
@@ -455,7 +459,8 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       #ifdef M_VERBOSE
       array_print_H_full(Hxt);
       #endif
-      LHS = Hxt; RHS = Hxt + NNN2;
+      LHS = Hxt;
+      RHS = Hxt + NNN2;
       Axb_success &= linear(LHS,RHS,dx3);
       #ifdef M_VERBOSE
       std::cerr << "third eval ---------" << std::endl;
@@ -594,7 +599,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
         std::cerr << "decreasing dt: " << *dt;
         #endif
       } else { // predictor success
-        ++predictor_successes;
+        ++predictor_successes; count++;
         array_copy_NNNplus1(x1t1, x0t0);
         if (predictor_successes >= s->num_successes_before_increase_) {
           predictor_successes = 0;
@@ -611,13 +616,17 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       #ifdef M_VERBOSE
       std::cerr << "\tAxb_success" << Axb_success << std::endl;
       #endif
+      if (count < MAX_NSAMPLES)
+      array_copy(x0, p);
+      p += NNN;
     } // while 
     // record the solution
     array_copy(x0, t_s->x);
-    t_s->t = *t0;
+    t_s->t = t0->real();
     if (t_s->status == PROCESSING) t_s->status = REGULAR;
     // evaluate_HxH(x0t0, HxH);
     // cond_number_via_svd(HxH /*Hx*/, t_s->cond);
+    t_s->num_steps = count;
     ++t_s;
     s_s += NNN;
   } // outer solution loop

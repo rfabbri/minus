@@ -6,7 +6,7 @@
 #include <fstream>
 #include <iomanip>
 #include <chrono>
-#include <minus.h>
+#include <tests/expminus.h>
 
 static const double dbgtol = 1e-3;
 
@@ -4871,7 +4871,7 @@ const double line_complex[5][9] =
 // a = a_raw(1:2:end) + i*a_raw(2:2:end);
 // 
 static bool
-mwrite(const Solution s[NSOLS], const char *fname)
+mwrite(const SolutionExp s[NSOLS], const char *fname)
 {
   bool scilab=false;
 
@@ -5017,13 +5017,13 @@ main(int argc, char **argv)
 
   if (!profile && !mread(input)) return 1; // reads into global params_
   
-  static Solution solutions[NSOLS];
+  static SolutionExp solutions[NSOLS];
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
 #ifdef M_VERBOSE
   std::cerr << "LOG \033[0;33mStarting path tracker\e[m\n" << std::endl;
 #endif 
   unsigned retval = 
-  ptrack(&MINUS_DEFAULT, start_sols_, params_, solutions);
+  exp_ptrack(&MINUS_DEFAULT, start_sols_, params_, solutions);
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   auto duration = duration_cast<milliseconds>( t2 - t1 ).count();
   if (profile) {
@@ -5045,8 +5045,8 @@ main(int argc, char **argv)
    
   // test openmp
   // #pragma omp parallel for
-//  for(int n=0; n<10; ++n) printf(" %d", n);
-//    printf(".\n");
+  for(int n=0; n<10; ++n) printf(" %d", n);
+    printf(".\n");
   
   return 0;
 }

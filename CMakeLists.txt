@@ -220,6 +220,7 @@ add_library( minus ${minus_sources} )
 #  include(${CMAKE_CURRENT_LIST_DIR}/config/cmake/export/MINUSCreateProject.cmake)
 #endif()
 
+## TODO: use add_compile_options(-Wall) etc
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
 
 # Crucial flags for performance
