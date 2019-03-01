@@ -645,5 +645,3 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
 //int
 //linear_bundle
 #endif
-
-#undef linear

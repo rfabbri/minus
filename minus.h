@@ -15,6 +15,7 @@
 //
 // OPTIMIZATIONS
 //  - see trifocal.key in bignotes for basic results
+//  - see CMakeLists.txt
 
 
 #include <complex>
@@ -122,76 +123,5 @@ struct Solution
 
 
 unsigned ptrack(const TrackerSettings *t, const complex s_sols[NNN*NSOLS], const complex params[NPARAMS], Solution raw_solutions[NSOLS]);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// --- TESTING ONLY: REMOVE ---------------------------------------------------
-
-// in .h just for testing purposes
-#if 0
-bool linear(
-    const complex* A,  // size-by-size matrix of complex #s
-    const complex* b,  // bsize-by-size RHS of Ax=b
-    complex* x   // solution
-    );
-    */
-
-/*
-bool linear_eigen(
-    const complex* A,  // NNN-by-NNN matrix of complex #s
-    const complex* b,  // 1-by-NNN RHS of Ax=b  (bsize-by-NNN)
-    complex* x   // solution
-    );
-
-bool linear_eigen2(
-    const complex* A,  // NNN-by-NNN matrix of complex #s
-    const complex* b,  // 1-by-NNN RHS of Ax=b  (bsize-by-NNN)
-    complex* x   // solution
-    );
-
-bool linear_eigen3(
-    const complex* A,  // NNN-by-NNN matrix of complex #s
-    const complex* b,  // 1-by-NNN RHS of Ax=b  (bsize-by-NNN)
-    complex* x   // solution
-    );
-bool linear_eigen3(
-    const complex* A,  // NNN-by-NNN matrix of complex #s
-    const complex* b,  // 1-by-NNN RHS of Ax=b  (bsize-by-NNN)
-    complex* x   // solution
-    );
-    */
-#endif
-
 
 #endif  // minus_h_
