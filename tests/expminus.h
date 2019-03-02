@@ -30,6 +30,8 @@ struct SolutionExp
 
 unsigned exp_ptrack(const TrackerSettings *t, const complex s_sols[NNN*NSOLS], const complex params[NPARAMS], SolutionExp raw_solutions[NSOLS]);
 
+void
+exp_ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex params[2*NPARAMS], SolutionExp raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max);
 
 // --- TESTING ONLY: REMOVE ---------------------------------------------------
 

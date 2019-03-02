@@ -341,7 +341,6 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
 {
   // TODO: test by making variables static for a second run, some of these arrays may have to be zeroed
   // One huge clear instruction will work as they are sequential in mem.
-  const complex one_half(0.5, 0);
   const double t_step = s->init_dt_;  // initial step
   complex x0t0[NNNPLUS1];  // t = real running in [0,1]
   complex *x0 = x0t0; double *t0 = (double *) (x0t0 + NNN);
@@ -445,7 +444,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       #endif
       
       // dx2
-      complex one_half_dt = one_half* *dt;
+      complex one_half_dt = *dt*0.5;
       array_multiply_scalar_to_self(dx1, one_half_dt);
       array_add_to_self(xt, dx1); // x0+.5dx1*dt
       xt[NNN] += one_half_dt;  // t0+.5dt

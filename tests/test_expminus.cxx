@@ -9,6 +9,7 @@
 #include <vbl/vbl_array_1d.h>
 #include <vbl/vbl_attributes.h>
 #include <chrono>
+#include <thread>
 
 using namespace std::chrono;
 
@@ -5190,8 +5191,22 @@ test_ptrack()
   printf("TRACKER ---------------------------------\n");
   SolutionExp solutions[NSOLS];
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
-  unsigned retval = 
-  exp_ptrack(&MINUS_DEFAULT, start_sols, params, solutions);
+
+  std::thread t[2];
+  t[0] = std::thread(exp_ptrack_subset, &MINUS_DEFAULT, start_sols, params, solutions, 0, 156);
+  t[1] = std::thread(exp_ptrack_subset, &MINUS_DEFAULT, start_sols, params, solutions, 156, 312);
+  t[1].join();
+  t[0].join();
+  /*
+  std::thread t[8];
+  for (unsigned i=0; i+39 <= 312; i+=39) {
+    std::cout << "trh " << i/39 << ", " << i << ", " << i+39 << std::endl;
+      t[i/39] = std::thread(exp_ptrack_subset, &MINUS_DEFAULT, start_sols, params, solutions, i, i+39);
+  }
+  for (int i = 0; i < 8; ++i)
+      t[i].join();
+      */
+  
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   auto duration = duration_cast<seconds>( t2 - t1 ).count();
   report(solutions);
