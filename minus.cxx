@@ -349,7 +349,8 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
   //  complex* t1 = x1t1+NNN;
   complex dxdt[NNNPLUS1], *dx = dxdt, *dt = dxdt + NNN;
   complex Hxt[NNNPLUS1 * NNN], *HxH=Hxt;  // HxH is reusing Hxt
-  complex *LHS, *RHS;
+  const complex *RHS = Hxt + NNN2;  // Hx or Ht, same storage
+  const complex *LHS = Hxt;
   complex xt[NNNPLUS1];
   complex dx1[NNN], dx2[NNN], dx3[NNN], dx4[NNN];
   complex *x1t1 = xt;  // reusing xt's space to represent x1t1
@@ -424,8 +425,6 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       }
       #endif
       
-      LHS = Hxt;
-      RHS = Hxt + NNN2;
       #ifdef M_VERBOSE
       array_print_n("LHS",LHS, NNN*NNN);
       array_print("minus RHS",RHS);
@@ -453,7 +452,6 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       //
       evaluate_Hxt(xt, params, Hxt);
       
-      LHS = Hxt; RHS = Hxt + NNN2;
       Axb_success &= linear(LHS,RHS,dx2);
       #ifdef M_VERBOSE
       std::cerr << "second eval ---------" << std::endl;
@@ -478,7 +476,6 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       #ifdef M_VERBOSE
       array_print_H_full(Hxt);
       #endif
-      LHS = Hxt; RHS = Hxt + NNN2;
       Axb_success &= linear(LHS,RHS,dx3);
       #ifdef M_VERBOSE
       std::cerr << "third eval ---------" << std::endl;
@@ -525,8 +522,6 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       array_print_H("Hxt",Hxt);
       array_print_H_full(Hxt);
       #endif
-      LHS = Hxt;
-      RHS = Hxt + NNN2;
       Axb_success &= linear(LHS,RHS,dx4);
       #ifdef M_VERBOSE
       array_print_NNNplus1("xt", xt);
@@ -584,9 +579,6 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
         array_print_H("HxH",HxH);
         #endif
         
-        
-        LHS = HxH;         // Hx
-        RHS = HxH + NNN2;  // -H
         Axb_success &= linear(LHS,RHS,dx);
         #ifdef M_VERBOSE
         array_print_n("LHS corr",LHS,NNN2);

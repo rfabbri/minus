@@ -129,6 +129,29 @@ linear_eigen4(
   return true;
 }
 
+// 20s
+// Direct inversion - good for smaller matrices, 5x5 etc
+static bool 
+linear_eigen5(
+    const complex* A,  // NNN-by-NNN matrix of complex #s
+    const complex* b,  // 1-by-NNN RHS of Ax=b  (bsize-by-NNN)
+    complex* x   // solution
+    )
+{
+  using namespace Eigen;
+  
+  Map<Matrix<complex, NNN, 1> > xx(x);
+  Map<const Matrix<complex, NNN, NNN> > AA(A,NNN,NNN);  // accessors for the data
+  Map<const Matrix<complex, NNN, 1> > bb(b);
+  
+  // xx = AA.partialPivLu().solve(bb);
+  // 
+  Matrix<complex, NNN, NNN> inv = AA.inverse();
+  xx = inv * bb;
+  // xx += inv*(bb-AA*xx); // correct
+  return true; // TODO: better error handling
+}
+
 static const double the_smallest_number = 1e-13;
 static const double dbgtol = 1e-2;
 
@@ -293,6 +316,8 @@ exp_ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const comp
   complex xt[NNNPLUS1];
   complex dx1[NNN], dx2[NNN], dx3[NNN], dx4[NNN];
   complex *x1t1 = xt;  // reusing xt's space to represent x1t1
+  
+  Map<const Matrix<complex, NNN, NNN> > eHx(Hxt,NNN,NNN);  // accessors for the data
 
   SolutionExp* t_s = raw_solutions;  // current target solution
   const complex* s_s = s_sols;    // current start solution
@@ -379,7 +404,15 @@ exp_ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const comp
       array_print("minus RHS",RHS);
       #endif
       // was: solve_via_lapack_without_transposition(n, LHS, 1, RHS, dx1);
-      Axb_success &= linear(LHS,RHS,dx1);
+      // Axb_success &= linear(LHS,RHS,dx1);
+      
+      Matrix<complex, NNN, NNN> Hxinv = eHx.inverse();
+      {
+        Map<Matrix<complex, NNN, 1> > xx(dx);
+        Map<const Matrix<complex, NNN, 1> > bb(RHS);
+        xx = inv * bb;
+      }
+      
       #ifdef M_VERBOSE
       array_print("dx1",dx1);
       // TODO: once this is working, use eigen2 for LU partial pivots, faster.
@@ -402,8 +435,6 @@ exp_ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const comp
       evaluate_Hxt(xt, params, Hxt);
 
       
-      LHS = Hxt;
-      RHS = Hxt + NNN2;
       Axb_success &= linear(LHS,RHS,dx2);
       #ifdef M_VERBOSE
       std::cerr << "second eval ---------" << std::endl;
@@ -428,8 +459,6 @@ exp_ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const comp
       #ifdef M_VERBOSE
       array_print_H_full(Hxt);
       #endif
-      LHS = Hxt;
-      RHS = Hxt + NNN2;
       Axb_success &= linear(LHS,RHS,dx3);
       #ifdef M_VERBOSE
       std::cerr << "third eval ---------" << std::endl;
@@ -476,8 +505,6 @@ exp_ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const comp
       array_print_H("Hxt",Hxt);
       array_print_H_full(Hxt);
       #endif
-      LHS = Hxt;
-      RHS = Hxt + NNN2;
       Axb_success &= linear(LHS,RHS,dx4);
       #ifdef M_VERBOSE
       array_print_NNNplus1("xt", xt);
