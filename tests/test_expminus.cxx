@@ -216,6 +216,39 @@ test_linear()
 }
 #endif
 
+/*
+static void
+report_paths(const SolutionExp s[NSOLS])
+{
+  // This goes to info.txt
+  for (unsigned i=0; i < NSOLS; ++i) {
+    std::cerr << "============================================\n";
+    std::cerr << "Solution: " << i << std::endl;
+    std::cerr << "status: " << s[i].status << std::endl;
+
+    std::cout << s[i].status << std::endl;
+    std::cout << s[i].num_steps << std::endl;
+    for (unsigned var=0; var < NNN; ++var) {
+      std::cerr << s[i].start_x[var] << std::endl;
+    }
+
+    std::cout << std::setprecision(20);
+    for (unsigned var=0; var +1 < NNN; ++var) {
+      std::cout << "{ " << s[i].x[var].real() << ", " << s[i].x[var].imag() << "}," << std::endl;
+    }
+    std::cout << "{ " << s[i].x[NNN-1].real() << ", " << s[i].x[NNN-1].imag() << "}\n" << std::endl;
+  }
+
+  // This goes to tracks.txt
+  for (unsigned i=0; i < NSOLS; ++i) {
+    for (unsigned x=0; x < s[i].num_steps_path[i]; ++x) {
+      s[i].path[x]
+    }
+  }
+}
+*/
+
+
 static void
 report(const SolutionExp s[NSOLS])
 {

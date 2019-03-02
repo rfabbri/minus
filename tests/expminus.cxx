@@ -297,10 +297,12 @@ exp_ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const comp
   SolutionExp* t_s = raw_solutions;  // current target solution
   const complex* s_s = s_sols;    // current start solution
   // complex *p = t_s->path;
-  for (unsigned sol_n = 0; sol_n < 10; ++sol_n) { // outer loop
-     std::ofstream fpaths("path-solution-" + std::to_string(sol_n),std::ios::out);
+  for (unsigned sol_n = 0; sol_n < NSOLS; ++sol_n) { // outer loop
+     std::ostringstream s_str;
+     s_str << std::setw(std::ceil(3)) << std::setfill('0') << sol_n;
+     std::ofstream fpaths("path-solution-" + s_str.str() ,std::ios::out);
      fpaths << std::setprecision(20);
-     std::ofstream finfo("info-solution-" + std::to_string(sol_n), std::ios::out);
+     std::ofstream finfo("info-solution-" + s_str.str(), std::ios::out);
      finfo << std::setprecision(20);
      
     #ifdef M_VERBOSE

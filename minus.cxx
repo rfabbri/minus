@@ -127,6 +127,29 @@ linear_eigen4(
   xx = AA.householderQr().solve(bb);
   return true;
 }
+
+// 20s
+// Direct inversion - good for smaller matrices, 5x5 etc
+static bool 
+linear_eigen5(
+    const complex* A,  // NNN-by-NNN matrix of complex #s
+    const complex* b,  // 1-by-NNN RHS of Ax=b  (bsize-by-NNN)
+    complex* x   // solution
+    )
+{
+  using namespace Eigen;
+  
+  Map<Matrix<complex, NNN, 1> > xx(x);
+  Map<const Matrix<complex, NNN, NNN> > AA(A,NNN,NNN);  // accessors for the data
+  Map<const Matrix<complex, NNN, 1> > bb(b);
+  
+  // xx = AA.partialPivLu().solve(bb);
+  // 
+  Matrix<complex, NNN, NNN> inv = AA.inverse();
+  xx = inv * bb;
+  // xx += inv*(bb-AA*xx); // correct
+  return true; // TODO: better error handling
+}
 // from compute_Grabner_basis, 5point.c
 #if 0
 bool linear_bundler(
