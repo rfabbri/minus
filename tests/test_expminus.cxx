@@ -5192,12 +5192,20 @@ test_ptrack()
   SolutionExp solutions[NSOLS];
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
-  std::thread t[2];
-  t[0] = std::thread(exp_ptrack_subset, &MINUS_DEFAULT, start_sols, params, solutions, 0, 156);
-  t[1] = std::thread(exp_ptrack_subset, &MINUS_DEFAULT, start_sols, params, solutions, 156, 312);
-  t[1].join();
-  t[0].join();
-  /*
+//  std::thread t[2];
+//  t[0] = std::thread(exp_ptrack_subset, &MINUS_DEFAULT, start_sols, params, solutions, 0, 156);
+//  t[1] = std::thread(exp_ptrack_subset, &MINUS_DEFAULT, start_sols, params, solutions, 156, 312);
+//  t[1].join();
+//  t[0].join();
+//  std::thread t[4];
+//  t[0] = std::thread(exp_ptrack_subset, &MINUS_DEFAULT, start_sols, params, solutions, 0, 78);
+//  t[1] = std::thread(exp_ptrack_subset, &MINUS_DEFAULT, start_sols, params, solutions, 78, 78*2);
+//  t[2] = std::thread(exp_ptrack_subset, &MINUS_DEFAULT, start_sols, params, solutions, 78*2, 78*3);
+//  t[3] = std::thread(exp_ptrack_subset, &MINUS_DEFAULT, start_sols, params, solutions, 78*3, 78*4);
+//  t[0].join();
+//  t[1].join();
+//  t[2].join();
+//  t[3].join();
   std::thread t[8];
   for (unsigned i=0; i+39 <= 312; i+=39) {
     std::cout << "trh " << i/39 << ", " << i << ", " << i+39 << std::endl;
@@ -5205,7 +5213,6 @@ test_ptrack()
   }
   for (int i = 0; i < 8; ++i)
       t[i].join();
-      */
   
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   auto duration = duration_cast<seconds>( t2 - t1 ).count();

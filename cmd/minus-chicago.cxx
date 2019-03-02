@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iomanip>
 #include <chrono>
+#include <thread>
 #include <minus.h>
 
 static const double dbgtol = 1e-3;
@@ -5022,8 +5023,17 @@ main(int argc, char **argv)
 #ifdef M_VERBOSE
   std::cerr << "LOG \033[0;33mStarting path tracker\e[m\n" << std::endl;
 #endif 
-  unsigned retval = 
-  ptrack(&MINUS_DEFAULT, start_sols_, params_, solutions);
+  //  unsigned retval = 
+  //  ptrack(&MINUS_DEFAULT, start_sols_, params_, solutions);
+  {
+    std::cerr << "LOG \033[0;33mUsing 4 threads by default\e[m\n" << std::endl;
+    std::thread t[4];
+    t[0] = std::thread(ptrack_subset, &MINUS_DEFAULT, start_sols_, params_, solutions, 0, 78);
+    t[1] = std::thread(ptrack_subset, &MINUS_DEFAULT, start_sols_, params_, solutions, 78, 78*2);
+    t[2] = std::thread(ptrack_subset, &MINUS_DEFAULT, start_sols_, params_, solutions, 78*2, 78*3);
+    t[3] = std::thread(ptrack_subset, &MINUS_DEFAULT, start_sols_, params_, solutions, 78*3, 78*4);
+    t[0].join(); t[1].join(); t[2].join(); t[3].join();
+  }
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   auto duration = duration_cast<milliseconds>( t2 - t1 ).count();
   if (profile) {

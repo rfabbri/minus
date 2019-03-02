@@ -114,7 +114,7 @@ enum SolutionStatus {
 
 struct Solution
 {
-  complex x[NNN];        // array of n coordinates
+  complex x[NNN];    // array of n coordinates
   double t;          // last value of parameter t used
   SolutionStatus status;
 //  unsigned num_steps;  // number of steps taken along the path
@@ -124,4 +124,5 @@ struct Solution
 
 unsigned ptrack(const TrackerSettings *t, const complex s_sols[NNN*NSOLS], const complex params[NPARAMS], Solution raw_solutions[NSOLS]);
 
+unsigned  ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex params[2*NPARAMS], Solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max);
 #endif  // minus_h_
