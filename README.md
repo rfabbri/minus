@@ -216,10 +216,14 @@ Also no success with GCC8 - slow or breaks fastmath.
 
 ## Authors
 
-Adapted and improved over Anton Leykin's and Timothy Duff's codes from Macaulay2 by
-Ricardo Fabbri. The core code grew out of Macaulay2/e/NAG.cpp.
+Source code adapted and improved over Anton Leykin's and Timothy Duff's codes
+from Macaulay2 by Ricardo Fabbri. The core code grew out of Macaulay2/e/NAG.cpp.
+These improvements and specializations were jointly developed with Tomas Pajdla,
+Benjamin Kimia and Hongyi Fan, with intensive discussion and testing from
+remaining ICCV'19 paper co-authors while at ICERM/Brown University: Jonathan
+Hauenstein, Margaret Regan, Elias Tsigaridas, Charles Wrampler, and David Pinho.
 
 ## Acknowledgements
 This grew as part of ICERM's 2018 Nonlinear Algebra Program (Computer Vision
-Working group) and 2019 Algebraic Vision research cluster. Both co-organized by
-the authors. We also thank our ICCV'19 paper co-authors.
+Working group) and 2019 Algebraic Vision research cluster, co-organized by
+the authors Leykin and Fabbri, respectively. We also thank our ICCV'19 paper co-authors.
