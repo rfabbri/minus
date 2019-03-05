@@ -374,7 +374,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
     
     // track H(x,t) for t in [0,1]
     while (t_s->status == PROCESSING && 1 - *t0 > the_smallest_number) {
-      if (1 - *t0 <= s->end_zone_factor_ + the_smallest_number && !end_zone)
+      if (!end_zone && 1 - *t0 <= s->end_zone_factor_ + the_smallest_number)
         end_zone = true; // TODO: see if this path coincides with any other path on entry to the end zone
       if (end_zone) {
           if (dt->real() > 1 - *t0) *dt = 1 - *t0;
@@ -680,7 +680,7 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
     
     // track H(x,t) for t in [0,1]
     while (t_s->status == PROCESSING && 1 - *t0 > the_smallest_number) {
-      if (1 - *t0 <= s->end_zone_factor_ + the_smallest_number && !end_zone)
+      if (!end_zone && 1 - *t0 <= s->end_zone_factor_ + the_smallest_number)
         end_zone = true; // TODO: see if this path coincides with any other path on entry to the end zone
       if (end_zone) {
           if (dt->real() > 1 - *t0) *dt = 1 - *t0;

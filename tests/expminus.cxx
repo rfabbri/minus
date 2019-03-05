@@ -324,6 +324,8 @@ exp_ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const comp
 
   SolutionExp* t_s = raw_solutions;  // current target solution
   const complex* s_s = s_sols;    // current start solution
+  unsigned solve_linear_calls = 0;
+  unsigned num_total_iter = 0;
   // complex *p = t_s->path;
   for (unsigned sol_n = 0; sol_n < NSOLS; ++sol_n) { // outer loop
 //     std::ostringstream s_str;
@@ -350,7 +352,7 @@ exp_ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const comp
     
     // track H(x,t) for t in [0,1]
     while (t_s->status == PROCESSING && 1 - *t0 > the_smallest_number) {
-      if (1 - *t0 <= s->end_zone_factor_ + the_smallest_number && !end_zone)
+      if (!end_zone && 1 - *t0 <= s->end_zone_factor_ + the_smallest_number)
         end_zone = true; // TODO: see if this path coincides with any other path on entry to the end zone
       if (end_zone) {
           if (dt->real() > 1 - *t0) *dt = 1 - *t0;
@@ -373,6 +375,7 @@ exp_ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const comp
       evaluate_Hxt(xt, params, Hxt); // Outputs Hxt
       // was: solve_via_lapack_without_transposition(n, LHS, 1, RHS, dx1);
       Axb_success &= linear(LHS,RHS,dx1);
+      solve_linear_calls++;
       
 //      Matrix<complex, NNN, NNN> Hxinv = eHx.inverse();
 //      {
@@ -389,6 +392,7 @@ exp_ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const comp
       //
       evaluate_Hxt(xt, params, Hxt);
       Axb_success &= linear(LHS,RHS,dx2);
+      solve_linear_calls++;
       //Hxinv = eHx.inverse();
 //      {
 //        Map<Matrix<complex, NNN, 1> > xx(dx2);
@@ -406,6 +410,7 @@ exp_ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const comp
       //
       evaluate_Hxt(xt, params, Hxt);
       Axb_success &= linear(LHS,RHS,dx3);
+      solve_linear_calls++;
       //Hxinv = eHx.inverse();
 //      {
 //        Map<Matrix<complex, NNN, 1> > xx(dx3);
@@ -423,6 +428,7 @@ exp_ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const comp
       //
       evaluate_Hxt(xt, params, Hxt);
       Axb_success &= linear(LHS,RHS,dx4);
+      solve_linear_calls++;
       //Hxinv = eHx.inverse();
 //      {
 //        Map<Matrix<complex, NNN, 1> > xx(dx4);
@@ -453,9 +459,11 @@ exp_ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const comp
       bool is_successful;
       do {
         ++n_corr_steps;
+        ++num_total_iter;
         evaluate_HxH(x1t1, params, HxH);
         
         Axb_success &= linear_eigen2(LHS,RHS,dx);
+        solve_linear_calls++;
 //            {
 //              Map<Matrix<complex, NNN, 1> > xx(dx);
 //              Map<const Matrix<complex, NNN, NNN> > AA(LHS,NNN,NNN);  // accessors for the data
@@ -485,6 +493,7 @@ exp_ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const comp
       if (array_norm2(x0) > s->infinity_threshold2_)
         t_s->status = INFINITY_FAILED;
       if (!Axb_success) t_s->status = SINGULAR;
+      if (sol_n == 0) std::cerr << "dt: " << dt->real() << std::endl;
     } // while 
     // record the solution
 //    for (unsigned kk=0; kk < NNN; ++kk)
@@ -506,6 +515,9 @@ exp_ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const comp
 //    fpaths.close();
 //    finfo.close();
   } // outer solution loop
+
+  std::cout << "# Solve linear calls: " << solve_linear_calls << std::endl;
+  std::cout << "# Total number of iterations: " << num_total_iter << std::endl;
 
   return 0;  // in the past, n_sols was returned, which now is NSOLS
 }
@@ -563,7 +575,7 @@ exp_ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], con
     
     // track H(x,t) for t in [0,1]
     while (t_s->status == PROCESSING && 1 - *t0 > the_smallest_number) {
-      if (1 - *t0 <= s->end_zone_factor_ + the_smallest_number && !end_zone)
+      if (!end_zone && 1 - *t0 <= s->end_zone_factor_ + the_smallest_number)
         end_zone = true; // TODO: see if this path coincides with any other path on entry to the end zone
       if (end_zone) {
           if (dt->real() > 1 - *t0) *dt = 1 - *t0;

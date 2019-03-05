@@ -288,7 +288,7 @@ test_sol_against_m2(const Solution s[NSOLS])
     absv[i] = std::abs(s_minus[i] - s_m2[i]);
   }
 
-  vbl_array_1d<double> v(absv, absv+NNN);
+  vbl_array_1d<double> v(absv, absv+NNN*NSOLS);
   std::cerr << "Median error " << median(v) << std::endl;
   std::cerr << "Mean error " << mean(v) << " Minimum error " << minval(v) << std::endl;
   return median(v);
