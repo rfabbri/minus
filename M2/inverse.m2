@@ -1,5 +1,5 @@
 debug needsPackage "SLPexpressions"
-needs "./chicago/common.m2"
+needs "common.m2"
 inv2 = A -> idGate/(A_(0,0)*A_(1,1)-A_(1,0)*A_(0,1)) * gateMatrix{{A_(1,1),-A_(0,1)},{-A_(1,0),A_(0,0)}}
 idGate = inputGate 1
 -*
