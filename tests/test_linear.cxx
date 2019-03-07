@@ -206,15 +206,15 @@ bool linear_bundler(
 
 
 static void
-print(complex A[][NNN])
+print(const complex A[][NNN])
 {
   // for now, print as vector
   for (unsigned i=0; i < NNN*NNN; ++i)
-    std::cout << ((complex *)A)[i] << std::endl;
+    std::cout << ((const complex *)A)[i] << std::endl;
 }
 
 static void
-print(complex *v)
+print(const complex *v)
 {
   for (unsigned i=0; i < NNN; ++i)
     std::cout << v[i] << std::endl;
@@ -296,21 +296,39 @@ static complex b[NNN] =
 { 0.407041000000000,- 0.046188200000000}};
 
 
+// Computed in Scilab
 static const complex sol[NNN] = 
-{{ 1.438980000000000,- 0.984509000000000},
-{ 2.090270000000000,+ 0.805246000000000},
-{-0.405540000000000,- 1.457750000000000},
-{-0.705762000000000,+ 0.166468000000000},
-{-2.172750000000000,+ 2.521430000000000},
-{-4.739900000000000,+ 0.491511000000000},
-{ 1.265470000000000,- 0.278627000000000},
-{ 0.221350000000000,+ 8.539289999999999},
-{ 0.081477200000000,- 0.061649800000000},
-{ 0.052804000000000,- 0.087110200000000},
-{ 0.103201000000000,+ 0.093230800000000},
-{ 0.494108000000000,+ 0.461057000000000},
-{ 2.118020000000000,- 1.405650000000000},
-{-2.557060000000000,+ 0.761854000000000}};
+{{1.22168667179699431,+ 0.0498174125645148},
+{ 1.01414252525281023,- 1.40608883721011702},
+{ 0.14962345713095399,- 1.22815487409473612},
+{-0.46428611099584222,- 0.03818401625592915},
+{-0.73884057243577261,- 0.23266419315468043},
+{-0.00075556528585659,+ 0.02021728028845612},
+{-0.11764292844922636,- 0.04119032983965841},
+{-0.02931068033016018,+ 0.14201886987190931},
+{-0.21475574124524766,- 0.02152961056102606},
+{-0.20469706313000821,+ 0.05335418324361420},
+{-0.02153035145179618,- 0.29181713120224195},
+{-0.81726804075896198,+ 0.01959585459446891},
+{-0.1665840762930203,+ 0.87178442245356957},
+{ 0.37196986306686414,+ 0.27537320811448124}};
+
+
+
+//{{ 1.438980000000000,- 0.984509000000000},
+//{ 2.090270000000000,+ 0.805246000000000},
+//{-0.405540000000000,- 1.457750000000000},
+//{-0.705762000000000,+ 0.166468000000000},
+//{-2.172750000000000,+ 2.521430000000000},
+//{-4.739900000000000,+ 0.491511000000000},
+//{ 1.265470000000000,- 0.278627000000000},
+//{ 0.221350000000000,+ 8.539289999999999},
+//{ 0.081477200000000,- 0.061649800000000},
+//{ 0.052804000000000,- 0.087110200000000},
+//{ 0.103201000000000,+ 0.093230800000000},
+//{ 0.494108000000000,+ 0.461057000000000},
+//{ 2.118020000000000,- 1.405650000000000},
+//{-2.557060000000000,+ 0.761854000000000}};
 
 static void
 join(complex *v, const float *real, const float *imag, unsigned size)
@@ -381,24 +399,26 @@ test_linear()
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   bool retval;
 //  for (unsigned i=0; i < 1903444; ++i) {
-  for (unsigned i=0; i < 100; ++i) {
-    A[1][1] = i/20;
-    retval = linear_eigen3((const complex *)A, (const complex *)b, x);
+  for (unsigned i=0; i < 1000000; ++i) {
+ //    A[1][1] = i/20;
+    retval = linear_eigen2((const complex *)A, (const complex *)b, x);
     __sync_synchronize();
   }
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   auto duration = duration_cast<milliseconds>( t2 - t1 ).count();
   std::cerr << "\033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
   
-  printf("retval: %i\n", retval);
-  transp(A);
+  // printf("Retval: %i\n", retval);
 
-  std::cout << "sol\n";
+  std::cout << "Computed solution\n";
   print(x);
+  std::cout << "Ground-truth\n";
+  print(sol);
   test_near_v(x,sol,NNN);
  
-  std::cout << "Is A times the computed x equal to the provide b?\n";
+  std::cout << "Is A times the computed x equal to the ground-truth b?\n";
   complex bb[NNN];
+  transp(A);
   multiply((const complex *)A,x,bb);
   test_near_v(b,bb,NNN);
 }
