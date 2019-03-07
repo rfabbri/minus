@@ -227,6 +227,10 @@ At Brown's CCV cluster, I used the following flags:
 ### Studying assembly output
 We refer to Eigen's documentation http://eigen.tuxfamily.org/index.php?title=Developer%27s_Corner#Studying_assembly_output 
 
+For SSE/VMX use, good examples include:
+Eigen/src/LU/arch/Inverse_SSE.h
+As well as VXL's VNL
+
 
 ## Authors
 

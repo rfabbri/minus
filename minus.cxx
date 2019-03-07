@@ -98,6 +98,7 @@ linear_eigen2(
   return true; // TODO: better error handling
 }
 
+/*
 static bool 
 linear_eigen3(
     const complex* A,  // NNN-by-NNN matrix of complex #s
@@ -114,6 +115,7 @@ linear_eigen3(
   xx = AA.fullPivLu().solve(bb);
   return true;
 }
+*/
 
 /*
 static bool 
@@ -349,16 +351,28 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
   // One huge clear instruction will work as they are sequential in mem.
   const double t_step = s->init_dt_;  // initial step
   complex x0t0[NNNPLUS1];  // t = real running in [0,1]
-  complex *x0 = x0t0; double *t0 = (double *) (x0t0 + NNN);
+  complex * const x0 = x0t0; double * const t0 = (double *) (x0t0 + NNN);
   //  complex* x1 =  x1t1;
   //  complex* t1 = x1t1+NNN;
-  complex dxdt[NNNPLUS1], *dx = dxdt, *dt = dxdt + NNN;
+  complex dxdt[NNNPLUS1], * const dx = dxdt, * const dt = dxdt + NNN;
   complex Hxt[NNNPLUS1 * NNN], *HxH=Hxt;  // HxH is reusing Hxt
-  const complex *RHS = Hxt + NNN2;  // Hx or Ht, same storage
-  const complex *LHS = Hxt;
+  const complex * const RHS = Hxt + NNN2;  // Hx or Ht, same storage
+  complex * const LHS = Hxt; // not const since we might do in-place LU
   complex xt[NNNPLUS1];
-  complex dx1[NNN], dx2[NNN], dx3[NNN], dx4[NNN];
-  complex *x1t1 = xt;  // reusing xt's space to represent x1t1
+  complex dx1[NNN], dx2[NNN], dx3[NNN];
+  complex * const dx4 = dx; // reuse dx for dx4
+  complex * const x1t1 = xt;  // reusing xt's space to represent x1t1
+  
+  /*
+  using namespace Eigen;
+  Map<Matrix<complex, NNN, 1> > dx1_eigen(dx1);
+  Map<Matrix<complex, NNN, 1> > dx2_eigen(dx2);
+  Map<Matrix<complex, NNN, 1> > dx3_eigen(dx3);
+  Map<Matrix<complex, NNN, 1> > dx4_eigen(dx4);
+  Map<Matrix<complex, NNN, 1> > dx_eigen(dx);
+  Map<Matrix<complex, NNN, NNN> > AA((complex *)Hxt,NNN,NNN);  // accessors for the data
+  Map<const Matrix<complex, NNN, 1> > bb(RHS);
+  */
 
   Solution* t_s = raw_solutions;  // current target solution
   const complex* s_s = s_sols;    // current start solution
@@ -436,6 +450,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       #endif
       // was: solve_via_lapack_without_transposition(n, LHS, 1, RHS, dx1);
       Axb_success &= linear(LHS,RHS,dx1);
+      // PartialPivLU<Matrix<complex, NNN, NNN> > lu(Hxt);
       #ifdef M_VERBOSE
       array_print("dx1",dx1);
       // TODO: once this is working, use eigen2 for LU partial pivots, faster.
@@ -552,7 +567,7 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
       array_add_to_self(dx4, dx2);
       array_add_to_self(dx4, dx3);
       array_multiply_scalar_to_self(dx4, 1./6.);
-      array_copy(dx4, dx);
+      // implicit - dx4 is an alias to dx: array_copy(dx4, dx);
 
       // make prediction
       array_copy_NNNplus1(x0t0, x1t1);

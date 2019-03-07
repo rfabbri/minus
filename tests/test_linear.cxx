@@ -107,6 +107,7 @@ linear_eigen2(
   return true; // TODO: better error handling
 }
 
+/*
 static bool 
 linear_eigen3(
     const complex* A,  // NNN-by-NNN matrix of complex #s
@@ -123,6 +124,7 @@ linear_eigen3(
   xx = AA.fullPivLu().solve(bb);
   return true;
 }
+*/
 
 /*
 static bool 
@@ -371,16 +373,23 @@ test_linear()
   
   complex x_true[NNN];
   complex x[NNN];
+  using namespace Eigen;
+  
 
   transp(A);
   std::cout << "==========\n";
   print(b);
+  
+  Map<Matrix<complex, NNN, 1> > xx(x);
+  Map<const Matrix<complex, NNN, NNN> > AA((complex *)A,NNN,NNN);  // accessors for the data
+  Map<const Matrix<complex, NNN, 1> > b_eigen((const complex *)b);
   
   std::cout << "Is ground truth A_orig times the ground truth solution sol equal to the ground truth b?\n";
   complex bb_mul[NNN];
   multiply((const complex *)A_orig,sol,bb_mul);
   test_near_v(b,bb_mul,NNN);
   std::cout << "!Gt\n";
+  PartialPivLU<Matrix<complex, NNN, NNN> > lu(AA);
   
   /* TIM 1903444 solvelinear calls, 6859039865ns time of solvelinear calls (6s)
    *
@@ -401,7 +410,10 @@ test_linear()
 //  for (unsigned i=0; i < 1903444; ++i) {
   for (unsigned i=0; i < 1000000; ++i) {
  //    A[1][1] = i/20;
-    retval = linear_eigen2((const complex *)A, (const complex *)b, x);
+    // retval = linear_eigen2((const complex *)A, (const complex *)b, x);
+    // xx = AA.partialPivLu().solve(b_eigen);
+    lu.compute(AA);
+    xx = lu.solve(b_eigen);
     __sync_synchronize();
   }
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
