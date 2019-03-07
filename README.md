@@ -213,6 +213,17 @@ a 2x DECREASE in speed. TODO: try other ICC-specific optimization flags
 
 Also no success with GCC8 - slow or breaks fastmath.
 
+### Intel ICC compiler + MKL
+Some tests were carried out with Intel ICC, but the gains were not significant
+enough to justify a proprietary compiler. 
+
+At Brown's CCV cluster, I used the following flags:
+
+```
+ MINUS_EXTRA_CMAKE_CXX_FLAGS	  -I${MKLROOT}/include -no-prec-div -ansi-alias  -mskylake-avx512 -xSKYLAKE-AVX512 -axSKYLAKE-AVX512
+ MINUS_EXTRA_CMAKE_EXE_LINKER_FLAGS   -L/gpfs/runtime/opt/intel/2018.1/mkl/lib/intel64_lin   -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm
+```
+
 
 ## Authors
 

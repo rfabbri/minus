@@ -6,7 +6,9 @@
 #include <cstdio>
 #include <iostream>
 #include <iomanip>
-#include "Eigen/Dense"
+#include "Eigen/Core"
+#include "Eigen/LU"
+//#include "Eigen/QR"
 #include "chicago.hxx"
 
 /* Lapack .h */
@@ -59,6 +61,7 @@ bool linear(
 }
 #endif
 
+/*
 static bool
 linear_eigen(
     const complex* A,  // NNN-by-NNN matrix of complex #s
@@ -75,6 +78,7 @@ linear_eigen(
   xx = AA.colPivHouseholderQr().solve(bb);
   return true;
 }
+*/
   
 
 static bool 
@@ -111,6 +115,7 @@ linear_eigen3(
   return true;
 }
 
+/*
 static bool 
 linear_eigen4(
     const complex* A,  // NNN-by-NNN matrix of complex #s
@@ -127,6 +132,7 @@ linear_eigen4(
   xx = AA.householderQr().solve(bb);
   return true;
 }
+*/
 
 // 20s
 // Direct inversion - good for smaller matrices, 5x5 etc
