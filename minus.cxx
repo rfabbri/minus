@@ -674,7 +674,7 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
   complex *const x0 = x0t0; double *const t0 = (double *) (x0t0 + NNN);
   //  complex* x1 =  x1t1;
   //  complex* t1 = x1t1+NNN;
-  complex dxdt[NNNPLUS1], *const dx = dxdt, *const dt = dxdt + NNN;
+  complex dxdt[NNNPLUS1], *const dx = dxdt; double *const dt = (double *)(dxdt + NNN);
   complex Hxt[NNNPLUS1 * NNN], *const HxH=Hxt;  // HxH is reusing Hxt
   const complex * const RHS = Hxt + NNN2;  // Hx or Ht, same storage
   complex * const LHS = Hxt;
@@ -705,8 +705,8 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
       if (!end_zone && 1 - *t0 <= s->end_zone_factor_ + the_smallest_number)
         end_zone = true; // TODO: see if this path coincides with any other path on entry to the end zone
       if (end_zone) {
-          if (dt->real() > 1 - *t0) *dt = 1 - *t0;
-      } else if (dt->real() > 1 - s->end_zone_factor_ - *t0) *dt = 1 - s->end_zone_factor_ - *t0;
+          if (*dt > 1 - *t0) *dt = 1 - *t0;
+      } else if (*dt > 1 - s->end_zone_factor_ - *t0) *dt = 1 - s->end_zone_factor_ - *t0;
       // PREDICTOR in: x0t0,dt
       //           out: dx
       // Runge Kutta
@@ -795,7 +795,7 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
 
       // dx3
       array_multiply_scalar_to_self(dx2, one_half_dt);
-      array_copy(x0t0, xt);
+      array_copy(x0t0, xt);  // spare t
       array_add_to_self(xt, dx2); // x0+.5dx2*dt
       // xt[n] += one_half*(*dt); // t0+.5dt (SAME)
       //
@@ -929,7 +929,7 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
       if (!is_successful) { // predictor failure
         predictor_successes = 0;
         *dt *= s->dt_decrease_factor_;
-        if (dt->real() < s->min_dt_) t_s->status = MIN_STEP_FAILED; // slight difference to SLP-imp.hpp:612
+        if (*dt < s->min_dt_) t_s->status = MIN_STEP_FAILED; // slight difference to SLP-imp.hpp:612
         #ifdef M_VERBOSE
         std::cerr << "\tPred failure" << std::endl;
         std::cerr << "decreasing dt: " << *dt;
