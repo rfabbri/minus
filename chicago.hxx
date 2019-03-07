@@ -3968,7 +3968,7 @@ evaluate_HxH(const complex* x /*x and t*/, const complex *params, complex* y /*H
   const complex G28 = G1 * X18;
   const complex G29 = X14 * X74;
   const complex G30 = G28 + G29;
-  const complex C2 = 2;
+  static constexpr complex C2 = 2;
   const complex G31 = C2 * X2;
   const complex G32 = G30 * G31;
   const complex G33 = G1 * X19;
