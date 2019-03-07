@@ -351,17 +351,17 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
   // One huge clear instruction will work as they are sequential in mem.
   const double t_step = s->init_dt_;  // initial step
   complex x0t0[NNNPLUS1];  // t = real running in [0,1]
-  complex * const x0 = x0t0; double * const t0 = (double *) (x0t0 + NNN);
+  complex *const x0 = x0t0; double *const t0 = (double *) (x0t0 + NNN);
   //  complex* x1 =  x1t1;
   //  complex* t1 = x1t1+NNN;
-  complex dxdt[NNNPLUS1], * const dx = dxdt, * const dt = dxdt + NNN;
-  complex Hxt[NNNPLUS1 * NNN], *HxH=Hxt;  // HxH is reusing Hxt
+  complex dxdt[NNNPLUS1], *const dx = dxdt, *const dt = dxdt + NNN;
+  complex Hxt[NNNPLUS1 * NNN], *const HxH=Hxt;  // HxH is reusing Hxt
   const complex * const RHS = Hxt + NNN2;  // Hx or Ht, same storage
-  complex * const LHS = Hxt; // not const since we might do in-place LU
+  complex *const LHS = Hxt; // not const since we might do in-place LU
   complex xt[NNNPLUS1];
   complex dx1[NNN], dx2[NNN], dx3[NNN];
-  complex * const dx4 = dx; // reuse dx for dx4
-  complex * const x1t1 = xt;  // reusing xt's space to represent x1t1
+  complex *const dx4 = dx; // reuse dx for dx4
+  complex *const x1t1 = xt;  // reusing xt's space to represent x1t1
   
   /*
   using namespace Eigen;
@@ -671,15 +671,16 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
   // One huge clear instruction will work as they are sequential in mem.
   const double t_step = s->init_dt_;  // initial step
   complex x0t0[NNNPLUS1];  // t = real running in [0,1]
-  complex *x0 = x0t0; double *t0 = (double *) (x0t0 + NNN);
+  complex *const x0 = x0t0; double *const t0 = (double *) (x0t0 + NNN);
   //  complex* x1 =  x1t1;
   //  complex* t1 = x1t1+NNN;
-  complex dxdt[NNNPLUS1], *dx = dxdt, *dt = dxdt + NNN;
-  complex Hxt[NNNPLUS1 * NNN], *HxH=Hxt;  // HxH is reusing Hxt
-  const complex *RHS = Hxt + NNN2;  // Hx or Ht, same storage
-  const complex *LHS = Hxt;
+  complex dxdt[NNNPLUS1], *const dx = dxdt, *const dt = dxdt + NNN;
+  complex Hxt[NNNPLUS1 * NNN], *const HxH=Hxt;  // HxH is reusing Hxt
+  const complex * const RHS = Hxt + NNN2;  // Hx or Ht, same storage
+  complex * const LHS = Hxt;
   complex xt[NNNPLUS1];
-  complex dx1[NNN], dx2[NNN], dx3[NNN], dx4[NNN];
+  complex dx1[NNN], dx2[NNN], dx3[NNN];
+  complex *const dx4 = dx; // reuse dx for dx4
   complex *x1t1 = xt;  // reusing xt's space to represent x1t1
 
   Solution* t_s = raw_solutions + sol_min;  // current target solution
@@ -873,7 +874,6 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
       array_add_to_self(dx4, dx2);
       array_add_to_self(dx4, dx3);
       array_multiply_scalar_to_self(dx4, 1./6.);
-      array_copy(dx4, dx);
 
       // make prediction
       array_copy_NNNplus1(x0t0, x1t1);
