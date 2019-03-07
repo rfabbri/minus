@@ -493,7 +493,7 @@ exp_ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const comp
       if (array_norm2(x0) > s->infinity_threshold2_)
         t_s->status = INFINITY_FAILED;
       if (!Axb_success) t_s->status = SINGULAR;
-      if (sol_n == 0) std::cerr << "dt: " << dt->real() << std::endl;
+      // if (sol_n == 0) std::cerr << "dt: " << dt->real() << std::endl;
     } // while 
     // record the solution
 //    for (unsigned kk=0; kk < NNN; ++kk)
@@ -550,7 +550,7 @@ exp_ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], con
   SolutionExp* t_s = raw_solutions+sol_min;  // current target solution
   const complex* s_s = s_sols+sol_min*NNN;    // current start solution
   // complex *p = t_s->path;
-  for (unsigned sol_n = sol_min; sol_n < sol_max; ++sol_n) { // outer loop
+  for (unsigned sol_n = sol_min; sol_n < 10; ++sol_n) { // outer loop
 //     std::ostringstream s_str;
 //     s_str << std::setw(std::ceil(3)) << std::setfill('0') << sol_n;
 //     std::ofstream fpaths("path-solution-" + s_str.str() ,std::ios::out);
