@@ -81,7 +81,7 @@ tangentConstraints = tangentConstraintMats/stp//rfold;
 depth Tanneqs--17
 depth lineTransferEqs--14
 depth tangentConstraints--14
-F=lineTransferEqs||tangentConstraints||Tanneqs;
+F=tangentConstraints||Tanneqs||lineTransferEqs;
 
 -- FUNCTIONS
 --todo: not all of these are chicago-specific
@@ -108,7 +108,7 @@ filterEval = (p,x) -> (
     -- false iff residual small
     resid := norm evaluate(F,x||p);
 --    << "residual: " << resid << endl;
-    (resid > 1e-4)
+    (resid > 1e-5)
     )
 
 -- parameter randomizer
@@ -129,7 +129,7 @@ solveChicagoM2 (Matrix, Matrix, List) := o -> (p0, p1, startSols) -> (
     if (o.Gammify) then (P0,P1) = (gammify P0, gammify P1);
     P01 := (gammify P0)||(gammify P1);
     H01 := specialize(PH, P01);
-    trackHomotopy(H01, startSols, o)
+    trackHomotopy(H01, startSols)
     )
 
 -- TESTS and EQUATION / AB INITIO SETUP
@@ -143,11 +143,6 @@ log10((max S)/(min S))--looks good!
 F'=F^pivs;
 elapsedTime PH = parametricSegmentHomotopy(F', cameraVars, dataParams);
 
-
-end--
-restart
-needs "chicago.m2"
-
 --both false?
 filterEval(p,x)
 filterEval(gammify p,x)
@@ -156,13 +151,13 @@ filterEval(gammify p,x)
 elapsedTime (V,np)= monodromySolve(PH, 
     point p, {point x},Verbose=>true,NumberOfNodes=>4,
     TargetSolutionCount=>312,SelectEdgeAndDirection=>selectBestEdgeAndDirection,
-    Potential=>potentialE, Randomizer=>gammify)
+    Potential=>potentialE, Randomizer=>gammify, FilterCondition=>filterEval)
 
--- sample run
-p1=matrix V.BasePoint
-startSols=points V.PartialSols;
-p2=random(CC^1,CC^45)
-elapsedTime solveChicagoM2(p1,p2,startSols);-- ~4s
+end--
+
+restart
+setRandomSeed 53817
+needs "chicago.m2"
 
 -- quality check
 sols = solutionsWithMultiplicity points V.PartialSols;
@@ -172,10 +167,22 @@ L = (sols/(x -> (
 	S := first SVD evaluate(J,o);
 	log10((max S)/(min S))
 	)));
+S=(sort apply(L,sols,(l,s)->(l,s)))/last;
+first S
+last S
+
 summary L -- better condition number stats than previous formulation
+#sols
+
+-- sample run
+p1=matrix V.BasePoint
+startSols=points V.PartialSols;
+p2=random(CC^1,CC^45)
+elapsedTime targetSols  = solveChicagoM2(p1,p2,S);-- ~4s
+tally targetSols/status
 
 -- write to file
-writeStartSys(V.BasePoint, sols, Filename => "startSys")
+writeStartSys(V.BasePoint, S, Filename => "startSys")
 
 -- package debugging
 uninstallPackage "MonodromySolver"
