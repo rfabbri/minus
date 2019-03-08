@@ -670,19 +670,12 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
   complex dxi[NNN];
   complex *const dx4 = dx;   // reuse dx for dx4
   complex *const x1t1 = xt;  // reusing xt's space to represent x1t1
-  using namespace Eigen;
-  Map<Matrix<complex, NNN, 1> > x0_eigen(x0);
-  Map<Matrix<complex, NNNPLUS1, 1> > x0t0_eigen(x0t0);
+  using namespace Eigen; // only used for linear solve
   Map<Matrix<complex, NNN, 1> > dxi_eigen(dxi);
   Map<Matrix<complex, NNN, 1> > dx4_eigen(dx4);
   Map<Matrix<complex, NNN, 1> > &dx_eigen = dx4_eigen;
   Map<Matrix<complex, NNN, NNN> > AA((complex *)Hxt,NNN,NNN);  // accessors for the data
   Map<const Matrix<complex, NNN, 1> > bb(RHS);
-  Map<Matrix<complex, NNN, 1> > xt_NNN_eigen(xt);
-  Map<Matrix<complex, NNNPLUS1, 1> > xt_NNNPLUS1_eigen(xt);
-  Map<Matrix<complex, NNNPLUS1, 1> > &x1t1_eigen = xt_NNNPLUS1_eigen;
-  Map<Matrix<complex, NNN, 1> > &x1_eigen = xt_NNN_eigen;
-  Map<Matrix<complex, NNNPLUS1, 1> > dxdt_eigen(dxdt);
 
   Solution* t_s = raw_solutions + sol_min;  // current target solution
   const complex* s_s = s_sols + sol_min*NNN;    // current start solution
@@ -716,35 +709,42 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
       dx4_eigen = lu.solve(bb);
       
       // dx2
-      complex one_half_dt = *dt*0.5;
-      dx4_eigen *= one_half_dt;
-      xt_NNN_eigen += dx4_eigen;
-      dx4_eigen *= 2;
+      const complex one_half_dt = *dt*0.5;
+      array_multiply_scalar_to_self(dx4, one_half_dt);
+      array_add_to_self(xt, dx4);
+      array_multiply_scalar_to_self(dx4, 2);
       xt[NNN] += one_half_dt;  // t0+.5dt
       evaluate_Hxt(xt, params, Hxt);
       dxi_eigen = lu.compute(AA).solve(bb);
 
       // dx3
-      dxi_eigen *= one_half_dt;
-      dx4_eigen += dxi_eigen*4;
-      xt_NNN_eigen = x0_eigen + dxi_eigen;
+      array_multiply_scalar_to_self(dxi, one_half_dt);
+      array_copy(x0t0, xt);
+      array_add_to_self(xt, dxi);
+      array_multiply_scalar_to_self(dxi, 4);
+      array_add_to_self(dx4, dxi);
       evaluate_Hxt(xt, params, Hxt);
       dxi_eigen = lu.compute(AA).solve(bb);
 
       // dx4
-      dxi_eigen *= *dt;
+      array_multiply_scalar_to_self(dxi, *dt);
       array_copy_NNNplus1(x0t0, xt);
-      xt_NNN_eigen = x0_eigen + dxi_eigen;
-      dx4_eigen += dxi_eigen*2;
+      array_add_to_self(xt, dxi);
+      array_multiply_scalar_to_self(dxi, 2);
+      array_add_to_self(dx4, dxi);
       xt[NNN] = *t0 + *dt;               // t0+dt
       evaluate_Hxt(xt, params, Hxt);
-      dx4_eigen = (dx4_eigen + lu.compute(AA).solve(bb)* *dt)*(1./6.);
+      dxi_eigen = lu.compute(AA).solve(bb);
+      array_multiply_scalar_to_self(dxi, *dt);
+      array_add_to_self(dx4, dxi);
+      array_multiply_scalar_to_self(dx4, 1./6.);
 
       // "dx1" = .5*dx1*dt, "dx2" = .5*dx2*dt, "dx3" = dx3*dt. Eigen vectorizes this:
       // dx4_eigen = (dx4_eigen* *dt + dx1_eigen*2 + dx2_eigen*4 + dx3_eigen*2)*(1./6.);
       
       // make prediction
-      x1t1_eigen = x0t0_eigen + dxdt_eigen;
+      array_copy_NNNplus1(x0t0, x1t1);
+      array_add_to_self_NNNplus1(x1t1, dxdt);
       
       // CORRECTOR
       unsigned n_corr_steps = 0;
@@ -753,8 +753,8 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
         ++n_corr_steps;
         evaluate_HxH(x1t1, params, HxH);
         dx_eigen = lu.compute(AA).solve(bb);
-        x1_eigen += dx_eigen;
-        is_successful = dx_eigen.squaredNorm() < s->epsilon2_ * x1_eigen.squaredNorm();
+        array_add_to_self(x1t1, dx);
+        is_successful = array_norm2(dx) < s->epsilon2_ * array_norm2(x1t1);
       } while (!is_successful && n_corr_steps < s->max_corr_steps_);
       
       if (!is_successful) { // predictor failure
@@ -769,7 +769,7 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
           *dt *= s->dt_increase_factor_;
         }
       }
-      if (x0_eigen.squaredNorm() > s->infinity_threshold2_)
+      if (array_norm2(x0) > s->infinity_threshold2_)
         t_s->status = INFINITY_FAILED;
     } // while (t loop)
     // record the solution
