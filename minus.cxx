@@ -363,16 +363,6 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
   complex *const dx4 = dx; // reuse dx for dx4
   complex *const x1t1 = xt;  // reusing xt's space to represent x1t1
   
-  /*
-  using namespace Eigen;
-  Map<Matrix<complex, NNN, 1> > dx1_eigen(dx1);
-  Map<Matrix<complex, NNN, 1> > dx2_eigen(dx2);
-  Map<Matrix<complex, NNN, 1> > dx3_eigen(dx3);
-  Map<Matrix<complex, NNN, 1> > dx4_eigen(dx4);
-  Map<Matrix<complex, NNN, 1> > dx_eigen(dx);
-  Map<Matrix<complex, NNN, NNN> > AA((complex *)Hxt,NNN,NNN);  // accessors for the data
-  Map<const Matrix<complex, NNN, 1> > bb(RHS);
-  */
 
   Solution* t_s = raw_solutions;  // current target solution
   const complex* s_s = s_sols;    // current start solution
@@ -681,7 +671,15 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
   complex xt[NNNPLUS1];
   complex dx1[NNN], dx2[NNN], dx3[NNN];
   complex *const dx4 = dx; // reuse dx for dx4
-  complex *x1t1 = xt;  // reusing xt's space to represent x1t1
+  complex *const x1t1 = xt;  // reusing xt's space to represent x1t1
+  using namespace Eigen;
+  Map<Matrix<complex, NNN, 1> > dx1_eigen(dx1);
+  Map<Matrix<complex, NNN, 1> > dx2_eigen(dx2);
+  Map<Matrix<complex, NNN, 1> > dx3_eigen(dx3);
+  Map<Matrix<complex, NNN, 1> > dx4_eigen(dx4);
+  Map<Matrix<complex, NNN, 1> > &dx_eigen = dx4_eigen;
+  Map<Matrix<complex, NNN, NNN> > AA((complex *)Hxt,NNN,NNN);  // accessors for the data
+  Map<const Matrix<complex, NNN, 1> > bb(RHS);
 
   Solution* t_s = raw_solutions + sol_min;  // current target solution
   const complex* s_s = s_sols + sol_min*NNN;    // current start solution
@@ -722,7 +720,7 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
       std::cerr << "t0 real" << *t0 << std::endl;
       #endif
       
-      bool Axb_success = true;
+      // bool Axb_success = true;
       array_copy_NNNplus1(x0t0, xt);
 
       #ifdef M_VERBOSE
@@ -757,7 +755,9 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
       array_print("minus RHS",RHS);
       #endif
       // was: solve_via_lapack_without_transposition(n, LHS, 1, RHS, dx1);
-      Axb_success &= linear(LHS,RHS,dx1);
+      PartialPivLU<Matrix<complex, NNN, NNN> > lu(AA);
+      dx1_eigen = lu.solve(bb);
+      // Axb_success &= linear(LHS,RHS,dx1);
       #ifdef M_VERBOSE
       array_print("dx1",dx1);
       // TODO: once this is working, use eigen2 for LU partial pivots, faster.
@@ -779,7 +779,8 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
       //
       evaluate_Hxt(xt, params, Hxt);
       
-      Axb_success &= linear(LHS,RHS,dx2);
+      lu.compute(AA); dx2_eigen = lu.solve(bb);
+      // Axb_success &= linear(LHS,RHS,dx2);
       #ifdef M_VERBOSE
       std::cerr << "second eval ---------" << std::endl;
       array_print_NNNplus1("xt", xt);
@@ -803,7 +804,8 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
       #ifdef M_VERBOSE
       array_print_H_full(Hxt);
       #endif
-      Axb_success &= linear(LHS,RHS,dx3);
+      // Axb_success &= linear(LHS,RHS,dx3);
+      lu.compute(AA); dx3_eigen = lu.solve(bb);
       #ifdef M_VERBOSE
       std::cerr << "third eval ---------" << std::endl;
       array_print_NNNplus1("xt", xt);
@@ -849,7 +851,8 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
       array_print_H("Hxt",Hxt);
       array_print_H_full(Hxt);
       #endif
-      Axb_success &= linear(LHS,RHS,dx4);
+      // Axb_success &= linear(LHS,RHS,dx4);
+      lu.compute(AA); dx4_eigen = lu.solve(bb);
       #ifdef M_VERBOSE
       array_print_NNNplus1("xt", xt);
       array_print("dx4", dx4);
@@ -905,7 +908,8 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
         array_print_H("HxH",HxH);
         #endif
         
-        Axb_success &= linear(LHS,RHS,dx);
+        // Axb_success &= linear(LHS,RHS,dx);
+        lu.compute(AA); dx_eigen = lu.solve(bb);
         #ifdef M_VERBOSE
         array_print_n("LHS corr",LHS,NNN2);
         array_print("RHS corr",RHS);
@@ -948,9 +952,9 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
       }
       if (array_norm2(x0) > s->infinity_threshold2_)
         t_s->status = INFINITY_FAILED;
-      if (!Axb_success) t_s->status = SINGULAR;
+      // if (!Axb_success) t_s->status = SINGULAR;
       #ifdef M_VERBOSE
-      std::cerr << "\tAxb_success" << Axb_success << std::endl;
+      // std::cerr << "\tAxb_success" << Axb_success << std::endl;
       #endif
     } // while 
     // record the solution

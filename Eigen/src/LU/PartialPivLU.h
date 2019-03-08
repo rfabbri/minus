@@ -239,28 +239,6 @@ template<typename _MatrixType> class PartialPivLU
       // Step 3
       m_lu.template triangularView<Upper>().solveInPlace(dst);
     }
-
-    template<bool Conjugate, typename RhsType, typename DstType>
-    EIGEN_DEVICE_FUNC
-    void _solve_impl_transposed(const RhsType &rhs, DstType &dst) const {
-     /* The decomposition PA = LU can be rewritten as A^T = U^T L^T P.
-      * So we proceed as follows:
-      * Step 1: compute c as the solution to L^T c = b
-      * Step 2: replace c by the solution x to U^T x = c.
-      * Step 3: update  c = P^-1 c.
-      */
-
-      eigen_assert(rhs.rows() == m_lu.cols());
-
-      // Step 1
-      dst = m_lu.template triangularView<Upper>().transpose()
-                .template conjugateIf<Conjugate>().solve(rhs);
-      // Step 2
-      m_lu.template triangularView<UnitLower>().transpose()
-          .template conjugateIf<Conjugate>().solveInPlace(dst);
-      // Step 3
-      dst = permutationP().transpose() * dst;
-    }
     #endif
 
   protected:
@@ -455,7 +433,7 @@ void PartialPivLU<MatrixType>::compute()
 {
   check_template_parameters();
 
-  m_rowsTranspositions.resize(14);
+  // m_rowsTranspositions.resize(14);
 
   typename TranspositionType::StorageIndex nb_transpositions;
   internal::partial_lu_inplace(m_lu, m_rowsTranspositions, nb_transpositions);
