@@ -98,6 +98,7 @@ linear_eigen2(
   return true; // TODO: better error handling
 }
 
+/*
 bool 
 linear_eigen3(
     const complex* A,  // NNN-by-NNN matrix of complex #s
@@ -114,6 +115,7 @@ linear_eigen3(
   xx = AA.fullPivLu().solve(bb);
   return true;
 }
+*/
 
 /*
 static bool 

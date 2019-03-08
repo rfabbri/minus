@@ -224,6 +224,13 @@ At Brown's CCV cluster, I used the following flags:
  MINUS_EXTRA_CMAKE_EXE_LINKER_FLAGS   -L/gpfs/runtime/opt/intel/2018.1/mkl/lib/intel64_lin   -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm
 ```
 
+### Studying assembly output
+We refer to Eigen's documentation http://eigen.tuxfamily.org/index.php?title=Developer%27s_Corner#Studying_assembly_output 
+
+For SSE/VMX use, good examples include:
+Eigen/src/LU/arch/Inverse_SSE.h
+As well as VXL's VNL
+
 
 ## Authors
 

@@ -239,6 +239,28 @@ template<typename _MatrixType> class PartialPivLU
       // Step 3
       m_lu.template triangularView<Upper>().solveInPlace(dst);
     }
+
+    template<bool Conjugate, typename RhsType, typename DstType>
+    EIGEN_DEVICE_FUNC
+    void _solve_impl_transposed(const RhsType &rhs, DstType &dst) const {
+     /* The decomposition PA = LU can be rewritten as A^T = U^T L^T P.
+      * So we proceed as follows:
+      * Step 1: compute c as the solution to L^T c = b
+      * Step 2: replace c by the solution x to U^T x = c.
+      * Step 3: update  c = P^-1 c.
+      */
+
+      eigen_assert(rhs.rows() == m_lu.cols());
+
+      // Step 1
+      dst = m_lu.template triangularView<Upper>().transpose()
+                .template conjugateIf<Conjugate>().solve(rhs);
+      // Step 2
+      m_lu.template triangularView<UnitLower>().transpose()
+          .template conjugateIf<Conjugate>().solveInPlace(dst);
+      // Step 3
+      dst = permutationP().transpose() * dst;
+    }
     #endif
 
   protected:
@@ -336,30 +358,20 @@ struct partial_lu_impl
   {
     typedef scalar_score_coeff_op<Scalar> Scoring;
     typedef typename Scoring::result_type Score;
-    static constexpr Index rows = 14;
-    static constexpr Index cols = 14;
-    static constexpr Index size = 14;
+    const Index rows = lu.rows();
+    const Index cols = lu.cols();
+    const Index size = (std::min)(rows,cols);
     nb_transpositions = 0;
     Index first_zero_pivot = -1;
-    for(Index k = 0; k < 14; ++k)
+    for(Index k = 0; k < size; ++k)
     {
       Index rrows = rows-k-1;
       Index rcols = cols-k-1;
 
-//      Score biggest_in_corner
-//        = lu.col(k).tail(rows-k).unaryExpr(Scoring()).maxCoeff(&row_of_biggest_in_col);
-      
-      
-      Index row_of_biggest_in_col(k);
-      Score biggest_in_corner = std::norm(lu.coeff(k,k));
-      
-      for (unsigned j=rows-1; j != k; --j) {
-        if (std::norm(lu.coeff(j,k)) > biggest_in_corner*1000) {
-            row_of_biggest_in_col = j;
-            biggest_in_corner = std::norm(lu.coeff(j,k));
-            break;
-        }
-      }
+      Index row_of_biggest_in_col;
+      Score biggest_in_corner
+        = lu.col(k).tail(rows-k).unaryExpr(Scoring()).maxCoeff(&row_of_biggest_in_col);
+      row_of_biggest_in_col += k;
 
       row_transpositions[k] = PivIndex(row_of_biggest_in_col);
 
@@ -382,9 +394,8 @@ struct partial_lu_impl
         first_zero_pivot = k;
       }
 
-      if(k<rows-1) {
+      if(k<rows-1)
         lu.bottomRightCorner(rrows,rcols).noalias() -= lu.col(k).tail(rrows) * lu.row(k).tail(rcols);
-      }
     }
     return first_zero_pivot;
   }
@@ -402,14 +413,78 @@ struct partial_lu_impl
     *
     * \note This very low level interface using pointers, etc. is to:
     *   1 - reduce the number of instantiations to the strict minimum
-    *   2 - avoid infinite recursion of the instantiations with Block<Block<Block<...> > > */
-  static Index blocked_lu(Scalar* lu_data, Index luStride, PivIndex* row_transpositions, PivIndex& nb_transpositions)
+    *   2 - avoid infinite recursion of the instantiations with Block<Block<Block<...> > >
+    */
+  static Index blocked_lu(Index rows, Index cols, Scalar* lu_data, Index luStride, PivIndex* row_transpositions, PivIndex& nb_transpositions, Index maxBlockSize=256)
   {
-    MapLU lu1(lu_data,StorageOrder==RowMajor?14:luStride,StorageOrder==RowMajor?luStride:14);
-    MatrixType lu(lu1,0,0,14,14);
+    MapLU lu1(lu_data,StorageOrder==RowMajor?rows:luStride,StorageOrder==RowMajor?luStride:cols);
+    MatrixType lu(lu1,0,0,rows,cols);
+
+    const Index size = (std::min)(rows,cols);
 
     // if the matrix is too small, no blocking:
-    return unblocked_lu(lu, row_transpositions, nb_transpositions);
+    if(size<=16)
+    {
+      return unblocked_lu(lu, row_transpositions, nb_transpositions);
+    }
+
+    // automatically adjust the number of subdivisions to the size
+    // of the matrix so that there is enough sub blocks:
+    Index blockSize;
+    {
+      blockSize = size/8;
+      blockSize = (blockSize/16)*16;
+      blockSize = (std::min)((std::max)(blockSize,Index(8)), maxBlockSize);
+    }
+
+    nb_transpositions = 0;
+    Index first_zero_pivot = -1;
+    for(Index k = 0; k < size; k+=blockSize)
+    {
+      Index bs = (std::min)(size-k,blockSize); // actual size of the block
+      Index trows = rows - k - bs; // trailing rows
+      Index tsize = size - k - bs; // trailing size
+
+      // partition the matrix:
+      //                          A00 | A01 | A02
+      // lu  = A_0 | A_1 | A_2 =  A10 | A11 | A12
+      //                          A20 | A21 | A22
+      BlockType A_0(lu,0,0,rows,k);
+      BlockType A_2(lu,0,k+bs,rows,tsize);
+      BlockType A11(lu,k,k,bs,bs);
+      BlockType A12(lu,k,k+bs,bs,tsize);
+      BlockType A21(lu,k+bs,k,trows,bs);
+      BlockType A22(lu,k+bs,k+bs,trows,tsize);
+
+      PivIndex nb_transpositions_in_panel;
+      // recursively call the blocked LU algorithm on [A11^T A21^T]^T
+      // with a very small blocking size:
+      Index ret = blocked_lu(trows+bs, bs, &lu.coeffRef(k,k), luStride,
+                   row_transpositions+k, nb_transpositions_in_panel, 16);
+      if(ret>=0 && first_zero_pivot==-1)
+        first_zero_pivot = k+ret;
+
+      nb_transpositions += nb_transpositions_in_panel;
+      // update permutations and apply them to A_0
+      for(Index i=k; i<k+bs; ++i)
+      {
+        Index piv = (row_transpositions[i] += internal::convert_index<PivIndex>(k));
+        A_0.row(i).swap(A_0.row(piv));
+      }
+
+      if(trows)
+      {
+        // apply permutations to A_2
+        for(Index i=k;i<k+bs; ++i)
+          A_2.row(i).swap(A_2.row(row_transpositions[i]));
+
+        // A12 = A11^-1 A12
+        A11.template triangularView<UnitLower>().solveInPlace(A12);
+
+        A22.noalias() -= A21 * A12;
+      }
+    }
+    return first_zero_pivot;
   }
 };
 
@@ -423,7 +498,7 @@ void partial_lu_inplace(MatrixType& lu, TranspositionType& row_transpositions, t
 
   partial_lu_impl
     <typename MatrixType::Scalar, MatrixType::Flags&RowMajorBit?RowMajor:ColMajor, typename TranspositionType::StorageIndex>
-    ::blocked_lu(&lu.coeffRef(0,0), lu.outerStride(), &row_transpositions.coeffRef(0), nb_transpositions);
+    ::blocked_lu(lu.rows(), lu.cols(), &lu.coeffRef(0,0), lu.outerStride(), &row_transpositions.coeffRef(0), nb_transpositions);
 }
 
 } // end namespace internal
@@ -433,7 +508,18 @@ void PartialPivLU<MatrixType>::compute()
 {
   check_template_parameters();
 
-  // m_rowsTranspositions.resize(14);
+  // the row permutation is stored as int indices, so just to be sure:
+  eigen_assert(m_lu.rows()<NumTraits<int>::highest());
+
+  if(m_lu.cols()>0)
+    m_l1_norm = m_lu.cwiseAbs().colwise().sum().maxCoeff();
+  else
+    m_l1_norm = RealScalar(0);
+
+  eigen_assert(m_lu.rows() == m_lu.cols() && "PartialPivLU is only for square (and moreover invertible) matrices");
+  const Index size = m_lu.rows();
+
+  m_rowsTranspositions.resize(size);
 
   typename TranspositionType::StorageIndex nb_transpositions;
   internal::partial_lu_inplace(m_lu, m_rowsTranspositions, nb_transpositions);

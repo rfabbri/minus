@@ -139,43 +139,50 @@ evaluate_Hxt(const complex *x /*x, t*/, const complex *params, complex *y /*HxH*
   const complex &X125 = params[110];
   const complex &X126 = params[111];
   
-  const complex C0 = 1;
-  const complex C1 = -1;
+  static constexpr complex C0 = 1;
+  static constexpr complex C1 = -1;
+  static constexpr complex C2 = 2;
   const complex G0 = C1 * X14;
   const complex G1 = C0 + G0;
+  // Packet2cd G1G3 = pload(G1G3);
+  
+  // Use Eigen arrays for AVX/SSE
+
   const complex G2 = G1 * X15;
   const complex G3 = X14 * X71;
-  const complex G4 = G2 + G3;
   const complex G5 = G1 * X21;
   const complex G6 = X14 * X77;
-  const complex G7 = G5 + G6;
   const complex G8 = X4 * X4;
   const complex G9 = X5 * X5;
-  const complex G10 = G8 + G9;
   const complex G11 = X6 * X6;
-  const complex G12 = G10 + G11;
   const complex G13 = X7 * X7;
-  const complex G14 = G12 + G13;
-  const complex G15 = G14 * X11;
-  const complex G16 = G7 * G15;
   const complex G17 = G1 * X22;
   const complex G18 = X14 * X78;
+  const complex G22 = G1 * X23;
+  const complex G23 = X14 * X79;
+  const complex G28 = G1 * X18;
+  const complex G29 = X14 * X74;
+  const complex G31 = C2 * X2;
+  const complex G33 = G1 * X19;
+  
+  const complex G4 = G2 + G3;
+  const complex G7 = G5 + G6;
+  const complex G10 = G8 + G9;
+  const complex G12 = G10 + G11;
+  const complex G14 = G12 + G13;
+  const complex G15 = G14 * X11;
+  
+  const complex G16 = G7 * G15;
   const complex G19 = G17 + G18;
   const complex G20 = G14 * X12;
   const complex G21 = G19 * G20;
-  const complex G22 = G1 * X23;
-  const complex G23 = X14 * X79;
   const complex G24 = G22 + G23;
   const complex G25 = G14 * X13;
   const complex G26 = G24 * G25;
   const complex G27 = G16 + G21 + G26;
-  const complex G28 = G1 * X18;
-  const complex G29 = X14 * X74;
+  
   const complex G30 = G28 + G29;
-  const complex C2 = 2;
-  const complex G31 = C2 * X2;
   const complex G32 = G30 * G31;
-  const complex G33 = G1 * X19;
   const complex G34 = X14 * X75;
   const complex G35 = G33 + G34;
   const complex G36 = C1 * X1;
@@ -660,7 +667,7 @@ evaluate_Hxt(const complex *x /*x, t*/, const complex *params, complex *y /*HxH*
   const complex G515 = G512 + G514;
   const complex G516 = G180 * G515;
   const complex G517 = G511 + G516;
-  const complex C3 = 0;
+  static constexpr complex C3 = 0;
   const complex G518 = G1 * X61;
   const complex G519 = X14 * X117;
   const complex G520 = G518 + G519;
@@ -3935,8 +3942,8 @@ evaluate_HxH(const complex* x /*x and t*/, const complex *params, complex* y /*H
   const complex &X125 = params[110];
   const complex &X126 = params[111];
   
-  const complex C0 = 1;
-  const complex C1 = -1;
+  static constexpr complex C0 = 1;
+  static constexpr complex C1 = -1;
   const complex G0 = C1 * X14;
   const complex G1 = C0 + G0;
   const complex G2 = G1 * X15;
@@ -3968,7 +3975,7 @@ evaluate_HxH(const complex* x /*x and t*/, const complex *params, complex* y /*H
   const complex G28 = G1 * X18;
   const complex G29 = X14 * X74;
   const complex G30 = G28 + G29;
-  const complex C2 = 2;
+  static constexpr complex C2 = 2;
   const complex G31 = C2 * X2;
   const complex G32 = G30 * G31;
   const complex G33 = G1 * X19;
@@ -4456,7 +4463,7 @@ evaluate_HxH(const complex* x /*x and t*/, const complex *params, complex* y /*H
   const complex G515 = G512 + G514;
   const complex G516 = G180 * G515;
   const complex G517 = G511 + G516;
-  const complex C3 = 0;
+  static constexpr complex C3 = 0;
   const complex G518 = G1 * X61;
   const complex G519 = X14 * X117;
   const complex G520 = G518 + G519;
