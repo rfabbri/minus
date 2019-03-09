@@ -29,6 +29,7 @@ dag_to(max_n_nodes) = list();
 for i=1:max_n_nodes
   dag_from(i) = list();
   dag_to(i) = list();
+  node_type(i) = '';
 end
 
 // use struct
@@ -79,7 +80,7 @@ function slpdag_add(strexpr)
   
   [lhs, rhs, op] = get_vars(strexpr);
   node_left = get_id(lhs);
-  node_type(node_left) = '+'
+  node_type(node_left) = op;
   node_expr(node_left) = strexpr;
   nodes_in_graph(node_left) = 1;
 
@@ -109,13 +110,14 @@ function gviz = export_graphviz()
       if ~isempty(dag_to(i));
         vn = nodename(i);
         for k=1:size(dag_to(i),'*')
-          gviz = [gviz; vn + ' -> ' + nodename(dag_to(i)(k))];
+          gviz = [gviz; vn + ' -> ' + nodename(dag_to(i)(k)) + '[label=""' + node_type(dag_to(i)(k)) + '""];'];
         end
       end
     end
   end
   gviz = [gviz; '}'];
-  write('chicago.dot',gv)
+  unix('rm -f chicago-tmp.dot');
+  write('chicago-tmp.dot',gviz);
 endfunction 
 
 //function print_vectorized_topo_order()
