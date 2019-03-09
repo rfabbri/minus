@@ -114,6 +114,8 @@ function gviz = export_graphviz()
       end
     end
   end
+  gviz = [gviz; '}'];
+  write('chicago.dot',gv)
 endfunction 
 
 //function print_vectorized_topo_order()
