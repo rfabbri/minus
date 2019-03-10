@@ -1,3 +1,5 @@
+if instance(RERUNMONODROMY,Symbol) then RERUNMONODROMY = false 
+
 -- IMPORTS
 needs "common.m2"
 needsPackage "MonodromySolver"
@@ -53,14 +55,48 @@ imgTans = (for j from 1 to 2 list for i from 1 to 3 list (
 	transpose gateMatrix{for k from 1 to 3 list t_(i,j,k)}))
 
 -- constraints from transferring points to first image plane
-ptTransfers1=for j from 0 to 2 list imgPoints#j#0
-ptTransfers2=for j from 0 to 2 list transpose R12 * imgPoints#j#1
-ptTransfers3=for j from 0 to 2 list transpose R13 * imgPoints#j#2
+pts12=for j from 0 to 2 list R12 * imgPoints#j#0
+pts13=for j from 0 to 2 list R13 * imgPoints#j#0
 
 -- matrices annihilating T1 and T2 , T1-T2 in kernel
-T1ann = cfold for i from 0 to 2 list crossProduct(ptTransfers1#i,ptTransfers2#i);
-T2ann = cfold for i from 0 to 2 list crossProduct(ptTransfers1#i,ptTransfers3#i);
-Tanneqs = {T1ann,T2ann}/stp//rfold;
+T1ann = for i from 0 to 2 list crossProduct(imgPoints#i#1,pts12#i);
+T2ann = for i from 0 to 2 list crossProduct(imgPoints#i#2,pts13#i);
+Tanneqs = {T1ann,T2ann}/cfold/stp//rfold;
+
+--BEGIN crosstalks...
+-- T12,T13 up to normalization
+T12 = crossProduct(T1ann#0,T1ann#1)
+T13 = crossProduct(T2ann#0,T2ann#1)
+
+-- components of projective translations
+T121=T12_(0,0)
+T123=T12_(2,0)
+T131=T13_(0,0)
+T133=T13_(2,0)
+
+-- expressions appearing in A,B,C
+topLA = T131*(imgPoints#0#2)_(2,0)-T133*(imgPoints#0#2)_(0,0)
+topLB = T131*(imgPoints#1#2)_(2,0)-T133*(imgPoints#1#2)_(0,0)
+topLC = T131*(imgPoints#2#2)_(2,0)-T133*(imgPoints#2#2)_(0,0)
+
+bottomLA = T121*(imgPoints#0#1)_(2,0)-T123*(imgPoints#0#1)_(0,0)
+bottomLB = T121*(imgPoints#1#1)_(2,0)-T123*(imgPoints#1#1)_(0,0)
+bottomLC = T121*(imgPoints#2#1)_(2,0)-T123*(imgPoints#2#1)_(0,0)
+
+topRA = (pts12#0)_(2,0)*(imgPoints#0#1_(0,0))-(pts12#0)_(0,0)*(imgPoints#0#1_(2,0))
+topRB = (pts12#1)_(2,0)*(imgPoints#1#1_(0,0))-(pts12#1)_(0,0)*(imgPoints#1#1_(2,0))
+topRC = (pts12#2)_(2,0)*(imgPoints#2#1_(0,0))-(pts12#2)_(0,0)*(imgPoints#2#1_(2,0))
+
+bottomRA = (pts13#0)_(2,0)*(imgPoints#0#2_(0,0))-(pts13#0)_(0,0)*(imgPoints#0#2_(2,0))
+bottomRB = (pts13#1)_(2,0)*(imgPoints#1#2_(0,0))-(pts13#1)_(0,0)*(imgPoints#1#2_(2,0))
+bottomRC = (pts13#2)_(2,0)*(imgPoints#2#2_(0,0))-(pts13#2)_(0,0)*(imgPoints#2#2_(2,0))
+
+AB=topLA*topRA*bottomLB*bottomRB-topLB*topRB*bottomLA*bottomRA
+AC=topLA*topRA*bottomLC*bottomRC-topLC*topRC*bottomLA*bottomRA
+crossTalks = gateMatrix{{AB},{AC}}
+--expressions for R_{1j}*gamma_k^
+
+-- END crosstalks
 
 -- 3 common line constraints
 S=subsets(3,2)
@@ -78,10 +114,12 @@ tangentConstraintMats = for j from 0 to 1 list(
 tangentConstraints = tangentConstraintMats/stp//rfold;
 
 -- circuit depth checks
-depth Tanneqs--17
-depth lineTransferEqs--14
-depth tangentConstraints--14
-F=tangentConstraints||Tanneqs||lineTransferEqs;
+depth Tanneqs--14
+depth lineTransferEqs--11
+depth tangentConstraints--11
+depth crossTalks -- 20
+
+F=lineTransferEqs||tangentConstraints||Tanneqs||crossTalks;
 
 -- FUNCTIONS
 --todo: not all of these are chicago-specific
@@ -134,7 +172,10 @@ solveChicagoM2 (Matrix, Matrix, List) := o -> (p0, p1, startSols) -> (
 
 -- TESTS and EQUATION / AB INITIO SETUP
 (p,x)=fabricateChicago CC
-norm evaluate(F,x||p)
+end
+restart
+needs "chicago.m2"
+evaluate(F,x||p)
 elapsedTime J=diff(gateMatrix {cameraVars},F);
 J0 = (evaluate(J,x||p))
 pivs=rowSelector J0
@@ -142,13 +183,13 @@ S=first SVD J0^pivs
 log10((max S)/(min S))--looks good!
 F'=F^pivs;
 elapsedTime PH = parametricSegmentHomotopy(F', cameraVars, dataParams);
-
+evalInputMatrix = gateMatrix{cameraVars|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters}
 --both false?
 filterEval(p,x)
 filterEval(gammify p,x)
 
 -- ad initio ~ 35s
-elapsedTime (V,np)= monodromySolve(PH, 
+if RERUNMONODROMY then elapsedTime (V,np)= monodromySolve(PH, 
     point p, {point x},Verbose=>true,NumberOfNodes=>4,
     TargetSolutionCount=>312,SelectEdgeAndDirection=>selectBestEdgeAndDirection,
     Potential=>potentialE, Randomizer=>gammify, FilterCondition=>filterEval)
@@ -156,6 +197,7 @@ elapsedTime (V,np)= monodromySolve(PH,
 end--
 
 restart
+RERUNMONODROMY=false
 setRandomSeed 53817
 needs "chicago.m2"
 
@@ -167,12 +209,11 @@ L = (sols/(x -> (
 	S := first SVD evaluate(J,o);
 	log10((max S)/(min S))
 	)));
-S=(sort apply(L,sols,(l,s)->(l,s)))/last;
-first S
-last S
-
 summary L -- better condition number stats than previous formulation
 #sols
+
+-- sort by condition number
+S=(sort apply(L,sols,(l,s)->(l,s)))/last;
 
 -- sample run
 p1=matrix V.BasePoint
