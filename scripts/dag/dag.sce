@@ -11,10 +11,10 @@ global nodes_in_graph;
 global node_type;
 global node_expr;
 n_Cs = 2;
-n_Xs = 3;
-n_Gs = 4; 
-//n_Xs = 127;
-//n_Gs = 3440;
+//n_Xs = 3;
+//n_Gs = 4; 
+n_Xs = 127;
+n_Gs = 3440;
 n_total = n_Cs + n_Xs + n_Gs;
 max_n_nodes = n_total;
 dag_from = list();
@@ -115,7 +115,7 @@ endfunction
 function gviz = export_graphviz()
     
   // go through each in dag_to 
-  if max_n_nodes < 20
+  if sum(nodes_in_graph) < 20
     gviz = ['digraph {'
       'splines=""line""'
       'ranksep=""1""'
@@ -137,7 +137,7 @@ function gviz = export_graphviz()
   end
   nt_times = [nt_times; '}'];
   
-  if max_n_nodes < 20
+  if sum(nodes_in_graph) < 20
     nt_plus = '{ node [shape=square, height=""0.3"", width=""0.3"", style=filled, color=steelblue4, fontcolor=steelblue4] ';
   else
   nt_plus = '{ node [shape=square, height=""0.3"", width=""0.3"", style=filled, color=steelblue4, fontcolor=steelblue4, fillcolor=steelblue4,label=""""] ';
@@ -184,7 +184,7 @@ endfunction
 //txt=mgetl('chicago.bare');
 
 txt = [
-  'G2 = G1 * X0;'
+//  'G2 = G1 * X0;'
 //  'G3 = X2 * X1;'
 //  G2 = G1 * X15;
 //  G3 = X14 * X71;
@@ -194,9 +194,9 @@ txt = [
 //  G9 = X5 * X5;
 //  G11 = X6 * X6;
 //  G12 = G11 + X6;
-//  'G2 = G1 * X15;'
-//  'G3 = X14 * X71;'
-//  'G5 = G1 * X21;'
+  'G2 = G1 * X15;'
+  'G3 = X14 * X71;'
+  'G5 = G1 * X21;'
 //  'G6 = X14 * X77;'
 //  'G8 = X4 * X4;'
 //  'G9 = X5 * X5;'

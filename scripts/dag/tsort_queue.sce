@@ -80,10 +80,12 @@ while ~isempty(Q)
     Qplus1 = list();
     Qtimes = Qtimes1();
     Qtimes1 = list();
-    Qtype = '+'
+    Qtype = '+';
   end
   vvec
   wvec
   extract
   cvec
 end
+
+// TODO: sort X's to adjacent vector positions
