@@ -1,2 +1,0 @@
-#!/bin/sh
-./tt 1>/tmp/a 2>/tmp/e
