@@ -142,6 +142,7 @@ evaluate_Hxt(const complex *x /*x, t*/, const complex *params, complex *y /*HxH*
   static constexpr complex C0 = 1;
   static constexpr complex C1 = -1;
   static constexpr complex C2 = 2;
+  static constexpr complex C3 = 0;
   const complex G0 = C1 * X14;
   const complex G1 = C0 + G0;
   // Packet2cd G1G3 = pload(G1G3);
@@ -667,7 +668,6 @@ evaluate_Hxt(const complex *x /*x, t*/, const complex *params, complex *y /*HxH*
   const complex G515 = G512 + G514;
   const complex G516 = G180 * G515;
   const complex G517 = G511 + G516;
-  static constexpr complex C3 = 0;
   const complex G518 = G1 * X61;
   const complex G519 = X14 * X117;
   const complex G520 = G518 + G519;
@@ -3944,6 +3944,8 @@ evaluate_HxH(const complex* x /*x and t*/, const complex *params, complex* y /*H
   
   static constexpr complex C0 = 1;
   static constexpr complex C1 = -1;
+  static constexpr complex C2 = 2;
+  static constexpr complex C3 = 0;
   const complex G0 = C1 * X14;
   const complex G1 = C0 + G0;
   const complex G2 = G1 * X15;
@@ -3975,7 +3977,6 @@ evaluate_HxH(const complex* x /*x and t*/, const complex *params, complex* y /*H
   const complex G28 = G1 * X18;
   const complex G29 = X14 * X74;
   const complex G30 = G28 + G29;
-  static constexpr complex C2 = 2;
   const complex G31 = C2 * X2;
   const complex G32 = G30 * G31;
   const complex G33 = G1 * X19;
@@ -4463,7 +4464,6 @@ evaluate_HxH(const complex* x /*x and t*/, const complex *params, complex* y /*H
   const complex G515 = G512 + G514;
   const complex G516 = G180 * G515;
   const complex G517 = G511 + G516;
-  static constexpr complex C3 = 0;
   const complex G518 = G1 * X61;
   const complex G519 = X14 * X117;
   const complex G520 = G518 + G519;
