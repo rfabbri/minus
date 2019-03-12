@@ -184,8 +184,10 @@ endfunction
 //txt=mgetl('chicago.bare');
 
 txt = [
-  'G2 = G1 * X0;'
+//  'G2 = G1 * X0;'
 //  'G3 = X2 * X1;'
+  'G0 = G1 * G3;'
+  'G2 = G0 * G3;'
 //  G2 = G1 * X15;
 //  G3 = X14 * X71;
 //  G5 = G1 * X21;
