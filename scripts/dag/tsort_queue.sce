@@ -1,18 +1,22 @@
 Q = Qplus;
 Qplus = list();
-Qtype = '+';
+Qtype = '0+';
 Qplus1 = list();
 Qtimes1 = list();
+rank = list();
+level = 1;
 while ~isempty(Q)
   vvec = [];
   wvec = [];
   extract = [];
   vid = 0;
   cvec = [];
+  rank(level) = list();
   while ~isempty(Q)
     // pop node p from Q
     p = Q($); Q($) = null();
     disp ('doing node' + string(p) + ' : ' + nodename(p))
+    rank(level)($+1) = nodename(p);
 
     select node_type(p)
     case '+'
@@ -63,29 +67,77 @@ while ~isempty(Q)
     end
     vid = vid+1;
   end
-  if Qtype == '+'
-    if ~isempty(Qtimes)
-      Q = Qtimes;
-      Qtimes = list();
-      Qtype = '*';
-    elseif ~isempty(Qplus1)
-      Q = Qplus1;
-      Qplus1 = list();
-      Qtype = '+';
-    else
-      Q = Qtimes1;
-      Qtimes1 = list();
-      Qtype = '*';
+  disp 'type after first loop'
+  Qtype
+  if part(Qtype,2) == '+'
+    if part(Qtype,1) == '0' // 0+
+      if ~isempty(Qtimes)
+        Q = Qtimes;
+        Qtimes = list();
+        Qtype = '0*';
+        disp '0+ to 0*'
+      elseif ~isempty(Qplus1)
+        Q = Qplus1;
+        Qplus1 = list();
+        Qtype = '1+';
+        level = level + 1;
+        disp '0+ to 1+'
+      else
+        Q = Qtimes1;
+        Qtimes1 = list();
+        Qtype = '1*';
+        level = level + 1;
+        disp '0+ to 1*'
+      end
+    else // 1+
+      if ~isempty(Qtimes1)
+        Q = Qtimes1;
+        Qtimes1 = list();
+        Qtype = '1*';
+        disp '1+ to 1*'
+      elseif ~isempty(Qplus)
+        Q = Qplus;
+        Qplus = list();
+        Qtype = '0+';
+        level = level + 1;
+        disp '1+ to 0+'
+      else
+        Q = Qtimes;
+        Qtimes = list();
+        Qtype = '0*';
+        level = level + 1;
+        disp '1+ to 0*'
+      end
     end
-  elseif Qtype == '*' 
-    if ~isempty(Qplus1)
-      Q = Qplus1;
-      Qplus1 = list();
-      Qtype = '+';
-    elseif ~isempty(Qtimes1)
-      Q = Qtimes1;
-      Qtimes1 = list();
-      Qtype = '*';
+  else // *
+    if part(Qtype,1) == '0' // 0*
+      if ~isempty(Qplus1)
+        Q = Qplus1;
+        Qplus1 = list();
+        Qtype = '1+';
+        level = level + 1;
+        disp '0* to 1+'
+      else
+        Q = Qtimes1;
+        Qtimes1 = list();
+        Qtype = '1*';
+        level = level + 1;
+        disp '0* to 1*'
+      end
+    else // 1*
+      if ~isempty(Qplus)
+        Q = Qplus;
+        Qplus = list();
+        Qtype = '0+';
+        level = level + 1;
+        disp '1* to 0+'
+      else
+        Q = Qtimes;
+        Qtimes = list();
+        Qtype = '0*';
+        level = level + 1;
+        disp '1* to 0*'
+      end
     end
   end
   vvec
