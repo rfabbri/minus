@@ -101,7 +101,7 @@ while ~isempty(Q)
     level = level + 1;
     if ~isempty(Qplus1)
       Q = Qplus1;
-      Qytimes = Qtimes1;
+      Qtimes = Qtimes1;
       Qplus1 = list();
       Qtimes1 = list();
       Qtype = '+';
