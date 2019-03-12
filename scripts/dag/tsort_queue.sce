@@ -5,13 +5,13 @@ Qplus1 = list();
 Qtimes1 = list();
 rank = list();
 level = 1;
+rank(1) = list();
 while ~isempty(Q)
   vvec = [];
   wvec = [];
   extract = [];
   vid = 0;
   cvec = [];
-  rank(level) = list();
   while ~isempty(Q)
     // pop node p from Q
     p = Q($); Q($) = null();
@@ -57,6 +57,7 @@ while ~isempty(Q)
         select node_type(q)
         case '+' then
           Qplus1($+1) = q;
+          disp('inserting ' + nodename(q) + ' Qtype: ' + Qtype);
         case '*' then
           Qtimes1($+1) = q;
           disp('inserting ' + nodename(q) + ' Qtype: ' + Qtype);
@@ -82,12 +83,18 @@ while ~isempty(Q)
       Qtimes1 = list();
       Qtype = '+';
       level = level + 1;
+      if (~isempty(Q))
+        rank(level) = list();
+      end
       disp '0+ to 1+, reset to 0+'
     else
       Q = Qtimes1;
       Qtimes1 = list();
       Qtype = '*';
       level = level + 1;
+      if (~isempty(Q))
+        rank(level) = list();
+      end
       disp '0+ to 1* -> 0*'
     end
   else // *
@@ -104,6 +111,9 @@ while ~isempty(Q)
       Qtimes1 = list();
       Qtype = '*';
       disp '0* to 1* -> 0*'
+    end
+    if (~isempty(Q))
+      rank(level) = list();
     end
   end
   vvec
