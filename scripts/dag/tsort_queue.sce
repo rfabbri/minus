@@ -16,7 +16,7 @@ while ~isempty(Q)
 
     select node_type(p)
     case '+'
-      disp '===================='
+      disp '===== ADD ================='
       [lhs, rhs, op] = get_vars(node_expr(p));
       vvec = [vvec; 'v[' + string(vid) + '] = ' + rhs(1)];
       remaining_rhs = tokens(node_expr(p));
@@ -42,9 +42,10 @@ while ~isempty(Q)
       q = dag_to(p)(k); dag_to(p)(k) = null();
       // remove p form dag_from(q)
       for jj = size(dag_from(q)):-1:1
-        // can have multiple edges, as in squaring op
+        // can have multiple edges, as in squaring op, treated in separately dag_to
         if dag_from(q)(jj) == p
           dag_from(q)(jj) = null();
+          break;
         end
       end
       // q becomes a leaf, add it to queue
@@ -54,6 +55,7 @@ while ~isempty(Q)
           Qplus1($+1) = q;
         case '*' then
           Qtimes1($+1) = q;
+          disp('inserting ' + nodename(q) + ' Qtype: ' + Qtype);
         else 
           error('node type must be plus or minus')
         end
@@ -76,11 +78,15 @@ while ~isempty(Q)
       Qtype = '*';
     end
   elseif Qtype == '*' 
-    Q = Qplus1;
-    Qplus1 = list();
-    Qtimes = Qtimes1();
-    Qtimes1 = list();
-    Qtype = '+';
+    if ~isempty(Qplus1)
+      Q = Qplus1;
+      Qplus1 = list();
+      Qtype = '+';
+    elseif ~isempty(Qtimes1)
+      Q = Qtimes1;
+      Qtimes1 = list();
+      Qtype = '*';
+    end
   end
   vvec
   wvec
