@@ -112,4 +112,11 @@ while ~isempty(Q)
   cvec
 end
 
-// TODO: sort X's to adjacent vector positions
+// TODO: sort X's and nearby variable indices to adjacent vector positions
+
+// draw graph with ranks
+
+exec dag.sce;
+gv = export_graphviz_with_ranks()
+size(aplat(rank))
+sum(nodes_in_graph)

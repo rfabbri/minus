@@ -1,5 +1,3 @@
-clear;
-
 global n_Cs;
 global n_Xs;
 global n_Gs; 
@@ -11,8 +9,10 @@ global nodes_in_graph;
 global node_type;
 global node_expr;
 n_Cs = 3;
-n_Xs = 3;
-n_Gs = 4; 
+//n_Xs = 3;
+//n_Gs = 4; 
+n_Xs = 8;
+n_Gs = 47;
 //n_Xs = 127;
 //n_Gs = 3440;
 n_total = n_Cs + n_Xs + n_Gs;
@@ -138,6 +138,74 @@ function gviz = export_graphviz()
   nt_times = [nt_times; '}'];
   
   if sum(nodes_in_graph) < 40
+    nt_plus = '{ node [shape=square, height=""0.3"", width=""0.3"", color=steelblue4, fontcolor=steelblue4] ';
+  else
+    nt_plus = '{ node [shape=square, height=""0.3"", width=""0.3"", style=filled, color=steelblue4, fontcolor=steelblue4, fillcolor=steelblue4,label=""""] ';
+  end
+  
+  for i=1:max_n_nodes
+    if nodes_in_graph(i) == 1
+      if node_type(i) == '+'
+        nt_plus = nt_plus + ' ' + nodename(i);
+      end
+    end
+  end
+  nt_plus= [nt_plus; '}'];
+  gviz = [gviz; nt_times];    
+  gviz = [gviz; nt_plus];    
+  for i=1:max_n_nodes
+    if nodes_in_graph(i) == 1
+      gviz = [gviz; nodename(i)+'[label = ""' + string(i) + nodename(i) + '""];'];
+    end
+  end
+  for i=1:max_n_nodes
+    if nodes_in_graph(i) == 1
+      if ~isempty(dag_to(i));
+        vn = nodename(i);
+        for k=1:size(dag_to(i))
+          nt = node_type(dag_to(i)(k));
+          if nt == '*'
+            colorstr = 'color=orangered, fontcolor=orangered'
+          else 
+            colorstr = 'color=steelblue4, fontcolor=steelblue4'
+          end
+//          gviz = [gviz; vn + ' -> ' + nodename(dag_to(i)(k)) + '[label=""' + nt + '"", fontsize=""24.0""' + colorstr + '];'];
+          gviz = [gviz; vn + ' -> ' + nodename(dag_to(i)(k)) + '[' + colorstr + '];'];
+        end
+      end
+    end
+  end
+  gviz = [gviz; '}'];
+  unix('rm -f chicago-tmp.dot');
+  write('chicago-tmp.dot',gviz);
+endfunction 
+
+function gviz = export_graphviz_with_ranks()
+    
+  // go through each in dag_to 
+  if sum(nodes_in_graph) < 40
+    gviz = ['digraph {'
+      'splines=""line""'
+      'ranksep=""1""'
+      'node [shape=circle,color=dimgray,height=""0.3""]'];
+    nt_times = '{ node [shape=diamond, height=""0.3"", width=""0.3"", color=orangered, fontcolor=orangered] ';
+  else
+    gviz = ['digraph {'
+      'splines=""line""'
+      'ranksep=""1""'
+      'node [shape=circle,fontcolor=white,color=dimgray,label="""",height=""0.3""]'];
+    nt_times = '{ node [shape=diamond, height=""0.3"", width=""0.3"", style=filled, color=orangered, fontcolor=orangered, fillcolor=orangered,label=""""] ';
+  end
+  for i=1:max_n_nodes
+    if nodes_in_graph(i) == 1
+      if node_type(i) == '*'
+        nt_times = nt_times + ' ' + nodename(i);
+      end
+    end
+  end
+  nt_times = [nt_times; '}'];
+
+  if sum(nodes_in_graph) < 40
     nt_plus = '{ node [shape=square, height=""0.3"", width=""0.3"", style=filled, color=steelblue4, fontcolor=steelblue4] ';
   else
   nt_plus = '{ node [shape=square, height=""0.3"", width=""0.3"", style=filled, color=steelblue4, fontcolor=steelblue4, fillcolor=steelblue4,label=""""] ';
@@ -152,6 +220,16 @@ function gviz = export_graphviz()
   nt_plus= [nt_plus; '}'];
   gviz = [gviz; nt_times];    
   gviz = [gviz; nt_plus];    
+
+  for r=1:size(rank)
+    ranks = '{ rank = same; '
+    for i=1:size(rank(r))
+      ranks = ranks + rank(r)(i) + ';';
+    end
+    ranks = ranks + ' }'
+    gviz = [gviz; ranks];
+  end
+  
   for i=1:max_n_nodes
     if nodes_in_graph(i) == 1
       if ~isempty(dag_to(i));
@@ -186,8 +264,6 @@ endfunction
 txt = [
 //  'G2 = G1 * X0;'
 //  'G3 = X2 * X1;'
-  'G0 = G1 * G3;'
-  'G2 = G0 * G3;'
 //  G2 = G1 * X15;
 //  G3 = X14 * X71;
 //  G5 = G1 * X21;
@@ -268,9 +344,9 @@ txt = [
 //  'G41 = G39 + G40;'
 //  'G42 = X0 + X0;'
 //  'G43 = G41 * G42;'
-//  'G44 = G32 + G38 + G43;'
+  'G44 = G32 + G38 + G43;'
 //  'G45 = G27 * G44;'
-//  'G46 = X5 * X7;'
+  'G46 = X5 * X7;'
 //  'G47 = X4 * X6;'
 //  'G48 = G46 + G47;'
 //  'G49 = C2 * G48;'
