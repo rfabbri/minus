@@ -252,7 +252,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffast-math")
 # most compiler will have this as part of -ffast-math
 # later on, we can use only this flag if equivalent gains to the more aggressive
 # -fast-math
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fcx-limited-range")
+# set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fcx-limited-range")
 
 
 
