@@ -15,12 +15,12 @@ while ~isempty(Q)
   while ~isempty(Q)
     // pop node p from Q
     p = Q($); Q($) = null();
-    disp ('doing node' + string(p) + ' : ' + nodename(p))
-    rank(level)($+1) = nodename(p);
+//    disp ('doing node' + string(p) + ' : ' + nodename(p))
+    rank(level)($+1) = p;
 
     select node_type(p)
     case '+'
-      disp '===== ADD ================='
+//      disp '===== ADD ================='
       [lhs, rhs, op] = get_vars(node_expr(p));
       vvec = [vvec; 'v[' + string(vid) + '] = ' + rhs(1)];
       remaining_rhs = tokens(node_expr(p));
@@ -28,7 +28,7 @@ while ~isempty(Q)
       wvec = [wvec; 'w[' + string(vid) + '] = ' + strcat(remaining_rhs)];
       extract = [extract; lhs + ' = v[' string(vid) '];']; // v *= v
     case '*'
-      disp '===== TIMES ==============='
+//      disp '===== TIMES ==============='
       [lhs, rhs, op] = get_vars(node_expr(p));
       vvec = [vvec; 'v[' + string(vid) + '] = ' + rhs(1)];
       remaining_rhs = tokens(node_expr(p));
@@ -57,10 +57,10 @@ while ~isempty(Q)
         select node_type(q)
         case '+' then
           Qplus1($+1) = q;
-          disp('inserting ' + nodename(q) + ' Qtype: ' + Qtype);
+//          disp('inserting ' + nodename(q) + ' Qtype: ' + Qtype);
         case '*' then
           Qtimes1($+1) = q;
-          disp('inserting ' + nodename(q) + ' Qtype: ' + Qtype);
+//          disp('inserting ' + nodename(q) + ' Qtype: ' + Qtype);
         else 
           error('node type must be plus or minus')
         end
@@ -68,14 +68,14 @@ while ~isempty(Q)
     end
     vid = vid+1;
   end
-  disp 'type after first loop'
+//  disp 'type after first loop'
   Qtype
   if Qtype == '+'
     if ~isempty(Qtimes)
       Q = Qtimes;
       Qtimes = list();
       Qtype = '*';
-      disp '0+ to 0*'
+//      disp '0+ to 0*'
     elseif ~isempty(Qplus1)
       Q = Qplus1;
       Qtimes = Qtimes1;
@@ -86,7 +86,7 @@ while ~isempty(Q)
       if (~isempty(Q))
         rank(level) = list();
       end
-      disp '0+ to 1+, reset to 0+'
+//      disp '0+ to 1+, reset to 0+'
     else
       Q = Qtimes1;
       Qtimes1 = list();
@@ -95,7 +95,7 @@ while ~isempty(Q)
       if (~isempty(Q))
         rank(level) = list();
       end
-      disp '0+ to 1* -> 0*'
+//      disp '0+ to 1* -> 0*'
     end
   else // *
     level = level + 1;
@@ -105,12 +105,12 @@ while ~isempty(Q)
       Qplus1 = list();
       Qtimes1 = list();
       Qtype = '+';
-      disp '0* to 1+ -> 0+'
+//      disp '0* to 1+ -> 0+'
     else
       Q = Qtimes1;
       Qtimes1 = list();
       Qtype = '*';
-      disp '0* to 1* -> 0*'
+//      disp '0* to 1* -> 0*'
     end
     if (~isempty(Q))
       rank(level) = list();
@@ -126,7 +126,35 @@ end
 
 // draw graph with ranks
 
-exec dag.sce;
-gv = export_graphviz_with_ranks()
 size(aplat(rank))
 sum(nodes_in_graph)
+rs = zeros(size(rank),1);
+rsplus = zeros(size(rank),1);
+rstimes = zeros(size(rank),1);
+rsconst = zeros(size(rank),1);
+rankplus=list();
+ranktimes=list();
+rank_by_name = rank;
+for i=1:size(rank)
+  rs(i) = size(rank(i))
+  rankplus(i) = list();
+  ranktimes(i) = list();
+  for k=1:rs(i)
+    rank_by_name(i)(k) = nodename(rank(i)(k));
+    select node_type(rank(i)(k));
+    case '+'
+      rsplus(i) = rsplus(i) + 1;
+      rankplus(i)(k) = rank(i)(k);
+    case '*'
+      rstimes(i) = rstimes(i) + 1;
+      ranktimes(i)(k) = rank(i)(k);
+    else
+      rsconst(i) = rsconst(i) + 1;
+    end
+  end
+end
+
+exec dag.sce;
+gv = export_graphviz_with_ranks()
+
+exec vectorize.sce;

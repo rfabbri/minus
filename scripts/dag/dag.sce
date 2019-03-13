@@ -221,10 +221,10 @@ function gviz = export_graphviz_with_ranks()
   gviz = [gviz; nt_times];    
   gviz = [gviz; nt_plus];    
 
-  for r=1:size(rank)
+  for r=1:size(rank_by_name)
     ranks = '{ rank = same; '
-    for i=1:size(rank(r))
-      ranks = ranks + rank(r)(i) + ';';
+    for i=1:size(rank_by_name(r))
+      ranks = ranks + rank_by_name(r)(i) + ';';
     end
     ranks = ranks + ' }'
     gviz = [gviz; ranks];
@@ -248,8 +248,8 @@ function gviz = export_graphviz_with_ranks()
     end
   end
   gviz = [gviz; '}'];
-  unix('rm -f chicago-tmp.dot');
-  write('chicago-tmp.dot',gviz);
+  unix('rm -f chicago-tmp-rank.dot');
+  write('chicago-tmp-rank.dot',gviz);
 endfunction 
 
 function determine_size()
@@ -302,9 +302,9 @@ txt = [
 //  'G25 = G14 * X13;'
 //  'G26 = G24 + G25 + G16;'
 //
-//  'G2 = G1 * X15;'
-//  'G3 = X14 * X71;'
-//  'G5 = G1 * X21;'
+  'G2 = G1 * X15;'
+  'G3 = X14 * X71;'
+  'G5 = G1 * X21;'
 //  'G6 = X14 * X77;'
 //  'G8 = X4 * X4;'
 //  'G9 = X5 * X5;'
@@ -318,7 +318,7 @@ txt = [
 //  'G29 = X14 * X74;'
 //  'G31 = C2 * X2;'
 //  'G33 = G1 * X19;'
-//  'G4 = G2 + G3;'
+  'G4 = G2 + G3;'
 //  'G7 = G5 + G6;'
 //  'G10 = G8 + G9;'
 //  'G12 = G10 + G11;'
@@ -334,10 +334,10 @@ txt = [
 //  'G27 = G16 + G21 + G26;'
 //  'G30 = G28 + G29;'
 //  'G32 = G30 * G31;'
-  'G34 = X14 * X75;'
-  'G35 = G33 + G34;'
-  'G36 = C1 * X1;'
-  'G37 = C2 * G36;'
+//  'G34 = X14 * X75;'
+//  'G35 = G33 + G34;'
+//  'G36 = C1 * X1;'
+//  'G37 = C2 * G36;'
 //  'G38 = G35 * G37;'
 //  'G39 = G1 * X20;'
 //  'G40 = X14 * X76;'
