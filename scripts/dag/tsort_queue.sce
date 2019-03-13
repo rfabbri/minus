@@ -144,10 +144,10 @@ for i=1:size(rank)
     select node_type(rank(i)(k));
     case '+'
       rsplus(i) = rsplus(i) + 1;
-      rankplus(i)(k) = rank(i)(k);
+      rankplus(i)($+1) = rank(i)(k);
     case '*'
       rstimes(i) = rstimes(i) + 1;
-      ranktimes(i)(k) = rank(i)(k);
+      ranktimes(i)($+1) = rank(i)(k);
     else
       rsconst(i) = rsconst(i) + 1;
     end
@@ -155,6 +155,9 @@ for i=1:size(rank)
 end
 
 exec dag.sce;
-gv = export_graphviz_with_ranks()
+gv = export_graphviz_with_ranks();
 
 exec vectorize.sce;
+size(vslp)
+exec dag_input.sce;
+size(txt)

@@ -1,0 +1,2 @@
+clear
+exec dag.sce;
