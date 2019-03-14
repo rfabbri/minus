@@ -672,7 +672,7 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
   complex *const LHS = Hxt;
   complex *const dx4 = dx;   // reuse dx for dx4
   double *const dt = (double *)(dxdt + NNN);
-  const double t_step = s->init_dt_;  // initial step
+  const double &t_step = s->init_dt_;  // initial step
   using namespace Eigen; // only used for linear solve
   Map<Matrix<complex, NNN, 1> > dxi_eigen(dxi);
   Map<Matrix<complex, NNN, 1> > dx4_eigen(dx4);
@@ -680,7 +680,7 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
   Map<const Matrix<complex, NNN, NNN> > AA((complex *)Hxt,NNN,NNN);  // accessors for the data
   Map<const Matrix<complex, NNN, 1> > bb(RHS);
 
-  Solution* t_s = raw_solutions + sol_min;  // current target solution
+  Solution *t_s = raw_solutions + sol_min;  // current target solution
   const complex* __restrict__ s_s = s_sols + sol_min*NNN;    // current start solution
   for (unsigned sol_n = sol_min; sol_n < sol_max; ++sol_n) { // solution loop
     t_s->status = PROCESSING;
