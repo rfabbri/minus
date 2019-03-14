@@ -89,17 +89,17 @@ set( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${MINUS_EXTRA_CMAKE
 # In order to be able to link vxl libraries into shared libraries on 64 bit linux, the -fPIC
 # compiler flag must be added.  Only do this if we are on a x86_64 *nix platform, we're building
 # static libraries, and the user has not explicitly requested position dependent code.
-if(UNIX)
-  if(NOT BUILD_SHARED_LIBS AND CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
-    option(VXL_BUILD_POSITION_DEPENDENT_CODE "Generate position dependent code (i.e. code cannot be used in shared library)" OFF)
-    mark_as_advanced(VXL_BUILD_POSITION_DEPENDENT_CODE)
-    if(NOT VXL_BUILD_POSITION_DEPENDENT_CODE)
-      message(STATUS "Adding -fPIC compiler flag to generate position independent code.")
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
-    endif()
-  endif()
-endif()
+# if(UNIX)
+#   if(NOT BUILD_SHARED_LIBS AND CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+#     option(VXL_BUILD_POSITION_DEPENDENT_CODE "Generate position dependent code (i.e. code cannot be used in shared library)" OFF)
+#     mark_as_advanced(VXL_BUILD_POSITION_DEPENDENT_CODE)
+#     if(NOT VXL_BUILD_POSITION_DEPENDENT_CODE)
+#       message(STATUS "Adding -fPIC compiler flag to generate position independent code.")
+#       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+#       set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+#     endif()
+#   endif()
+# endif()
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     # require at least gcc 4.8
@@ -209,6 +209,7 @@ aux_source_directory(Templates minus_sources)
 add_subdirectory(cmd) 
 
 set(BUILD_TESTING OFF CACHE BOOL "Build tests for minus")
+set(VXL_BUILD_POSITION_DEPENDENT_CODE ON CACHE BOOL "Generate position dependent code - code cannot be used in shared library")
   
 if(VXL_FOUND)  # For now we need vxl to build tests
   if( BUILD_TESTING )
