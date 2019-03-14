@@ -154,10 +154,10 @@ for i=1:size(rank)
   end
 end
 
-exec dag.sce;
-gv = export_graphviz_with_ranks();
+//exec dag.sce;
+//gv = export_graphviz_with_ranks();
 
 exec vectorize.sce;
 size(vslp)
-exec dag_input.sce;
-size(txt)
+//exec dag_input.sce;
+//size(txt)

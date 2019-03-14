@@ -8,7 +8,7 @@
 // cCode(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"Ht",gateMatrix{cameraVars})
 // (Ask Tim for the way to use cCode so that the input orders are like this.
 static inline void 
-evaluate_Hxt(const complex *x /*x, t*/, const complex *params, complex *y /*HxH*/) 
+evaluate_Hxt(const complex * __restrict__ x /*x, t*/, const complex * __restrict__ params, complex * __restrict__ y /*HxH*/) 
 {
   const complex &X0 = x[0];
   const complex &X1 = x[1];
@@ -3811,7 +3811,7 @@ evaluate_Hxt(const complex *x /*x, t*/, const complex *params, complex *y /*HxH*
 // cCode(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H",gateMatrix{cameraVars})
 // (Ask Tim for the way to use cCode so that the input orders are like this.
 static inline void 
-evaluate_HxH(const complex* x /*x and t*/, const complex *params, complex* y /*HxH*/) 
+evaluate_HxH(const complex* __restrict__ x /*x and t*/, const complex * __restrict__ params, complex* __restrict__ y /*HxH*/) 
 {
   const complex &X0 = x[0];
   const complex &X1 = x[1];

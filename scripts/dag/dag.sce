@@ -261,8 +261,8 @@ endfunction
 
 //txt=mgetl('chicago.bare');
 
-//exec chicago_bare.sce;
-exec dag_input.sce;
+exec chicago_bare.sce;
+//exec dag_input.sce;
 
 for i=1:size(txt,1)
   if isempty(tokens(txt(i)))
@@ -271,7 +271,7 @@ for i=1:size(txt,1)
   slpdag_add(txt(i))
 end
 
-gv = export_graphviz()
+gv = export_graphviz();
 
 translation = [];
 for i=1:n_total

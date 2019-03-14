@@ -264,14 +264,14 @@ array_print_H_full(const complex *a)
 }
 
 static inline void 
-array_multiply_scalar_to_self(complex *a, complex b)
+array_multiply_scalar_to_self(complex *__restrict__ a, complex b)
 {
   // TODO: optimize. Idea: use Eigen's parallizable structures or VNL SSE
   for (unsigned i = 0; i < NNN; ++i, ++a) *a = *a * b;
 }
 
 static inline void
-array_negate_self(complex *a)
+array_negate_self(complex * __restrict__ a)
 {
   // TODO: optimize. Idea: use Eigen's parallizable structures or VNL SSE
   for (unsigned i = 0; i < NNN; ++i, ++a) *a = -*a;
@@ -279,33 +279,33 @@ array_negate_self(complex *a)
 
 
 static inline void 
-array_multiply_self(complex *a, const complex *b)
+array_multiply_self(complex * __restrict__ a, const complex * __restrict__ b)
 {
   for (unsigned int i=0; i < NNN; ++i,++a,++b) *a *= *b;
 }
 
 static inline void 
-array_add_to_self(complex *a, const complex *b)
+array_add_to_self(complex * __restrict__ a, const complex * __restrict__ b)
 {
   for (unsigned int i=0; i < NNN; ++i,++a,++b) *a += *b;
 }
 
 static inline void 
-array_add_to_self_NNNplus1(complex *a, const complex *b)
+array_add_to_self_NNNplus1(complex * __restrict__ a, const complex * __restrict__ b)
 {
   for (unsigned int i=0; i < NNNPLUS1; ++i,++a,++b) *a += *b;
 }
 
 static inline void 
-array_add_scalar_to_self(complex *a, complex b)
+array_add_scalar_to_self(complex * __restrict__ a, complex b)
 {
   for (unsigned int i=0; i < NNN; ++i,++a) *a += b;
 }
 
 static inline void 
 array_copy(
-  const complex *a,
-  complex *b)
+  const complex * __restrict__ a,
+  complex * __restrict__ b)
 {
   // for (int i = 0; i < n; i++, a++, b++) *b = *a;
   memcpy(b, a, NNN*sizeof(complex));
@@ -313,8 +313,8 @@ array_copy(
 
 static inline void 
 array_copy_NNNplus1(
-  const complex *a,
-  complex *b)
+  const complex * __restrict__ a,
+  complex * __restrict__ b)
 {
   // for (int i = 0; i < n; i++, a++, b++) *b = *a;
   memcpy(b, a, NNNPLUS1*sizeof(complex));
@@ -322,10 +322,10 @@ array_copy_NNNplus1(
 
 
 static inline double
-array_norm2(const complex *a)
+array_norm2(const complex *__restrict__ a)
 {
   double val = 0;
-  complex const* end = a+NNN;
+  complex const* __restrict__ end = a+NNN;
   while (a != end)
     val += std::norm(*a++);
   return val;
@@ -657,28 +657,27 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
 unsigned    
 ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex params[2*NPARAMS], Solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max)
 {
-  // TODO: test by making variables static for a second run, some of these arrays may have to be zeroed
-  // One huge clear instruction will work as they are sequential in mem.
-  const double t_step = s->init_dt_;  // initial step
   complex x0t0[NNNPLUS1];  // t = real running in [0,1]
+  complex xt[NNNPLUS1]; complex *const x1t1 = xt;  // reusing xt's space to represent x1t1
   complex *const x0 = x0t0; double *const t0 = (double *) (x0t0 + NNN);
   complex dxdt[NNNPLUS1], *const dx = dxdt; double *const dt = (double *)(dxdt + NNN);
   complex Hxt[NNNPLUS1 * NNN], *const HxH=Hxt;  // HxH is reusing Hxt
   const complex * const RHS = Hxt + NNN2;  // Hx or Ht, same storage
   complex * const LHS = Hxt;
-  complex xt[NNNPLUS1];
   complex dxi[NNN];
   complex *const dx4 = dx;   // reuse dx for dx4
-  complex *const x1t1 = xt;  // reusing xt's space to represent x1t1
+  // TODO: test by making variables static for a second run, some of these arrays may have to be zeroed
+  // One huge clear instruction will work as they are sequential in mem.
+  const double t_step = s->init_dt_;  // initial step
   using namespace Eigen; // only used for linear solve
   Map<Matrix<complex, NNN, 1> > dxi_eigen(dxi);
   Map<Matrix<complex, NNN, 1> > dx4_eigen(dx4);
   Map<Matrix<complex, NNN, 1> > &dx_eigen = dx4_eigen;
-  Map<Matrix<complex, NNN, NNN> > AA((complex *)Hxt,NNN,NNN);  // accessors for the data
+  Map<const Matrix<complex, NNN, NNN> > AA((complex *)Hxt,NNN,NNN);  // accessors for the data
   Map<const Matrix<complex, NNN, 1> > bb(RHS);
 
   Solution* t_s = raw_solutions + sol_min;  // current target solution
-  const complex* s_s = s_sols + sol_min*NNN;    // current start solution
+  const complex* __restrict__ s_s = s_sols + sol_min*NNN;    // current start solution
   for (unsigned sol_n = sol_min; sol_n < sol_max; ++sol_n) { // solution loop
     t_s->status = PROCESSING;
     bool end_zone = false;
@@ -764,6 +763,15 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
       } else { // predictor success
         ++predictor_successes;
         array_copy_NNNplus1(x1t1, x0t0);
+        // 
+        // swap x1t1 x0t0
+        //
+        // x1t1 new points
+        //  xt new point
+        //
+        // x0t0 new point
+        //  x0 new point, t0 new point
+        // 
         if (predictor_successes >= s->num_successes_before_increase_) {
           predictor_successes = 0;
           *dt *= s->dt_increase_factor_;

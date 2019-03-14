@@ -5034,6 +5034,7 @@ main(int argc, char **argv)
     t[3] = std::thread(ptrack_subset, &MINUS_DEFAULT, start_sols_, params_, solutions, 78*3, 78*4);
     t[0].join(); t[1].join(); t[2].join(); t[3].join();
   }
+//  ptrack_subset(&MINUS_DEFAULT, start_sols_, params_, solutions, 0, 312);
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   auto duration = duration_cast<milliseconds>( t2 - t1 ).count();
   if (profile) {
