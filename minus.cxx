@@ -657,17 +657,21 @@ ptrack(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex 
 unsigned    
 ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex params[2*NPARAMS], Solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max)
 {
-  complex x0t0[NNNPLUS1];  // t = real running in [0,1]
-  complex xt[NNNPLUS1]; complex *const x1t1 = xt;  // reusing xt's space to represent x1t1
-  complex *const x0 = x0t0; double *const t0 = (double *) (x0t0 + NNN);
-  complex dxdt[NNNPLUS1], *const dx = dxdt; double *const dt = (double *)(dxdt + NNN);
-  complex Hxt[NNNPLUS1 * NNN], *const HxH=Hxt;  // HxH is reusing Hxt
-  const complex * const RHS = Hxt + NNN2;  // Hx or Ht, same storage
-  complex * const LHS = Hxt;
+  complex Hxt[NNNPLUS1 * NNN]; 
+  complex x0t0xtblock[2*NNNPLUS1];
+  complex dxdt[NNNPLUS1];
   complex dxi[NNN];
+  complex *x0t0 = x0t0xtblock;  // t = real running in [0,1]
+  complex *x0 = x0t0;
+  double  *t0 = (double *) (x0t0 + NNN);
+  complex *xt = x0t0xtblock + NNNPLUS1; 
+  complex *x1t1 = xt;  // reusing xt's space to represent x1t1
+  complex *const HxH=Hxt;  // HxH is reusing Hxt
+  complex *const dx = dxdt;
+  const complex *const RHS = Hxt + NNN2;  // Hx or Ht, same storage
+  complex *const LHS = Hxt;
   complex *const dx4 = dx;   // reuse dx for dx4
-  // TODO: test by making variables static for a second run, some of these arrays may have to be zeroed
-  // One huge clear instruction will work as they are sequential in mem.
+  double *const dt = (double *)(dxdt + NNN);
   const double t_step = s->init_dt_;  // initial step
   using namespace Eigen; // only used for linear solve
   Map<Matrix<complex, NNN, 1> > dxi_eigen(dxi);
@@ -762,7 +766,10 @@ ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const c
         if (*dt < s->min_dt_) t_s->status = MIN_STEP_FAILED; // slight difference to SLP-imp.hpp:612
       } else { // predictor success
         ++predictor_successes;
-        array_copy_NNNplus1(x1t1, x0t0);
+        std::swap(x1t1,x0t0);
+        x0 = x0t0;
+        t0 = (double *) (x0t0 + NNN);
+        xt = x1t1;
         // 
         // swap x1t1 x0t0
         //
