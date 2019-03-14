@@ -38,6 +38,7 @@ typedef std::complex<double> complex;
 // 
 // We use underscore in case we want to make setters/getters with same name,
 // or members of Tracker class if more complete C++ desired
+template <typename TFLOAT>
 struct TrackerSettings {
   TrackerSettings():
     init_dt_(0.05),   // m2 tStep, t_step, raw interface code initDt
@@ -53,17 +54,17 @@ struct TrackerSettings {
     infinity_threshold2_(infinity_threshold_ * infinity_threshold_)
   { }
   
-  double init_dt_;   // m2 tStep, t_step, raw interface code initDt
-  double min_dt_;        // m2 tStepMin, raw interface code minDt
-  double end_zone_factor_;
-  double epsilon_; // m2 CorrectorTolerance (chicago.m2, track.m2), raw interface code epsilon (interface2.d, NAG.cpp:rawSwetParametersPT)
-  double epsilon2_; 
+  TFLOAT init_dt_;   // m2 tStep, t_step, raw interface code initDt
+  TFLOAT min_dt_;        // m2 tStepMin, raw interface code minDt
+  TFLOAT end_zone_factor_;
+  TFLOAT epsilon_; // m2 CorrectorTolerance (chicago.m2, track.m2), raw interface code epsilon (interface2.d, NAG.cpp:rawSwetParametersPT)
+  TFLOAT epsilon2_; 
   unsigned max_corr_steps_;  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
-  double dt_increase_factor_;  // m2 stepIncreaseFactor
-  double dt_decrease_factor_;  // m2 stepDecreaseFactor not existent in DEFAULT, using what is in track.m2:77 
+  TFLOAT dt_increase_factor_;  // m2 stepIncreaseFactor
+  TFLOAT dt_decrease_factor_;  // m2 stepDecreaseFactor not existent in DEFAULT, using what is in track.m2:77 
   unsigned num_successes_before_increase_; // m2 numberSuccessesBeforeIncrease
-  double infinity_threshold_; // m2 InfinityThreshold
-  double infinity_threshold2_;
+  TFLOAT infinity_threshold_; // m2 InfinityThreshold
+  TFLOAT infinity_threshold2_;
 };
 
 // Current settings from Tim: Fri Feb 22 12:00:06 -03 2019 Git 0ec3340
@@ -98,7 +99,7 @@ struct TrackerSettings {
 //                      tStep => .05
 //                      tStepMin => 1e-7
 
-static const TrackerSettings MINUS_DEFAULT;
+static const TrackerSettings<double> MINUS_DEFAULT;
 
 enum SolutionStatus {
   UNDETERMINED,
@@ -122,7 +123,10 @@ struct Solution
 };
 
 
-unsigned ptrack(const TrackerSettings *t, const complex s_sols[NNN*NSOLS], const complex params[NPARAMS], Solution raw_solutions[NSOLS]);
+/*
+unsigned ptrack(const TrackerSettings<double> *t, const complex s_sols[NNN*NSOLS], const complex params[NPARAMS], Solution raw_solutions[NSOLS]);
+*/
 
-unsigned  ptrack_subset(const TrackerSettings *s, const complex s_sols[NNN*NSOLS], const complex params[2*NPARAMS], Solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max);
+
+unsigned  ptrack_subset(const TrackerSettings<double> *s, const complex s_sols[NNN*NSOLS], const complex params[2*NPARAMS], Solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max);
 #endif  // minus_h_
