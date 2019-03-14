@@ -1,5 +1,19 @@
 #ifndef minus_h_
 #define minus_h_
+// 
+// \brief MInimal problem NUmerical continuation package
+// \author Ricardo Fabbri based on original code by Anton Leykin 
+// \date Created: Fri Feb  8 17:42:49 EST 2019
+//
+// \verbatim
+// Modifications
+//    Leykin Feb82019: Initial sketch as simplified code from Macaulay e/NAG.*
+//    Tim    Feb2019:  Chicago-specific prototype in Macaulay2
+// \endverbatim
+//
+// OPTIMIZATIONS
+//  - see trifocal.key in bignotes for basic results
+//  - see CMakeLists.txt and README.md
 
 #define NSOLS 312  /* template these */
 #define NNN 14 
