@@ -42,7 +42,7 @@ struct TrackerSettings {
   TrackerSettings():
     init_dt_(0.05),   // m2 tStep, t_step, raw interface code initDt
     min_dt_(1e-7),        // m2 tStepMin, raw interface code minDt
-    end_zone_factor_(0.05),
+    end_zone_factor_(0.03),
     epsilon_(.001), // m2 CorrectorTolerance (chicago.m2, track.m2), raw interface code epsilon (interface2.d, NAG.cpp:rawSwetParametersPT)
     epsilon2_(epsilon_ * epsilon_), 
     max_corr_steps_(5),  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
