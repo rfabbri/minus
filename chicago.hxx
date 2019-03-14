@@ -1,5 +1,7 @@
 #ifndef chicago_hxx_
 #define chicago_hxx_
+
+#define complex C<F>
 // Evaluates Hx and Ht at the same time, reusing expressions.
 // 
 // Map from a multivariate poly with x 127-dimensional to y NNNxNNNPLUS1 dimensional
@@ -7,6 +9,7 @@
 // 
 // cCode(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"Ht",gateMatrix{cameraVars})
 // (Ask Tim for the way to use cCode so that the input orders are like this.
+template <typename F=double>
 static inline void 
 evaluate_Hxt(const complex * __restrict__ x /*x, t*/, const complex * __restrict__ params, complex * __restrict__ y /*HxH*/) 
 {
@@ -3810,6 +3813,7 @@ evaluate_Hxt(const complex * __restrict__ x /*x, t*/, const complex * __restrict
 // 
 // cCode(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H",gateMatrix{cameraVars})
 // (Ask Tim for the way to use cCode so that the input orders are like this.
+template <typename F=double>
 static inline void 
 evaluate_HxH(const complex* __restrict__ x /*x and t*/, const complex * __restrict__ params, complex* __restrict__ y /*HxH*/) 
 {
@@ -6995,4 +6999,5 @@ evaluate_HxH(const complex* __restrict__ x /*x and t*/, const complex * __restri
   y[208] = -G2828;
   y[209] = -G2836;
 }
+#undef complex
 #endif // chicago_hxx

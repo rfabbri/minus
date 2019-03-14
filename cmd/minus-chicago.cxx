@@ -7,9 +7,15 @@
 #include <iomanip>
 #include <chrono>
 #include <thread>
-#include <minus.h>
+#include <minus.hxx>
+static constexpr double tol = 1e-3;
 
-static const double dbgtol = 1e-3;
+#define FloatT double
+typedef std::complex<FloatT> complex;
+using M = Minus<FloatT>;
+
+// using ptrack as ptrack<n,n,n,n>: here we set it.
+
 
 #define M_VERBOSE 1
 using namespace std::chrono;
@@ -4871,8 +4877,9 @@ const double line_complex[5][9] =
 // Reshape a to have proper real and imaginary parts
 // a = a_raw(1:2:end) + i*a_raw(2:2:end);
 // 
+template <typename F=double>
 static bool
-mwrite(const Solution s[NSOLS], const char *fname)
+mwrite(const Solution<F> s[NSOLS], const char *fname)
 {
   bool scilab=false;
 
@@ -4938,12 +4945,12 @@ mwrite(const Solution s[NSOLS], const char *fname)
 // be it point-tangents as in Ric's format, be it a linecomplex as in Hongy's format
 //
 // This format is generic enough to be adapted to M2 or matlab
+template <typename F=double>
 static bool
 mread(const char *fname)
 {
   std::ifstream infp;
   std::istream *inp = &std::cin;
-  
   
   if (!stdio_) {
     infp.open(fname, std::ios::in);
@@ -4958,8 +4965,8 @@ mread(const char *fname)
     
   in.exceptions(std::istream::failbit | std::istream::badbit);
   unsigned i=0;
-  double *dparams = (double *)params_;
-  while (!in.eof() && dparams != (double *)params_+2*2*NPARAMS) {
+  F *dparams = (F *)params_;
+  while (!in.eof() && dparams != (F *)params_+2*2*NPARAMS) {
       try {
       in >> *dparams++;
       // std::cerr << "reading " <<  *(dparams-1) << std::endl;;
@@ -4973,7 +4980,7 @@ mread(const char *fname)
         return false;
       }
   }
-  if (dparams != (double *)params_+2*2*NPARAMS)
+  if (dparams != (F *)params_+2*2*NPARAMS)
     std::cerr << "I/O Premature input termination\n";
 
 //  for (unsigned i=0; i < 2*NPARAMS; ++i)
@@ -5016,9 +5023,9 @@ main(int argc, char **argv)
     std::cerr << "LOG Running default solve for profiling\n";
   #endif 
 
-  if (!profile && !mread(input)) return 1; // reads into global params_
+  if (!profile && !mread<FloatT>(input)) return 1; // reads into global params_
   
-  static Solution solutions[NSOLS];
+  static Solution<FloatT> solutions[NSOLS];
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   #ifdef M_VERBOSE
   std::cerr << "LOG \033[0;33mStarting path tracker\e[m\n" << std::endl;
@@ -5028,10 +5035,10 @@ main(int argc, char **argv)
   {
     std::cerr << "LOG \033[0;33mUsing 4 threads by default\e[m\n" << std::endl;
     std::thread t[4];
-    t[0] = std::thread(ptrack_subset, MINUS_DEFAULT, start_sols_, params_, solutions, 0, 78);
-    t[1] = std::thread(ptrack_subset, MINUS_DEFAULT, start_sols_, params_, solutions, 78, 78*2);
-    t[2] = std::thread(ptrack_subset, MINUS_DEFAULT, start_sols_, params_, solutions, 78*2, 78*3);
-    t[3] = std::thread(ptrack_subset, MINUS_DEFAULT, start_sols_, params_, solutions, 78*3, 78*4);
+    t[0] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 0, 78);
+    t[1] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 78, 78*2);
+    t[2] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 78*2, 78*3);
+    t[3] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 78*3, 78*4);
     t[0].join(); t[1].join(); t[2].join(); t[3].join();
   }
   //  ptrack_subset(&MINUS_DEFAULT, start_sols_, params_, solutions, 0, 312);
@@ -5040,8 +5047,8 @@ main(int argc, char **argv)
   if (profile) {
     // compare solutions to certain values from M2
     // two random entries
-    if (std::abs(solutions[1].x[1] - complex(-.25177177692982444e1, -.84845195030295639)) <= dbgtol &&
-        std::abs(solutions[NSOLS-2].x[2] - complex(.7318330016224166, .10129116603501138)) <= dbgtol)
+    if (std::abs(solutions[1].x[1] - complex(-.25177177692982444e1, -.84845195030295639)) <= tol &&
+        std::abs(solutions[NSOLS-2].x[2] - complex(.7318330016224166, .10129116603501138)) <= tol)
       std::cerr << "LOG solutions look OK\n";
     else  {
       std::cerr << "LOG \033[1;91merror:\e[m solutions dont match m2. Errors: ";
@@ -5049,7 +5056,7 @@ main(int argc, char **argv)
           << std::abs(solutions[NSOLS-2].x[2] - complex(.7318330016224166, .10129116603501138)) << std::endl;
     }
   }
-  if (!mwrite(solutions, output)) return 2;
+  if (!mwrite<FloatT>(solutions, output)) return 2;
   #ifdef M_VERBOSE
   std::cerr << "LOG \033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
   #endif

@@ -15,13 +15,16 @@
 //
 // OPTIMIZATIONS
 //  - see trifocal.key in bignotes for basic results
-//  - see CMakeLists.txt
+//  - see CMakeLists.txt and README.md
 
 
 #include <complex>
 #include <cstring>
 
-typedef std::complex<double> complex;
+// typedef std::complex<double> complex;
+
+template <typename F=double>
+using C = std::complex<F>;
 
 #define NSOLS 312  /* template these */
 #define NNN 14 
@@ -38,7 +41,7 @@ typedef std::complex<double> complex;
 // 
 // We use underscore in case we want to make setters/getters with same name,
 // or members of Tracker class if more complete C++ desired
-template <typename TFLOAT>
+template <typename F=double>
 struct TrackerSettings {
   TrackerSettings():
     init_dt_(0.05),   // m2 tStep, t_step, raw interface code initDt
@@ -54,17 +57,17 @@ struct TrackerSettings {
     infinity_threshold2_(infinity_threshold_ * infinity_threshold_)
   { }
   
-  TFLOAT init_dt_;   // m2 tStep, t_step, raw interface code initDt
-  TFLOAT min_dt_;        // m2 tStepMin, raw interface code minDt
-  TFLOAT end_zone_factor_;
-  TFLOAT epsilon_; // m2 CorrectorTolerance (chicago.m2, track.m2), raw interface code epsilon (interface2.d, NAG.cpp:rawSwetParametersPT)
-  TFLOAT epsilon2_; 
+  F init_dt_;   // m2 tStep, t_step, raw interface code initDt
+  F min_dt_;        // m2 tStepMin, raw interface code minDt
+  F end_zone_factor_;
+  F epsilon_; // m2 CorrectorTolerance (chicago.m2, track.m2), raw interface code epsilon (interface2.d, NAG.cpp:rawSwetParametersPT)
+  F epsilon2_; 
   unsigned max_corr_steps_;  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
-  TFLOAT dt_increase_factor_;  // m2 stepIncreaseFactor
-  TFLOAT dt_decrease_factor_;  // m2 stepDecreaseFactor not existent in DEFAULT, using what is in track.m2:77 
+  F dt_increase_factor_;  // m2 stepIncreaseFactor
+  F dt_decrease_factor_;  // m2 stepDecreaseFactor not existent in DEFAULT, using what is in track.m2:77 
   unsigned num_successes_before_increase_; // m2 numberSuccessesBeforeIncrease
-  TFLOAT infinity_threshold_; // m2 InfinityThreshold
-  TFLOAT infinity_threshold2_;
+  F infinity_threshold_; // m2 InfinityThreshold
+  F infinity_threshold2_;
 };
 
 // Current settings from Tim: Fri Feb 22 12:00:06 -03 2019 Git 0ec3340
@@ -99,7 +102,6 @@ struct TrackerSettings {
 //                      tStep => .05
 //                      tStepMin => 1e-7
 
-static const TrackerSettings<double> MINUS_DEFAULT;
 
 enum SolutionStatus {
   UNDETERMINED,
@@ -113,15 +115,25 @@ enum SolutionStatus {
   DECREASE_PRECISION
 };
 
+template <typename F=double>
 struct Solution
 {
-  complex x[NNN];    // array of n coordinates
-  double t;          // last value of parameter t used
+  C<F> x[NNN];    // array of n coordinates
+  F t;          // last value of parameter t used
   SolutionStatus status;
   //  unsigned num_steps;  // number of steps taken along the path
   Solution() : status(UNDETERMINED) { }
 };
 
+template <typename F=double>
+class Minus {
+  public:
+  static const TrackerSettings<F> DEFAULT;
+  static unsigned 
+  track(const TrackerSettings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], Solution<F> raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max);
+};
+template <typename F>
+const TrackerSettings<F> Minus<F>::DEFAULT;
 
-unsigned ptrack_subset(const TrackerSettings<double> &s, const complex s_sols[NNN*NSOLS], const complex params[2*NPARAMS], Solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max);
+
 #endif  // minus_h_
