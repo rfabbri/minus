@@ -5008,33 +5008,33 @@ main(int argc, char **argv)
     print_usage();
   }
 
-#ifdef M_VERBOSE
+  #ifdef M_VERBOSE
   if (!profile) {
     std::cerr << "LOG Input being read from " << input << std::endl;
     std::cerr << "LOG Output being written to " << output << std::endl;
   } else
     std::cerr << "LOG Running default solve for profiling\n";
-#endif 
+  #endif 
 
   if (!profile && !mread(input)) return 1; // reads into global params_
   
   static Solution solutions[NSOLS];
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
-#ifdef M_VERBOSE
+  #ifdef M_VERBOSE
   std::cerr << "LOG \033[0;33mStarting path tracker\e[m\n" << std::endl;
-#endif 
+  #endif 
   //  unsigned retval = 
   //  ptrack(&MINUS_DEFAULT, start_sols_, params_, solutions);
   {
     std::cerr << "LOG \033[0;33mUsing 4 threads by default\e[m\n" << std::endl;
     std::thread t[4];
-    t[0] = std::thread(ptrack_subset, &MINUS_DEFAULT, start_sols_, params_, solutions, 0, 78);
-    t[1] = std::thread(ptrack_subset, &MINUS_DEFAULT, start_sols_, params_, solutions, 78, 78*2);
-    t[2] = std::thread(ptrack_subset, &MINUS_DEFAULT, start_sols_, params_, solutions, 78*2, 78*3);
-    t[3] = std::thread(ptrack_subset, &MINUS_DEFAULT, start_sols_, params_, solutions, 78*3, 78*4);
+    t[0] = std::thread(ptrack_subset, MINUS_DEFAULT, start_sols_, params_, solutions, 0, 78);
+    t[1] = std::thread(ptrack_subset, MINUS_DEFAULT, start_sols_, params_, solutions, 78, 78*2);
+    t[2] = std::thread(ptrack_subset, MINUS_DEFAULT, start_sols_, params_, solutions, 78*2, 78*3);
+    t[3] = std::thread(ptrack_subset, MINUS_DEFAULT, start_sols_, params_, solutions, 78*3, 78*4);
     t[0].join(); t[1].join(); t[2].join(); t[3].join();
   }
-//  ptrack_subset(&MINUS_DEFAULT, start_sols_, params_, solutions, 0, 312);
+  //  ptrack_subset(&MINUS_DEFAULT, start_sols_, params_, solutions, 0, 312);
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   auto duration = duration_cast<milliseconds>( t2 - t1 ).count();
   if (profile) {
@@ -5050,14 +5050,9 @@ main(int argc, char **argv)
     }
   }
   if (!mwrite(solutions, output)) return 2;
-#ifdef M_VERBOSE
+  #ifdef M_VERBOSE
   std::cerr << "LOG \033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
-#endif
+  #endif
    
-  // test openmp
-  // #pragma omp parallel for
-//  for(int n=0; n<10; ++n) printf(" %d", n);
-//    printf(".\n");
-  
   return 0;
 }

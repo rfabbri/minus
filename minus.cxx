@@ -342,7 +342,7 @@ array_norm2(const complex *__restrict__ a)
 // TODO: template min, max
 // 
 unsigned    
-ptrack_subset(const TrackerSettings<double> *s, const complex s_sols[NNN*NSOLS], const complex params[2*NPARAMS], Solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max)
+ptrack_subset(const TrackerSettings<double> &s, const complex s_sols[NNN*NSOLS], const complex params[2*NPARAMS], Solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max)
 {
   complex Hxt[NNNPLUS1 * NNN]; 
   complex x0t0xtblock[2*NNNPLUS1];
@@ -359,7 +359,7 @@ ptrack_subset(const TrackerSettings<double> *s, const complex s_sols[NNN*NSOLS],
   complex *const LHS = Hxt;
   complex *const dx4 = dx;   // reuse dx for dx4
   double *const dt = (double *)(dxdt + NNN);
-  const double &t_step = s->init_dt_;  // initial step
+  const double &t_step = s.init_dt_;  // initial step
   using namespace Eigen; // only used for linear solve
   Map<Matrix<complex, NNN, 1> > dxi_eigen(dxi);
   Map<Matrix<complex, NNN, 1> > dx4_eigen(dx4);
@@ -380,12 +380,12 @@ ptrack_subset(const TrackerSettings<double> *s, const complex s_sols[NNN*NSOLS],
 
     // track H(x,t) for t in [0,1]
     while (t_s->status == PROCESSING && 1 - *t0 > the_smallest_number) {
-      if (!end_zone && 1 - *t0 <= s->end_zone_factor_ + the_smallest_number)
+      if (!end_zone && 1 - *t0 <= s.end_zone_factor_ + the_smallest_number)
         end_zone = true; // TODO: see if this path coincides with any other path on entry to the end zone
       if (end_zone) {
           if (*dt > 1 - *t0) *dt = 1 - *t0;
-      } else if (*dt > 1 - s->end_zone_factor_ - *t0) *dt = 1 - s->end_zone_factor_ - *t0;
-      // PREDICTOR in: x0t0,dt out: dx
+      } else if (*dt > 1 - s.end_zone_factor_ - *t0) *dt = 1 - s.end_zone_factor_ - *t0;
+      /// PREDICTOR /// in: x0t0,dt out: dx
       /*  top-level code for Runge-Kutta-4
           dx1 := solveHxTimesDXequalsMinusHt(x0,t0);
           dx2 := solveHxTimesDXequalsMinusHt(x0+(1/2)*dx1*dt,t0+(1/2)*dt);
@@ -437,7 +437,7 @@ ptrack_subset(const TrackerSettings<double> *s, const complex s_sols[NNN*NSOLS],
       array_copy_NNNplus1(x0t0, x1t1);
       array_add_to_self_NNNplus1(x1t1, dxdt);
       
-      // CORRECTOR
+      /// CORRECTOR ///
       unsigned n_corr_steps = 0;
       bool is_successful;
       do {
@@ -445,34 +445,25 @@ ptrack_subset(const TrackerSettings<double> *s, const complex s_sols[NNN*NSOLS],
         evaluate_HxH(x1t1, params, HxH);
         dx_eigen = lu.compute(AA).solve(bb);
         array_add_to_self(x1t1, dx);
-        is_successful = array_norm2(dx) < s->epsilon2_ * array_norm2(x1t1);
-      } while (!is_successful && n_corr_steps < s->max_corr_steps_);
+        is_successful = array_norm2(dx) < s.epsilon2_ * array_norm2(x1t1);
+      } while (!is_successful && n_corr_steps < s.max_corr_steps_);
       
       if (!is_successful) { // predictor failure
         predictor_successes = 0;
-        *dt *= s->dt_decrease_factor_;
-        if (*dt < s->min_dt_) t_s->status = MIN_STEP_FAILED; // slight difference to SLP-imp.hpp:612
+        *dt *= s.dt_decrease_factor_;
+        if (*dt < s.min_dt_) t_s->status = MIN_STEP_FAILED; // slight difference to SLP-imp.hpp:612
       } else { // predictor success
         ++predictor_successes;
         std::swap(x1t1,x0t0);
         x0 = x0t0;
         t0 = (double *) (x0t0 + NNN);
         xt = x1t1;
-        // 
-        // swap x1t1 x0t0
-        //
-        // x1t1 new points
-        //  xt new point
-        //
-        // x0t0 new point
-        //  x0 new point, t0 new point
-        // 
-        if (predictor_successes >= s->num_successes_before_increase_) {
+        if (predictor_successes >= s.num_successes_before_increase_) {
           predictor_successes = 0;
-          *dt *= s->dt_increase_factor_;
+          *dt *= s.dt_increase_factor_;
         }
       }
-      if (array_norm2(x0) > s->infinity_threshold2_)
+      if (array_norm2(x0) > s.infinity_threshold2_)
         t_s->status = INFINITY_FAILED;
     } // while (t loop)
     // record the solution
