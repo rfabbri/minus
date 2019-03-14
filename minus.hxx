@@ -468,6 +468,12 @@ template <typename F=double>
 class Minus {
   public:
   static const TrackerSettings<F> DEFAULT;
+  
+  static unsigned track_all(const TrackerSettings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], Solution<F> raw_solutions[NSOLS])
+  {
+    track(s, s_sols, params, raw_solutions, 0, NNN); // TODO: template start and end
+  }
+  
   static unsigned track(const TrackerSettings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], Solution<F> raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max)
   {
     C<F> Hxt[NNNPLUS1 * NNN]; 
