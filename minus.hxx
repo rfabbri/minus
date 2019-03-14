@@ -1,16 +1,137 @@
 #ifndef minus_hxx_
 #define minus_hxx_
 // 
+// \brief MInimal problem NUmerical continuation package
 // \author Ricardo Fabbri based on original code by Anton Leykin 
 // \date Created: Fri Feb  8 17:42:49 EST 2019
 //
+// \verbatim
+// Modifications
+//    Leykin Feb82019: Initial sketch as simplified code from Macaulay e/NAG.*
+//    Tim    Feb2019:  Chicago-specific prototype in Macaulay2
+// \endverbatim
+//
+// OPTIMIZATIONS
+//  - see trifocal.key in bignotes for basic results
+//  - see CMakeLists.txt and README.md
 
-#include "minus.h" 
 #include <cstdio>
 #include <iostream>
 #include <iomanip>
 #include "Eigen/Core"
 #include "Eigen/LU"
+#include <complex>
+#include <cstring>
+
+// typedef std::complex<double> complex;
+
+template <typename F=double>
+using C = std::complex<F>;
+
+#define NSOLS 312  /* template these */
+#define NNN 14 
+#define NNNPLUS1 15 
+#define NNNPLUS2 16
+#define NNN2 196  /* NNN squared */
+#define NPARAMS 56 /* Number of parameters in parameter homotopy - eg, coefficients, etc, to represent NNNxNNN sys */
+
+
+// Tracker parameters
+// Default values obtained in M2 by doing 
+// eg DEFAULT#tStep
+// or peek DEFAULT
+// 
+// We use underscore in case we want to make setters/getters with same name,
+// or members of Tracker class if more complete C++ desired
+template <typename F=double>
+struct TrackerSettings {
+  TrackerSettings():
+    init_dt_(0.05),   // m2 tStep, t_step, raw interface code initDt
+    min_dt_(1e-7),        // m2 tStepMin, raw interface code minDt
+    end_zone_factor_(0.03),
+    epsilon_(.001), // m2 CorrectorTolerance (chicago.m2, track.m2), raw interface code epsilon (interface2.d, NAG.cpp:rawSwetParametersPT)
+    epsilon2_(epsilon_ * epsilon_), 
+    max_corr_steps_(5),  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
+    dt_increase_factor_(2.),  // m2 stepIncreaseFactor
+    dt_decrease_factor_(1./dt_increase_factor_),  // m2 stepDecreaseFactor not existent in DEFAULT, using what is in track.m2:77 
+    num_successes_before_increase_(20), // m2 numberSuccessesBeforeIncrease
+    infinity_threshold_(1e6), // m2 InfinityThreshold
+    infinity_threshold2_(infinity_threshold_ * infinity_threshold_)
+  { }
+  
+  F init_dt_;   // m2 tStep, t_step, raw interface code initDt
+  F min_dt_;        // m2 tStepMin, raw interface code minDt
+  F end_zone_factor_;
+  F epsilon_; // m2 CorrectorTolerance (chicago.m2, track.m2), raw interface code epsilon (interface2.d, NAG.cpp:rawSwetParametersPT)
+  F epsilon2_; 
+  unsigned max_corr_steps_;  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
+  F dt_increase_factor_;  // m2 stepIncreaseFactor
+  F dt_decrease_factor_;  // m2 stepDecreaseFactor not existent in DEFAULT, using what is in track.m2:77 
+  unsigned num_successes_before_increase_; // m2 numberSuccessesBeforeIncrease
+  F infinity_threshold_; // m2 InfinityThreshold
+  F infinity_threshold2_;
+};
+
+// Current settings from Tim: Fri Feb 22 12:00:06 -03 2019 Git 0ec3340
+// o9 = MutableHashTable{AffinePatches => DynamicPatch     }
+//                      Attempts => 5
+//                      Bits => infinity
+//                      CorrectorTolerance => .000001
+//                      EndZoneFactor => .05
+//                      ErrorTolerance => 1e-8
+//                      Field => CC
+//                      gamma => 1
+//                      InfinityThreshold => 1e7
+//                      Iterations => 30
+//                      maxCorrSteps => 3
+//                      maxNumberOfVariables => 50
+//                      MultistepDegree => 3
+//                      NoOutput => true
+//                      Normalize => false
+//                      numberSuccessesBeforeIncrease => 2
+//                      Precision => 53
+//                      Predictor => RungeKutta4
+//                      Projectivize => false
+//                      ResidualTolerance => .0001
+//                      SingularConditionNumber => 100000
+//                      SLP => false
+//                      SLPcorrector => false
+//                      SLPpredictor => false
+//                      Software => M2engine
+//                      stepIncreaseFactor => 2
+//                      tDegree => 1
+//                      Tolerance => .000001
+//                      tStep => .05
+//                      tStepMin => 1e-7
+
+
+enum SolutionStatus {
+  UNDETERMINED,
+  PROCESSING,
+  REGULAR,
+  SINGULAR,
+  INFINITY_FAILED,
+  MIN_STEP_FAILED,
+  ORIGIN_FAILED,
+  INCREASE_PRECISION,
+  DECREASE_PRECISION
+};
+
+template <typename F=double>
+struct Solution
+{
+  C<F> x[NNN];    // array of n coordinates
+  F t;          // last value of parameter t used
+  SolutionStatus status;
+  //  unsigned num_steps;  // number of steps taken along the path
+  Solution() : status(UNDETERMINED) { }
+};
+
+
+
+
+
+
 //#include "Eigen/QR"
 #include "chicago.hxx"
 
@@ -341,7 +462,148 @@ array_norm2(const C<F> *__restrict__ a)
   return val;
 }
 
-#define linear linear_eigen2
+// #define linear linear_eigen2
+
+template <typename F=double>
+class Minus {
+  public:
+  static const TrackerSettings<F> DEFAULT;
+  static unsigned track(const TrackerSettings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], Solution<F> raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max)
+  {
+    C<F> Hxt[NNNPLUS1 * NNN]; 
+    C<F> x0t0xtblock[2*NNNPLUS1];
+    C<F> dxdt[NNNPLUS1];
+    C<F> dxi[NNN];
+    C<F> *x0t0 = x0t0xtblock;  // t = real running in [0,1]
+    C<F> *x0 = x0t0;
+    F    *t0 = (F *) (x0t0 + NNN);
+    C<F> *xt = x0t0xtblock + NNNPLUS1; 
+    C<F> *x1t1 = xt;      // reusing xt's space to represent x1t1
+    C<F> *const HxH=Hxt;  // HxH is reusing Hxt
+    C<F> *const dx = dxdt;
+    const C<F> *const RHS = Hxt + NNN2;  // Hx or Ht, same storage
+    C<F> *const LHS = Hxt;
+    C<F> *const dx4 = dx;   // reuse dx for dx4
+    F    *const dt = (F *)(dxdt + NNN);
+    const F &t_step = s.init_dt_;  // initial step
+    using namespace Eigen; // only used for linear solve
+    Map<Matrix<C<F>, NNN, 1> > dxi_eigen(dxi);
+    Map<Matrix<C<F>, NNN, 1> > dx4_eigen(dx4);
+    Map<Matrix<C<F>, NNN, 1> > &dx_eigen = dx4_eigen;
+    Map<const Matrix<C<F>, NNN, NNN> > AA((C<F> *)Hxt,NNN,NNN);  // accessors for the data
+    Map<const Matrix<C<F>, NNN, 1> > bb(RHS);
+    static constexpr F the_smallest_number = 1e-13;
+
+    Solution<F> *t_s = raw_solutions + sol_min;  // current target solution
+    const C<F>* __restrict__ s_s = s_sols + sol_min*NNN;    // current start solution
+    // for (unsigned sol_n = 0; sol_n < NSOLS; ++sol_n)  // outer loop
+    for (unsigned sol_n = sol_min; sol_n < sol_max; ++sol_n) { // solution loop
+      t_s->status = PROCESSING;
+      bool end_zone = false;
+      array_copy(s_s, x0);
+      *t0 = 0;
+      *dt = t_step;
+      unsigned predictor_successes = 0;
+
+      // track H(x,t) for t in [0,1]
+      while (t_s->status == PROCESSING && 1 - *t0 > the_smallest_number) {
+        if (!end_zone && 1 - *t0 <= s.end_zone_factor_ + the_smallest_number)
+          end_zone = true; // TODO: see if this path coincides with any other path on entry to the end zone
+        if (end_zone) {
+            if (*dt > 1 - *t0) *dt = 1 - *t0;
+        } else if (*dt > 1 - s.end_zone_factor_ - *t0) *dt = 1 - s.end_zone_factor_ - *t0;
+        /// PREDICTOR /// in: x0t0,dt out: dx
+        /*  top-level code for Runge-Kutta-4
+            dx1 := solveHxTimesDXequalsMinusHt(x0,t0);
+            dx2 := solveHxTimesDXequalsMinusHt(x0+(1/2)*dx1*dt,t0+(1/2)*dt);
+            dx3 := solveHxTimesDXequalsMinusHt(x0+(1/2)*dx2*dt,t0+(1/2)*dt);
+            dx4 := solveHxTimesDXequalsMinusHt(x0+dx3*dt,t0+dt);
+            (1/6)*dt*(dx1+2*dx2+2*dx3+dx4) */
+        array_copy_NNNplus1(x0t0, xt);
+
+        // dx1
+        evaluate_Hxt<F>(xt, params, Hxt); // Outputs Hxt
+        PartialPivLU<Matrix<C<F>, NNN, NNN> > lu(AA);
+        dx4_eigen = lu.solve(bb);
+        
+        // dx2
+        const C<F> one_half_dt = *dt*0.5;
+        array_multiply_scalar_to_self(dx4, one_half_dt);
+        array_add_to_self(xt, dx4);
+        array_multiply_scalar_to_self<F>(dx4, 2.);
+        xt[NNN] += one_half_dt;  // t0+.5dt
+        evaluate_Hxt<F>(xt, params, Hxt);
+        dxi_eigen = lu.compute(AA).solve(bb);
+
+        // dx3
+        array_multiply_scalar_to_self(dxi, one_half_dt);
+        array_copy(x0t0, xt);
+        array_add_to_self(xt, dxi);
+        array_multiply_scalar_to_self<F>(dxi, 4);
+        array_add_to_self(dx4, dxi);
+        evaluate_Hxt<F>(xt, params, Hxt);
+        dxi_eigen = lu.compute(AA).solve(bb);
+
+        // dx4
+        array_multiply_scalar_to_self<F>(dxi, *dt);
+        array_copy_NNNplus1(x0t0, xt);
+        array_add_to_self(xt, dxi);
+        array_multiply_scalar_to_self<F>(dxi, 2);
+        array_add_to_self(dx4, dxi);
+        xt[NNN] = *t0 + *dt;               // t0+dt
+        evaluate_Hxt<F>(xt, params, Hxt);
+        dxi_eigen = lu.compute(AA).solve(bb);
+        array_multiply_scalar_to_self<F>(dxi, *dt);
+        array_add_to_self(dx4, dxi);
+        array_multiply_scalar_to_self<F>(dx4, 1./6.);
+
+        // "dx1" = .5*dx1*dt, "dx2" = .5*dx2*dt, "dx3" = dx3*dt. Eigen vectorizes this:
+        // dx4_eigen = (dx4_eigen* *dt + dx1_eigen*2 + dx2_eigen*4 + dx3_eigen*2)*(1./6.);
+        
+        // make prediction
+        array_copy_NNNplus1(x0t0, x1t1);
+        array_add_to_self_NNNplus1(x1t1, dxdt);
+        
+        /// CORRECTOR ///
+        unsigned n_corr_steps = 0;
+        bool is_successful;
+        do {
+          ++n_corr_steps;
+          evaluate_HxH<F>(x1t1, params, HxH);
+          dx_eigen = lu.compute(AA).solve(bb);
+          array_add_to_self(x1t1, dx);
+          is_successful = array_norm2(dx) < s.epsilon2_ * array_norm2(x1t1);
+        } while (!is_successful && n_corr_steps < s.max_corr_steps_);
+        
+        if (!is_successful) { // predictor failure
+          predictor_successes = 0;
+          *dt *= s.dt_decrease_factor_;
+          if (*dt < s.min_dt_) t_s->status = MIN_STEP_FAILED; // slight difference to SLP-imp.hpp:612
+        } else { // predictor success
+          ++predictor_successes;
+          std::swap(x1t1,x0t0);
+          x0 = x0t0;
+          t0 = (F *) (x0t0 + NNN);
+          xt = x1t1;
+          if (predictor_successes >= s.num_successes_before_increase_) {
+            predictor_successes = 0;
+            *dt *= s.dt_increase_factor_;
+          }
+        }
+        if (array_norm2(x0) > s.infinity_threshold2_)
+          t_s->status = INFINITY_FAILED;
+      } // while (t loop)
+      // record the solution
+      array_copy(x0, t_s->x);
+      t_s->t = *t0;
+      if (t_s->status == PROCESSING) t_s->status = REGULAR;
+      ++t_s;
+      s_s += NNN;
+    } // outer solution loop
+  }
+};
+template <typename F>
+const TrackerSettings<F> Minus<F>::DEFAULT;
 
 // THE MEAT //////////////////////////////////////////////////////////////////
 // t: tracker settings
@@ -351,142 +613,5 @@ array_norm2(const C<F> *__restrict__ a)
 //
 // TODO: template min, max
 // 
-template <typename F>
-unsigned Minus<F>::
-track(const TrackerSettings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], Solution<F> raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max)
-{
-  C<F> Hxt[NNNPLUS1 * NNN]; 
-  C<F> x0t0xtblock[2*NNNPLUS1];
-  C<F> dxdt[NNNPLUS1];
-  C<F> dxi[NNN];
-  C<F> *x0t0 = x0t0xtblock;  // t = real running in [0,1]
-  C<F> *x0 = x0t0;
-  F    *t0 = (F *) (x0t0 + NNN);
-  C<F> *xt = x0t0xtblock + NNNPLUS1; 
-  C<F> *x1t1 = xt;      // reusing xt's space to represent x1t1
-  C<F> *const HxH=Hxt;  // HxH is reusing Hxt
-  C<F> *const dx = dxdt;
-  const C<F> *const RHS = Hxt + NNN2;  // Hx or Ht, same storage
-  C<F> *const LHS = Hxt;
-  C<F> *const dx4 = dx;   // reuse dx for dx4
-  F    *const dt = (F *)(dxdt + NNN);
-  const F &t_step = s.init_dt_;  // initial step
-  using namespace Eigen; // only used for linear solve
-  Map<Matrix<C<F>, NNN, 1> > dxi_eigen(dxi);
-  Map<Matrix<C<F>, NNN, 1> > dx4_eigen(dx4);
-  Map<Matrix<C<F>, NNN, 1> > &dx_eigen = dx4_eigen;
-  Map<const Matrix<C<F>, NNN, NNN> > AA((C<F> *)Hxt,NNN,NNN);  // accessors for the data
-  Map<const Matrix<C<F>, NNN, 1> > bb(RHS);
-  static constexpr F the_smallest_number = 1e-13;
-
-  Solution<F> *t_s = raw_solutions + sol_min;  // current target solution
-  const C<F>* __restrict__ s_s = s_sols + sol_min*NNN;    // current start solution
-  // for (unsigned sol_n = 0; sol_n < NSOLS; ++sol_n)  // outer loop
-  for (unsigned sol_n = sol_min; sol_n < sol_max; ++sol_n) { // solution loop
-    t_s->status = PROCESSING;
-    bool end_zone = false;
-    array_copy(s_s, x0);
-    *t0 = 0;
-    *dt = t_step;
-    unsigned predictor_successes = 0;
-
-    // track H(x,t) for t in [0,1]
-    while (t_s->status == PROCESSING && 1 - *t0 > the_smallest_number) {
-      if (!end_zone && 1 - *t0 <= s.end_zone_factor_ + the_smallest_number)
-        end_zone = true; // TODO: see if this path coincides with any other path on entry to the end zone
-      if (end_zone) {
-          if (*dt > 1 - *t0) *dt = 1 - *t0;
-      } else if (*dt > 1 - s.end_zone_factor_ - *t0) *dt = 1 - s.end_zone_factor_ - *t0;
-      /// PREDICTOR /// in: x0t0,dt out: dx
-      /*  top-level code for Runge-Kutta-4
-          dx1 := solveHxTimesDXequalsMinusHt(x0,t0);
-          dx2 := solveHxTimesDXequalsMinusHt(x0+(1/2)*dx1*dt,t0+(1/2)*dt);
-          dx3 := solveHxTimesDXequalsMinusHt(x0+(1/2)*dx2*dt,t0+(1/2)*dt);
-          dx4 := solveHxTimesDXequalsMinusHt(x0+dx3*dt,t0+dt);
-          (1/6)*dt*(dx1+2*dx2+2*dx3+dx4) */
-      array_copy_NNNplus1(x0t0, xt);
-
-      // dx1
-      evaluate_Hxt<F>(xt, params, Hxt); // Outputs Hxt
-      PartialPivLU<Matrix<C<F>, NNN, NNN> > lu(AA);
-      dx4_eigen = lu.solve(bb);
-      
-      // dx2
-      const C<F> one_half_dt = *dt*0.5;
-      array_multiply_scalar_to_self(dx4, one_half_dt);
-      array_add_to_self(xt, dx4);
-      array_multiply_scalar_to_self<F>(dx4, 2.);
-      xt[NNN] += one_half_dt;  // t0+.5dt
-      evaluate_Hxt<F>(xt, params, Hxt);
-      dxi_eigen = lu.compute(AA).solve(bb);
-
-      // dx3
-      array_multiply_scalar_to_self(dxi, one_half_dt);
-      array_copy(x0t0, xt);
-      array_add_to_self(xt, dxi);
-      array_multiply_scalar_to_self<F>(dxi, 4);
-      array_add_to_self(dx4, dxi);
-      evaluate_Hxt<F>(xt, params, Hxt);
-      dxi_eigen = lu.compute(AA).solve(bb);
-
-      // dx4
-      array_multiply_scalar_to_self<F>(dxi, *dt);
-      array_copy_NNNplus1(x0t0, xt);
-      array_add_to_self(xt, dxi);
-      array_multiply_scalar_to_self<F>(dxi, 2);
-      array_add_to_self(dx4, dxi);
-      xt[NNN] = *t0 + *dt;               // t0+dt
-      evaluate_Hxt<F>(xt, params, Hxt);
-      dxi_eigen = lu.compute(AA).solve(bb);
-      array_multiply_scalar_to_self<F>(dxi, *dt);
-      array_add_to_self(dx4, dxi);
-      array_multiply_scalar_to_self<F>(dx4, 1./6.);
-
-      // "dx1" = .5*dx1*dt, "dx2" = .5*dx2*dt, "dx3" = dx3*dt. Eigen vectorizes this:
-      // dx4_eigen = (dx4_eigen* *dt + dx1_eigen*2 + dx2_eigen*4 + dx3_eigen*2)*(1./6.);
-      
-      // make prediction
-      array_copy_NNNplus1(x0t0, x1t1);
-      array_add_to_self_NNNplus1(x1t1, dxdt);
-      
-      /// CORRECTOR ///
-      unsigned n_corr_steps = 0;
-      bool is_successful;
-      do {
-        ++n_corr_steps;
-        evaluate_HxH<F>(x1t1, params, HxH);
-        dx_eigen = lu.compute(AA).solve(bb);
-        array_add_to_self(x1t1, dx);
-        is_successful = array_norm2(dx) < s.epsilon2_ * array_norm2(x1t1);
-      } while (!is_successful && n_corr_steps < s.max_corr_steps_);
-      
-      if (!is_successful) { // predictor failure
-        predictor_successes = 0;
-        *dt *= s.dt_decrease_factor_;
-        if (*dt < s.min_dt_) t_s->status = MIN_STEP_FAILED; // slight difference to SLP-imp.hpp:612
-      } else { // predictor success
-        ++predictor_successes;
-        std::swap(x1t1,x0t0);
-        x0 = x0t0;
-        t0 = (F *) (x0t0 + NNN);
-        xt = x1t1;
-        if (predictor_successes >= s.num_successes_before_increase_) {
-          predictor_successes = 0;
-          *dt *= s.dt_increase_factor_;
-        }
-      }
-      if (array_norm2(x0) > s.infinity_threshold2_)
-        t_s->status = INFINITY_FAILED;
-    } // while (t loop)
-    // record the solution
-    array_copy(x0, t_s->x);
-    t_s->t = *t0;
-    if (t_s->status == PROCESSING) t_s->status = REGULAR;
-    ++t_s;
-    s_s += NNN;
-  } // outer solution loop
-
-  return 0;  // in the past, n_sols was returned, which now is NSOLS
-}
 
 #endif // minus_hxx_
