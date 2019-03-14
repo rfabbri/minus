@@ -197,10 +197,14 @@ set(MINUS_LIBRARY_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} CACHE STATIC "Where all
 # endif()
 
 
-# XXX: to be removed when header-only library is deployed
-# set (minus_sources
-#   minus.cxx              minus.hxx minus.h chicago.hxx
-# )
+# optional, header-only library can be used without this library
+# library is useful when the function will be used in many places
+# to avoid having to include Minus many times and slowdown the compiler
+set (minus_sources
+  minus.hxx minus.h chicago.hxx
+)
+
+aux_source_directory(Templates minus_sources)
 
 add_subdirectory(cmd) 
 
@@ -213,7 +217,7 @@ if(VXL_FOUND)  # For now we need vxl to build tests
 endif()
 
 # For now, we have a library
-# add_library( minus ${minus_sources} )
+add_library( minus ${minus_sources} )
 
 # This command must be the last command in this file
 #if(NOT MINUS_NO_EXPORT)

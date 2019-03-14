@@ -7,7 +7,7 @@
 #include <iomanip>
 #include <chrono>
 #include <thread>
-#include <minus.hxx>
+#include <minus.h>
 static constexpr double tol = 1e-3;
 
 #define FloatT double
