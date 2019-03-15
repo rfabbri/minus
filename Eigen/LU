@@ -23,8 +23,8 @@
   * \endcode
   */
 
-#include "src/misc/Kernel.h"
-#include "src/misc/Image.h"
+//#include "src/misc/Kernel.h"
+//#include "src/misc/Image.h"
 //#include "src/LU/FullPivLU.h"
 #include "src/LU/PartialPivLU.h"
 /*

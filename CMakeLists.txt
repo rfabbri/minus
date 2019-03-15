@@ -89,17 +89,17 @@ set( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${MINUS_EXTRA_CMAKE
 # In order to be able to link vxl libraries into shared libraries on 64 bit linux, the -fPIC
 # compiler flag must be added.  Only do this if we are on a x86_64 *nix platform, we're building
 # static libraries, and the user has not explicitly requested position dependent code.
-# if(UNIX)
-#   if(NOT BUILD_SHARED_LIBS AND CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
-#     option(VXL_BUILD_POSITION_DEPENDENT_CODE "Generate position dependent code (i.e. code cannot be used in shared library)" OFF)
-#     mark_as_advanced(VXL_BUILD_POSITION_DEPENDENT_CODE)
-#     if(NOT VXL_BUILD_POSITION_DEPENDENT_CODE)
-#       message(STATUS "Adding -fPIC compiler flag to generate position independent code.")
-#       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-#       set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
-#     endif()
-#   endif()
-# endif()
+if(UNIX)
+  if(NOT BUILD_SHARED_LIBS AND CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+    option(VXL_BUILD_POSITION_DEPENDENT_CODE "Generate position dependent code (i.e. code cannot be used in shared library)" OFF)
+    mark_as_advanced(VXL_BUILD_POSITION_DEPENDENT_CODE)
+    if(NOT VXL_BUILD_POSITION_DEPENDENT_CODE)
+      message(STATUS "Adding -fPIC compiler flag to generate position independent code.")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+    endif()
+  endif()
+endif()
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     # require at least gcc 4.8
@@ -226,14 +226,14 @@ add_library( minus ${minus_sources} )
 #endif()
 
 ## TODO: use add_compile_options(-Wall) etc
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall" CACHE STRING "" )
 
 # Crucial flags for performance
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native" CACHE STRING "" )
 
 # This one is the most important one - order of magnitude faster
 # See this: https://gcc.gnu.org/ml/gcc/2001-07/msg02150.html
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffast-math")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffast-math" CACHE STRING "" )
 # --fast-math breaks into these:
 #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-math-errno -ffinite-math-only -fno-rounding-math -fno-signaling-nans -fcx-limited-range -fexcess-precision=fast")
 

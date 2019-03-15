@@ -21,13 +21,7 @@
 #define NNNPLUS2 16
 #define NNN2 196  /* NNN squared */
 #define NPARAMS 56 /* Number of parameters in parameter homotopy - eg, coefficients, etc, to represent NNNxNNN sys */
-#include <cstdio>
-#include <iostream>
-#include <iomanip>
-#include "Eigen/Core"
-#include "Eigen/LU"
 #include <complex>
-#include <cstring>
 
 // typedef std::complex<double> complex;
 
