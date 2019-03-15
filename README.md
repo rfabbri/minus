@@ -22,21 +22,22 @@ Minus is split into three parts:
 For more details, see the [website](http://multiview-3d-drawings.sourceforge.net)
 
 ## Usage in C++ programs
-For use in your program, we provide a C++ standard library (soon to be made header-only).
+For use in your program, we provide a C++ header-only library 
 Simply do:
 ```C
-#include <minus.h>
+#include <minus.hxx>
 ```
 
 In your program, you can then use
 
 ```C
-  ptrack<CHICAGO>(&MINUS_DEFAULT, start_sols, params, solutions);
+  Minus<double>::track(Minus<double>::DEFAULT, start_sols_, params_, solutions);
 
 ```
-To solve a 14x14 trifocal problem from lines on points ("Chicago").
-You do need to know the size (or type) of the minimal problem in advance, for
-efficiency reasons.  This is not dynamic code, so no allocations are performed.
+To solve a 14x14 trifocal problem from lines on points ("Chicago") (see full example
+in `cmd/minus-chicago.cxx`.  You do need to know the size (or type) of the
+minimal problem in advance, for efficiency reasons.  This is not dynamic code,
+so no allocations are performed.
 
 ## Commandline programs
 
