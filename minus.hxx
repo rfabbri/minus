@@ -48,9 +48,7 @@ struct array {
   }
 
   static inline void 
-  copy(
-    const C<F> * __restrict__ a,
-    C<F> * __restrict__ b)
+  copy(const C<F> * __restrict__ a, C<F> * __restrict__ b)
   {
     memcpy(b, a, NNN*sizeof(C<F>));
   }
@@ -60,15 +58,14 @@ struct array {
   {
     F val = 0;
     C<F> const* __restrict__ end = a+NNN;
-    while (a != end)
-      val += std::norm(*a++);
+    while (a != end) val += std::norm(*a++);
     return val;
   }
 };
 
 typedef array<F,NNN> v; typedef array<F,NNNPLUS1> vp1;
 template <typename F>
-const tracker_settings<F> minus<F>::DEFAULT;
+const tracker_settings<F> minus_core<F>::DEFAULT;
 
 // THE MEAT //////////////////////////////////////////////////////////////////////
 // t: tracker settings
@@ -77,7 +74,7 @@ const tracker_settings<F> minus<F>::DEFAULT;
 // compute solutions sol_min...sol_max-1 within NSOLS
 // 
 template <typename int F=double, unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P>   // only one is NNN
-unsigned minus<F, NSOLS, NNN, NPARAMS, problem P>::
+unsigned minus_core<F, NSOLS, NNN, NPARAMS, problem P>::
 track(const tracker_settings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution<F> raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max)
 {
   C<F> Hxt[NNNPLUS1 * NNN]; 

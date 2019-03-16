@@ -37,7 +37,6 @@
 // define #MINUS_CHICAGO before loading minus.hxx will select default
 // formulation for CHICAGO
 
-
 template <typename F=double>
 using C = std::complex<F>;
 
@@ -130,16 +129,16 @@ struct solution
   solution() : status(UNDETERMINED) { }
 };
 
-
+// The problem solvers that this solver template currently supports
 enum problem {chicago14a, chicago6a, standard};
 
 template <typename int F=double, unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P=chicago14a>
-class minus {
+class minus_core {
   public:
   static const tracker_settings<F> DEFAULT;
-  static constexpr NNPLUS1 = NNN+1;
-  static constexpr NNPLUS2 = NNN+2;
-  static constexpr NNN2 = NNN*NNN;
+  static constexpr nnn = NNN;    // the size of the system
+  static constexpr nsols = NSOLS;   // the number of solutions
+  static constexpr nparams = NPARAMS; // the number of parameters
   
   // tracks all
   static unsigned track(const tracker_settings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution<F> raw_solutions[NSOLS])
@@ -150,8 +149,18 @@ class minus {
   static unsigned track(const tracker_settings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution<F> raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max);
 
   private:
-  static evaluate_Hxt(const complex * __restrict__ x /*x, t*/, const complex * __restrict__ params, complex * __restrict__ y /*HxH*/);
-  static evaluate_HxH(const complex * __restrict__ x /*x and t*/, const complex * __restrict__ params, complex* __restrict__ y /*HxH*/);
+  static constexpr NNPLUS1 = NNN+1;
+  static constexpr NNPLUS2 = NNN+2;
+  static constexpr NNN2 = NNN*NNN;
+  static evaluate_Hxt(const complex * __restrict__ x /*x, t*/,    const complex * __restrict__ params, complex * __restrict__ y /*HxH*/);
+  static evaluate_HxH(const complex * __restrict__ x /*x and t*/, const complex * __restrict__ params, complex * __restrict__ y /*HxH*/);
 };
+
+// type alias used to hide a template parameter 
+template<problem P>
+using minus = minus_core<double, 312, 14, 56, chicago14a>;
+// can now use minus<chicago14a>
+// no need to do this:
+// typedef minus<double, 312, 14, 56> minus_chicago14a;
 
 #endif  // minus_h_

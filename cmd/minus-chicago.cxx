@@ -8,18 +8,14 @@
 #include <chrono>
 #include <thread>
 #include <minus.h>
-static constexpr double tol = 1e-3;
 
-#define FloatT double
-typedef std::complex<FloatT> complex;
-using M = Minus<FloatT>;
-
-// using ptrack as ptrack<n,n,n,n>: here we set it.
-
-
-#define M_VERBOSE 1
+#define Float double;
+typedef M minus<chicago14a>;
+static constexpr Float tol = 1e-3;
+typedef std::complex<Float> complex;
 using namespace std::chrono;
 
+#define  M_VERBOSE 1     // display verbose messages
 static void
 print_usage()
 {
@@ -29,7 +25,7 @@ print_usage()
   exit(1);
 }
 
-bool stdio_=true;
+bool stdio_=true;  // by default read/write from stdio
 
 // Hardcoded for efficiency.
 // If you want to play with different start sols,
@@ -4716,7 +4712,6 @@ static complex const start_sols_[NNN*NSOLS] = {
   {.15356445889843059,-.90598199688147387e-2},
   {-.1721304990664842,-.12755642206752138}
 };
-
 // Example specialized homotopy for a specific given inputk
 // these take almost 1min in Macaulay2
 // Used for testing.
@@ -4879,7 +4874,7 @@ const double line_complex[5][9] =
 // 
 template <typename F=double>
 static bool
-mwrite(const Solution<F> s[NSOLS], const char *fname)
+mwrite(const Solution<F> s[M::nsols], const char *fname)
 {
   bool scilab=false;
 
@@ -4907,10 +4902,10 @@ mwrite(const Solution<F> s[NSOLS], const char *fname)
   out << std::setprecision(20);
 
   out << "[";
-  for (unsigned i=0; i <NSOLS; ++i) {
-    for (unsigned var=0; var < NNN; ++var) {
+  for (unsigned i=0; i <M::nsols; ++i) {
+    for (unsigned var=0; var < M::nnn; ++var) {
       out << s[i].x[var].real() << imag << s[i].x[var].imag();
-      if (i*var +1 < NNN*NSOLS) 
+      if (i*var +1 < M::nnn * M::nsols) 
         out << std::endl;
       // BINARY fsols.write((char *)(s[i].x[var]),2*sizeof(double));
     }
@@ -4966,7 +4961,7 @@ mread(const char *fname)
   in.exceptions(std::istream::failbit | std::istream::badbit);
   unsigned i=0;
   F *dparams = (F *)params_;
-  while (!in.eof() && dparams != (F *)params_+2*2*NPARAMS) {
+  while (!in.eof() && dparams != (F *)params_+2*2*M::nparams) {
       try {
       in >> *dparams++;
       // std::cerr << "reading " <<  *(dparams-1) << std::endl;;
@@ -4980,7 +4975,7 @@ mread(const char *fname)
         return false;
       }
   }
-  if (dparams != (F *)params_+2*2*NPARAMS)
+  if (dparams != (F *)params_+2*2*M::nparams)
     std::cerr << "I/O Premature input termination\n";
 
 //  for (unsigned i=0; i < 2*NPARAMS; ++i)
@@ -5023,9 +5018,9 @@ main(int argc, char **argv)
     std::cerr << "LOG Running default solve for profiling\n";
   #endif 
 
-  if (!profile && !mread<FloatT>(input)) return 1; // reads into global params_
+  if (!profile && !mread<Float>(input)) return 1; // reads into global params_
   
-  static Solution<FloatT> solutions[NSOLS];
+  static solution<Float> solutions[NSOLS];
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   #ifdef M_VERBOSE
   std::cerr << "LOG \033[0;33mStarting path tracker\e[m\n" << std::endl;
@@ -5056,7 +5051,7 @@ main(int argc, char **argv)
           << std::abs(solutions[NSOLS-2].x[2] - complex(.7318330016224166, .10129116603501138)) << std::endl;
     }
   }
-  if (!mwrite<FloatT>(solutions, output)) return 2;
+  if (!mwrite<Float>(solutions, output)) return 2;
   #ifdef M_VERBOSE
   std::cerr << "LOG \033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
   #endif
