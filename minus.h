@@ -131,8 +131,9 @@ struct solution
 };
 
 
+enum problem {chicago14a, chicago6a, standard};
 
-template <typename int F=double, unsigned NSOLS, unsigned NNN, unsigned NPARAMS>
+template <typename int F=double, unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P=chicago14a>
 class minus {
   public:
   static const tracker_settings<F> DEFAULT;
@@ -140,12 +141,17 @@ class minus {
   static constexpr NNPLUS2 = NNN+2;
   static constexpr NNN2 = NNN*NNN;
   
-  static unsigned track_all(const tracker_settings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution<F> raw_solutions[NSOLS])
+  // tracks all
+  static unsigned track(const tracker_settings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution<F> raw_solutions[NSOLS])
   {
-    track(s, s_sols, params, raw_solutions, 0, NNN); // TODO: template start and end
+    track(s, s_sols, params, raw_solutions, 0, NNN);
   }
   
   static unsigned track(const tracker_settings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution<F> raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max);
+
+  private:
+  static evaluate_Hxt(const complex * __restrict__ x /*x, t*/, const complex * __restrict__ params, complex * __restrict__ y /*HxH*/);
+  static evaluate_HxH(const complex * __restrict__ x /*x and t*/, const complex * __restrict__ params, complex* __restrict__ y /*HxH*/);
 };
 
 #endif  // minus_h_

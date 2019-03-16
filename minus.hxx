@@ -11,7 +11,8 @@
 #include <cstring>
 #include "Eigen/LU"
 #include "minus.h"
-#include "chicago.hxx"
+#include "chicago14a.hxx"
+// #include "chicago6a.hxx"
 
 
 template <typename F=double, unsigned NNN>
@@ -65,7 +66,7 @@ struct array {
   }
 };
 
-
+typedef array<F,NNN> v; typedef array<F,NNNPLUS1> vp1;
 template <typename F>
 const tracker_settings<F> minus<F>::DEFAULT;
 
@@ -75,11 +76,10 @@ const tracker_settings<F> minus<F>::DEFAULT;
 // params: params of target as specialized homotopy params - P01 in SolveChicago
 // compute solutions sol_min...sol_max-1 within NSOLS
 // 
-template <typename int F=double, unsigned NSOLS, unsigned NNN, unsigned NPARAMS>   // only one is NNN
-unsigned minus<F, NSOLS, NNN, NPARAMS>::
+template <typename int F=double, unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P>   // only one is NNN
+unsigned minus<F, NSOLS, NNN, NPARAMS, problem P>::
 track(const tracker_settings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution<F> raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max)
 {
-  typedef array<F,NNN> v; typedef array<F,NNNPLUS1> vp1;
   C<F> Hxt[NNNPLUS1 * NNN]; 
   C<F> x0t0xtblock[2*NNNPLUS1];
   C<F> dxdt[NNNPLUS1];
@@ -130,7 +130,7 @@ track(const tracker_settings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> par
       vp1::copy(x0t0, xt);
 
       // dx1
-      evaluate_Hxt<F>(xt, params, Hxt); // Outputs Hxt
+      evaluate_Hxt(xt, params, Hxt); // Outputs Hxt
       PartialPivLU<Matrix<C<F>, NNN, NNN> > lu(AA);
       dx4_eigen = lu.solve(bb);
       
@@ -140,7 +140,7 @@ track(const tracker_settings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> par
       v::add_to_self(xt, dx4);
       v::multiply_scalar_to_self(dx4, 2.);
       xt[NNN] += one_half_dt;  // t0+.5dt
-      evaluate_Hxt<F>(xt, params, Hxt);
+      evaluate_Hxt(xt, params, Hxt);
       dxi_eigen = lu.compute(AA).solve(bb);
 
       // dx3
@@ -149,7 +149,7 @@ track(const tracker_settings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> par
       v::add_to_self(xt, dxi);
       v::multiply_scalar_to_self(dxi, 4);
       v::add_to_self(dx4, dxi);
-      evaluate_Hxt<F>(xt, params, Hxt);
+      evaluate_Hxt(xt, params, Hxt);
       dxi_eigen = lu.compute(AA).solve(bb);
 
       // dx4
@@ -159,7 +159,7 @@ track(const tracker_settings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> par
       v::multiply_scalar_to_self(dxi, 2);
       v::add_to_self(dx4, dxi);
       xt[NNN] = *t0 + *dt;               // t0+dt
-      evaluate_Hxt<F>(xt, params, Hxt);
+      evaluate_Hxt(xt, params, Hxt);
       dxi_eigen = lu.compute(AA).solve(bb);
       v::multiply_scalar_to_self(dxi, *dt);
       v::add_to_self(dx4, dxi);
@@ -177,7 +177,7 @@ track(const tracker_settings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> par
       bool is_successful;
       do {
         ++n_corr_steps;
-        evaluate_HxH<F>(x1t1, params, HxH);
+        evaluate_HxH(x1t1, params, HxH);
         dx_eigen = lu.compute(AA).solve(bb);
         v::add_to_self(x1t1, dx);
         is_successful = v::norm2(dx) < s.epsilon2_ * v::norm2(x1t1);

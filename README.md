@@ -31,13 +31,19 @@ Simply do:
 In your program, you can then use
 
 ```C
-  Minus<double>::track(Minus<double>::DEFAULT, start_sols_, params_, solutions);
-
+  minus_chicago14a::track(minus_chicago14a::DEFAULT, start_sols, params, solutions);
 ```
 To solve a 14x14 trifocal problem from lines on points ("Chicago") (see full example
 in `cmd/minus-chicago.cxx`.  You do need to know the size (or type) of the
 minimal problem in advance, for efficiency reasons.  This is not dynamic code,
-so no allocations are performed.
+so no allocations are performed. 
+
+`minus_chicago` is a shorthand for a generic template, so you have full control to add
+your own compiled formulations. Other available instances are:
+```C
+  minus_chicago6a::track(minus_chicago6a::DEFAULT, start_sols, params, solutions);
+```
+To solve a 6x6 solver instead.
 
 ## Commandline programs
 
@@ -172,6 +178,32 @@ For developers: the start system is compiled and don't need to be input
 
 
 ## Hacking
+
+### Template internals
+
+The code:
+```C
+  #include <minus.hxx>
+  ...
+  minus_chicago14a::track(..)
+```
+Is shorthand for 
+```C
+  #include <minus.hxx>
+  ...
+  minus<double, 312, 14, 56, chicago14a_eval>::track(...)
+```
+
+### Adding a new minimal problem formulation to Minus
+
+Let's say you have a new minimal problem, Chicago 6a, that is, variant
+`a` to the 6x6 formulation of the trifocal pose from points at lines problem.
+
+- Include a new name `chicago6a_eval` for your problem in the template Enum
+- Place your evaluation functions into a file called `chiago6a_eval.hxx`.
+  using the file chicago14a to see how the function should be defined.
+- Place a define to simplify your solver name: 
+    typedef minus<double, xx, 6, xx, chicago14a_eval> minus_chicago6a 
 
 ### Test Suite
   Enable tests in cmake, then indicate where your vxl build folder is located.
