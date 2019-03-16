@@ -15,15 +15,28 @@
 //  - see trifocal.key in bignotes for basic results
 //  - see CMakeLists.txt and README.md
 
-#define NSOLS 312  /* template these */
-#define NNN 14 
-#define NNNPLUS1 15 
-#define NNNPLUS2 16
-#define NNN2 196  /* NNN squared */
-#define NPARAMS 56 /* Number of parameters in parameter homotopy - eg, coefficients, etc, to represent NNNxNNN sys */
+//
+// Minus<double,312,14,56,eval.hxx>
+// 
+// Shortcut: chicago14minors or default chicago
+// Chicago means 312 and certain eval. 14,56 is a chicago formulation
+// 
+
+//#define NSOLS 312  /* template these */
+//#define NNN   14    /* system size */
+//#define NNNPLUS1 15 
+//#define NNNPLUS2 16
+//#define NNN2 196  /* NNN squared */
+//#define NPARAMS 56 /* Number of parameters in parameter homotopy - eg, coefficients, etc, to represent NNNxNNN sys */
 #include <complex>
 
 // typedef std::complex<double> complex;
+// might have to define eval.hxx through define
+// so
+//
+// define #MINUS_CHICAGO before loading minus.hxx will select default
+// formulation for CHICAGO
+
 
 template <typename F=double>
 using C = std::complex<F>;
@@ -36,8 +49,8 @@ using C = std::complex<F>;
 // We use underscore in case we want to make setters/getters with same name,
 // or members of Tracker class if more complete C++ desired
 template <typename F=double>
-struct TrackerSettings {
-  TrackerSettings():
+struct tracker_settings {
+  tracker_settings():
     init_dt_(0.05),   // m2 tStep, t_step, raw interface code initDt
     min_dt_(1e-7),        // m2 tStepMin, raw interface code minDt
     end_zone_factor_(0.03),
@@ -63,8 +76,39 @@ struct TrackerSettings {
   F infinity_threshold_; // m2 InfinityThreshold
   F infinity_threshold2_;
 };
+// Current settings from Tim: Fri Feb 22 12:00:06 -03 2019 Git 0ec3340
+// o9 = MutableHashTable{AffinePatches => DynamicPatch     }
+//                      Attempts => 5
+//                      Bits => infinity
+//                      CorrectorTolerance => .000001
+//                      EndZoneFactor => .05
+//                      ErrorTolerance => 1e-8
+//                      Field => CC
+//                      gamma => 1
+//                      InfinityThreshold => 1e7
+//                      Iterations => 30
+//                      maxCorrSteps => 3
+//                      maxNumberOfVariables => 50
+//                      MultistepDegree => 3
+//                      NoOutput => true
+//                      Normalize => false
+//                      numberSuccessesBeforeIncrease => 2
+//                      Precision => 53
+//                      Predictor => RungeKutta4
+//                      Projectivize => false
+//                      ResidualTolerance => .0001
+//                      SingularConditionNumber => 100000
+//                      SLP => false
+//                      SLPcorrector => false
+//                      SLPpredictor => false
+//                      Software => M2engine
+//                      stepIncreaseFactor => 2
+//                      tDegree => 1
+//                      Tolerance => .000001
+//                      tStep => .05
+//                      tStepMin => 1e-7
 
-enum SolutionStatus {
+enum solution_status {
   UNDETERMINED,
   PROCESSING,
   REGULAR,
@@ -76,29 +120,32 @@ enum SolutionStatus {
   DECREASE_PRECISION
 };
 
-template <typename F=double>
-struct Solution
+template <typename F=double, typename NNN>
+struct solution
 {
   C<F> x[NNN];    // array of n coordinates
   F t;          // last value of parameter t used
-  SolutionStatus status;
+  solution_status status;
   //  unsigned num_steps;  // number of steps taken along the path
-  Solution() : status(UNDETERMINED) { }
+  solution() : status(UNDETERMINED) { }
 };
 
 
 
-template <typename F=double>
-class Minus {
+template <typename int F=double, unsigned NSOLS, unsigned NNN, unsigned NPARAMS>
+class minus {
   public:
-  static const TrackerSettings<F> DEFAULT;
+  static const tracker_settings<F> DEFAULT;
+  static constexpr NNPLUS1 = NNN+1;
+  static constexpr NNPLUS2 = NNN+2;
+  static constexpr NNN2 = NNN*NNN;
   
-  static unsigned track_all(const TrackerSettings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], Solution<F> raw_solutions[NSOLS])
+  static unsigned track_all(const tracker_settings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution<F> raw_solutions[NSOLS])
   {
     track(s, s_sols, params, raw_solutions, 0, NNN); // TODO: template start and end
   }
   
-  static unsigned track(const TrackerSettings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], Solution<F> raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max);
+  static unsigned track(const tracker_settings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution<F> raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max);
 };
 
 #endif  // minus_h_
