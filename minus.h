@@ -178,7 +178,7 @@ void minus_core<NSOLS, NNN, NPARAMS, P, F>::evaluate_HxH(const C<F> * __restrict
 
 // type alias used to hide a template parameter 
 template<problem P>
-using minus = minus_core<312, 14, 56, chicago14a, double>;
+using minus = minus_core<312, 14, 56, P, double>;  // TODO: set 312, 14, 56 conditional on P
 // can now use minus<chicago14a>
 // no need to do this:
 // typedef minus<double, 312, 14, 56> minus_chicago14a;

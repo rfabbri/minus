@@ -28,22 +28,35 @@ Simply do:
 #include <minus.hxx>
 ```
 
-In your program, you can then use
-
+In your program, you can then use `minus<chicago>` like so:
 ```C
-  minus_chicago14a::track(minus_chicago14a::DEFAULT, start_sols, params, solutions);
+  minus<chicago>::track(minus<chicago>::DEFAULT, start_sols, params, solutions);
 ```
-To solve a 14x14 trifocal problem from lines on points ("Chicago") (see full example
-in `cmd/minus-chicago.cxx`.  You do need to know the size (or type) of the
-minimal problem in advance, for efficiency reasons.  This is not dynamic code,
-so no allocations are performed. 
+to solve a trifocal pose problem from lines at points ("Chicago"), using the default
+formulation.  See the full example in `cmd/minus-chicago.cxx`.  This is
+efficient static code, so no allocations are performed.  
 
-`minus_chicago` is a shorthand for a generic template, so you have full control to add
-your own compiled formulations. Other available instances are:
+The size and key parameters of the minimal problem are hardcoded as template
+parameters in advance, for efficiency. `minus<>` is a shorthand for a generic
+template, so you have full control to add your own compiled formulations, or
+change the floating point implementation.  You can easily specify the
+formulation by using, e.g., `minus<chicago14a>` instead of `minus<chicago>`,
+which will use a 14x14 formulation for the Chicago problem.  Other
+available instances are available, e.g. `minus<chicago6a>` to solve a 6x6
+formulation for the same problem instead. 
+
+To solve another problem, say the `Cleveland` trifocal pose problem from mixed
+points and lines, simply use the problem tag:
 ```C
-  minus_chicago6a::track(minus_chicago6a::DEFAULT, start_sols, params, solutions);
+  minus<cleveland>::track(minus<cleveland>::DEFAULT, start_sols, params, solutions);
 ```
-To solve a 6x6 solver instead.
+
+### Further control on template parametrs
+
+If you want to have full control on templating, say, to change from `double` to
+`float`, `minus<problem>` is just a shorthand for `minus_core<problem,double>`.
+So you can use `minus_core<chicago14a, float>`. See the section Hacking for how
+to add your own problem formulation to Minus.
 
 ## Commandline programs
 
