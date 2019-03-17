@@ -15,8 +15,8 @@
 // #include "chicago6a.hxx"
 
 
-template <typename F=double, unsigned NNN>
-struct array {
+template <unsigned NNN, typename F>
+struct minus_array {
   static inline void 
   multiply_scalar_to_self(C<F> *__restrict__ a, C<F> b)
   {
@@ -63,9 +63,9 @@ struct array {
   }
 };
 
-typedef array<F,NNN> v; typedef array<F,NNNPLUS1> vp1;
-template <typename F>
-const tracker_settings<F> minus_core<F>::DEFAULT;
+template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>
+const 
+typename minus_core<NSOLS, NNN, NPARAMS, P, F>::track_settings minus_core<NSOLS, NNN, NPARAMS, P, F>::DEFAULT;
 
 // THE MEAT //////////////////////////////////////////////////////////////////////
 // t: tracker settings
@@ -73,9 +73,9 @@ const tracker_settings<F> minus_core<F>::DEFAULT;
 // params: params of target as specialized homotopy params - P01 in SolveChicago
 // compute solutions sol_min...sol_max-1 within NSOLS
 // 
-template <typename int F=double, unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P>   // only one is NNN
-unsigned minus_core<F, NSOLS, NNN, NPARAMS, problem P>::
-track(const tracker_settings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution<F> raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max)
+template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>   // only one is NNN
+unsigned minus_core<NSOLS, NNN, NPARAMS, P, F>::
+track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max)
 {
   C<F> Hxt[NNNPLUS1 * NNN]; 
   C<F> x0t0xtblock[2*NNNPLUS1];
@@ -100,8 +100,9 @@ track(const tracker_settings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> par
   Map<const Matrix<C<F>, NNN, NNN> > AA((C<F> *)Hxt,NNN,NNN);  // accessors for the data
   Map<const Matrix<C<F>, NNN, 1> > bb(RHS);
   static constexpr F the_smallest_number = 1e-13;
+  typedef minus_array<NNN,F> v; typedef minus_array<NNNPLUS1,F> vp;
 
-  solution<F> *t_s = raw_solutions + sol_min;  // current target solution
+  solution *t_s = raw_solutions + sol_min;  // current target solution
   const C<F>* __restrict__ s_s = s_sols + sol_min*NNN;    // current start solution
   for (unsigned sol_n = sol_min; sol_n < sol_max; ++sol_n) { // solution loop
     t_s->status = PROCESSING;
@@ -124,7 +125,7 @@ track(const tracker_settings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> par
           dx3 := solveHxTimesDXequalsminusHt(x0+(1/2)*dx2*dt,t0+(1/2)*dt);
           dx4 := solveHxTimesDXequalsminusHt(x0+dx3*dt,t0+dt);
           (1/6)*dt*(dx1+2*dx2+2*dx3+dx4) */
-      vp1::copy(x0t0, xt);
+      vp::copy(x0t0, xt);
 
       // dx1
       evaluate_Hxt(xt, params, Hxt); // Outputs Hxt
@@ -151,7 +152,7 @@ track(const tracker_settings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> par
 
       // dx4
       v::multiply_scalar_to_self(dxi, *dt);
-      vp1::copy(x0t0, xt);
+      vp::copy(x0t0, xt);
       v::add_to_self(xt, dxi);
       v::multiply_scalar_to_self(dxi, 2);
       v::add_to_self(dx4, dxi);
@@ -166,8 +167,8 @@ track(const tracker_settings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> par
       // dx4_eigen = (dx4_eigen* *dt + dx1_eigen*2 + dx2_eigen*4 + dx3_eigen*2)*(1./6.);
       
       // make prediction
-      vp1:copy(x0t0, x1t1);
-      vp1::add_to_self(x1t1, dxdt);
+      vp::copy(x0t0, x1t1);
+      vp::add_to_self(x1t1, dxdt);
       
       /// CORRECTOR ///
       unsigned n_corr_steps = 0;

@@ -9,18 +9,12 @@
 // Modifications
 //    Leykin Feb82019: Initial sketch as simplified code from Macaulay e/NAG.*
 //    Tim    Feb2019:  Chicago-specific prototype in Macaulay2
+//    Fabbri Mar162019: fully templated code
 // \endverbatim
 //
 // OPTIMIZATIONS
 //  - see trifocal.key in bignotes for basic results
 //  - see CMakeLists.txt and README.md
-
-//
-// Minus<double,312,14,56,eval.hxx>
-// 
-// Shortcut: chicago14minors or default chicago
-// Chicago means 312 and certain eval. 14,56 is a chicago formulation
-// 
 
 //#define NSOLS 312  /* template these */
 //#define NNN   14    /* system size */
@@ -33,23 +27,75 @@
 // typedef std::complex<double> complex;
 // might have to define eval.hxx through define
 // so
-//
-// define #MINUS_CHICAGO before loading minus.hxx will select default
-// formulation for CHICAGO
 
 template <typename F=double>
 using C = std::complex<F>;
 
-// Tracker parameters
-// Default values obtained in M2 by doing 
-// eg DEFAULT#tStep
-// or peek DEFAULT
-// 
-// We use underscore in case we want to make setters/getters with same name,
-// or members of Tracker class if more complete C++ desired
-template <typename F=double>
-struct tracker_settings {
-  tracker_settings():
+// The problem solvers that this solver template currently supports
+enum problem {chicago14a, chicago6a, standard};
+
+template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F=double>
+class minus_core { // fully static, not to be instantiated - just used for templating
+  public: // ----------- Data structures --------------------------------------
+  
+  // Tracker parameters
+  // Default values obtained in M2 by doing 
+  // eg DEFAULT#tStep
+  // or peek DEFAULT
+  // 
+  // We use underscore in case we want to make setters/getters with same name,
+  // or members of Tracker class if more complete C++ desired
+  
+  struct track_settings; 
+  
+  enum solution_status {
+    UNDETERMINED,
+    PROCESSING,
+    REGULAR,
+    SINGULAR,
+    INFINITY_FAILED,
+    MIN_STEP_FAILED,
+    ORIGIN_FAILED,
+    INCREASE_PRECISION,
+    DECREASE_PRECISION
+  };
+  
+  struct solution
+  {
+    C<F> x[NNN];    // array of n coordinates
+    F t;          // last value of parameter t used
+    solution_status status;
+    //  unsigned num_steps;  // number of steps taken along the path
+    solution() : status(UNDETERMINED) { }
+  };
+
+  static const track_settings DEFAULT;
+  static constexpr unsigned nnn = NNN;    // the size of the system
+  static constexpr unsigned nsols = NSOLS;   // the number of solutions
+  static constexpr unsigned nparams = NPARAMS; // the number of parameters
+  
+  public: // ----------- Functions --------------------------------------------
+  
+  ///// THE MEAT /////
+  static unsigned track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max);
+  
+  // helper function: tracks all, no begin or end to specify
+  static unsigned track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS])
+  {
+    track(s, s_sols, params, raw_solutions, 0, NNN);
+  }
+  
+  private: // -----------------------------------------------------------------
+  static constexpr unsigned NNNPLUS1 = NNN+1;
+  static constexpr unsigned NNNPLUS2 = NNN+2;
+  static constexpr unsigned NNN2 = NNN*NNN;
+  static void evaluate_Hxt(const C<F> * __restrict__ x /*x, t*/,    const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
+  static void evaluate_HxH(const C<F> * __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
+};
+
+template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>
+struct minus_core<NSOLS, NNN, NPARAMS, P, F>::track_settings {
+  track_settings():
     init_dt_(0.05),   // m2 tStep, t_step, raw interface code initDt
     min_dt_(1e-7),        // m2 tStepMin, raw interface code minDt
     end_zone_factor_(0.03),
@@ -75,7 +121,7 @@ struct tracker_settings {
   F infinity_threshold_; // m2 InfinityThreshold
   F infinity_threshold2_;
 };
-// Current settings from Tim: Fri Feb 22 12:00:06 -03 2019 Git 0ec3340
+// Original settings from Tim: Fri Feb 22 12:00:06 -03 2019 Git 0ec3340
 // o9 = MutableHashTable{AffinePatches => DynamicPatch     }
 //                      Attempts => 5
 //                      Bits => infinity
@@ -107,58 +153,30 @@ struct tracker_settings {
 //                      tStep => .05
 //                      tStepMin => 1e-7
 
-enum solution_status {
-  UNDETERMINED,
-  PROCESSING,
-  REGULAR,
-  SINGULAR,
-  INFINITY_FAILED,
-  MIN_STEP_FAILED,
-  ORIGIN_FAILED,
-  INCREASE_PRECISION,
-  DECREASE_PRECISION
+// The user specializes this to their problem inside problem.hxx
+// Needed to create this class since functions do not always support partial
+// specialization
+template <problem P, typename F>
+struct eval {
+  static void Hxt(const C<F> * __restrict__ x /*x, t*/,    const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
+  static void HxH(const C<F> * __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
 };
 
-template <typename F=double, typename NNN>
-struct solution
+template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>
+void minus_core<NSOLS, NNN, NPARAMS, P, F>::evaluate_Hxt(const C<F> * __restrict__ x /*x, t*/,    const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/)
 {
-  C<F> x[NNN];    // array of n coordinates
-  F t;          // last value of parameter t used
-  solution_status status;
-  //  unsigned num_steps;  // number of steps taken along the path
-  solution() : status(UNDETERMINED) { }
-};
+  eval<P,F>::Hxt(x, params, y);
+}
 
-// The problem solvers that this solver template currently supports
-enum problem {chicago14a, chicago6a, standard};
-
-template <typename int F=double, unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P=chicago14a>
-class minus_core {
-  public:
-  static const tracker_settings<F> DEFAULT;
-  static constexpr nnn = NNN;    // the size of the system
-  static constexpr nsols = NSOLS;   // the number of solutions
-  static constexpr nparams = NPARAMS; // the number of parameters
-  
-  // tracks all
-  static unsigned track(const tracker_settings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution<F> raw_solutions[NSOLS])
-  {
-    track(s, s_sols, params, raw_solutions, 0, NNN);
-  }
-  
-  static unsigned track(const tracker_settings<F> &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution<F> raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max);
-
-  private:
-  static constexpr NNPLUS1 = NNN+1;
-  static constexpr NNPLUS2 = NNN+2;
-  static constexpr NNN2 = NNN*NNN;
-  static evaluate_Hxt(const complex * __restrict__ x /*x, t*/,    const complex * __restrict__ params, complex * __restrict__ y /*HxH*/);
-  static evaluate_HxH(const complex * __restrict__ x /*x and t*/, const complex * __restrict__ params, complex * __restrict__ y /*HxH*/);
-};
+template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>
+void minus_core<NSOLS, NNN, NPARAMS, P, F>::evaluate_HxH(const C<F> * __restrict__ x /*x, t*/,    const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/)
+{
+  eval<P,F>::HxH(x, params, y);
+}
 
 // type alias used to hide a template parameter 
 template<problem P>
-using minus = minus_core<double, 312, 14, 56, chicago14a>;
+using minus = minus_core<312, 14, 56, chicago14a, double>;
 // can now use minus<chicago14a>
 // no need to do this:
 // typedef minus<double, 312, 14, 56> minus_chicago14a;

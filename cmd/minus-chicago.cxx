@@ -31,7 +31,7 @@ bool stdio_=true;  // by default read/write from stdio
 // If you want to play with different start sols,
 // write another program that accepts start sols in runtime,
 // but keep this one lean & mean.
-static complex const start_sols_[NNN*NSOLS] = {
+static complex const start_sols_[M::nnn*M::nsols] = {
   {-.59336028545681196,-.11013183013512155},
   {.11944671140724233,-.13633687755694085},
   {-.7527462639007193e-1,.36383005180054401},
@@ -4715,7 +4715,7 @@ static complex const start_sols_[NNN*NSOLS] = {
 // Example specialized homotopy for a specific given inputk
 // these take almost 1min in Macaulay2
 // Used for testing.
-static complex params_[2*NPARAMS] = { // start-target param pairs, P01 in chicago.m2
+static complex params_[2*M:nnn] = { // start-target param pairs, P01 in chicago.m2
   {.391195550619826,-.00262962533857666},
   {.310140709227333,+.169842562835882},
   {-.725705624433656,+.441901252816163},
@@ -4858,7 +4858,6 @@ const double line_complex[5][9] =
  * */
 
 // Output solutions in ASCII matlab format
-//
 //
 // ---------------------------------------------------------
 // If in the future our solver is really fast, we may need Binary IO:
@@ -5020,7 +5019,7 @@ main(int argc, char **argv)
 
   if (!profile && !mread<Float>(input)) return 1; // reads into global params_
   
-  static solution<Float> solutions[NSOLS];
+  static M::solution solutions[M::nsols];
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   #ifdef M_VERBOSE
   std::cerr << "LOG \033[0;33mStarting path tracker\e[m\n" << std::endl;
