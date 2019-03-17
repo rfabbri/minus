@@ -198,26 +198,36 @@ The code:
 ```C
   #include <minus.hxx>
   ...
-  minus_chicago14a::track(..)
+  minus<chicago14a>::track(..)
 ```
 Is shorthand for 
 ```C
   #include <minus.hxx>
   ...
-  minus<double, 312, 14, 56, chicago14a_eval>::track(...)
+  minus_core<312, 14, 56, chicago14a, double>::track(...)
 ```
+where chicago14a is an enum (int) template parameter.
 
 ### Adding a new minimal problem formulation to Minus
 
 Let's say you have a new minimal problem, Chicago 6a, that is, variant
 `a` to the 6x6 formulation of the trifocal pose from points at lines problem.
 
-- Include a new name `chicago6a_eval` for your problem in the template Enum
-- Place your evaluation functions into a file called `chiago6a_eval.hxx`.
-  using the file chicago14a to see how the function should be defined.
-- Place a define to simplify your solver name: 
-    typedef minus<double, xx, 6, xx, chicago14a_eval> minus_chicago6a 
-
+- Include a new name `chicago6a` for your problem in the `enum problem` in
+`minus.h`. This is the table of problem tags of Minus.
+- Place your evaluation functions into a file called `chiago6a.hxx`.
+  using the existing file `chicago14a.hxx` to see how the function should be defined.
+  Basically, you need to copy what is in `chicago14a.hxx`, include your function
+  bodies according to the format, and substitute chicago14a to chicago6a.
+- Optional: place a define to simplify your solver name: 
+    this is a `using` clause towards the end of `minus.h`.
+- Optional: If you are using Minus header-only, you are done! But for faster compile times 
+and maller codes, you can use our libminus, with an explicit instantiation. In
+`Templates/minus-chicago-alltypes-allformulations+double.cxx`, copy the line
+starting with `template class` and place your own instantiation. If it is a
+different problem than Chicago, you may want to place it in a similar file with
+chicago in the name. 
+    
 ### Test Suite
   Enable tests in cmake, then indicate where your vxl build folder is located.
   When building VXL, only build VNL.
