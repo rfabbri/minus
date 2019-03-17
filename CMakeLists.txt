@@ -201,7 +201,7 @@ set(MINUS_LIBRARY_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} CACHE STATIC "Where all
 # library is useful when the function will be used in many places
 # to avoid having to include Minus many times and slowdown the compiler
 set (minus_sources
-  minus.hxx minus.h chicago.hxx
+  minus.hxx minus.h chicago14a.hxx
 )
 
 aux_source_directory(Templates minus_sources)

@@ -9,8 +9,8 @@
 #include <thread>
 #include <minus.h>
 
-#define Float double;
-typedef M minus<chicago14a>;
+#define Float double
+typedef minus<chicago14a> M;
 static constexpr Float tol = 1e-3;
 typedef std::complex<Float> complex;
 using namespace std::chrono;
@@ -4715,7 +4715,7 @@ static complex const start_sols_[M::nnn*M::nsols] = {
 // Example specialized homotopy for a specific given inputk
 // these take almost 1min in Macaulay2
 // Used for testing.
-static complex params_[2*M:nnn] = { // start-target param pairs, P01 in chicago.m2
+static complex params_[2*M::nparams] = { // start-target param pairs, P01 in chicago.m2
   {.391195550619826,-.00262962533857666},
   {.310140709227333,+.169842562835882},
   {-.725705624433656,+.441901252816163},
@@ -4873,7 +4873,7 @@ const double line_complex[5][9] =
 // 
 template <typename F=double>
 static bool
-mwrite(const Solution<F> s[M::nsols], const char *fname)
+mwrite(const M::solution s[M::nsols], const char *fname)
 {
   bool scilab=false;
 
@@ -5042,12 +5042,12 @@ main(int argc, char **argv)
     // compare solutions to certain values from M2
     // two random entries
     if (std::abs(solutions[1].x[1] - complex(-.25177177692982444e1, -.84845195030295639)) <= tol &&
-        std::abs(solutions[NSOLS-2].x[2] - complex(.7318330016224166, .10129116603501138)) <= tol)
+        std::abs(solutions[M::nsols-2].x[2] - complex(.7318330016224166, .10129116603501138)) <= tol)
       std::cerr << "LOG solutions look OK\n";
     else  {
       std::cerr << "LOG \033[1;91merror:\e[m solutions dont match m2. Errors: ";
       std::cerr << std::abs(solutions[1].x[2] - complex(-.25177177692982444e1, -.84845195030295639)) << ", "
-          << std::abs(solutions[NSOLS-2].x[2] - complex(.7318330016224166, .10129116603501138)) << std::endl;
+          << std::abs(solutions[M::nsols-2].x[2] - complex(.7318330016224166, .10129116603501138)) << std::endl;
     }
   }
   if (!mwrite<Float>(solutions, output)) return 2;

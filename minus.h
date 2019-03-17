@@ -63,24 +63,26 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   struct solution
   {
     C<F> x[NNN];    // array of n coordinates
-    F t;          // last value of parameter t used
+    F t;            // last value of parameter t used
     solution_status status;
     //  unsigned num_steps;  // number of steps taken along the path
     solution() : status(UNDETERMINED) { }
   };
 
   static const track_settings DEFAULT;
-  static constexpr unsigned nnn = NNN;    // the size of the system
-  static constexpr unsigned nsols = NSOLS;   // the number of solutions
-  static constexpr unsigned nparams = NPARAMS; // the number of parameters
+  static constexpr unsigned nnn = NNN;          // the size of the system
+  static constexpr unsigned nsols = NSOLS;      // the number of solutions
+  static constexpr unsigned nparams = NPARAMS;  // the number of parameters
   
   public: // ----------- Functions --------------------------------------------
   
   ///// THE MEAT /////
-  static unsigned track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max);
+  static unsigned track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], 
+      const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max);
   
   // helper function: tracks all, no begin or end to specify
-  static unsigned track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS])
+  static unsigned track_all(const track_settings &s, const C<F> s_sols[NNN*NSOLS], 
+      const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS])
   {
     track(s, s_sols, params, raw_solutions, 0, NNN);
   }
