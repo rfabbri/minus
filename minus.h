@@ -165,13 +165,13 @@ struct eval {
 };
 
 template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>
-void minus_core<NSOLS, NNN, NPARAMS, P, F>::evaluate_Hxt(const C<F> * __restrict__ x /*x, t*/,    const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/)
+void minus_core<NSOLS, NNN, NPARAMS, P, F>::evaluate_Hxt(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/)
 {
   eval<P,F>::Hxt(x, params, y);
 }
 
 template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>
-void minus_core<NSOLS, NNN, NPARAMS, P, F>::evaluate_HxH(const C<F> * __restrict__ x /*x, t*/,    const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/)
+void minus_core<NSOLS, NNN, NPARAMS, P, F>::evaluate_HxH(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/)
 {
   eval<P,F>::HxH(x, params, y);
 }
@@ -179,6 +179,9 @@ void minus_core<NSOLS, NNN, NPARAMS, P, F>::evaluate_HxH(const C<F> * __restrict
 // type alias used to hide a template parameter 
 template<problem P>
 using minus = minus_core<312, 14, 56, P, double>;  // TODO: set 312, 14, 56 conditional on P
+
+template<problem P>
+using minus6 = minus_core<312, 6, 45, P, double>;
 // can now use minus<chicago14a>
 // no need to do this:
 // typedef minus<double, 312, 14, 56> minus_chicago14a;

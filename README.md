@@ -219,10 +219,24 @@ Let's say you have a new minimal problem, Chicago 6a, that is, variant
   using the existing file `chicago14a.hxx` to see how the function should be defined.
   Basically, you need to copy what is in `chicago14a.hxx`, include your function
   bodies according to the format, and substitute chicago14a to chicago6a.
+    - Negate y entries by hand
+    - X are refs: `%s/C X/const C<F> \&X/g`
+    - Consts C are constexprs: `%s/C \(C[0-9] =\)/static constexpr C<F> \1/gc`
+    - Gates G are variables `%s/C G/const C<F> G/gc` for gates (no ampersand)
+- Optional: Default start system and gammified parameters
+    - mimmick the file `chicago14a-default.hxx` to create your own, eg,
+    `chicago6a-default.hxx`. 
+    - if your start system comes from our Macaulay2 scripts, use the commands in
+    `scripts/extract-start-sols.vim` to help you translate to C++
+    vector initialization format
+    - in your app, say `cmd/minus-chicago.cxx` for chicago problems,
+      for now you have to selectively include this. Ongoing work will remove
+      this need, being only needed to do minus<chicago6a>.
 - Optional: place a define to simplify your solver name: 
     this is a `using` clause towards the end of `minus.h`.
 - Optional: If you are using Minus header-only, you are done! But for faster compile times 
-and maller codes, you can use our libminus, with an explicit instantiation. In
+and for including your formulation on the the official Minus codebase, and
+for smaller codes, you can use our libminus, with an explicit instantiation. In
 `Templates/minus-chicago-alltypes-allformulations+double.cxx`, copy the line
 starting with `template class` and place your own instantiation. If it is a
 different problem than Chicago, you may want to place it in a similar file with

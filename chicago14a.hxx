@@ -7006,4 +7006,5 @@ HxH(const C<F>* __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<
   y[208] = -G2828;
   y[209] = -G2836;
 }
+
 #endif // chicago14a_hxx
