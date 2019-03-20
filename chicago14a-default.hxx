@@ -4694,7 +4694,7 @@ static complex const start_sols_[M::nnn*M::nsols] = {
 // Example specialized homotopy for a specific given inputk
 // these take almost 1min in Macaulay2
 // Used for testing.
-static complex params_[2*M::nparams] = { // start-target param pairs, P01 in chicago.m2
+static std::complex<float> params_[2*M::nparams] = { // start-target param pairs, P01 in chicago.m2
   {.391195550619826,-.00262962533857666},
   {.310140709227333,+.169842562835882},
   {-.725705624433656,+.441901252816163},

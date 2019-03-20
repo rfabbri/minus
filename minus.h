@@ -78,11 +78,11 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   
   ///// THE MEAT /////
   static unsigned track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], 
-      const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max);
+      const C<float> params[2*NPARAMS], solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max);
   
   // helper function: tracks all, no begin or end to specify
   static unsigned track_all(const track_settings &s, const C<F> s_sols[NNN*NSOLS], 
-      const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS])
+      const C<float> params[2*NPARAMS], solution raw_solutions[NSOLS])
   {
     track(s, s_sols, params, raw_solutions, 0, NNN);
   }
@@ -91,8 +91,8 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   static constexpr unsigned NNNPLUS1 = NNN+1;
   static constexpr unsigned NNNPLUS2 = NNN+2;
   static constexpr unsigned NNN2 = NNN*NNN;
-  static void evaluate_Hxt(const C<F> * __restrict__ x /*x, t*/,    const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
-  static void evaluate_HxH(const C<F> * __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
+  static void evaluate_Hxt(const C<F> * __restrict__ x /*x, t*/,    const C<float> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
+  static void evaluate_HxH(const C<F> * __restrict__ x /*x and t*/, const C<float> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
 };
 
 template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>
@@ -160,18 +160,18 @@ struct minus_core<NSOLS, NNN, NPARAMS, P, F>::track_settings {
 // specialization
 template <problem P, typename F>
 struct eval {
-  static void Hxt(const C<F> * __restrict__ x /*x, t*/,    const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
-  static void HxH(const C<F> * __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
+  static void Hxt(const C<F> * __restrict__ x /*x, t*/,    const C<float> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
+  static void HxH(const C<F> * __restrict__ x /*x and t*/, const C<float> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
 };
 
 template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>
-void minus_core<NSOLS, NNN, NPARAMS, P, F>::evaluate_Hxt(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/)
+void minus_core<NSOLS, NNN, NPARAMS, P, F>::evaluate_Hxt(const C<F> * __restrict__ x /*x, t*/, const C<float> * __restrict__ params, C<F> * __restrict__ y /*HxH*/)
 {
   eval<P,F>::Hxt(x, params, y);
 }
 
 template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>
-void minus_core<NSOLS, NNN, NPARAMS, P, F>::evaluate_HxH(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/)
+void minus_core<NSOLS, NNN, NPARAMS, P, F>::evaluate_HxH(const C<F> * __restrict__ x /*x, t*/, const C<float> * __restrict__ params, C<F> * __restrict__ y /*HxH*/)
 {
   eval<P,F>::HxH(x, params, y);
 }
