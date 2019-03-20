@@ -75,7 +75,7 @@ typename minus_core<NSOLS, NNN, NPARAMS, P, F>::track_settings minus_core<NSOLS,
 // 
 template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>   // only one is NNN
 unsigned minus_core<NSOLS, NNN, NPARAMS, P, F>::
-track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<float> params[2*NPARAMS], solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max)
+track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max)
 {
   C<F> Hxt[NNNPLUS1 * NNN]; 
   C<F> x0t0xtblock[2*NNNPLUS1];

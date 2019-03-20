@@ -3,8 +3,8 @@
 
 template <typename F>
 struct eval<chicago14a, F> {
-  static void Hxt(const C<F> * __restrict__ x /*x, t*/,    const C<float> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
-  static void HxH(const C<F> * __restrict__ x /*x and t*/, const C<float> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
+  static void Hxt(const C<F> * __restrict__ x /*x, t*/,    const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
+  static void HxH(const C<F> * __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
 };
 
 // Evaluates Hx and Ht at the same time, reusing expressions.
@@ -17,7 +17,7 @@ struct eval<chicago14a, F> {
 template <typename F>
 inline void 
 eval<chicago14a, F>::
-Hxt(const C<F> * __restrict__ x /*x, t*/, const C<float> * __restrict__ params, C<F> * __restrict__ y /*HxH*/) 
+Hxt(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/) 
 {
   const C<F> &X0 = x[0];
   const C<F> &X1 = x[1];
@@ -3822,7 +3822,7 @@ Hxt(const C<F> * __restrict__ x /*x, t*/, const C<float> * __restrict__ params, 
 template <typename F>
 inline void 
 eval<chicago14a, F>::
-HxH(const C<F>* __restrict__ x /*x and t*/, const C<float> * __restrict__ params, C<F>* __restrict__ y /*HxH*/) 
+HxH(const C<F>* __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F>* __restrict__ y /*HxH*/) 
 {
   const C<F> &X0 = x[0];
   const C<F> &X1 = x[1];
