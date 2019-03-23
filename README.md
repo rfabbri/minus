@@ -316,6 +316,6 @@ Costa de Pinho.
 
 
 ## Acknowledgements
-This grew as part of Brown University/ICERM's 2018 Nonlinear Algebra Program (Computer Vision
-Working group) and 2019 Algebraic Vision research cluster, co-organized by
-the authors Leykin and Fabbri, respectively.
+Minus was born out of Brown University/ICERM's 2018 Nonlinear Algebra Program (Computer Vision
+Working group) and the 2019 Algebraic Vision research cluster, the former co-organized by
+the authors Leykin, Hauenstein and the latter by Fabbri.
