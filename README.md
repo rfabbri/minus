@@ -309,9 +309,14 @@ from Macaulay2 by Ricardo Fabbri. The core code grew out of Macaulay2/e/NAG.cpp.
 These improvements and specializations were jointly developed with Tomas Pajdla,
 Benjamin Kimia and Hongyi Fan, with intensive discussion and testing from
 remaining ICCV'19 paper co-authors while at ICERM/Brown University: Jonathan
-Hauenstein, Margaret Regan, Elias Tsigaridas, Charles Wrampler, and David Pinho.
+Hauenstein, Margaret Regan, Elias Tsigaridas, Charles Wrampler, and David da
+Costa de Pinho.
+
+## Paper
+The theory and practice associated to this solver can be found at
+arxiv, entitled: "Trifocal Relative Pose from Lines at Points and its Efficient Solution"
 
 ## Acknowledgements
-This grew as part of ICERM's 2018 Nonlinear Algebra Program (Computer Vision
+This grew as part of Brown University/ICERM's 2018 Nonlinear Algebra Program (Computer Vision
 Working group) and 2019 Algebraic Vision research cluster, co-organized by
 the authors Leykin and Fabbri, respectively. We also thank our ICCV'19 paper co-authors.
