@@ -19,7 +19,9 @@ Minus is split into three parts:
 - Optional: extensive tests useful for tuning the algorithm to a machine architecture and
   compiler. These are disabled by default, and requires [VXL core library](https://vxl.github.io) (*optional* - most users don't need this).
  
-For more details, see the [website](http://multiview-3d-drawings.sourceforge.net)
+The theory and practice associated to Minus is described in
+"Trifocal Relative Pose from Lines at Points and its Efficient Solution"
+(Arxiv). For datasets and curve-based SfM code, see the [website](http://multiview-3d-drawings.sourceforge.net).
 
 ## Usage in C++ programs
 For use in your program, we provide a C++ header-only library 
@@ -28,13 +30,13 @@ Simply do:
 #include <minus.hxx>
 ```
 
-In your program, you can then use `minus<chicago>` like so:
+And use `minus<chicago>` like so:
 ```C
   minus<chicago>::track(minus<chicago>::DEFAULT, start_sols, params, solutions);
 ```
 to solve a trifocal pose problem from lines at points ("Chicago"), using the default
 formulation.  See the full example in `cmd/minus-chicago.cxx`.  This is
-efficient static code, so no allocations are performed.  
+efficient *static* code, so no allocations are performed.  
 
 The size and key parameters of the minimal problem are hardcoded as template
 parameters in advance, for efficiency. `minus<>` is a shorthand for a generic
@@ -312,9 +314,6 @@ remaining ICCV'19 paper co-authors while at ICERM/Brown University: Jonathan
 Hauenstein, Margaret Regan, Elias Tsigaridas, Charles Wrampler, and David da
 Costa de Pinho.
 
-## Paper
-The theory and practice associated to this solver can be found at
-arxiv, entitled: "Trifocal Relative Pose from Lines at Points and its Efficient Solution"
 
 ## Acknowledgements
 This grew as part of Brown University/ICERM's 2018 Nonlinear Algebra Program (Computer Vision
