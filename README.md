@@ -13,8 +13,8 @@ initialization. In fact, the solutions found using this technique for square
 problems can be used to initialize Levenberg-Marquardt for an overconstrained problem.
 
 Minus is split into three parts:
-- An efficient library for use in your C++ programs, no dependencies beyond C++
-  standard and the seamless Eigen library
+- An efficient library for use in your C++ programs, no dependencies beyond
+  standard C++ and Eigen (included)
 - A simple commandline program easy to interface with other programs (eg, Matlab and Macaulay2)
 - Optional: extensive tests useful for tuning the algorithm to a machine architecture and
   compiler. These are disabled by default, and requires [VXL core library](https://vxl.github.io) (*optional* - most users don't need this).
