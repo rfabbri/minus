@@ -20,8 +20,9 @@ Minus is split into three parts:
   compiler. These are disabled by default, and requires [VXL core library](https://vxl.github.io) (*optional* - most users don't need this).
  
 The theory and practice associated to Minus is described in
-"Trifocal Relative Pose from Lines at Points and its Efficient Solution"
-(Arxiv). For datasets and curve-based SfM code, see the [website](http://multiview-3d-drawings.sourceforge.net).
+"Trifocal Relative Pose from Lines at Points and its Efficient Solution", Arxiv
+March 23 2019 ([pdf](http://rfabbri.github.io/stuff/fabbri-kimia-etal-arxiv2019-v2.pdf)). 
+For datasets and curve-based SfM code, see the [website](http://multiview-3d-drawings.sourceforge.net).
 
 ## Usage in C++ programs
 For use in your program, we provide a C++ header-only library 
