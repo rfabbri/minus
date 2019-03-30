@@ -1,0 +1,1 @@
+/opt/local/bin/c++  -DMINUS_WARN_DEPRECATED -DMINUS_WARN_DEPRECATED_ONCE -I/Users/rfabbri/cprg/vxlprg/lemsvpe/minus-bin -I/Users/rfabbri/cprg/vxlprg/lemsvpe/minus  -fPIC -O3 -DNDEBUG -march=native -ffast-math -g  -Wno-undefined-var-template -std=gnu++11 -o minus.s -S -c /Users/rfabbri/cprg/vxlprg/lemsvpe/minus/Templates/minus-chicago-alltypes-allformulations+double.cxx

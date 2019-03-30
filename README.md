@@ -302,6 +302,16 @@ To inspect the flags that are implied. I got good perf with gcc5, but it was
 using by default `-mtune=generic`. If I put `-mtune=skylake` it might speedup
 further.
 
+To see command-line flags implied by eg `-march=native`, use:
+
+```
+gcc -march=native -E -v - </dev/null 2>&1 | grep cc1
+```
+If you want to see the compiler/precompiler defines set by certain parameters, do this:
+```
+echo | gcc -dM -E - -march=native
+```
+
 ### Intel ICC compiler + MKL
 Some tests were carried out with Intel ICC, but the gains were not significant
 enough to justify a proprietary compiler. 
@@ -320,6 +330,16 @@ For SSE/VMX use, good examples include:
 Eigen/src/LU/arch/Inverse_SSE.h
 As well as VXL's VNL
 
+FMA could potentially speedup the evaluators.
+
+Place this between code:
+```asm
+   asm("#------ BEGIN!");
+   // some code to analyze
+   asm("#------ END!");
+```
+
+use/adapt the script `scripts/minus-disassemble`
 
 ## Authors
 
