@@ -77,11 +77,11 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   public: // ----------- Functions --------------------------------------------
   
   ///// THE MEAT /////
-  static unsigned track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], 
+  static void track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], 
       const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max);
   
   // helper function: tracks all, no begin or end to specify
-  static unsigned track_all(const track_settings &s, const C<F> s_sols[NNN*NSOLS], 
+  static void track_all(const track_settings &s, const C<F> s_sols[NNN*NSOLS], 
       const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS])
   {
     track(s, s_sols, params, raw_solutions, 0, NNN);

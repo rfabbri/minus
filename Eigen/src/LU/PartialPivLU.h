@@ -338,7 +338,6 @@ struct partial_lu_impl
     typedef typename Scoring::result_type Score;
     static constexpr Index rows = 14;
     static constexpr Index cols = 14;
-    static constexpr Index size = 14;
     nb_transpositions = 0;
     Index first_zero_pivot = -1;
     for(Index k = 0; k < 14; ++k)

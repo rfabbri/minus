@@ -74,7 +74,7 @@ typename minus_core<NSOLS, NNN, NPARAMS, P, F>::track_settings minus_core<NSOLS,
 // compute solutions sol_min...sol_max-1 within NSOLS
 // 
 template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>   // only one is NNN
-unsigned minus_core<NSOLS, NNN, NPARAMS, P, F>::
+void minus_core<NSOLS, NNN, NPARAMS, P, F>::
 track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max)
 {
   C<F> Hxt[NNNPLUS1 * NNN]; 
@@ -88,8 +88,7 @@ track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2
   C<F> *x1t1 = xt;      // reusing xt's space to represent x1t1
   C<F> *const HxH=Hxt;  // HxH is reusing Hxt
   C<F> *const dx = dxdt;
-  const C<F> *const RHS = Hxt + NNN2;  // Hx or Ht, same storage
-  C<F> *const LHS = Hxt;
+  const C<F> *const RHS = Hxt + NNN2;  // Hx or Ht, same storage //// UNUSED:  C<F> *const LHS = Hxt;
   C<F> *const dx4 = dx;   // reuse dx for dx4
   F    *const dt = (F *)(dxdt + NNN);
   const F &t_step = s.init_dt_;  // initial step
