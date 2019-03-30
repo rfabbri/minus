@@ -133,7 +133,9 @@ track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2
       
       // dx2
       const C<F> one_half_dt = *dt*0.5;
+      asm("#------ BEGIN!");
       v::multiply_scalar_to_self(dx4, one_half_dt);
+      asm("#------ END !");
       v::add_to_self(xt, dx4);
       v::multiply_scalar_to_self(dx4, 2.);
       xt[NNN] += one_half_dt;  // t0+.5dt
@@ -143,7 +145,9 @@ track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2
       // dx3
       v::multiply_scalar_to_self(dxi, one_half_dt);
       v::copy(x0t0, xt);
+      EIGEN_ASM_COMMENT("begin");
       v::add_to_self(xt, dxi);
+      EIGEN_ASM_COMMENT("end");
       v::multiply_scalar_to_self(dxi, 4);
       v::add_to_self(dx4, dxi);
       evaluate_Hxt(xt, params, Hxt);

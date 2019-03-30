@@ -233,7 +233,12 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
 
 # This one is the most important one - order of magnitude faster
 # See this: https://gcc.gnu.org/ml/gcc/2001-07/msg02150.html
+# if GCC 8
+#   -march=native -freciprocal-math -fno-trapping-math -fno-math-errno -ffinite-math-only -fno-signaling-nans -fno-rounding-math -fcx-limited-range -fexcess-precision=fast
+#   problem with gcc 8 is -fno-signed-zeros
+# else
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffast-math")
+
 # --fast-math breaks into these:
 #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-math-errno -ffinite-math-only -fno-rounding-math -fno-signaling-nans -fcx-limited-range -fexcess-precision=fast")
 
