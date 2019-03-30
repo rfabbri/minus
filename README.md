@@ -286,6 +286,22 @@ a 2x DECREASE in speed. TODO: try other ICC-specific optimization flags
 
 Also no success with GCC8 - slow or breaks fastmath.
 
+Some versions of GCC might not detect your processor correctly. 
+We use `-march=native` but if your processor is newer relative to your GCC,
+then you might have to confirm:
+```bash
+ gcc -march=native -Q --help=target | grep -- '-march=' | cut -f3
+```
+For gcc 5, this returns broadwell, when my arch is kabylake which is compatible
+to skylake, so gcc should be detecting as skylake ideally. Using newer GCC
+guarantees that for me. You can also try
+```
+gcc-8 -march=native -E -v - </dev/null 2>&1 | grep cc1
+```
+To inspect the flags that are implied. I got good perf with gcc5, but it was
+using by default `-mtune=generic`. If I put `-mtune=skylake` it might speedup
+further.
+
 ### Intel ICC compiler + MKL
 Some tests were carried out with Intel ICC, but the gains were not significant
 enough to justify a proprietary compiler. 
