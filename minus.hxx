@@ -77,10 +77,10 @@ template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>
 void minus_core<NSOLS, NNN, NPARAMS, P, F>::
 track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max)
 {
-  C<F> Hxt[NNNPLUS1 * NNN]; 
-  C<F> x0t0xtblock[2*NNNPLUS1];
-  C<F> dxdt[NNNPLUS1];
-  C<F> dxi[NNN];
+  C<F> Hxt[NNNPLUS1 * NNN] __attribute__((aligned(16))); 
+  C<F> x0t0xtblock[2*NNNPLUS1] __attribute__((aligned(16)));
+  C<F> dxdt[NNNPLUS1] __attribute__((aligned(16)));
+  C<F> dxi[NNN] __attribute__((aligned(16)));
   C<F> *x0t0 = x0t0xtblock;  // t = real running in [0,1]
   C<F> *x0 = x0t0;
   F    *t0 = (F *) (x0t0 + NNN);
@@ -93,13 +93,14 @@ track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2
   F    *const dt = (F *)(dxdt + NNN);
   const F &t_step = s.init_dt_;  // initial step
   using namespace Eigen; // only used for linear solve
-  Map<Matrix<C<F>, NNN, 1> > dxi_eigen(dxi);
-  Map<Matrix<C<F>, NNN, 1> > dx4_eigen(dx4);
-  Map<Matrix<C<F>, NNN, 1> > &dx_eigen = dx4_eigen;
-  Map<const Matrix<C<F>, NNN, NNN> > AA((C<F> *)Hxt,NNN,NNN);  // accessors for the data
-  Map<const Matrix<C<F>, NNN, 1> > bb(RHS);
+  Map<Matrix<C<F>, NNN, 1>,Aligned> dxi_eigen(dxi);
+  Map<Matrix<C<F>, NNN, 1>,Aligned> dx4_eigen(dx4);
+  Map<Matrix<C<F>, NNN, 1>,Aligned> &dx_eigen = dx4_eigen;
+  Map<const Matrix<C<F>, NNN, NNN>,Aligned> AA((C<F> *)Hxt,NNN,NNN);  // accessors for the data
+  Map<const Matrix<C<F>, NNN, 1>, Aligned > bb(RHS);
   static constexpr F the_smallest_number = 1e-13;
   typedef minus_array<NNN,F> v; typedef minus_array<NNNPLUS1,F> vp;
+  PartialPivLU<Matrix<C<F>, NNN, NNN> > lu;
 
   solution *t_s = raw_solutions + sol_min;  // current target solution
   const C<F>* __restrict__ s_s = s_sols + sol_min*NNN;    // current start solution
@@ -128,14 +129,11 @@ track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2
 
       // dx1
       evaluate_Hxt(xt, params, Hxt); // Outputs Hxt
-      PartialPivLU<Matrix<C<F>, NNN, NNN> > lu(AA);
-      dx4_eigen = lu.solve(bb);
+      dx4_eigen = lu.compute(AA).solve(bb);
       
       // dx2
       const C<F> one_half_dt = *dt*0.5;
-      asm("#------ BEGIN!");
       v::multiply_scalar_to_self(dx4, one_half_dt);
-      asm("#------ END !");
       v::add_to_self(xt, dx4);
       v::multiply_scalar_to_self(dx4, 2.);
       xt[NNN] += one_half_dt;  // t0+.5dt
@@ -145,9 +143,7 @@ track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2
       // dx3
       v::multiply_scalar_to_self(dxi, one_half_dt);
       v::copy(x0t0, xt);
-      EIGEN_ASM_COMMENT("begin");
       v::add_to_self(xt, dxi);
-      EIGEN_ASM_COMMENT("end");
       v::multiply_scalar_to_self(dxi, 4);
       v::add_to_self(dx4, dxi);
       evaluate_Hxt(xt, params, Hxt);
