@@ -93,4 +93,5 @@ scripts/dag/tmp.cxx
 scripts/dag/vectorize_experiment.sce
 scripts/extract-start-sols.vim
 tests/a.sce
-
+gcc8-flags
+hongyi-test
