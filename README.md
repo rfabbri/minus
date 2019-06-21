@@ -7,18 +7,20 @@ This package originated in solving medium-sized  (eg, degree > 100) square probl
 trifocal minimal problems from points and lines are of importance (as in
 curve-based structure from motion, where lines are tangents to curves).
 As of this date, such problems are too high degree to be solved symbolically,
-while being low enough degree to allow a global technique rather than the usual
-local Levenberg-Marquardt of structure from motion that requires an
-initialization. In fact, the solutions found using this technique for square
-problems can be used to initialize Levenberg-Marquardt for an overconstrained problem.
+while being low enough degree to allow an efficient implementation of a global
+technique, rather than the usual local Levenberg-Marquardt of structure from
+motion that requires an initialization. The solutions found using this technique
+for square problems can be used to initialize Levenberg-Marquardt for an
+overconstrained problem.
 
 Minus is split into three parts:
 - An efficient library for use in your C++ programs, no dependencies beyond
   standard C++ and Eigen (included)
-- A simple commandline program easy to interface with other programs (eg, Matlab and Macaulay2)
+- Simple commandline program easy to interface with other programs (eg, Matlab and Macaulay2)
 - Optional: extensive tests useful for tuning the algorithm to a machine architecture and
   compiler. These are disabled by default, and requires [VXL core library](https://vxl.github.io) (*optional* - most users don't need this).
  
+## Paper
 The theory and practice associated to Minus is described in
 "Trifocal Relative Pose from Lines at Points and its Efficient Solution", Arxiv
 March 23 2019 ([pdf](http://rfabbri.github.io/stuff/fabbri-kimia-etal-arxiv2019-v2.pdf)). 
@@ -349,7 +351,9 @@ These improvements and specializations were jointly developed with Tomas Pajdla,
 Benjamin Kimia and Hongyi Fan, with intensive discussion and testing from
 remaining Arxiv paper co-authors while at ICERM/Brown University: Jonathan
 Hauenstein, Margaret Regan, Elias Tsigaridas, Charles Wrampler, and David da
-Costa de Pinho.
+Costa de Pinho. The Chicago problem was originally formulated as a differential
+version of curve-based trifocal estimation by Ricardo Fabbri, Peter Giblin, and
+Benjamin Kimia.
 
 
 ## Acknowledgements
