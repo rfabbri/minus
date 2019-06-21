@@ -167,7 +167,7 @@ mread(const char *fname)
 // Simplest possible command to compute the Chicago problem
 // for estimating calibrated trifocal geometry from points and lines at points
 //
-// This is to be kept very simple with only standard C.
+// This is to be kept very simple C with only minimal C++ with Templates.
 // If you want to complicate this, please create another executable.
 // 
 int
