@@ -408,7 +408,7 @@ test_linear()
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   bool retval;
 //  for (unsigned i=0; i < 1903444; ++i) {
-  for (unsigned i=0; i < 1000000; ++i) {
+  for (unsigned i=0; i < 1000; ++i) {
  //    A[1][1] = i/20;
     // retval = linear_eigen2((const complex *)A, (const complex *)b, x);
     // xx = AA.partialPivLu().solve(b_eigen);
