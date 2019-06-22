@@ -4,7 +4,7 @@
 
 set(minus_test_all_sources
   test_driver.cxx
-  test_minus.cxx
+#   test_minus.cxx
 )
 
 aux_source_directory(Templates minus_test_all_sources)

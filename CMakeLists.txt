@@ -215,7 +215,7 @@ if(VXL_FOUND)  # For now we need vxl to build tests
   if( BUILD_TESTING )
     add_subdirectory(tests)
   endif()
-  #XXX add_subdirectory(algo)
+  add_subdirectory(algo)
 endif()
 
 # For now, we have a library
