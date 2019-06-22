@@ -84,7 +84,7 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   static void track_all(const track_settings &s, const C<F> s_sols[NNN*NSOLS], 
       const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS])
   {
-    track(s, s_sols, params, raw_solutions, 0, NNN);
+    track(s, s_sols, params, raw_solutions, 0, NSOLS);
   }
   
   private: // -----------------------------------------------------------------
