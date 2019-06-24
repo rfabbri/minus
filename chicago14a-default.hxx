@@ -4692,8 +4692,11 @@ static complex const start_sols_[M::nnn*M::nsols] = {
   {-.1721304990664842,-.12755642206752138}
 };
 
-// Non-gammified (randomized)
+// Non-gammified (non-randomized)
 // Start system parameters
+//
+// pDouble||pTriple||pChart
+// 
 static complex params_start_[M::nparams] = {
   {.13016671344237549,-.36891394723672405},
   {.2649393534275909,-.23418132862391827},

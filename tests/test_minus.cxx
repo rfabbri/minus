@@ -179,7 +179,7 @@ test_world_to_camera()
   //  This is iccv-chicago-src/chicagoTestDataSph file 5linesCase1.txt
   //  which was used to generate the default run. It already inverts point  coords
   //
-  //  5 lines:
+  //  5 lines (Hongy matlab this is visibleLines, inverted:
   //0.879008519574604 0.476806063840702 0.038623735269322 0.894813299896884 -0.446440542880738 0.032208045798003 0.704559167216148 0.709645249326512 -0.033704562238054
   //-0.707245886556431 0.706967648445817 -0.027867353589865 0.740915644124991 0.671598100273408 -0.041627953405298 0.978562374828962 -0.205950670232225 0.014188247805869
   //-0.995986793114319 0.089500323696923 0.002805786591495 -0.159509552710649 0.987196385018730 0.016889155865539 0.590904880455181 -0.806741236242606 -0.029119177786994
@@ -194,21 +194,121 @@ test_world_to_camera()
 
   // Steps to transform this to params:  minus/src-iccv-chicago/t
   //
-  // // p0 is initial parameters
-  // // sols is initial solutions - already in chicago-default.hxx start_sols_
-  // (p0,sols) = readStartSys "startSys";
+  // p0 is initial parameters OK
+  // params_start_ in chicago14a-default.hxx OK
+
+  // sols is initial solutions  OK
+  // start_sols_already in chicago-default.hxx  OK
   // 
-  // (pLines, x) = parseFile: from the above, returns 
-  // pLines is a 15x3 matrix of line coefs
+  // (p0,sols) = readStartSys "startSys"; OK
+  // 
+  // (pLines, x) = parseFile: from the above, returns  OK
+  // pLines is a 15x3 matrix of line coefs made by Hongyi
+  //    1    -- l_1_1 --
+  //    2    -- l_1_2 --
+  //    3    -- l_1_3 --
+  //    4    -- l_2_1 --
+  //    5    -- l_2_2 --
+  //    6    -- l_2_3 --
+  //    7    -- l_3_1 --
+  //    8    -- l_3_2 --
+  //    9    -- l_3_3 --
+  //    10   -- l_4_1 --
+  //    11   -- l_4_2 --
+  //    12   -- l_4_3 --
+  //    13   -- l_5_1 --
+  //    14   -- l_5_2 --
+  //    15   -- l_5_3 --
+  // 
+  //    l_line_view
+  //       
+  //    These lines are:
   //
+  //    l_1: Point 1&2  (A, B)
+  //    l_2: Point 1&3  (A, C)
+  //    l_3: Point 2&3  (B, C)
+  //    l_4: Tangent at Point 1 (A)
+  //    l_5: Tangent at Point 2 (B)
+  // 
+
+  // XXX we want to obtain pLines from point data
+
+  // ---------------------------------------------------------------
   // solveChicago(p0, pLines /*targetLines*/, sols /*startSols*/);
-  //    P0 := if (numcols p0 == 1) then p0 else transpose p0;
   //    P1 := lines2Parameters targetLines;
   //    P01 := (gammify P0)||(gammify P1);
   //    H01 := specialize(PH, P01); -- XXXX
+  // Each one in turn:
+  //    
+  // ---P1 := lines2Parameters targetLines; -------------
+  //    P1 is pDouble||pTriple||pChart  //  Hongyi: [pDouble; tripleChart; XR'; XT1'; XT2'];
+  //    
+  //    pDouble: 9x3 out of the 15x3 of the pairsiwe lines, linearized as 1x27
+  //        Tim: pDouble is matrix(targetLines^{0..8},27,1);
+  //        Order: row-major
+  //        Hongyi: same
+  //
+  //
+  //    pTriple
+  //        tripleIntersections := {{0,3,9},{0+1,3+1,9+1},{0+2,3+2,9+2},{0,6,12},{0+1,6+1,12+1},{0+2,6+2,12+2}};
+  //        for each ind in tripleIntersections
+  //            subm = get all ind lines in pLines
+  //            n = numericalKernel(subm', kTol);
+  //            // find intersection point - if we already have it, just use it!
+  //            // if our data input is in the form of 3 points and lines
+  //            // through them, simply convert keeping the invariant that the
+  //            // line really goes through the points
+  //            // if the tangent line does not go exactly through the point,
+  //            // need to use svd to make sure it goes through it.
+  //            // unless they have been randomized. Even then,
+  //            // we should not find an average intersection point between the
+  //            // 3 lines, but should keep the point as the more reliable
+  //            // measurement and only adjust the line to the point.
+  //            // This will be left for later.
+  //
+  //            // intersection point as non-normalized coordinates
+  //            ind = (1/n_(2,0))*n^{0,1})
+  //                n^{0,1} is n(0:1,:)   if n is 3x1 -> n(0:1)
+  //                n_(2,0) is not n_{2,0} but simply -> n(2)
+  //        
+  //    pChart
+  //        sphere(7,1)|sphere(5,1)|sphere(5,1)
+  //
+  // --- gammify ---  XXX 
+  //
+  //
+  // 9 random complex numbers (rand x + i rand y), non unit, seemingly uniform
+  // Corresponding to the 9 pairwise lines
+  //
+  // gamma1 .. gamma9
   // 
-  
+  // diag0 Generate a 3*9 = 27 entry thing by duplicationg gammas
+  // gamma1
+  // gamma1
+  // gamma1
+  // gamma2
+  // gamma2
+  // gamma2
+  // ...
+  // gamma9
+  // gamma9
+  // gamma9
 
+  //    tripleIntersections := {{0,3,9},{0+1,3+1,9+1},{0+2,3+2,9+2},
+  //  {0,6,12},{0+1,6+1,12+1},{0+2,6+2,12+2}};
+  
+  //  for each triple intersection i
+  //    Get the first two (point-point) lines
+  //    diag1(i) = conjugate(gammas(tripleIntersection(i)(0)))
+  //    diag1(i+1) = conjugate(gammas(tripleIntersection(i)(1)))
+  //    
+  //  diag2 := 7 times a fixed random(); -- t chart gamma
+  //  diag3 := 5 times a fixed random(); -- q chart, cam 2, gamma
+  //  diag4 := 5 times ...               -- q chart, cam 3, gamma
+  //  p' := diagonalMatrix(diag0|diag1|diag2|diag3|diag4)*p;
+  //  total                  27   12    7      5    5 = 56
+    
+  
   // XXX doing: prototype conversions in pseudocode to see if simplifications
   // emerge
 }
