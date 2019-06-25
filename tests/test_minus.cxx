@@ -91,6 +91,9 @@ points2params(points, params)
   pts[1][0]; tgts[0][1];
 }
 
+static std::random_device rd;
+static std::mt19937 rnd{rd()};
+
 void
 test_world_to_camera()
 {
@@ -214,7 +217,7 @@ test_world_to_camera()
   //    XXX
 
   
-  plines[][] = {
+  plines[15][3] = {
   };
 
   unsigned id []  = {
@@ -236,7 +239,7 @@ test_world_to_camera()
     
   complex params[2*M::nparams]; // start-target param pairs, P01 in chicago.m2, like params_ 
   
-  get_params_start_target(params);
+  get_params_start_target(plines, params);
     lines2params(plines, params);
     gammify(params);
     gammify(params+M::nparams);
@@ -245,10 +248,10 @@ test_world_to_camera()
                        // 2*M::nparams array 
                        // after this fn, complex part zero, but we will use this space later
                        // to gammify/randomize
-  lines2params(plines, complex params[static M::nparams])
+  lines2params(double plines[][], complex params[static M::nparams])
   {
     //    params (P1) is pDouble||pTriple||pChart  //  Hongyi: [pDouble; tripleChart; XR'; XT1'; XT2'];
-    //    size    27       12        17 = 56
+    //    size              27       12        17 = 56
 
     // pDouble ----------------------------------------
     // converts 1st 9 lines to complex (real part zero)
@@ -264,77 +267,45 @@ test_world_to_camera()
     unsigned triple_intersections[6][3] = 
       {{0,3,9},{0+1,3+1,9+1},{0+2,3+2,9+2},{0,6,12},{0+1,6+1,12+1},{0+2,6+2,12+2}};
 
+    complex (*params_lines)[2] = (complex (*)[2]) (params+27);
     // express each of the 6 tangents in the basis of the other pairwise lines
-    // intersecting at the same point, projectively
+    // intersecting at the same point
     for (unsigned l=0; l < 6; ++l) {
-      l0l0 = dot(l0,l0);
-      l0l1 = dot(l0,l1);
-      l1l1 = dot(l1,l1);
-      l2l0 = dot(l2,l0);
-      l2l1 = dot(l2,l1);
-      a = cross([l0l0 l1l0 l2l0], [l0l1 l1l1 l2l1]);
-      // divide by the last coord (see cross prod formula, plug direct)
+      const complex *l0 = plines[triple_intersections[l][0]];
+      const complex *l1 = plines[triple_intersections[l][1]];
+      const complex *l2 = plines[triple_intersections[l][2]];
+      l0l0 = dot(l0,l0); l0l1 = dot(l0,l1); l1l1 = dot(l1,l1);
+      l2l0 = dot(l2,l0); l2l1 = dot(l2,l1);
+      l2_l0l1 = cross([l0l0 l1l0 l2l0], [l0l1 l1l1 l2l1]);
+      params_lines[l][0] = l2_l0l1[0]/l2_l0l1[2]; // divide by the last coord (see cross prod formula, plug direct)
+      params_lines[l][1] = l2_l0l1[1]/l2_l0l1[2];
     }
 
 
-    
-  //    pTriple: the 6 tangent lines in the coordinates of the point-point
-  //        lines, in the form  (x1,y1,x2,y2,x3,y3,...): 12x1
-  //        
-  //        tripleIntersections := {{0,3,9},{0+1,3+1,9+1},{0+2,3+2,9+2},{0,6,12},{0+1,6+1,12+1},{0+2,6+2,12+2}};
-  //        for each ind in tripleIntersections
-  //            subm = get all ind lines in pLines
-  //            n = numericalKernel(subm', kTol);
-  //            // find intersection point - if we already have it, just use it!
-  //            // if our data input is in the form of 3 points and lines
-  //            // through them, simply convert keeping the invariant that the
-  //            // line really goes through the points
-  //            // if the tangent line does not go exactly through the point,
-  //            // need to use svd to make sure it goes through it.
-  //            // unless they have been randomized. Even then,
-  //            // we should not find an average intersection point between the
-  //            // 3 lines, but should keep the point as the more reliable
-  //            // measurement and only adjust the line to the point.
-  //            // This will be left for later.
-  //
-  //            // intersection point as non-normalized coordinates
-  //            ind = (1/n_(2,0))*n^{0,1})
-  //                     n^{0,1} is n(0:1,:)   if n is 3x1 -> n(0:1)
-  //                     n_(2,0) is not n_{2,0} but simply -> n(2)
-  //
-  //
-  //            Explanation: 
-  //            The tripleChart computation starts with line indices:
-  //            ind = [0 3 9;1 4 10; 2 5 11; 0 6 12; 1 7 13; 2 8 14]+1;
-  //            
-  //            Lets take ind [0 3 9]+1, or [1 4 10].
-  //            This is l_1_1, l_2_1, l_4_1.
-  //            These are lines 1, 2, and 4 at point 1.
-  //            All these lines intersect at point 1.
-         
-  //            Now both your code and Tim's will now generate a 3x3 matrix
-  //            for svd:
-         
-  //            -- l_1_1 --
-  //            -- l_2_1 --
-  //            -- l_4_1 --
-         
-  //            When you compute the numerical kernel, it means you are finding an
-  //            intersection point. The intersection point is the point p such that the
-  //            matrix times this p is as close to zero as possible. This means p satisfies
-  //            all equations as closely as possible.
-         
-  //            This code only makes sense if your input is only lines and you want to find
-  //            an approximate intersection, since in general they will not intersect
-  //            exactly at the same point in the presence of noise.
-  //
-  //
-  //            Code without svd: /Users/rfabbri/cprg/vxlprg/lemsvpe/minus/scripts/test_triple_intersections.m
-  //                
-  //        
-  //    pChart: just unit rands 17x1
-  //        sphere(7,1)|sphere(5,1)|sphere(5,1)
-  //
+    // random unit array v of dimension n
+    // only on real coordinates, with 0 complex ones
+    rand_sphere(complex v[], unsigned n) 
+    {
+        std::normal_distribution<> g{0,1};
+        // fill each with a random number
+        double m=0;
+        for (unsigned i=0; i < n; ++i) {
+          double r = g(rng);
+          v[i] = complex{r};
+          m += r*r;
+        }
+        m = std::sqrt(m);
+        for (unsigned i=0; i < n; ++i)
+          v[i] /= m;
+    }
+
+    //        
+    //    pChart: just unit rands 17x1
+    //        sphere(7,1)|sphere(5,1)|sphere(5,1)
+    //
+    rand_sphere(params+27+12,7);
+    rand_sphere(params+27+12+7,5);
+    rand_sphere(params+27+12+7+5,5);
   }
   
   //  This is iccv-chicago-src/chicagoTestDataSph file 5linesCase1.txt
