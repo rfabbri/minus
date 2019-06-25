@@ -95,7 +95,7 @@ void
 test_world_to_camera()
 {
   //  This is exactly the case in the slides in big-notes/trifocal/trifocal.key
-
+  // Extracted from the original synthcurves dataset
   // synthcurves-multiview-3d-dataset/spherical-ascii-100_views-perturb-radius_sigma10-normal_sigma0_01rad-minsep_15deg-no_two_cams_colinear_with_object
   //
   // Frame files: frame_..42, 54, 62
@@ -107,27 +107,31 @@ test_world_to_camera()
   // 3389  tangents
   // 0-based ids. +1 to get file line
   // 
-  // Extracting this data from those files:
-  // scripts/getlines.sh
+  // Extracting this data from those files: scripts/getlines.sh
 
+  // NOTE: The point order seems to match Hongyi,
+  // though he might have done an off-by-1 mistake for point indexing (3012 vs
+  // 3011)
+  double p[view][point][coord];
   // points for frame 42
-  // + sed -n '621p;3012p;3390p' frame_0042-pts-2d.txt
-  286.7673976130331539 217.06531260627261304
+  // + sed -n '3012p;3390p;621p' frame_0042-pts-2d.txt
   141.01103052308988595 270.45312297462106699
   239.89822517853363593 86.442049763307068133
+  286.7673976130331539 217.06531260627261304
   
   // points for frame 54
-  // + sed -n '621p;3012p;3390p' frame_0054-pts-2d.txt
-  257.04360648826406077 159.4404341695463927
+  // + sed -n '3012p;3390p;621p;' frame_0054-pts-2d.txt
   241.41513314836856807 447.15662243793082098
   123.95973916849976604 213.90676875312345828
+  257.04360648826406077 159.4404341695463927
   
   // points for frame 62
-  // + sed -n '621p;3012p;3390p' frame_0062-pts-2d.txt
+  // + sed -n '3012p;3390p;621p' frame_0062-pts-2d.txt
+  375.60750199363729962 277.22372936832925916
   295.57132984990698787 147.80261937455236421
   240.78946527513195974 410.13737156824942076
-  375.60750199363729962 277.22372936832925916
 
+  double tgt[view][tgt][coord];
   // tangents for frame 42
   // + sed -n '3012p;3390p' frame_0042-tgts-2d.txt
   0.9536809622336909209 -0.3008199166827579818
@@ -145,11 +149,14 @@ test_world_to_camera()
 
 
   // intrinsic params equal to every frame
+  double K[][];
   2584.9325098195013197 0 249.77137587221417903
   0 2584.7918606057692159 278.31267937919352562
   0 0 1
 
   // extrinsic params for each frame
+  double R[][][];
+  double C[][][];
 
   // extrinsics for frame 42
   // + cat frame_0042.extrinsic
@@ -175,6 +182,58 @@ test_world_to_camera()
   
 
 
+  // Generate lines
+  // pLines is a 15x3 matrix of line coefs  (we use view-line-point index, this
+  // is inverted to match Hongyi)
+  //    1    -- l_1_1 --
+  //    2    -- l_1_2 --
+  //    3    -- l_1_3 --
+  //    4    -- l_2_1 --
+  //    5    -- l_2_2 --
+  //    6    -- l_2_3 --
+  //    7    -- l_3_1 --
+  //    8    -- l_3_2 --
+  //    9    -- l_3_3 --
+  //    10   -- l_4_1 --
+  //    11   -- l_4_2 --
+  //    12   -- l_4_3 --
+  //    13   -- l_5_1 --
+  //    14   -- l_5_2 --
+  //    15   -- l_5_3 --
+  //    
+  //    l_line_view
+  //    
+  //    These lines are:
+  //
+  //    l_1: Point 1&2  (A, B)
+  //    l_2: Point 1&3  (A, C)
+  //    l_3: Point 2&3  (B, C)
+  //    l_4: Tangent at Point 1 (A)
+  //    l_5: Tangent at Point 2 (B)
+  
+  //    XXX
+
+  
+  plines[][] = {
+  };
+
+  unsigned id []  = {
+    {0, 1},
+    {0, 2},
+    {1, 2} 
+  };
+
+  // plines 1-9: 
+  // 
+  unsigned i=0;
+  for (unsigned l=0; l < 3; ++l)
+    for (unsigned v=0; v < 3; ++v)
+      plines[i++] = cross(pts[v][id[v][0]], pts[v][id[v][1]]);
+
+  for (unsigned p=0; p < 2; ++p)
+    for (unsigned v=0; v < 3; ++v)
+      plines[i++] = cross(p[v][p], p[v][p]+tgt[v][p]);
+    
   
   //  This is iccv-chicago-src/chicagoTestDataSph file 5linesCase1.txt
   //  which was used to generate the default run. It already inverts point  coords
@@ -202,7 +261,8 @@ test_world_to_camera()
   // 
   // (p0,sols) = readStartSys "startSys"; OK
   // 
-  // (pLines, x) = parseFile: from the above, returns  OK
+  // ------------------------------------------------------------ DONE
+  // pLines = parseFile: from the above, returns  OK
   // pLines is a 15x3 matrix of line coefs made by Hongyi
   //    1    -- l_1_1 --
   //    2    -- l_1_2 --
@@ -230,26 +290,25 @@ test_world_to_camera()
   //    l_4: Tangent at Point 1 (A)
   //    l_5: Tangent at Point 2 (B)
   // 
-
-  // XXX we want to obtain pLines from point data
-
-  // ---------------------------------------------------------------
-  // solveChicago(p0, pLines /*targetLines*/, sols /*startSols*/);
+  // --------------------------------------------------------------- 
+  // //////////////////////////////solveChicago(p0, pLines /*targetLines*/, sols /*startSols*/);
   //    P1 := lines2Parameters targetLines;
-  //    P01 := (gammify P0)||(gammify P1);
-  //    H01 := specialize(PH, P01); -- XXXX
+  //    P01 := (gammify P0)||(gammify P1);  // which is what we need..
+  //    
   // Each one in turn:
   //    
-  // ---P1 := lines2Parameters targetLines; -------------
+  // ---P1 := lines2Parameters targetLines; ------------- XXX
   //    P1 is pDouble||pTriple||pChart  //  Hongyi: [pDouble; tripleChart; XR'; XT1'; XT2'];
+  //    size    27       12        17 = 56
   //    
-  //    pDouble: 9x3 out of the 15x3 of the pairsiwe lines, linearized as 1x27
+  //    pDouble: 9x3 out of the 15x3 of the pairsiwe lines, linearized as 27x1
   //        Tim: pDouble is matrix(targetLines^{0..8},27,1);
   //        Order: row-major
   //        Hongyi: same
   //
   //
-  //    pTriple
+  //    pTriple: the 6 points that have tangents, in the form  (x1,y1,x2,y2,x3,y3,...): 12x1
+  //        
   //        tripleIntersections := {{0,3,9},{0+1,3+1,9+1},{0+2,3+2,9+2},{0,6,12},{0+1,6+1,12+1},{0+2,6+2,12+2}};
   //        for each ind in tripleIntersections
   //            subm = get all ind lines in pLines
@@ -268,17 +327,49 @@ test_world_to_camera()
   //
   //            // intersection point as non-normalized coordinates
   //            ind = (1/n_(2,0))*n^{0,1})
-  //                n^{0,1} is n(0:1,:)   if n is 3x1 -> n(0:1)
-  //                n_(2,0) is not n_{2,0} but simply -> n(2)
+  //                     n^{0,1} is n(0:1,:)   if n is 3x1 -> n(0:1)
+  //                     n_(2,0) is not n_{2,0} but simply -> n(2)
+  //
+  //
+  //            Explanation: 
+  //            The tripleChart computation starts with line indices:
+  //            ind = [0 3 9;1 4 10; 2 5 11; 0 6 12; 1 7 13; 2 8 14]+1;
+  //            
+  //            Lets take ind [0 3 9]+1, or [1 4 10].
+  //            This is l_1_1, l_2_1, l_4_1.
+  //            These are lines 1, 2, and 4 at point 1.
+  //            All these lines intersect at point 1.
+         
+  //            Now both your code and Tim's will now generate a 3x3 matrix
+  //            for svd:
+         
+  //            -- l_1_1 --
+  //            -- l_2_1 --
+  //            -- l_4_1 --
+         
+  //            When you compute the numerical kernel, it means you are finding an
+  //            intersection point. The intersection point is the point p such that the
+  //            matrix times this p is as close to zero as possible. This means p satisfies
+  //            all equations as closely as possible.
+         
+  //            This code only makes sense if your input is only lines and you want to find
+  //            an approximate intersection, since in general they will not intersect
+  //            exactly at the same point in the presence of noise.
+  //
+  //
+  //            Code without svd: /Users/rfabbri/cprg/vxlprg/lemsvpe/minus/scripts/test_triple_intersections.m
+  //                
   //        
-  //    pChart
+  //    pChart: just unit rands 17x1
   //        sphere(7,1)|sphere(5,1)|sphere(5,1)
   //
-  // --- gammify ---  XXX 
+  //
+  // --- gammify ---
   //
   //
   // 9 random complex numbers (rand x + i rand y), non unit, seemingly uniform
-  // Corresponding to the 9 pairwise lines
+  // Corresponding to the 9 pairwise lines. Seems unit is a better idea
+  // numerically.
   //
   // gamma1 .. gamma9
   // 
@@ -294,7 +385,7 @@ test_world_to_camera()
   // gamma9
   // gamma9
 
-  //    tripleIntersections := {{0,3,9},{0+1,3+1,9+1},{0+2,3+2,9+2},
+  //  tripleIntersections := {{0,3,9},{0+1,3+1,9+1},{0+2,3+2,9+2},
   //  {0,6,12},{0+1,6+1,12+1},{0+2,6+2,12+2}};
   
   //  for each triple intersection i
@@ -305,8 +396,8 @@ test_world_to_camera()
   //  diag2 := 7 times a fixed random(); -- t chart gamma
   //  diag3 := 5 times a fixed random(); -- q chart, cam 2, gamma
   //  diag4 := 5 times ...               -- q chart, cam 3, gamma
-  //  p' := diagonalMatrix(diag0|diag1|diag2|diag3|diag4)*p;
-  //  total                  27   12    7      5    5 = 56
+  //  p' := (diag0|diag1|diag2|diag3|diag4).*p;
+  //  total    27   12    7      5    5 = 56
     
   
   // XXX doing: prototype conversions in pseudocode to see if simplifications
