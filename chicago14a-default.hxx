@@ -4697,7 +4697,11 @@ static complex const start_sols_[M::nnn*M::nsols] = {
 //
 // pDouble||pTriple||pChart
 // 
-static complex params_start_[M::nparams] = {
+//                                  actually just the start M::nparams
+//                                  are initialized here, but we use 
+//                                  the other M::nparams later 
+//                                  to store target system params
+static complex params_start_target_[2*M::nparams] = {
   {.13016671344237549,-.36891394723672405},
   {.2649393534275909,-.23418132862391827},
   {.16966329078346828,.83255014163452079},
@@ -4760,7 +4764,7 @@ static complex params_start_[M::nparams] = {
 // these take almost 1min in Macaulay2
 // Used for testing.
 // Gammified (randomized)
-static complex params_start_target_[2*M::nparams] = { // start-target param pairs, P01 in chicago.m2
+static complex default_params_start_target_gammified_[2*M::nparams] = { // start-target param pairs, P01 in chicago.m2
   {.391195550619826,-.00262962533857666},
   {.310140709227333,+.169842562835882},
   {-.725705624433656,+.441901252816163},
@@ -4874,6 +4878,8 @@ static complex params_start_target_[2*M::nparams] = { // start-target param pair
   {-.106561340161159,+.495572246957103},
   {.0663667102234161,-.308643825789244}
 };
+static complex *params_= default_params_start_target_gammified_; // start-target param pairs, P01 in chicago.m2
+  
 // Hongy's format (intermediate, after inverting K, specific for line/minur
 // formulation)
 // 

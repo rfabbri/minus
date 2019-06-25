@@ -223,17 +223,119 @@ test_world_to_camera()
     {1, 2} 
   };
 
-  // plines 1-9: 
-  // 
+  // plines 1-9 (between points): 
   unsigned i=0;
   for (unsigned l=0; l < 3; ++l)
     for (unsigned v=0; v < 3; ++v)
       plines[i++] = cross(pts[v][id[v][0]], pts[v][id[v][1]]);
 
+  // plines 10-15 (tangents): 
   for (unsigned p=0; p < 2; ++p)
     for (unsigned v=0; v < 3; ++v)
       plines[i++] = cross(p[v][p], p[v][p]+tgt[v][p]);
     
+  complex params[2*M::nparams]; // start-target param pairs, P01 in chicago.m2, like params_ 
+  
+  get_params_start_target(params);
+    lines2params(plines, params);
+    gammify(params);
+    gammify(params+M::nparams);
+  
+                       // we only use the first half of the outer
+                       // 2*M::nparams array 
+                       // after this fn, complex part zero, but we will use this space later
+                       // to gammify/randomize
+  lines2params(plines, complex params[static M::nparams])
+  {
+    //    params (P1) is pDouble||pTriple||pChart  //  Hongyi: [pDouble; tripleChart; XR'; XT1'; XT2'];
+    //    size    27       12        17 = 56
+
+    // pDouble ----------------------------------------
+    // converts 1st 9 lines to complex (real part zero)
+    // 
+    // 9x3 out of the 15x3 of the pairsiwe lines, linearized as 27x1
+    // Tim: pDouble is matrix(targetLines^{0..8},27,1);
+    // Order: row-major
+    const complex *pl = (const complex *)plines;
+    for (unsigned i=0; i < 27; ++i) params[i] = pl[i];
+
+    // pTriple ----------------------------------------
+    
+    unsigned triple_intersections[6][3] = 
+      {{0,3,9},{0+1,3+1,9+1},{0+2,3+2,9+2},{0,6,12},{0+1,6+1,12+1},{0+2,6+2,12+2}};
+
+    // express each of the 6 tangents in the basis of the other pairwise lines
+    // intersecting at the same point, projectively
+    for (unsigned l=0; l < 6; ++l) {
+      l0l0 = dot(l0,l0);
+      l0l1 = dot(l0,l1);
+      l1l1 = dot(l1,l1);
+      l2l0 = dot(l2,l0);
+      l2l1 = dot(l2,l1);
+      a = cross([l0l0 l1l0 l2l0], [l0l1 l1l1 l2l1]);
+      // divide by the last coord (see cross prod formula, plug direct)
+    }
+
+
+    
+  //    pTriple: the 6 tangent lines in the coordinates of the point-point
+  //        lines, in the form  (x1,y1,x2,y2,x3,y3,...): 12x1
+  //        
+  //        tripleIntersections := {{0,3,9},{0+1,3+1,9+1},{0+2,3+2,9+2},{0,6,12},{0+1,6+1,12+1},{0+2,6+2,12+2}};
+  //        for each ind in tripleIntersections
+  //            subm = get all ind lines in pLines
+  //            n = numericalKernel(subm', kTol);
+  //            // find intersection point - if we already have it, just use it!
+  //            // if our data input is in the form of 3 points and lines
+  //            // through them, simply convert keeping the invariant that the
+  //            // line really goes through the points
+  //            // if the tangent line does not go exactly through the point,
+  //            // need to use svd to make sure it goes through it.
+  //            // unless they have been randomized. Even then,
+  //            // we should not find an average intersection point between the
+  //            // 3 lines, but should keep the point as the more reliable
+  //            // measurement and only adjust the line to the point.
+  //            // This will be left for later.
+  //
+  //            // intersection point as non-normalized coordinates
+  //            ind = (1/n_(2,0))*n^{0,1})
+  //                     n^{0,1} is n(0:1,:)   if n is 3x1 -> n(0:1)
+  //                     n_(2,0) is not n_{2,0} but simply -> n(2)
+  //
+  //
+  //            Explanation: 
+  //            The tripleChart computation starts with line indices:
+  //            ind = [0 3 9;1 4 10; 2 5 11; 0 6 12; 1 7 13; 2 8 14]+1;
+  //            
+  //            Lets take ind [0 3 9]+1, or [1 4 10].
+  //            This is l_1_1, l_2_1, l_4_1.
+  //            These are lines 1, 2, and 4 at point 1.
+  //            All these lines intersect at point 1.
+         
+  //            Now both your code and Tim's will now generate a 3x3 matrix
+  //            for svd:
+         
+  //            -- l_1_1 --
+  //            -- l_2_1 --
+  //            -- l_4_1 --
+         
+  //            When you compute the numerical kernel, it means you are finding an
+  //            intersection point. The intersection point is the point p such that the
+  //            matrix times this p is as close to zero as possible. This means p satisfies
+  //            all equations as closely as possible.
+         
+  //            This code only makes sense if your input is only lines and you want to find
+  //            an approximate intersection, since in general they will not intersect
+  //            exactly at the same point in the presence of noise.
+  //
+  //
+  //            Code without svd: /Users/rfabbri/cprg/vxlprg/lemsvpe/minus/scripts/test_triple_intersections.m
+  //                
+  //        
+  //    pChart: just unit rands 17x1
+  //        sphere(7,1)|sphere(5,1)|sphere(5,1)
+  //
+  }
   
   //  This is iccv-chicago-src/chicagoTestDataSph file 5linesCase1.txt
   //  which was used to generate the default run. It already inverts point  coords
@@ -307,7 +409,8 @@ test_world_to_camera()
   //        Hongyi: same
   //
   //
-  //    pTriple: the 6 points that have tangents, in the form  (x1,y1,x2,y2,x3,y3,...): 12x1
+  //    pTriple: the 6 tangent lines in the coordinates of the point-point
+  //        lines, in the form  (x1,y1,x2,y2,x3,y3,...): 12x1
   //        
   //        tripleIntersections := {{0,3,9},{0+1,3+1,9+1},{0+2,3+2,9+2},{0,6,12},{0+1,6+1,12+1},{0+2,6+2,12+2}};
   //        for each ind in tripleIntersections
