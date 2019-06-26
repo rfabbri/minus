@@ -1,6 +1,8 @@
 // 
 // \author Ricardo Fabbri based on original code by Anton Leykin 
 // \date February 2019
+//
+// Tests more comprehensive runs of minus using the public interface
 // 
 #include <iostream>
 #include <fstream>
@@ -83,26 +85,10 @@ test_end_user_interface()
 }
 
 void
-test_rand()
-{
-  std::cout << "Random number generation \n";
-  static constexpr unsigned NRAND = 20000.;
-  double d[NRAND];
-  for (unsigned i=0; i < NRAND; ++i)
-    d[i] = minus_util<M::nnn,double>::gauss(minus_util<M::nnn,double>::rnd);
-  double s = 0;
-  for (unsigned i=0; i < NRAND; ++i)
-    s+= d[i];
-  std::cout << "***** avg: " << s/NRAND << std::endl;
-  TEST("Is the random generator gaussian(0,1000) average not too far from 0?", s/NRAND < 100, true);
-}
-
-void
 test_minus()
 {
   //test_full_solve();
   test_end_user_interface();
-  test_rand();
 }
 
 TESTMAIN(test_minus);
