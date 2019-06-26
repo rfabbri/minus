@@ -9,14 +9,14 @@
 #include <iostream>
 #include <iomanip>
 #include <cstring>
+#include <random>
 #include "Eigen/LU"
 #include "minus.h"
 #include "chicago14a.hxx"
 // #include "chicago6a.hxx"
 
-
 template <unsigned NNN, typename F>
-struct minus_array {
+struct minus_array { // Speed critical -----------------------------------------
   static inline void 
   multiply_scalar_to_self(C<F> *__restrict__ a, C<F> b)
   {
@@ -61,7 +61,49 @@ struct minus_array {
     while (a != end) val += std::norm(*a++);
     return val;
   }
+  
 };
+
+
+template <unsigned NNN, typename F>
+struct minus_util { // Not speed critical --------------------------------------
+  // Random unit array v of dimension n
+  // only on real coordinates, with 0 complex ones
+  // we are guaranteeing unifom sampling on the sphere,
+  // but simpler rand() on each dimension then normalization also works
+//  static inline void 
+//  rand_sphere(complex v[], unsigned n) {
+//     fill each with a random number
+//    F m=0;
+//    for (unsigned i=0; i < n; ++i) {
+//      F r = gauss(rng);
+//      v[i] = complex{r};
+//      m += r*r;
+//    }
+//    m = std::sqrt(m);
+//    for (unsigned i=0; i < n; ++i)
+//      v[i] /= m;
+//  }
+//  void randc(C<F> *z) { 
+//    thread_local std::random_device rd;  //static
+//    thread_local std::mt19937 rnd{rd()};
+//    thread_local std::normal_distribution<F> gauss{0,1000};  
+//    *z = C<F>{gauss(rng), gauss(rng)}; *z /= std::abs(*z); 
+//  }
+private:
+  static std::random_device rd;
+  static std::mt19937 rnd;
+  static std::normal_distribution<F> gauss;
+};
+
+template <unsigned NNN, typename F>
+std::random_device minus_util<NNN,F>::rd;
+
+template <unsigned NNN, typename F>
+std::mt19937 minus_util<NNN,F>::rnd{rd()};
+
+template <unsigned NNN, typename F>
+std::normal_distribution<F> minus_util<NNN,F>::gauss{0,1000};  
 
 template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>
 const 

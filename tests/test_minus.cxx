@@ -93,6 +93,7 @@ points2params(points, params)
 
 static std::random_device rd;
 static std::mt19937 rnd{rd()};
+static std::normal_distribution<double> gauss{0,1000};  
 
 void
 test_world_to_camera()
@@ -282,22 +283,6 @@ test_world_to_camera()
     }
 
 
-    // random unit array v of dimension n
-    // only on real coordinates, with 0 complex ones
-    rand_sphere(complex v[], unsigned n) 
-    {
-        std::normal_distribution<> g{0,1};
-        // fill each with a random number
-        double m=0;
-        for (unsigned i=0; i < n; ++i) {
-          double r = g(rng);
-          v[i] = complex{r};
-          m += r*r;
-        }
-        m = std::sqrt(m);
-        for (unsigned i=0; i < n; ++i)
-          v[i] /= m;
-    }
 
     //        
     //    pChart: just unit rands 17x1
@@ -307,6 +292,42 @@ test_world_to_camera()
     rand_sphere(params+27+12+7,5);
     rand_sphere(params+27+12+7+5,5);
   }
+  
+  gammify(params);
+  gammify(params+M::nparams);
+
+  void
+  gammify(complex params[static M::nparams])
+  {
+    // diag0
+    complex (*params_lines)[2] = (complex (*)[2]) params;
+    complex gammas[9]; 
+    for (unsigned l=0; l < 9; ++l) {
+      randc(gammas+l);
+      const complex &g = gammas[l];
+      params[l][0] *= g; params[l][1] *= g; params[l][2] *= g;
+    }
+    triple_intersections[][] = {{0,3},{0+1,3+1},{0+2,3+2},{0,6},{0+1,6+1},{0+2,6+2}};
+
+    // diag1
+    unsigned i = 9;
+    for (unsigned tl=0; tl < 6; ++tl) {
+      params[i++] *= gammas[triple_intersections[tl][0]].conj();
+      params[i++] *= gammas[triple_intersections[tl][1]].conj();
+    }
+    
+    complex g;
+    // diag2 -- tchart gamma
+    randc(&g); for (unsigned k=0; k < 7; ++k) params[i++] *= g;
+    // diag3 -- qchart, cam 2, gamma
+    randc(&g); for (unsigned k=0; k < 5; ++k) params[i++] *= g;
+    // diag4 -- qchart, cam 3, gammg
+    randc(&g); for (unsigned k=0; k < 5; ++k) params[i++] *= g;
+    //  p = (diag0|diag1|diag2|diag3|diag4).*p;
+    //  total  27   12    7      5    5 = 56
+  }
+  
+  // triple
   
   //  This is iccv-chicago-src/chicagoTestDataSph file 5linesCase1.txt
   //  which was used to generate the default run. It already inverts point  coords
@@ -464,6 +485,7 @@ test_world_to_camera()
   
   //  for each triple intersection i
   //    Get the first two (point-point) lines
+  //    
   //    diag1(i) = conjugate(gammas(tripleIntersection(i)(0)))
   //    diag1(i+1) = conjugate(gammas(tripleIntersection(i)(1)))
   //    
