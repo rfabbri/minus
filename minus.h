@@ -23,6 +23,7 @@
 //#define NNN2 196  /* NNN squared */
 //#define NPARAMS 56 /* Number of parameters in parameter homotopy - eg, coefficients, etc, to represent NNNxNNN sys */
 #include <complex>
+#include <random>
 
 // typedef std::complex<double> complex;
 // might have to define eval.hxx through define
@@ -185,5 +186,35 @@ using minus6 = minus_core<312, 6, 45, P, double>;
 // can now use minus<chicago14a>
 // no need to do this:
 // typedef minus<double, 312, 14, 56> minus_chicago14a;
+
+template <unsigned NNN, typename F>
+struct minus_util { // Not speed critical --------------------------------------
+  // Random unit array v of dimension n
+  // only on real coordinates, with 0 complex ones
+  // we are guaranteeing unifom sampling on the sphere,
+  // but simpler rand() on each dimension then normalization also works
+//  static inline void 
+//  rand_sphere(complex v[], unsigned n) {
+//     fill each with a random number
+//    F m=0;
+//    for (unsigned i=0; i < n; ++i) {
+//      F r = gauss(rng);
+//      v[i] = complex{r};
+//      m += r*r;
+//    }
+//    m = std::sqrt(m);
+//    for (unsigned i=0; i < n; ++i)
+//      v[i] /= m;
+//  }
+//  void randc(C<F> *z) { 
+//    thread_local std::random_device rd;  //static
+//    thread_local std::mt19937 rnd{rd()};
+//    thread_local std::normal_distribution<F> gauss{0,1000};  
+//    *z = C<F>{gauss(rng), gauss(rng)}; *z /= std::abs(*z); 
+//  }
+  static std::random_device rd;
+  static std::mt19937 rnd;
+  static std::normal_distribution<F> gauss;
+};
 
 #endif  // minus_h_
