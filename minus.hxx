@@ -63,6 +63,31 @@ struct minus_array { // Speed critical -----------------------------------------
 };
 
 template <unsigned NNN, typename F>
+struct minus_util { // Not speed critical --------------------------------------
+  // Random unit array v of dimension n
+  // only on real coordinates, with 0 complex ones
+  // we are guaranteeing unifom sampling on the sphere,
+  // but simpler rand() on each dimension then normalization also works
+//  static inline void 
+//  rand_sphere(complex v[], unsigned n) {
+//     fill each with a random number
+//    F m=0;
+//    for (unsigned i=0; i < n; ++i) {
+//      F r = gauss(rng);
+//      v[i] = complex{r};
+//      m += r*r;
+//    }
+//    m = std::sqrt(m);
+//    for (unsigned i=0; i < n; ++i)
+//      v[i] /= m;
+//  }
+  static void randc(C<F> *z) { *z = C<F>{gauss(rnd), gauss(rnd)}; *z /= std::abs(*z); }
+  static std::random_device rd;
+  static std::mt19937 rnd;
+  static std::normal_distribution<F> gauss;
+};
+
+template <unsigned NNN, typename F>
 std::random_device minus_util<NNN,F>::rd;
 
 template <unsigned NNN, typename F>

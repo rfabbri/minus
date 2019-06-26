@@ -87,7 +87,7 @@ test_end_user_interface()
 void
 test_minus()
 {
-  //test_full_solve();
+  test_full_solve();
   test_end_user_interface();
 }
 
