@@ -60,10 +60,20 @@ struct minus_array { // Speed critical -----------------------------------------
     while (a != end) val += std::norm(*a++);
     return val;
   }
+
+  static inline void
+  cross(const C<F> v1[3], const C<F> v2[3], C<F> r[3])
+  {
+    r[0] = v1[1] * v2[2] - v1[2] * v2[1];
+    r[1] = v1[2] * v2[0] - v1[0] * v2[2];
+    r[2] = v1[0] * v2[1] - v1[1] * v2[0];
+  }
+  static inline C<F>
+  dot(const C<F> v1[3], const C<F> v2[3]) { return v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2]; }
 };
 
 // Not performance critical ---------------------------------------------------
-template <unsigned NNN, typename F>
+template <unsigned NNN, typename F>  // TODO remove NNN
 struct minus_util {
   // Random unit array v of dimension n
   // only on real coordinates, with 0 complex ones
