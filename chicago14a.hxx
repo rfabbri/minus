@@ -7007,4 +7007,84 @@ HxH(const C<F>* __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<
   y[209] = -G2836;
 }
 
+//------------------------------------------------------------------------------
+
+template <typename F>
+struct minus_io_shaping<chicago14a,F> {
+  static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
+};
+
+// --- gammify -----------------------------------------------------------------
+//
+// 9 random complex numbers (rand x + i rand y), non unit, seemingly uniform
+// Corresponding to the 9 pairwise lines. Seems unit is a better idea
+// numerically.
+//
+// gamma1 .. gamma9
+// 
+// diag0 Generate a 3*9 = 27 entry thing by duplicationg gammas
+// gamma1
+// gamma1
+// gamma1
+// gamma2
+// gamma2
+// gamma2
+// ...
+// gamma9
+// gamma9
+// gamma9
+//
+//  tripleIntersections := {{0,3,9},{0+1,3+1,9+1},{0+2,3+2,9+2},
+//  {0,6,12},{0+1,6+1,12+1},{0+2,6+2,12+2}};
+//
+//  for each triple intersection i
+//    Get the first two (point-point) lines
+//    
+//    diag1(i) = conjugate(gammas(tripleIntersection(i)(0)))
+//    diag1(i+1) = conjugate(gammas(tripleIntersection(i)(1)))
+//    
+//  diag2 := 7 times a fixed random(); -- t chart gamma
+//  diag3 := 5 times a fixed random(); -- q chart, cam 2, gamma
+//  diag4 := 5 times ...               -- q chart, cam 3, gamma
+//  p' := (diag0|diag1|diag2|diag3|diag4).*p;
+//  total    27   12    7      5    5 = 56
+//
+template <typename F>
+inline void 
+minus_io_shaping<chicago14a, F>::
+gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
+{
+  typedef minus_util<F> util;
+  //  params = (diag0|diag1|diag2|diag3|diag4).*params;
+  // diag0
+  C<F> (*p)[3] = (C<F> (*)[3]) params;
+  C<F> gammas[9]; 
+  for (unsigned l=0; l < 9; ++l) {
+    util::randc(gammas+l);
+    const C<F> &g = gammas[l];
+    p[l][0] *= g; p[l][1] *= g; p[l][2] *= g;
+  }
+  
+  // ids of two point-point lines at tangents
+  unsigned triple_intersect[6][2] = {{0,3},{0+1,3+1},{0+2,3+2},{0,6},{0+1,6+1},{0+2,6+2}};
+
+  // diag1
+  unsigned i = 9*3;
+  for (unsigned tl=0; tl < 6; ++tl) {  // for each tangent line
+    params[i++] *= std::conj(gammas[triple_intersect[tl][0]]);
+    params[i++] *= std::conj(gammas[triple_intersect[tl][1]]);
+  }
+  
+  C<F> g;
+  // diag2 -- tchart gamma
+  util::randc(&g); for (unsigned k=0; k < 7; ++k) params[i++] *= g;
+  // diag3 -- qchart, cam 2, gamma
+  util::randc(&g); for (unsigned k=0; k < 5; ++k) params[i++] *= g;
+  // diag4 -- qchart, cam 3, gammg
+  util::randc(&g); for (unsigned k=0; k < 5; ++k) params[i++] *= g;
+  //  p = (diag0|diag1|diag2|diag3|diag4).*p;
+  //  total  27   12    7      5    5 = 56
+  assert(i == 56);
+}
+
 #endif // chicago14a_hxx

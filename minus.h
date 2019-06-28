@@ -84,9 +84,7 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   // helper function: tracks all, no begin or end to specify
   static void track_all(const track_settings &s, const C<F> s_sols[NNN*NSOLS], 
       const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS])
-  {
-    track(s, s_sols, params, raw_solutions, 0, NSOLS);
-  }
+  { track(s, s_sols, params, raw_solutions, 0, NSOLS); }
   
   private: // -----------------------------------------------------------------
   static constexpr unsigned NNNPLUS1 = NNN+1;
@@ -177,9 +175,21 @@ void minus_core<NSOLS, NNN, NPARAMS, P, F>::evaluate_HxH(const C<F> * __restrict
   eval<P,F>::HxH(x, params, y);
 }
 
+// IO shaping: not used in tracker, but only for shaping user data
+// The user specializes this to their problem inside problem.hxx
+// Needed to create this class since functions do not always support partial
+// specialization
+template <problem P, /* add more as needed */ typename F>
+struct minus_io_shaping {
+  static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
+};
+
 // type alias used to hide a template parameter 
 template<problem P>
 using minus = minus_core<312, 14, 56, P, double>;  // TODO: set 312, 14, 56 conditional on P
+
+template<problem P>
+using minus_io = minus_io_shaping<P, double>;
 
 template<problem P>
 using minus6 = minus_core<312, 6, 45, P, double>;

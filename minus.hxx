@@ -11,8 +11,6 @@
 #include <cstring>
 #include "Eigen/LU"
 #include "minus.h"
-#include "chicago14a.hxx"      // specific implementations to chicago 14a formulation
-// #include "chicago6a.hxx"
 
 template <unsigned NNN, typename F>
 struct minus_array { // Speed critical -----------------------------------------
@@ -108,9 +106,8 @@ std::mt19937 minus_util<F>::rnd{rd()};
 template <typename F>
 std::normal_distribution<F> minus_util<F>::gauss{0.0,1000.0};  
 
-template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>
-const 
-typename minus_core<NSOLS, NNN, NPARAMS, P, F>::track_settings minus_core<NSOLS, NNN, NPARAMS, P, F>::DEFAULT;
+template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F> const typename 
+minus_core<NSOLS, NNN, NPARAMS, P, F>::track_settings minus_core<NSOLS, NNN, NPARAMS, P, F>::DEFAULT;
 
 // THE MEAT //////////////////////////////////////////////////////////////////////
 // t: tracker settings
@@ -118,8 +115,8 @@ typename minus_core<NSOLS, NNN, NPARAMS, P, F>::track_settings minus_core<NSOLS,
 // params: params of target as specialized homotopy params - P01 in SolveChicago
 // compute solutions sol_min...sol_max-1 within NSOLS
 // 
-template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>   // only one is NNN
-void minus_core<NSOLS, NNN, NPARAMS, P, F>::
+template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F> void 
+minus_core<NSOLS, NNN, NPARAMS, P, F>::
 track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max)
 {
   C<F> Hxt[NNNPLUS1 * NNN] __attribute__((aligned(16))); 
@@ -247,5 +244,8 @@ track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2
     ++t_s; s_s += NNN;
   } // outer solution loop
 }
+
+#include "chicago14a.hxx"      // specific implementations to chicago 14a formulation
+// #include "chicago6a.hxx"
 
 #endif // minus_hxx_
