@@ -101,13 +101,75 @@ test_rand()
     TEST_NEAR("Cross product", m, 0 , tol);
   }
 }
+#if 0
+// XXX
+                     // we only use the first half of the outer
+                     // 2*M::nparams array 
+                     // after this fn, complex part zero, but we will use this space later
+                     // to gammify/randomize
+lines2params(double plines[][3], complex params[static M::nparams])
+{
+  //    params (P1) is pDouble||pTriple||pChart  //  Hongyi: [pDouble; tripleChart; XR'; XT1'; XT2'];
+  //    size              27       12        17 = 56
+
+  // pDouble ----------------------------------------
+  // converts 1st 9 lines to complex (real part zero)
+  // 
+  // 9x3 out of the 15x3 of the pairsiwe lines, linearized as 27x1
+  // Tim: pDouble is matrix(targetLines^{0..8},27,1);
+  // Order: row-major
+  const double *pl = (const double *)plines;
+  for (unsigned i=0; i < 27; ++i) params[i] = pl[i];
+
+  // pTriple ----------------------------------------
+  
+  unsigned triple_intersections[6][3] = 
+    {{0,3,9},{0+1,3+1,9+1},{0+2,3+2,9+2},{0,6,12},{0+1,6+1,12+1},{0+2,6+2,12+2}};
+
+  complex (*params_lines)[2] = (complex (*)[2]) (params+27);
+  // express each of the 6 tangents in the basis of the other pairwise lines
+  // intersecting at the same point
+  for (unsigned l=0; l < 6; ++l) {
+    const complex *l0 = plines[triple_intersections[l][0]];
+    const complex *l1 = plines[triple_intersections[l][1]];
+    const complex *l2 = plines[triple_intersections[l][2]];
+    l0l0 = dot(l0,l0); l0l1 = dot(l0,l1); l1l1 = dot(l1,l1);
+    l2l0 = dot(l2,l0); l2l1 = dot(l2,l1);
+    // cross([l0l0 l1l0 l2l0], [l0l1 l1l1 l2l1], l2_l0l1);
+    {
+      complex v1[3], v2[3];
+      v1[0] = l0l0; v1[1] = l1l0; v1[2] = l2l0;
+      v2[0] = l0l1; v2[1] = l1l1; v2[2] = l2l1;
+      cross(v1, v2, l2_l0l1);
+    }
+    
+    params_lines[l][0] = l2_l0l1[0]/l2_l0l1[2]; // divide by the last coord (see cross prod formula, plug direct)
+    params_lines[l][1] = l2_l0l1[1]/l2_l0l1[2];
+  }
+  //        
+  //    pChart: just unit rands 17x1
+  //        sphere(7,1)|sphere(5,1)|sphere(5,1)
+  //
+  rand_sphere(params+27+12,7);
+  rand_sphere(params+27+12+7,5);
+  rand_sphere(params+27+12+7+5,5);
+}
+#endif
 
 void
 test_gamma()
 {
+  std::ofstream log("log");
   // sanity check
-  complex p_test_deleteme[M::nparams];
-  io::gammify(p_test_deleteme);
+  complex p_test[M::nparams];
+  
+  // arbitrary values
+  for (unsigned i=0; i < M::nparams; ++i)
+    p_test[i] = 100;
+  
+  io::gammify(p_test);
+  for (unsigned i=0; i < M::nparams; ++i)
+    log << p_test[i] << std::endl;
 }
 
 void
