@@ -7095,7 +7095,7 @@ gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
 template <typename F>
 inline void 
 minus_io_shaping<chicago14a, F>::
-lines2params(F plines[15][3], C<F> * __restrict__ params/*[static M::nparams]*/)
+lines2params(F plines[15][3], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   typedef minus_util<F> util;
   typedef minus_3d<F> vec;

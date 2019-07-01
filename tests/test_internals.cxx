@@ -128,10 +128,25 @@ test_lines2params()
 }
 
 void
+get_params_start_target(F plines[15][3], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+{
+  lines2params(plines, params);
+  gammify(params);
+  gammify(params+M::nparams);
+}
+
+void
+test_get_params_start_target()
+{
+  complex params[2*M::nparams]; // start-target param pairs, P01 in chicago.m2, like params_ 
+}
+
+void
 test_io_shaping()
 {
   test_gamma();
   test_lines2params();
+  test_get_params_start_target();
 }
 
 void
