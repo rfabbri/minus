@@ -58,7 +58,11 @@ struct minus_array { // Speed critical -----------------------------------------
     while (a != end) val += std::norm(*a++);
     return val;
   }
+};
 
+// Functions over 3 dimensions
+template <typename F>
+struct minus_3d {
   static inline void
   cross(const C<F> v1[3], const C<F> v2[3], C<F> r[3])
   {
@@ -68,6 +72,16 @@ struct minus_array { // Speed critical -----------------------------------------
   }
   static inline C<F>
   dot(const C<F> v1[3], const C<F> v2[3]) { return v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2]; }
+  
+  static inline void
+  cross(const F v1[3], const F v2[3], F r[3])
+  {
+    r[0] = v1[1] * v2[2] - v1[2] * v2[1];
+    r[1] = v1[2] * v2[0] - v1[0] * v2[2];
+    r[2] = v1[0] * v2[1] - v1[1] * v2[0];
+  }
+  static inline F
+  dot(const F v1[3], const F v2[3]) { return v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2]; }
 };
 
 // Not performance critical ---------------------------------------------------

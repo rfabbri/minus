@@ -7012,6 +7012,7 @@ HxH(const C<F>* __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<
 template <typename F>
 struct minus_io_shaping<chicago14a,F> {
   static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
+  static void lines2params(F plines[15][3], C<F> * __restrict__ params/*[static M::nparams]*/);
 };
 
 // --- gammify -----------------------------------------------------------------
@@ -7085,6 +7086,63 @@ gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
   //  p = (diag0|diag1|diag2|diag3|diag4).*p;
   //  total  27   12    7      5    5 = 56
   assert(i == 56);
+}
+
+// we only use the first half of the outer
+// 2*M::nparams array 
+// after this fn, complex part zero, but we will use this space later
+// to gammify/randomize
+template <typename F>
+inline void 
+minus_io_shaping<chicago14a, F>::
+lines2params(F plines[15][3], C<F> * __restrict__ params/*[static M::nparams]*/)
+{
+  typedef minus_util<F> util;
+  typedef minus_3d<F> vec;
+  //    params (P1) is pF||pTriple||pChart  //  Hongyi: [pF; tripleChart; XR'; XT1'; XT2'];
+  //    size              27       12        17 = 56
+
+  // pF ----------------------------------------
+  // converts 1st 9 lines to C<F> (real part zero)
+  // 
+  // 9x3 out of the 15x3 of the pairsiwe lines, linearized as 27x1
+  // Tim: pF is matrix(targetLines^{0..8},27,1);
+  // Order: row-major
+  const F *pl = (const F *)plines;
+  for (unsigned i=0; i < 27; ++i) params[i] = pl[i];
+
+  // pTriple ----------------------------------------
+  
+  unsigned triple_intersections[6][3] = 
+    {{0,3,9},{0+1,3+1,9+1},{0+2,3+2,9+2},{0,6,12},{0+1,6+1,12+1},{0+2,6+2,12+2}};
+
+  C<F> (*params_lines)[2] = (C<F> (*)[2]) (params+27);
+  // express each of the 6 tangents in the basis of the other pairwise lines
+  // intersecting at the same point
+  for (unsigned l=0; l < 6; ++l) {
+    const F *l0 = plines[triple_intersections[l][0]];
+    const F *l1 = plines[triple_intersections[l][1]];
+    const F *l2 = plines[triple_intersections[l][2]];
+    double l0l0 = vec::dot(l0,l0), l0l1 = vec::dot(l0,l1), l1l1 = vec::dot(l1,l1),
+    l2l0 = vec::dot(l2,l0), l2l1 = vec::dot(l2,l1);
+    // cross([l0l0 l1l0 l2l0], [l0l1 l1l1 l2l1], l2_l0l1);
+    double l2_l0l1[3]; 
+    {
+      F v1[3], v2[3];
+      v1[0] = l0l0; v1[1] = l0l1; v1[2] = l2l0;
+      v2[0] = l0l1; v2[1] = l1l1; v2[2] = l2l1;
+      vec::cross(v1, v2, l2_l0l1);
+    }
+    params_lines[l][0] = l2_l0l1[0]/l2_l0l1[2]; // divide by the last coord (see cross prod formula, plug direct)
+    params_lines[l][1] = l2_l0l1[1]/l2_l0l1[2];
+  }
+  //        
+  //    pChart: just unit rands 17x1
+  //        sphere(7,1)|sphere(5,1)|sphere(5,1)
+  //
+  util::rand_sphere(params+27+12,7);
+  util::rand_sphere(params+27+12+7,5);
+  util::rand_sphere(params+27+12+7+5,5);
 }
 
 #endif // chicago14a_hxx
