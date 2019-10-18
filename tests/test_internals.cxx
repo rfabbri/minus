@@ -128,7 +128,7 @@ test_lines2params()
 }
 
 void
-get_params_start_target(F plines[15][3], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+get_params_start_target(const F plines[15][3], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   lines2params(plines, params);
   gammify(params);
@@ -138,7 +138,13 @@ get_params_start_target(F plines[15][3], C<F> * __restrict__ params/*[static 2*M
 void
 test_get_params_start_target()
 {
+  std::ofstream log("log_test_get_params_start_target");
   complex params[2*M::nparams]; // start-target param pairs, P01 in chicago.m2, like params_ 
+  double plines[15][3];
+  get_params_start_target(plines, params);
+  TEST("get_params_start_target sanity check", params[0], complex(0));
+  for (unsigned i=0; i < 2*M::nparams; ++i)
+    log << params[i] << std::endl;;
 }
 
 void
