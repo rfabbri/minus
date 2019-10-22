@@ -1,5 +1,21 @@
 language: cpp
+
+# $PROJ_BUILD_DIR must not be co-located with the source directory!
+env:
+global:
+    - PROJ_SOURCE_DIR=${TRAVIS_BUILD_DIR} # ${HOME}/build/<USER>/<REPO>
+    - PROJ_BUILD_DIR=${HOME}/proj/build
+    - PROJ_INSTALL_DIR=${HOME}/proj/install
+      
 compiler:
-- gcc
+- gcc  # default 5.4 as of Sept 2019
 os:
 - linux
+
+# main script
+script:
+  - cmake --version
+  - ${CC} --version
+  - cd ${PROJ_BUILD_DIR}
+  - cmake
+-DCMAKE_INSTALL_PREFIX:PATH=${PROJ_INSTALL_DIR}
