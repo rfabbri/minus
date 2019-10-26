@@ -7,7 +7,6 @@ language: cpp
 #     - PROJ_BUILD_DIR=${HOME}/proj/build
 #     - PROJ_INSTALL_DIR=${HOME}/proj/install
 
-env:  # https://docs.travis-ci.com/user/customizing-the-build#Rows-that-are-Allowed-to-Fail
 matrix:
   include:
     #    - os: linux
