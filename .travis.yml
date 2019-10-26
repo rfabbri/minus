@@ -7,34 +7,35 @@ language: cpp
 #     - PROJ_BUILD_DIR=${HOME}/proj/build
 #     - PROJ_INSTALL_DIR=${HOME}/proj/install
 
+env:  # https://docs.travis-ci.com/user/customizing-the-build#Rows-that-are-Allowed-to-Fail
 matrix:
   include:
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-5
-      env:
-         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
-         - MATRIX_NAME="gcc-5"
-           
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-6
-      env:
-         - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
-         - MATRIX_NAME="gcc-6"
-
-    - os: linux
-      compiler: clang
-      env:
-        - MATRIX_NAME="clang_default"
+    #    - os: linux
+    #      addons:
+    #        apt:
+    #          sources:
+    #            - ubuntu-toolchain-r-test
+    #          packages:
+    #            - g++-5
+    #      env:
+    #         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+    #         - MATRIX_NAME="gcc-5"
+    #           
+    #    - os: linux
+    #      addons:
+    #        apt:
+    #          sources:
+    #            - ubuntu-toolchain-r-test
+    #          packages:
+    #            - g++-6
+    #      env:
+    #         - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
+    #         - MATRIX_NAME="gcc-6"
+    #
+    #    - os: linux
+    #      compiler: clang
+    #      env:
+    #        - MATRIX_NAME="clang_default"
 
     # works on macOS 10.14       
     - os: osx
@@ -70,9 +71,10 @@ matrix:
       env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
         - MATRIX_NAME="gcc-5_xcode11"
+  allow_failures:
+    - MATRIX_NAME="gcc-5_xcode11"
+          
 
-allow_failures:
-  - MATRIX_NAME="gcc-5_xcode11"
        
 # addons:
 #   apt:
@@ -114,7 +116,7 @@ before_install:
 script:
   - cmake --version
   - ${CC} --version
-  - cmake .
+  - cmake -DCMAKE_CXX_FLAGS="-w" .
   - make
   - ./bin/minus-chicago -g 1>/dev/null     # test
 #   - make install
