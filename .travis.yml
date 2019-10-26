@@ -18,6 +18,8 @@ matrix:
              - g++-5
        env:
           - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+          - MATRIX_NAME="gcc-5"
+            
      - os: linux
        addons:
          apt:
@@ -27,6 +29,16 @@ matrix:
              - g++-6
        env:
           - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
+          - MATRIX_NAME="gcc-6"
+
+     - os: linux
+       compiler: clang
+       addons:
+         apt:
+           packages:
+             - ninja-build
+       env:
+         - MATRIX_NAME="clang_default"
 
      # works on macOS 10.14       
      - os: osx
@@ -45,14 +57,14 @@ matrix:
 before_install:
     - eval "${MATRIX_EVAL}"
       
-jobs:
-include:
-  - os: linux
-    dist: trusty
-  - os: linux
-    dist: xenial
-  - os: osx
-    osx_image: xcode11
+# jobs:
+# include:
+#   - os: linux
+#     dist: trusty
+#   - os: linux
+#     dist: xenial
+#   - os: osx
+#     osx_image: xcode11
 
 
 # additional setup
