@@ -72,7 +72,7 @@ matrix:
         - MATRIX_NAME="gcc-5_xcode11"
 
 allow_failures:
-  - od:osx
+  - MATRIX_NAME="gcc-5_xcode11"
        
 # addons:
 #   apt:
