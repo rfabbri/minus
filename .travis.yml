@@ -1,11 +1,11 @@
 language: cpp
 
 # $PROJ_BUILD_DIR must not be co-located with the source directory!
-env:
-global:  # this is useful for future caching, see VXL/.travis.yml
-    - PROJ_SOURCE_DIR=${TRAVIS_BUILD_DIR} # ${HOME}/build/<USER>/<REPO>
-    - PROJ_BUILD_DIR=${HOME}/proj/build
-    - PROJ_INSTALL_DIR=${HOME}/proj/install
+# env:
+# global:  # this is useful for future caching, see VXL/.travis.yml
+#     - PROJ_SOURCE_DIR=${TRAVIS_BUILD_DIR} # ${HOME}/build/<USER>/<REPO>
+#     - PROJ_BUILD_DIR=${HOME}/proj/build
+#     - PROJ_INSTALL_DIR=${HOME}/proj/install
       
 os:
 - linux
@@ -34,9 +34,9 @@ install:
 #       export PATH=${DEPS_DIR}/cmake/bin:${PATH}
 #     fi    
 
-before_script:
+# before_script:
   # create build & install directories if they do not exist
-  - mkdir -p ${PROJ_BUILD_DIR} ${PROJ_INSTALL_DIR}
+#   - mkdir -p ${PROJ_BUILD_DIR} ${PROJ_INSTALL_DIR}
   
 # main script
 script:
@@ -44,6 +44,6 @@ script:
   - ${CC} --version
   - cd ${PROJ_BUILD_DIR}
   - cmake
-        -DCMAKE_INSTALL_PREFIX:PATH=${PROJ_INSTALL_DIR}
+        -DCMAKE_INSTALL_PREFIX:PATH=${PROJ_INSTALL_DIR} .
   - make
   - make install
