@@ -1,7 +1,8 @@
 <!--<img src="vxd-logo.gif" width="215" height="84" /> -->
 
 
-## MINUS: MInimial problem NUmerical continuation Solver
+## MINUS: MInimial problem NUmerical continuation Solver [![Build Status](https://travis-ci.org/rfabbri/minus.svg?branch=master)](https://travis-ci.org/rfabbri/minus)
+
 This package originated in solving medium-sized  (eg, degree > 100) square problems
 (ie, exactly-determined, 0-dimensional), notably in computer vision where
 trifocal minimal problems from points and lines are of importance (as in
