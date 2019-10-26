@@ -19,6 +19,8 @@ jobs:
 include:
   - os: linux
     dist: trusty
+  - os: linux
+    dist: xenial
   - os: osx
     osx_image: xcode11
 
