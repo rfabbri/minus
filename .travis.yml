@@ -52,7 +52,7 @@ matrix:
           packages:
           - gcc@5
       env:
-        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CXXFLAGS=-w"
+        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
         - MATRIX_NAME="gcc-5_xcode10.2"
       
     - os: osx
@@ -62,7 +62,7 @@ matrix:
           packages:
           - gcc@5
       env:
-        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CXXFLAGS=-w"
+        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
         - MATRIX_NAME="gcc-5_xcode11"
        
 # addons:
