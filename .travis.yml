@@ -76,5 +76,6 @@ script:
   - ${CC} --version
   - cmake .
   - make
-  - cmd/minus-chicago -g 1>/dev/null     # test
+  - ls
+  - ./cmd/minus-chicago -g 1>/dev/null     # test
 #   - make install
