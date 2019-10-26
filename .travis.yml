@@ -44,4 +44,4 @@ script:
   - ${CC} --version
   - cmake .
   - make
-  - make install
+#   - make install
