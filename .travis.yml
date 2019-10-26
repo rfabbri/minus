@@ -72,7 +72,15 @@ matrix:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
         - MATRIX_NAME="gcc-5_xcode11"
   allow_failures:
-    - MATRIX_NAME="gcc-5_xcode11"
+    - os: osx
+      osx_image: xcode11
+      addons:
+        homebrew:
+          packages:
+          - gcc@5
+      env:
+        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+        - MATRIX_NAME="gcc-5_xcode11"
           
 
        
@@ -116,7 +124,7 @@ before_install:
 script:
   - cmake --version
   - ${CC} --version
-  - cmake -DCMAKE_CXX_FLAGS="-w" .
+  - cmake .
   - make
   - ./bin/minus-chicago -g 1>/dev/null     # test
 #   - make install
