@@ -6,15 +6,45 @@ language: cpp
 #     - PROJ_SOURCE_DIR=${TRAVIS_BUILD_DIR} # ${HOME}/build/<USER>/<REPO>
 #     - PROJ_BUILD_DIR=${HOME}/proj/build
 #     - PROJ_INSTALL_DIR=${HOME}/proj/install
-      
-os:
-- linux
-- osx
-      
-compiler:
-- gcc  # default 5.4 as of Sept 2019
-- clang
 
+matrix:
+  include:
+     - os: linux
+       addons:
+         apt:
+           sources:
+             - ubuntu-toolchain-r-test
+           packages:
+             - g++-5
+       env:
+          - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+     - os: linux
+       addons:
+         apt:
+           sources:
+             - ubuntu-toolchain-r-test
+           packages:
+             - g++-6
+       env:
+          - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
+
+     # works on macOS 10.14       
+     - os: osx
+       osx_image: xcode10.2
+       
+     - os: osx
+       osx_image: xcode11
+           
+# addons:
+#   apt:
+#     sources:
+#       - ubuntu-toolchain-r-test
+#     packages:
+#       - cmake
+
+before_install:
+    - eval "${MATRIX_EVAL}"
+      
 jobs:
 include:
   - os: linux
@@ -26,7 +56,7 @@ include:
 
 
 # additional setup
-install:
+# install:
 
   # install specific cmake version (minimum vxl requirement)
 #   - |
@@ -46,4 +76,5 @@ script:
   - ${CC} --version
   - cmake .
   - make
+  - cmd/minus-chicago -g 1>/dev/null     # test
 #   - make install
