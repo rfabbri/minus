@@ -9,44 +9,53 @@ language: cpp
 
 matrix:
   include:
-     - os: linux
-       addons:
-         apt:
-           sources:
-             - ubuntu-toolchain-r-test
-           packages:
-             - g++-5
-       env:
-          - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
-          - MATRIX_NAME="gcc-5"
-            
-     - os: linux
-       addons:
-         apt:
-           sources:
-             - ubuntu-toolchain-r-test
-           packages:
-             - g++-6
-       env:
-          - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
-          - MATRIX_NAME="gcc-6"
-
-     - os: linux
-       compiler: clang
-       addons:
-         apt:
-           packages:
-             - ninja-build
-       env:
-         - MATRIX_NAME="clang_default"
-
-     # works on macOS 10.14       
-     - os: osx
-       osx_image: xcode10.2
-       
-     - os: osx
-       osx_image: xcode11
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+      env:
+         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+         - MATRIX_NAME="gcc-5"
            
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env:
+         - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
+         - MATRIX_NAME="gcc-6"
+
+    - os: linux
+      compiler: clang
+      addons:
+        apt:
+          packages:
+            - ninja-build
+      env:
+        - MATRIX_NAME="clang_default"
+
+    # works on macOS 10.14       
+    - os: osx
+      osx_image: xcode10.2
+      
+    - os: osx
+      osx_image: xcode11
+      
+    - os: osx
+      osx_image: xcode10.2
+      addons:
+        homebrew:
+          packages:
+          - gcc@5
+      env:
+        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CXXFLAGS=-w"
+       
 # addons:
 #   apt:
 #     sources:
