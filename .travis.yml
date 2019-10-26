@@ -42,8 +42,6 @@ install:
 script:
   - cmake --version
   - ${CC} --version
-  - cd ${PROJ_BUILD_DIR}
-  - cmake
-        -DCMAKE_INSTALL_PREFIX:PATH=${PROJ_INSTALL_DIR} .
+  - cmake .
   - make
   - make install
