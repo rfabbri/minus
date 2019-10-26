@@ -33,19 +33,17 @@ matrix:
 
     - os: linux
       compiler: clang
-      addons:
-        apt:
-          packages:
-            - ninja-build
       env:
         - MATRIX_NAME="clang_default"
 
     # works on macOS 10.14       
     - os: osx
       osx_image: xcode10.2
+      - MATRIX_NAME="clang_xcode10"
       
     - os: osx
       osx_image: xcode11
+      - MATRIX_NAME="clang_xcode11"
       
     - os: osx
       osx_image: xcode10.2
@@ -55,6 +53,17 @@ matrix:
           - gcc@5
       env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CXXFLAGS=-w"
+        - MATRIX_NAME="gcc-5_xcode10.2"
+      
+    - os: osx
+      osx_image: xcode11
+      addons:
+        homebrew:
+          packages:
+          - gcc@5
+      env:
+        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5 && CXXFLAGS=-w"
+        - MATRIX_NAME="gcc-5_xcode11"
        
 # addons:
 #   apt:
