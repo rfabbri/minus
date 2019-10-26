@@ -57,6 +57,10 @@ matrix:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
         - MATRIX_NAME="gcc-5_xcode10.2"
       
+    # There is a specific bug with Xcode11 
+    # when including cstdlib, due to gcc including a clang header
+    # that misses a clang definition just introduced by apple
+    # https://github.com/Homebrew/homebrew-core/issues/40676
     - os: osx
       osx_image: xcode11
       addons:
@@ -66,6 +70,9 @@ matrix:
       env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
         - MATRIX_NAME="gcc-5_xcode11"
+
+allow_failures:
+  - od:osx
        
 # addons:
 #   apt:
@@ -74,6 +81,7 @@ matrix:
 #     packages:
 #       - cmake
 
+          
 before_install:
     - eval "${MATRIX_EVAL}"
       
