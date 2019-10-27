@@ -92,7 +92,7 @@ struct minus_util {
   // we are guaranteeing unifom sampling on the sphere,
   // but simpler rand() on each dimension then normalization also works
   static inline void 
-  rand_sphere(C<F> __restrict__ *v/*[chicago14a: 5 minimum, can be 7]*/, unsigned n) {
+  rand_sphere(C<F> *v/*[chicago14a: 5 minimum, can be 7]*/, unsigned n) {
     F m=0;
     for (unsigned i=0; i < n; ++i) {
       F r = gauss(rnd);
