@@ -11,12 +11,9 @@
 #include <cstring>
 #include "Eigen/LU"
 #include "minus.h"
-#include "chicago14a.hxx"
-// #include "chicago6a.hxx"
-
 
 template <unsigned NNN, typename F>
-struct minus_array {
+struct minus_array { // Speed critical -----------------------------------------
   static inline void 
   multiply_scalar_to_self(C<F> *__restrict__ a, C<F> b)
   {
@@ -63,9 +60,68 @@ struct minus_array {
   }
 };
 
-template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>
-const 
-typename minus_core<NSOLS, NNN, NPARAMS, P, F>::track_settings minus_core<NSOLS, NNN, NPARAMS, P, F>::DEFAULT;
+// Functions over 3 dimensions
+template <typename F>
+struct minus_3d {
+  static inline void
+  cross(const C<F> v1[3], const C<F> v2[3], C<F> r[3])
+  {
+    r[0] = v1[1] * v2[2] - v1[2] * v2[1];
+    r[1] = v1[2] * v2[0] - v1[0] * v2[2];
+    r[2] = v1[0] * v2[1] - v1[1] * v2[0];
+  }
+  static inline C<F>
+  dot(const C<F> v1[3], const C<F> v2[3]) { return v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2]; }
+  
+  static inline void
+  cross(const F v1[3], const F v2[3], F r[3])
+  {
+    r[0] = v1[1] * v2[2] - v1[2] * v2[1];
+    r[1] = v1[2] * v2[0] - v1[0] * v2[2];
+    r[2] = v1[0] * v2[1] - v1[1] * v2[0];
+  }
+  static inline F
+  dot(const F v1[3], const F v2[3]) { return v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2]; }
+};
+
+// Not performance critical ---------------------------------------------------
+template <typename F>  // TODO remove NNN
+struct minus_util {
+  // Random unit array v of dimension n
+  // only on real coordinates, with 0 complex ones
+  // we are guaranteeing unifom sampling on the sphere,
+  // but simpler rand() on each dimension then normalization also works
+  static inline void 
+  rand_sphere(C<F> __restrict__ *v/*[chicago14a: 5 minimum, can be 7]*/, unsigned n) {
+    F m=0;
+    for (unsigned i=0; i < n; ++i) {
+      F r = gauss(rnd);
+      v[i] = C<F>{r};
+      m += r*r;
+    }
+    m = std::sqrt(m);
+    for (unsigned i=0; i < n; ++i)
+      v[i] /= m;
+  }
+
+  // random complex
+  static void randc(C<F> * __restrict__ z) { *z = C<F>{gauss(rnd), gauss(rnd)}; *z /= std::abs(*z); }
+  static std::random_device rd;
+  static std::mt19937 rnd;
+  static std::normal_distribution<F> gauss;
+};
+
+template <typename F>
+std::random_device minus_util<F>::rd;
+
+template <typename F>
+std::mt19937 minus_util<F>::rnd{rd()};
+
+template <typename F>
+std::normal_distribution<F> minus_util<F>::gauss{0.0,1000.0};  
+
+template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F> const typename 
+minus_core<NSOLS, NNN, NPARAMS, P, F>::track_settings minus_core<NSOLS, NNN, NPARAMS, P, F>::DEFAULT;
 
 // THE MEAT //////////////////////////////////////////////////////////////////////
 // t: tracker settings
@@ -73,8 +129,8 @@ typename minus_core<NSOLS, NNN, NPARAMS, P, F>::track_settings minus_core<NSOLS,
 // params: params of target as specialized homotopy params - P01 in SolveChicago
 // compute solutions sol_min...sol_max-1 within NSOLS
 // 
-template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>   // only one is NNN
-void minus_core<NSOLS, NNN, NPARAMS, P, F>::
+template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F> void 
+minus_core<NSOLS, NNN, NPARAMS, P, F>::
 track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max)
 {
   C<F> Hxt[NNNPLUS1 * NNN] __attribute__((aligned(16))); 
@@ -202,5 +258,8 @@ track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2
     ++t_s; s_s += NNN;
   } // outer solution loop
 }
+
+#include "chicago14a.hxx"      // specific implementations to chicago 14a formulation
+// #include "chicago6a.hxx"
 
 #endif // minus_hxx_

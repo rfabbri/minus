@@ -1,6 +1,8 @@
 // 
 // \author Ricardo Fabbri based on original code by Anton Leykin 
 // \date February 2019
+//
+// Tests more comprehensive runs of minus using the public interface
 // 
 #include <iostream>
 #include <fstream>
@@ -69,9 +71,24 @@ test_full_solve()
 }
 
 void
+test_end_user_interface()
+{
+  // static data for points and cams
+
+  
+
+  // Placeholder for M::solve(M::DEFAULT, start_sols_, points, cameras);
+//  M::points2params(points, params);
+//  
+//  M::track_all(M::DEFAULT, start_sols_, params_, solutions);
+//  M::solutions2cams(solutions, cameras);
+}
+
+void
 test_minus()
 {
   test_full_solve();
+  test_end_user_interface();
 }
 
 TESTMAIN(test_minus);

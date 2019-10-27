@@ -81,8 +81,6 @@ matrix:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
         - MATRIX_NAME="gcc-5_xcode11"
           
-
-       
 # addons:
 #   apt:
 #     sources:
@@ -102,7 +100,6 @@ before_install:
 #     dist: xenial
 #   - os: osx
 #     osx_image: xcode11
-
 
 # additional setup
 # install:
