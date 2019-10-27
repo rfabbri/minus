@@ -140,12 +140,23 @@ void
 test_get_params_start_target()
 {
   std::ofstream log("log_test_get_params_start_target");
+  
+  {
+  complex params[2*M::nparams]; // start-target param pairs, P01 in chicago.m2, like params_ 
+  Float plines[15][3];
+  get_params_start_target<Float>(plines, params);
+  TEST("get_params_start_target sanity check", params[0], complex(0));
+  }
+  
+  {
   complex params[2*M::nparams]; // start-target param pairs, P01 in chicago.m2, like params_ 
   Float plines[15][3];
   get_params_start_target<Float>(plines, params);
   TEST("get_params_start_target sanity check", params[0], complex(0));
   for (unsigned i=0; i < 2*M::nparams; ++i)
     log << params[i] << std::endl;;
+  }
+  
 }
 
 void
@@ -153,7 +164,7 @@ test_io_shaping()
 {
   test_gamma();
   test_lines2params();
-  //test_get_params_start_target();
+  test_get_params_start_target();
 }
 
 void
