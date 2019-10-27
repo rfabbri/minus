@@ -2,7 +2,6 @@
 // \author Ricardo Fabbri based on original code by Anton Leykin 
 // \date February 2019
 // 
-x
 #include <iostream>
 #include <fstream>
 #include <iomanip>
