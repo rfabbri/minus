@@ -124,7 +124,8 @@ script:
   - cmake --version
   - ${CC} --version
   - cmake .
-  - if [ "$MATRIX_NAME" = "gcc-5_xcode11" ]; then 
+  - |
+    if [ "$MATRIX_NAME" = "gcc-5_xcode11" ]; then 
       make 2>&1 | grep -v -e '^/var/folders/*' -e '^[[:space:]]*\.section' -e '^[[:space:]]*\^[[:space:]]*~*'; 
     else 
       make
