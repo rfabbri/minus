@@ -70,18 +70,117 @@ test_full_solve()
   test_against_ground_truth(solutions);
 }
 
+//TODO to io::
+//
+// \param[in] tgts: three tangents, one at each point.
+// Only two tangents will actually be used. If one of the points
+// in each image has no reliable or well-defined tangents,
+// you can pass anything (zeros or unallocated memory); 
+// it will be ignored. 
+// only tgt[view][id_tgt1][:] and tgt[view][id_tgt2][:] will be used.
+void
+points2params(p[3][3][2], tgt[3][3][2], id_tgt1, id_tgt2)
+{
+  Float plines[15][3];
+  point_tangents2lines(p, tgt, plines);
+  get_params_start_target<Float>(plines, params);
+}
+
+// Generate lines
+// pLines is a 15x3 matrix of line coefs  (we use view-line-point index, this
+// is inverted to match Hongyi)
+//    1    -- l_1_1 --
+//    2    -- l_1_2 --
+//    3    -- l_1_3 --
+//    4    -- l_2_1 --
+//    5    -- l_2_2 --
+//    6    -- l_2_3 --
+//    7    -- l_3_1 --
+//    8    -- l_3_2 --
+//    9    -- l_3_3 --
+//    10   -- l_4_1 --
+//    11   -- l_4_2 --
+//    12   -- l_4_3 --
+//    13   -- l_5_1 --
+//    14   -- l_5_2 --
+//    15   -- l_5_3 --
+//    
+//    l_line_view
+//    
+//    These lines are:
+//
+//    l_1: Point 1&2  (A, B)
+//    l_2: Point 1&3  (A, C)
+//    l_3: Point 2&3  (B, C)
+//    l_4: Tangent at Point 1 (A)
+//    l_5: Tangent at Point 2 (B)
+//
+// NOTE: the input tangent std::vector will be used as scratch so make a copy
+// if you intend to reuse it 
+void
+point_tangents2lines(p, tgt, plines)
+{
+  
+  cross(p[0][0], p[1][0], plines[0]);
+  cross(p[0][1], p[1][1], plines[1]);
+  cross(p[0][2], p[1][2], plines[2]);
+  cross(p[0][0], p[2][0], plines[3]);
+  cross(p[0][1], p[2][1], plines[4]);
+  cross(p[0][2], p[2][2], plines[5]);
+  cross(p[1][0], p[2][0], plines[6]);
+  cross(p[1][1], p[2][1], plines[7]);
+  cross(p[1][2], p[2][2], plines[8]);
+  
+  // tangent at point 0
+  point_tangent2line(p[0][0], t[0][0], plines[9]);
+  point_tangent2line(p[0][1], t[0][1], plines[10]);
+  point_tangent2line(p[0][2], t[0][2], plines[11]);
+  
+  // tangent at point 1
+  point_tangent2line(p[1][0], t[1][0], plines[12]);
+  point_tangent2line(p[1][1], t[1][1], plines[13]);
+  point_tangent2line(p[1][2], t[1][2], plines[14]);
+  // TODO: test normalize to unit vectors for numerics
+}
+
+void
+solutions2poses(solutions, R12, t12, R13, T13)
+{
+  // XXX
+  solutions = reshape(solutions,[14,length(solutions)/14]);
+  imagSolutions = imag(solutions);
+  checkFlag = sum(imagSolutions);
+  realSolutions = solutions(:,abs(checkFlag) < 10e-6);
+  realSolutions = real(realSolutions);
+  for i = 1:size(realSolutions,2)
+      realSolutions(1:4,i) = realSolutions(1:4,i) ./ norm(realSolutions(1:4,i));
+      realSolutions(5:8,i) = realSolutions(5:8,i) ./ norm(realSolutions(5:8,i));
+  end
+  
+    solutions = realSolutions
+
+        quat12 = solutions(1:4,i);
+        quat13 = solutions(5:8,i);
+        T12 = solutions(9:11,i);
+        T13 = solutions(12:14,i);
+        R12 = quat2rotm(transpose(quat12 ./ norm(quat12)));
+        R13 = quat2rotm(transpose(quat13 ./ norm(quat13)));
+  
+}
+
+//TODO to io::
+
 void
 test_end_user_interface()
 {
   // static data for points and cams
 
-  
-
-  // Placeholder for M::solve(M::DEFAULT, start_sols_, points, cameras);
-//  M::points2params(points, params);
-//  
-//  M::track_all(M::DEFAULT, start_sols_, params_, solutions);
-//  M::solutions2cams(solutions, cameras);
+  // M::solve(M::DEFAULT, start_sols_, points, cameras);
+  {
+  io::point_tangents2params(points, tangents, params);
+  M::track_all(M::DEFAULT, start_sols_, params_, solutions);
+  io::solutions2cams(solutions, cameras);
+  }
 }
 
 void

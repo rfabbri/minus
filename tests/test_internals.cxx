@@ -127,6 +127,16 @@ test_lines2params()
   TEST("lines2params sanity check", params[0], complex(0));
 }
 
+void 
+test_points2lines()
+{
+  { // sanity check
+  }
+
+  { // hardcoded input points and desired output lines
+  }
+}
+
 template <typename F=double>
 void
 get_params_start_target(F plines[15][3], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
@@ -156,13 +166,13 @@ test_get_params_start_target()
   for (unsigned i=0; i < 2*M::nparams; ++i)
     log << params[i] << std::endl;;
   }
-  
 }
 
 void
 test_io_shaping()
 {
   test_gamma();
+  test_points2lines();
   test_lines2params();
   test_get_params_start_target();
 }
