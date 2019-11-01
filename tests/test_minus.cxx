@@ -120,7 +120,6 @@ points2params(p[3][3][2], tgt[3][3][2], id_tgt1, id_tgt2)
 void
 point_tangents2lines(p, tgt, plines)
 {
-  
   cross(p[0][0], p[1][0], plines[0]);
   cross(p[0][1], p[1][1], plines[1]);
   cross(p[0][2], p[1][2], plines[2]);
@@ -143,10 +142,11 @@ point_tangents2lines(p, tgt, plines)
   // TODO: test normalize to unit vectors for numerics
 }
 
-void
-solutions2poses(solutions, R12, t12, R13, T13)
-{
   // XXX
+void
+solution2poses(solution s, R12, t12, R13, T13)
+{
+  
   solutions = reshape(solutions,[14,length(solutions)/14]);
   imagSolutions = imag(solutions);
   checkFlag = sum(imagSolutions);
@@ -165,7 +165,6 @@ solutions2poses(solutions, R12, t12, R13, T13)
         T13 = solutions(12:14,i);
         R12 = quat2rotm(transpose(quat12 ./ norm(quat12)));
         R13 = quat2rotm(transpose(quat13 ./ norm(quat13)));
-  
 }
 
 //TODO to io::
