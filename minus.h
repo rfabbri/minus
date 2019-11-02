@@ -182,8 +182,9 @@ void minus_core<NSOLS, NNN, NPARAMS, P, F>::evaluate_HxH(const C<F> * __restrict
 template <problem P, /* add more as needed */ typename F>
 struct minus_io_shaping {
   static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
-  static void lines2params(F plines[15][3], C<F> * __restrict__ params/*[static M::nparams]*/);
+  static void point_tangents2params(F p[3][3][2], F tgt[3][3][2], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   static void point_tangents2lines(F p[3][3][2], F tgt[3][3][2], unsigned id_tgt0, unsigned id_tgt1, F plines[15][3]);
+  static void lines2params(F plines[15][3], C<F> * __restrict__ params/*[static M::nparams]*/);
 };
 
 // type alias used to hide a template parameter 

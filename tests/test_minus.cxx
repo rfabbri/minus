@@ -70,98 +70,7 @@ test_full_solve()
   test_against_ground_truth(solutions);
 }
 
-//TODO to io::
-//
-// \param[in] tgts: three tangents, one at each point.
-// Only two tangents will actually be used. If one of the points
-// in each image has no reliable or well-defined tangents,
-// you can pass anything (zeros or unallocated memory); 
-// it will be ignored. 
-// only tgt[view][id_tgt0][:] and tgt[view][id_tgt1][:] will be used.
-//
-// id_tgt0  < id_tgt0 < 3
-// 
-void
-point_tangents2params(F p[3][3][2], F tgt[3][3][2], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/)
-{
-  Float plines[15][3];
-  point_tangents2lines(p, tgt, plines);
-  // get_params_start_target<Float>(plines, params);
-  io::lines2params<Float>(plines, params);
-}
-
-
-// unit quaternion to rot matrix
-void
-quat2rotm(const F q[4], F r[9])
-{
-  const F 
-    x2 = q[0] * q[0],  xy = q[0] * q[1],  rx = q[3] * q[0],
-    y2 = q[1] * q[1],  yz = q[1] * q[2],  ry = q[3] * q[1],
-    z2 = q[2] * q[2],  zx = q[2] * q[0],  rz = q[3] * q[2],
-    r2 = q[3] * q[3];
-    
-  *r++ = r2 + x2 - y2 - z2;    //  rot(0,0) = r[0]
-  *r++ = 2. * (xy - rz);       //  rot(0,1) = r[1] 
-  *r++ = 2. * (zx + ry);       //  rot(0,2) = r[2] 
-  *r++ = 2. * (xy + rz);       //  rot(1,0) = r[3] 
-  *r++ = r2 - x2 + y2 - z2;    //  rot(1,1) = r[4]
-  *r++ = 2. * (yz - rx);       //  rot(1,2) = r[5] 
-  *r++ = 2. * (zx - ry);       //  rot(2,0) = r[6] 
-  *r++ = 2. * (yz + rx);       //  rot(2,1) = r[7] 
-  *r   = r2 - x2 - y2 + z2;    //  rot(2,2) = r[8]
-}
-
-// \returns true if the solution is real, false otherwise
-// 
-//  rs: real solution; f holds solution R12, t12, R13, T13 row-major
-bool
-get_real(const solution *s, F rs[NNN])
-{
-  // Hongyi function realSolutions = parseSolutionString(output)
-  // solutions = reshape(solutions,[14,length(solutions)/14]);
-
-  eps = 10e-6;
-  
-  imagSolutions = imag(solutions);
-  
-  // TODO
-  // Fancy way to convert to real is to check if the complex number is close to
-  // horizontal then get absolute value.
-  /*
-  for (unsigned var = 0; var < NNN; ++var)  // differs from Hongyi criterion
-    if (s->x[var].real() < eps && s->x[var].real() >= eps
-        || std::abs(std::tan(std::arg(s->x[var].imag()))) >= eps)
-      return false;
-  
-  F real_solution[NNN];
-  for (unsigned var = 0; var < NNN; ++var) 
-    real_solution[var] = ((s->x[var].real() >= 0) ? 1 : -1) * std::abs(s->x[var]);
-  */
-
-  for (unsigned var = 0; var < NNN; ++var)
-    if (std::abs(s->x[var].imag()) >= eps)
-        return false;
-  
-  F rs[NNN]; // real solution
-  for (unsigned var = 0; var < NNN; ++var) 
-    rs[var] = s->x[var].real();
-
-  // quat12 rs(0:3), quat12 rs(4:7)
-  F *p = rs;
-  F norm = sqrt(p[0]*p[0] + p[1]*p[1] + p[2]*p[2] + p[3]*p[3]);
-  p[0] /= norm; p[1] /= norm; p[2] /= norm; p[3] /= norm;
-  p += 4;
-  F norm = sqrt(p[0]*p[0] + p[1]*p[1] + p[2]*p[2] + p[3]*p[3]);
-  p[0] /= norm; p[1] /= norm; p[2] /= norm; p[3] /= norm;
-
-  //  T12 = solutions(9:11);
-  //  T13 = solutions(12:14);
-  //  R12 = quat2rotm(transpose(quat12));
-  //  R13 = quat2rotm(transpose(quat13));
-
-  return true;
-}
+/*
 
 void
 solutions2cams()
@@ -170,8 +79,7 @@ solutions2cams()
     get_real();
     // build cams by using quat2rotm
 }
-
-//TODO to io::
+*/
 
 void
 test_end_user_interface()

@@ -58,6 +58,52 @@ struct minus_array { // Speed critical -----------------------------------------
     while (a != end) val += std::norm(*a++);
     return val;
   }
+  
+  // Get the real part of the solution vector s (e.g., member x of struct
+  // solution).
+  //  
+  // rs: real solution; holds solution R12, t12, R13, T13 row-major
+  //
+  // \returns true if the solution is nearly real, false otherwise
+  //
+  // Not speed critical.
+  static inline bool
+  get_real(C<F> s[NNN], F rs[NNN])
+  {
+    // Hongyi function realSolutions = parseSolutionString(output)
+    // solutions = reshape(solutions,[14,length(solutions)/14]);
+
+    static const double eps = 10e-6;
+    
+    // TODO[improvement]
+    // Fancy way to convert to real is to check if the complex number is close to
+    // horizontal then get absolute value.
+    /*
+    for (unsigned var = 0; var < NNN; ++var)  // differs from Hongyi criterion
+      if (s->x[var].real() < eps && s->x[var].real() >= eps
+          || std::abs(std::tan(std::arg(s->x[var].imag()))) >= eps)
+        return false;
+    
+    F real_solution[NNN];
+    for (unsigned var = 0; var < NNN; ++var) 
+      real_solution[var] = ((s->x[var].real() >= 0) ? 1 : -1) * std::abs(s->x[var]);
+    */
+
+    for (unsigned var = 0; var < NNN; ++var)
+      if (std::abs(s[var].imag()) >= eps)
+          return false;
+    
+    for (unsigned var = 0; var < NNN; ++var) 
+      rs[var] = s[var].real();
+
+    // quat12 rs(0:3), quat12 rs(4:7)
+    //  T12 = solutions(9:11);
+    //  T13 = solutions(12:14);
+    //  R12 = quat2rotm(transpose(quat12));
+    //  R13 = quat2rotm(transpose(quat13));
+
+    return true;
+  }
 };
 
 // Functions over 3 dimensions
@@ -94,7 +140,7 @@ struct minus_3d {
 };
 
 // Not performance critical ---------------------------------------------------
-template <typename F>  // TODO remove NNN
+template <typename F>
 struct minus_util {
   // Random unit array v of dimension n
   // only on real coordinates, with 0 complex ones
@@ -118,6 +164,29 @@ struct minus_util {
   static std::random_device rd;
   static std::mt19937 rnd;
   static std::normal_distribution<F> gauss;
+  
+  // arbitrary quaternion to rotation matrix.
+  // will normalize the quaternion in-place.
+  static inline void quat2rotm(F q[4], F r[9])
+  {
+    F norm = sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3]);
+    q[0] /= norm; q[1] /= norm; q[2] /= norm; q[3] /= norm;
+    const F 
+      x2 = q[0] * q[0],  xy = q[0] * q[1],  rx = q[3] * q[0],
+      y2 = q[1] * q[1],  yz = q[1] * q[2],  ry = q[3] * q[1],
+      z2 = q[2] * q[2],  zx = q[2] * q[0],  rz = q[3] * q[2],
+      r2 = q[3] * q[3];
+      
+    *r++ = r2 + x2 - y2 - z2;    //  rot(0,0) = r[0]
+    *r++ = 2. * (xy - rz);       //  rot(0,1) = r[1] 
+    *r++ = 2. * (zx + ry);       //  rot(0,2) = r[2] 
+    *r++ = 2. * (xy + rz);       //  rot(1,0) = r[3] 
+    *r++ = r2 - x2 + y2 - z2;    //  rot(1,1) = r[4]
+    *r++ = 2. * (yz - rx);       //  rot(1,2) = r[5] 
+    *r++ = 2. * (zx - ry);       //  rot(2,0) = r[6] 
+    *r++ = 2. * (yz + rx);       //  rot(2,1) = r[7] 
+    *r   = r2 - x2 - y2 + z2;    //  rot(2,2) = r[8]
+  }
 };
 
 template <typename F>

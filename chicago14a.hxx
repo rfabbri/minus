@@ -7012,8 +7012,9 @@ HxH(const C<F>* __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<
 template <typename F>
 struct minus_io_shaping<chicago14a,F> {
   static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
-  static void lines2params(F plines[15][3], C<F> * __restrict__ params/*[static M::nparams]*/);
+  static void point_tangents2params(F p[3][3][2], F tgt[3][3][2], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   static void point_tangents2lines(F p[3][3][2], F tgt[3][3][2], unsigned id_tgt0, unsigned id_tgt1, F plines[15][3]);
+  static void lines2params(F plines[15][3], C<F> * __restrict__ params/*[static M::nparams]*/);
 };
 
 // --- gammify -----------------------------------------------------------------
@@ -7212,5 +7213,25 @@ point_tangents2lines(F p[3][3][2], F t[3][3][2], unsigned i0, unsigned i1,
   minus_3d<F>::point_tangent2line(p[i1][2], t[1][2], plines[14]);
   // TODO: test normalize to unit vectors for better numerics
 }
+
+// \param[in] tgts: three tangents, one at each point.
+// Only two tangents will actually be used. If one of the points
+// in each image has no reliable or well-defined tangents,
+// you can pass anything (zeros or unallocated memory); 
+// it will be ignored. 
+// only tgt[view][id_tgt0][:] and tgt[view][id_tgt1][:] will be used.
+//
+// id_tgt0  < id_tgt0 < 3
+// 
+template <typename F>
+inline void 
+minus_io_shaping<chicago14a, F>::
+point_tangents2params(F p[3][3][2], F tgt[3][3][2], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+{
+  F plines[15][3];
+  point_tangents2lines(p, tgt, id_tgt0, id_tgt1, plines);
+  lines2params(plines, params);
+}
+
 
 #endif // chicago14a_hxx
