@@ -154,28 +154,26 @@ quat2rotm(const F q[4], F r[9])
     r2 = q[3] * q[3];
     
   *r++ = r2 + x2 - y2 - z2;    //  rot(0,0) = r[0]
-  *r++ = 2. * (xy - rz);        //  rot(0,1) = r[1] 
-  *r++ = 2. * (zx + ry);        //  rot(0,2) = r[2] 
-  *r++ = 2. * (xy + rz);        //  rot(1,0) = r[3] 
+  *r++ = 2. * (xy - rz);       //  rot(0,1) = r[1] 
+  *r++ = 2. * (zx + ry);       //  rot(0,2) = r[2] 
+  *r++ = 2. * (xy + rz);       //  rot(1,0) = r[3] 
   *r++ = r2 - x2 + y2 - z2;    //  rot(1,1) = r[4]
-  *r++ = 2. * (yz - rx);        //  rot(1,2) = r[5] 
-  *r++ = 2. * (zx - ry);        //  rot(2,0) = r[6] 
-  *r++ = 2. * (yz + rx);        //  rot(2,1) = r[7] 
-  *r++ = r2 - x2 - y2 + z2;    //  rot(2,2) = r[8]
+  *r++ = 2. * (yz - rx);       //  rot(1,2) = r[5] 
+  *r++ = 2. * (zx - ry);       //  rot(2,0) = r[6] 
+  *r++ = 2. * (yz + rx);       //  rot(2,1) = r[7] 
+  *r   = r2 - x2 - y2 + z2;    //  rot(2,2) = r[8]
 }
 
-  // XXX
 // \returns true if the solution is real, false otherwise
 // 
 //  rs: real solution; f holds solution R12, t12, R13, T13 row-major
 bool
-solution2poses(const solution *s, F rs[24])
+get_real(const solution *s, F rs[NNN])
 {
   // Hongyi function realSolutions = parseSolutionString(output)
   // solutions = reshape(solutions,[14,length(solutions)/14]);
 
   eps = 10e-6;
-  
   
   imagSolutions = imag(solutions);
   
@@ -193,7 +191,7 @@ solution2poses(const solution *s, F rs[24])
     real_solution[var] = ((s->x[var].real() >= 0) ? 1 : -1) * std::abs(s->x[var]);
   */
 
-  for (unsigned var = 0; var < NNN; ++var)  // differs from Hongyi criterion
+  for (unsigned var = 0; var < NNN; ++var)
     if (std::abs(s->x[var].imag()) >= eps)
         return false;
   
@@ -201,9 +199,6 @@ solution2poses(const solution *s, F rs[24])
   for (unsigned var = 0; var < NNN; ++var) 
     rs[var] = s->x[var].real();
 
-  realSolutions(1:4) = realSolutions(1:4) ./ norm(realSolutions(1:4));
-  realSolutions(5:8) = realSolutions(5:8) ./ norm(realSolutions(5:8));
-  
   // quat12 rs(0:3), quat12 rs(4:7)
   F *p = rs;
   F norm = sqrt(p[0]*p[0] + p[1]*p[1] + p[2]*p[2] + p[3]*p[3]);
@@ -212,12 +207,20 @@ solution2poses(const solution *s, F rs[24])
   F norm = sqrt(p[0]*p[0] + p[1]*p[1] + p[2]*p[2] + p[3]*p[3]);
   p[0] /= norm; p[1] /= norm; p[2] /= norm; p[3] /= norm;
 
-//  T12 = solutions(9:11);
-//  T13 = solutions(12:14);
-  R12 = quat2rotm(transpose(quat12));
-  R13 = quat2rotm(transpose(quat13));
+  //  T12 = solutions(9:11);
+  //  T13 = solutions(12:14);
+  //  R12 = quat2rotm(transpose(quat12));
+  //  R13 = quat2rotm(transpose(quat13));
 
   return true;
+}
+
+void
+solutions2cams()
+{
+  // for each solution
+    get_real();
+    // build cams by using quat2rotm
 }
 
 //TODO to io::
@@ -231,7 +234,16 @@ test_end_user_interface()
   {
   io::point_tangents2params(points, tangents, params);
   M::track_all(M::DEFAULT, start_sols_, params_, solutions);
-  io::solutions2cams(solutions, cameras);
+  
+  TEST("Did it track first solution?", solutions[0].t > 0, true);
+  TEST("Did it track the last solution?", solutions[M::nsols-1].t > 0, true);
+  test_against_ground_truth(solutions);
+
+  // test solutions are good before formatting them out,
+  // just like in minus-chicago
+
+//  io::solutions2cams(solutions, cameras);
+//  test_final_solve_against_ground_truth(solutions);
   }
 }
 
