@@ -7013,7 +7013,7 @@ template <typename F>
 struct minus_io_shaping<chicago14a,F> {
   static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
   static void lines2params(F plines[15][3], C<F> * __restrict__ params/*[static M::nparams]*/);
-  static void point_tangents2lines(F p[3][3][2], F tgt[3][3][2], unsigned id_tgt0, unsigned id_tgt1 F plines[15][3]);
+  static void point_tangents2lines(F p[3][3][2], F tgt[3][3][2], unsigned id_tgt0, unsigned id_tgt1, F plines[15][3]);
 };
 
 // --- gammify -----------------------------------------------------------------
@@ -7183,12 +7183,14 @@ lines2params(F plines[15][3], C<F> * __restrict__ params/*[static 2*M::nparams]*
 template <typename F>
 inline void 
 minus_io_shaping<chicago14a, F>::
-point_tangents2lines(F p[3][3][2], F tgt[3][3][2], unsigned id_tgt0, unsigned id_tgt1
+point_tangents2lines(F p[3][3][2], F t[3][3][2], unsigned i0, unsigned i1,
                      F plines[15][3])
 {
+  typedef minus_3d<F> vec;
+  
   assert (i0 < i1 && i1 < 3);
-  i2 = (i0 == 0) ? ((i1 == 1) ? 2 : 1) : 0;
-
+  unsigned i2 = (i0 == 0) ? ((i1 == 1) ? 2 : 1) : 0;
+  
   vec::cross(p[i0][0], p[i1][0], plines[0]);
   vec::cross(p[i0][1], p[i1][1], plines[1]);
   vec::cross(p[i0][2], p[i1][2], plines[2]);
@@ -7200,14 +7202,14 @@ point_tangents2lines(F p[3][3][2], F tgt[3][3][2], unsigned id_tgt0, unsigned id
   vec::cross(p[i1][2], p[i2][2], plines[8]);
   
   // tangent at point p[i0]
-  minus_3d::point_tangent2line(p[i0][0], t[0][0], plines[9]);
-  minus_3d::point_tangent2line(p[i0][1], t[0][1], plines[10]);
-  minus_3d::point_tangent2line(p[i0][2], t[0][2], plines[11]);
+  minus_3d<F>::point_tangent2line(p[i0][0], t[0][0], plines[9]);
+  minus_3d<F>::point_tangent2line(p[i0][1], t[0][1], plines[10]);
+  minus_3d<F>::point_tangent2line(p[i0][2], t[0][2], plines[11]);
  
   // tangent at point p[i1]
-  minus_3d::point_tangent2line(p[i1][0], t[1][0], plines[12]);
-  minus_3d::point_tangent2line(p[i1][1], t[1][1], plines[13]);
-  minus_3d::point_tangent2line(p[i1][2], t[1][2], plines[14]);
+  minus_3d<F>::point_tangent2line(p[i1][0], t[1][0], plines[12]);
+  minus_3d<F>::point_tangent2line(p[i1][1], t[1][1], plines[13]);
+  minus_3d<F>::point_tangent2line(p[i1][2], t[1][2], plines[14]);
   // TODO: test normalize to unit vectors for better numerics
 }
 
