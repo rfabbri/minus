@@ -143,28 +143,57 @@ point_tangents2lines(p, tgt, plines)
 }
 
   // XXX
-void
-solution2poses(solution s, R12, t12, R13, T13)
+// \returns true if the solution is real, false otherwise
+bool
+solution2poses(const solution *s, R12, t12, R13, T13)
 {
+  // Hongyi function realSolutions = parseSolutionString(output)
+  // solutions = reshape(solutions,[14,length(solutions)/14]);
+
+  eps = 10e-6;
   
-  solutions = reshape(solutions,[14,length(solutions)/14]);
+  
   imagSolutions = imag(solutions);
-  checkFlag = sum(imagSolutions);
-  realSolutions = solutions(:,abs(checkFlag) < 10e-6);
+  
+  // TODO
+  // Fancy way to convert to real is to check if the complex number is close to
+  // horizontal then get absolute value.
+  /*
+  for (unsigned var = 0; var < NNN; ++var)  // differs from Hongyi criterion
+    if (s->x[var].real() < eps && s->x[var].real() >= eps
+        || std::abs(std::tan(std::arg(s->x[var].imag()))) >= eps)
+      return false;
+  
+  F real_solution[NNN];
+  for (unsigned var = 0; var < NNN; ++var) 
+    real_solution[var] = ((s->x[var].real() >= 0) ? 1 : -1) * std::abs(s->x[var]);
+  */
+
+  for (unsigned var = 0; var < NNN; ++var)  // differs from Hongyi criterion
+    if (std::abs(s->x[var].imag()) >= eps)
+        return false;
+  
+  F rs[NNN]; // real solution
+  for (unsigned var = 0; var < NNN; ++var) 
+    rs[var] = s->x[var].real()
+
   realSolutions = real(realSolutions);
+
   for i = 1:size(realSolutions,2)
       realSolutions(1:4,i) = realSolutions(1:4,i) ./ norm(realSolutions(1:4,i));
       realSolutions(5:8,i) = realSolutions(5:8,i) ./ norm(realSolutions(5:8,i));
   end
   
-    solutions = realSolutions
+  solutions = realSolutions
 
-        quat12 = solutions(1:4,i);
-        quat13 = solutions(5:8,i);
-        T12 = solutions(9:11,i);
-        T13 = solutions(12:14,i);
-        R12 = quat2rotm(transpose(quat12 ./ norm(quat12)));
-        R13 = quat2rotm(transpose(quat13 ./ norm(quat13)));
+  quat12 = solutions(1:4,i);
+  quat13 = solutions(5:8,i);
+  T12 = solutions(9:11,i);
+  T13 = solutions(12:14,i);
+  R12 = quat2rotm(transpose(quat12 ./ norm(quat12)));
+  R13 = quat2rotm(transpose(quat13 ./ norm(quat13)));
+
+  return true;
 }
 
 //TODO to io::
