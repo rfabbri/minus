@@ -7013,6 +7013,7 @@ template <typename F>
 struct minus_io_shaping<chicago14a,F> {
   static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
   static void lines2params(F plines[15][3], C<F> * __restrict__ params/*[static M::nparams]*/);
+  static void point_tangents2lines(F p[3][3][2], F tgt[3][3][2], unsigned id_tgt0, unsigned id_tgt1 F plines[15][3]);
 };
 
 // --- gammify -----------------------------------------------------------------
@@ -7143,6 +7144,71 @@ lines2params(F plines[15][3], C<F> * __restrict__ params/*[static 2*M::nparams]*
   util::rand_sphere(params+27+12,7);
   util::rand_sphere(params+27+12+7,5);
   util::rand_sphere(params+27+12+7+5,5);
+}
+
+// Generate "visible" line representation from input point-tangents
+// 
+// The points that have tangents are indicated by the indices id_tgt0  < id_tgt0 < 3
+// 
+// pLines is a 15x3 matrix of line coefs  (we use view-line-point index, this
+// is inverted to match Hongyi)
+//    1    -- l_1_1 --
+//    2    -- l_1_2 --
+//    3    -- l_1_3 --
+//    4    -- l_2_1 --
+//    5    -- l_2_2 --
+//    6    -- l_2_3 --
+//    7    -- l_3_1 --
+//    8    -- l_3_2 --
+//    9    -- l_3_3 --
+//    10   -- l_4_1 --
+//    11   -- l_4_2 --
+//    12   -- l_4_3 --
+//    13   -- l_5_1 --
+//    14   -- l_5_2 --
+//    15   -- l_5_3 --
+//    
+//    l_line_view
+//    
+//    These lines are:
+//
+//    l_1: Point 1&2  (A, B)
+//    l_2: Point 1&3  (A, C)
+//    l_3: Point 2&3  (B, C)
+//    l_4: Tangent at Point 1 (A)
+//    l_5: Tangent at Point 2 (B)
+//
+// NOTE: the input tangent vector will be used as scratch so make a copy
+// if you intend to reuse it 
+template <typename F>
+inline void 
+minus_io_shaping<chicago14a, F>::
+point_tangents2lines(F p[3][3][2], F tgt[3][3][2], unsigned id_tgt0, unsigned id_tgt1
+                     F plines[15][3])
+{
+  assert (i0 < i1 && i1 < 3);
+  i2 = (i0 == 0) ? ((i1 == 1) ? 2 : 1) : 0;
+
+  vec::cross(p[i0][0], p[i1][0], plines[0]);
+  vec::cross(p[i0][1], p[i1][1], plines[1]);
+  vec::cross(p[i0][2], p[i1][2], plines[2]);
+  vec::cross(p[i0][0], p[i2][0], plines[3]);
+  vec::cross(p[i0][1], p[i2][1], plines[4]);
+  vec::cross(p[i0][2], p[i2][2], plines[5]);
+  vec::cross(p[i1][0], p[i2][0], plines[6]);
+  vec::cross(p[i1][1], p[i2][1], plines[7]);
+  vec::cross(p[i1][2], p[i2][2], plines[8]);
+  
+  // tangent at point p[i0]
+  minus_3d::point_tangent2line(p[i0][0], t[0][0], plines[9]);
+  minus_3d::point_tangent2line(p[i0][1], t[0][1], plines[10]);
+  minus_3d::point_tangent2line(p[i0][2], t[0][2], plines[11]);
+ 
+  // tangent at point p[i1]
+  minus_3d::point_tangent2line(p[i1][0], t[1][0], plines[12]);
+  minus_3d::point_tangent2line(p[i1][1], t[1][1], plines[13]);
+  minus_3d::point_tangent2line(p[i1][2], t[1][2], plines[14]);
+  // TODO: test normalize to unit vectors for better numerics
 }
 
 #endif // chicago14a_hxx
