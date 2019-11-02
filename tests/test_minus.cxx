@@ -142,10 +142,34 @@ point_tangents2lines(p, tgt, plines)
   // TODO: test normalize to unit vectors for numerics
 }
 
+
+// unit quaternion to rot matrix
+void
+quat2rotm(const F q[4], F r[9])
+{
+  const F 
+    x2 = q[0] * q[0],  xy = q[0] * q[1],  rx = q[3] * q[0],
+    y2 = q[1] * q[1],  yz = q[1] * q[2],  ry = q[3] * q[1],
+    z2 = q[2] * q[2],  zx = q[2] * q[0],  rz = q[3] * q[2],
+    r2 = q[3] * q[3];
+    
+  *r++ = r2 + x2 - y2 - z2;    //  rot(0,0) = r[0]
+  *r++ = 2. * (xy - rz);        //  rot(0,1) = r[1] 
+  *r++ = 2. * (zx + ry);        //  rot(0,2) = r[2] 
+  *r++ = 2. * (xy + rz);        //  rot(1,0) = r[3] 
+  *r++ = r2 - x2 + y2 - z2;    //  rot(1,1) = r[4]
+  *r++ = 2. * (yz - rx);        //  rot(1,2) = r[5] 
+  *r++ = 2. * (zx - ry);        //  rot(2,0) = r[6] 
+  *r++ = 2. * (yz + rx);        //  rot(2,1) = r[7] 
+  *r++ = r2 - x2 - y2 + z2;    //  rot(2,2) = r[8]
+}
+
   // XXX
 // \returns true if the solution is real, false otherwise
+// 
+//  rs: real solution; f holds solution R12, t12, R13, T13 row-major
 bool
-solution2poses(const solution *s, R12, t12, R13, T13)
+solution2poses(const solution *s, F rs[24])
 {
   // Hongyi function realSolutions = parseSolutionString(output)
   // solutions = reshape(solutions,[14,length(solutions)/14]);
@@ -175,23 +199,23 @@ solution2poses(const solution *s, R12, t12, R13, T13)
   
   F rs[NNN]; // real solution
   for (unsigned var = 0; var < NNN; ++var) 
-    rs[var] = s->x[var].real()
+    rs[var] = s->x[var].real();
 
-  realSolutions = real(realSolutions);
-
-  for i = 1:size(realSolutions,2)
-      realSolutions(1:4,i) = realSolutions(1:4,i) ./ norm(realSolutions(1:4,i));
-      realSolutions(5:8,i) = realSolutions(5:8,i) ./ norm(realSolutions(5:8,i));
-  end
+  realSolutions(1:4) = realSolutions(1:4) ./ norm(realSolutions(1:4));
+  realSolutions(5:8) = realSolutions(5:8) ./ norm(realSolutions(5:8));
   
-  solutions = realSolutions
+  // quat12 rs(0:3), quat12 rs(4:7)
+  F *p = rs;
+  F norm = sqrt(p[0]*p[0] + p[1]*p[1] + p[2]*p[2] + p[3]*p[3]);
+  p[0] /= norm; p[1] /= norm; p[2] /= norm; p[3] /= norm;
+  p += 4;
+  F norm = sqrt(p[0]*p[0] + p[1]*p[1] + p[2]*p[2] + p[3]*p[3]);
+  p[0] /= norm; p[1] /= norm; p[2] /= norm; p[3] /= norm;
 
-  quat12 = solutions(1:4,i);
-  quat13 = solutions(5:8,i);
-  T12 = solutions(9:11,i);
-  T13 = solutions(12:14,i);
-  R12 = quat2rotm(transpose(quat12 ./ norm(quat12)));
-  R13 = quat2rotm(transpose(quat13 ./ norm(quat13)));
+//  T12 = solutions(9:11);
+//  T13 = solutions(12:14);
+  R12 = quat2rotm(transpose(quat12));
+  R13 = quat2rotm(transpose(quat13));
 
   return true;
 }
