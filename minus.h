@@ -212,10 +212,16 @@ struct minus_io_shaping {
   // along curves.
   static constexpr unsigned nvislines = (npoints*(npoints-1) >> 1 + ntangents + nfreelines) * nviews;  // just a name for the number of homog coordinates
   // nvislines = 15 for Chicago.
+  
+  // INPUT ---------------------------------------------------------------------
   static void point_tangents2params(F p[nview][npoints][ncoords], F tgt[nview][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
   static void point_tangents2lines(F p[nview][npoints][ncoords], F tgt[nview][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, F plines[nvislines][ncoords_h]);
   static void lines2params(F plines[nvislines][ncoords_h], C<F> * __restrict__ params/*[static M::nparams]*/);
+
+  // OUTPUT --------------------------------------------------------------------
+  static void solutions2cams(M::solution raw_solutions[M::NSOLS], F cameras[M::NSOLS][2][4][3], unsigned id_sols[M::NSOLS], unsigned *nsols_final);
+  static void solution2cams(F rs[NNN], F cameras[2][4][3]);
 };
 
 // type alias used to hide a template parameter 

@@ -7235,5 +7235,59 @@ point_tangents2params(F p[3][3][2], F tgt[3][3][2], unsigned id_tgt0, unsigned i
   lines2params(plines, params);
 }
 
+//
+// returns cameras[0:nsols_final][2][4][3]
+//
+// where the camera matrix P^t = [R|T]^t is cameras[sol_number][view_id][:][:]
+// where view_id is 0 or 1 for second and third camera relative to the first,
+// resp.
+//
+// This design is for cache speed. Translation in the camera matrix is stored
+// such that its coordinates are memory contiguous.
+// 
+// The cameras array is fixed in size to NSOLS which is the max
+// number of solutions, which perfectly fits in memory. The caller must pass an
+// array with that minimum.
+template <typename F>
+inline void 
+minus_io_shaping<chicago14a, F>::
+void
+solutions2cams(M::solution raw_solutions[M::NSOLS], F cameras[M::NSOLS][2][4][3], 
+               unsigned id_sols[M::NSOLS], unsigned *nsols_final)
+{
+  *nsols_final = 0;
+  for (unsigned sol=0; sol < M::NSOLS; ++sol)
+    F real_solutions[M::NNN];
+    if (get_real(raw_solutions[sol], real_solutions)) {
+      id_sols[(*nsols_final)++] = sol;
+      // build cams by using quat2rotm
+      solution2cams(real_solutions, (F [2][4][3] ) (cameras + sol));
+    }
+}
+
+template <typename F>
+inline void 
+minus_io_shaping<chicago14a, F>::
+void 
+solution2cams(F rs[NNN], F cameras[2][4][3])
+{
+  // camera 0 (2nd camera relative to 1st)
+  quat2rotm(rs, (F [3][3]) cameras[0]);
+  cameras[0][3][0] = rs[8];
+  cameras[0][3][1] = rs[9];
+  cameras[0][3][2] = rs[10];
+  
+  // camera 1 (3rd camera relative to 1st)
+  quat2rotm(rs, (F [3][3]) cameras[1]);
+  cameras[1][3][0] = rs[11];
+  cameras[1][3][1] = rs[12];
+  cameras[1][3][2] = rs[13];
+
+  // quat12 rs(0:3), quat12 rs(4:7)
+  //  T12 = solutions(9:11);
+  //  T13 = solutions(12:14);
+  //  R12 = quat2rotm(transpose(quat12));
+  //  R13 = quat2rotm(transpose(quat13));
+}
 
 #endif // chicago14a_hxx

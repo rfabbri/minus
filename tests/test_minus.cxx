@@ -68,55 +68,6 @@ test_full_solve()
   test_against_ground_truth(solutions);
 }
 
-//
-// returns cameras[0:nsols_final][2][4][3]
-//
-// where the camera matrix P^t = [R|T]^t is cameras[sol_number][view_id][:][:]
-// where view_id is 0 or 1 for second and third camera relative to the first,
-// resp.
-//
-// This design is for cache speed. Translation in the camera matrix is stored
-// such that its coordinates are memory contiguous.
-// 
-// The cameras array is fixed in size to NSOLS which is the max
-// number of solutions, which perfectly fits in memory. The caller must pass an
-// array with that minimum.
-void
-solutions2cams(M::solution raw_solutions[M::NSOLS], double cameras[M::NSOLS][2][4][3], 
-    unsigned id_sols[M::NSOLS], unsigned *nsols_final)
-{
-  *nsols_final = 0;
-  for (unsigned sol=0; sol < M::NSOLS; ++sol)
-    double real_solutions[M::NNN];
-    if (get_real(raw_solutions[sol], real_solutions)) {
-      id_sols[(*nsols_final)++] = sol;
-      // build cams by using quat2rotm
-      solution2cams(real_solutions, (double [2][4][3] ) (cameras + sol));
-    }
-}
-
-void 
-solution2cams(F rs[NNN], double cameras[2][4][3])
-{
-  // camera 0 (2nd camera relative to 1st)
-  quat2rotm(rs, (double [3][3]) cameras[0]);
-  cameras[0][3][0] = rs[8];
-  cameras[0][3][1] = rs[9];
-  cameras[0][3][2] = rs[10];
-  
-  // camera 1 (3rd camera relative to 1st)
-  quat2rotm(rs, (double [3][3]) cameras[1]);
-  cameras[1][3][0] = rs[8];
-  cameras[1][3][1] = rs[9];
-  cameras[1][3][2] = rs[10];
-
-  // quat12 rs(0:3), quat12 rs(4:7)
-  //  T12 = solutions(9:11);
-  //  T13 = solutions(12:14);
-  //  R12 = quat2rotm(transpose(quat12));
-  //  R13 = quat2rotm(transpose(quat13));
-}
-
 void
 test_end_user_interface()
 {
