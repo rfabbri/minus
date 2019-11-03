@@ -215,11 +215,6 @@ struct minus_io_shaping {
   // along curves.
   static constexpr unsigned nvislines = (npoints*(npoints-1) >> 1 + ntangents + nfreelines) * nviews; 
   // nvislines = 15 for Chicago.
-
-  // template magic: this maps template parameters to a struct type, to allow
-  // function overload as a way to do partial template specialization for
-  // members
-
 #if 0
   // INPUT ---------------------------------------------------------------------
   static void point_tangents2params(F p[nview][npoints][ncoords], F tgt[nview][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
