@@ -72,7 +72,6 @@ struct minus_array { // Speed critical -----------------------------------------
   {
     // Hongyi function realSolutions = parseSolutionString(output)
     // solutions = reshape(solutions,[14,length(solutions)/14]);
-
     static const double eps = 10e-6;
     
     // TODO[improvement]
@@ -88,12 +87,9 @@ struct minus_array { // Speed critical -----------------------------------------
     for (unsigned var = 0; var < NNN; ++var) 
       real_solution[var] = ((s->x[var].real() >= 0) ? 1 : -1) * std::abs(s->x[var]);
     */
-
     for (unsigned var = 0; var < NNN; ++var)
-      if (std::abs(s[var].imag()) >= eps)
-          return false;
-    
-    for (unsigned var = 0; var < NNN; ++var) 
+      if (std::abs(s[var].imag()) >= eps) return false;
+    for (var = NNN-1; var != (unsigned)-1; --var) 
       rs[var] = s[var].real();
 
     // quat12 rs(0:3), quat12 rs(4:7)
@@ -101,7 +97,6 @@ struct minus_array { // Speed critical -----------------------------------------
     //  T13 = solutions(12:14);
     //  R12 = quat2rotm(transpose(quat12));
     //  R13 = quat2rotm(transpose(quat13));
-
     return true;
   }
 };
@@ -272,7 +267,7 @@ track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2
       v::multiply_scalar_to_self(dx4, 2.);
       xt[NNN] += one_half_dt;  // t0+.5dt
       evaluate_Hxt(xt, params, Hxt);
-      dxi_eigen = lu.compute(AA).solve(bb);
+      dxi_eigen = lu.compute(AA).solve(bb);  // TODO: reuse pivots
 
       // dx3
       v::multiply_scalar_to_self(dxi, one_half_dt);
@@ -331,7 +326,7 @@ track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2
         t_s->status = INFINITY_FAILED;
     } // while (t loop)
     v::copy(x0, t_s->x); // record the solution
-    t_s->t = *t0;
+    t_s->t = *t0; // TODO try to include this in the previous memcpy
     if (t_s->status == PROCESSING) t_s->status = REGULAR;
     ++t_s; s_s += NNN;
   } // outer solution loop
