@@ -1,59 +1,6 @@
 void
 test_world_to_camera()
 {
-  //  This is exactly the case in the slides in big-notes/trifocal/trifocal.key
-  // Extracted from the original synthcurves dataset
-  // synthcurves-multiview-3d-dataset/spherical-ascii-100_views-perturb-radius_sigma10-normal_sigma0_01rad-minsep_15deg-no_two_cams_colinear_with_object
-  //
-  // Frame files: frame_..42, 54, 62
-  //
-  // Points:
-  // 
-  // 620
-  // 3011  tangents
-  // 3389  tangents
-  // 0-based ids. +1 to get file line
-  // 
-  // Extracting this data from those files: scripts/getlines.sh
-
-  // NOTE: The point order seems to match Hongyi,
-  // though he might have done an off-by-1 mistake for point indexing (3012 vs
-  // 3011)
-  double p[view][point][coord];
-  // points for frame 42
-  // + sed -n '3012p;3390p;621p' frame_0042-pts-2d.txt
-  141.01103052308988595 270.45312297462106699
-  239.89822517853363593 86.442049763307068133
-  286.7673976130331539 217.06531260627261304
-  
-  // points for frame 54
-  // + sed -n '3012p;3390p;621p;' frame_0054-pts-2d.txt
-  241.41513314836856807 447.15662243793082098
-  123.95973916849976604 213.90676875312345828
-  257.04360648826406077 159.4404341695463927
-  
-  // points for frame 62
-  // + sed -n '3012p;3390p;621p' frame_0062-pts-2d.txt
-  375.60750199363729962 277.22372936832925916
-  295.57132984990698787 147.80261937455236421
-  240.78946527513195974 410.13737156824942076
-
-  double tgt[view][tgt][coord];
-  // tangents for frame 42
-  // + sed -n '3012p;3390p' frame_0042-tgts-2d.txt
-  0.9536809622336909209 -0.3008199166827579818
-  0.0082601187924503903515 -0.99996588463683822035
-
-  // tangents for frame 54
-  // + sed -n '3012p;3390p' frame_0054-tgts-2d.txt
-  0.18491347256048701331 -0.9827548054655455001
-  -0.99542450475950383648 0.095551322985590561587
-  
-  // tangents for frame 62
-  // + sed -n '3012p;3390p' frame_0062-tgts-2d.txt
-  0.77931350598248894102 -0.62663423094599701724
-  0.76492323888624347283 0.64412144709812224619
-
 
   // intrinsic params equal to every frame
   double K[][];
@@ -315,4 +262,3 @@ test_world_to_camera()
   // XXX doing: prototype conversions in pseudocode to see if simplifications
   // emerge
 }
-

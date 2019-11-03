@@ -7009,12 +7009,14 @@ HxH(const C<F>* __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<
 
 //------------------------------------------------------------------------------
 
-template <typename F>
+// A base template class for zero and first-order problems (points,
+// lines, tangents or lines at points).
+template <problem P, 3 /*NVIEWS*/, 3 /*NPOINTS*/, 2 /*NTANGENTS*/,  typename F>
 struct minus_io_shaping<chicago14a,F> {
+  static void point_tangents2params(F p[nview][npoints][ncoords], F tgt[nview][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
-  static void point_tangents2params(F p[3][3][2], F tgt[3][3][2], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
-  static void point_tangents2lines(F p[3][3][2], F tgt[3][3][2], unsigned id_tgt0, unsigned id_tgt1, F plines[15][3]);
-  static void lines2params(F plines[15][3], C<F> * __restrict__ params/*[static M::nparams]*/);
+  static void point_tangents2lines(F p[nview][npoints][ncoords], F tgt[nview][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, F plines[nvislines][ncoords_h]);
+  static void lines2params(F plines[nvislines][ncoords_h], C<F> * __restrict__ params/*[static M::nparams]*/);
 };
 
 // --- gammify -----------------------------------------------------------------
