@@ -87,7 +87,8 @@ struct minus_array { // Speed critical -----------------------------------------
     for (unsigned var = 0; var < NNN; ++var) 
       real_solution[var] = ((s->x[var].real() >= 0) ? 1 : -1) * std::abs(s->x[var]);
     */
-    for (unsigned var = 0; var < NNN; ++var)
+    unsigned var = 0;
+    for (; var < NNN; ++var)
       if (std::abs(s[var].imag()) >= eps) return false;
     for (var = NNN-1; var != (unsigned)-1; --var) 
       rs[var] = s[var].real();

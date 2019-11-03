@@ -102,6 +102,7 @@ test_rand()
   }
 }
 
+#if 0
 void
 test_gamma()
 {
@@ -117,6 +118,7 @@ test_gamma()
   for (unsigned i=0; i < M::nparams; ++i)
     log << p_test[i] << std::endl;
 }
+#endif
 
 void
 test_lines2params()
@@ -137,6 +139,7 @@ test_points2lines()
   }
 }
 
+#if 0
 template <typename F=double>
 void
 get_params_start_target(F plines[15][3], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
@@ -167,14 +170,19 @@ test_get_params_start_target()
     log << params[i] << std::endl;;
   }
 }
+#endif
 
 void
 test_io_shaping()
 {
+#if 0
   test_gamma();
   test_points2lines();
+#endif
   test_lines2params();
+#if 0
   test_get_params_start_target();
+#endif
 }
 
 void

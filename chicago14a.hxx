@@ -7011,13 +7011,94 @@ HxH(const C<F>* __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<
 
 // A base template class for zero and first-order problems (points,
 // lines, tangents or lines at points).
-template <problem P, 3 /*NVIEWS*/, 3 /*NPOINTS*/, 2 /*NTANGENTS*/,  typename F>
-struct minus_io_shaping<chicago14a,F> {
+template <typename F>
+struct minus_io_shaping<3 /*NVIEWS*/, 3 /*NPOINTS*/, 0 /*NFREELINES*/, 2 /*NTANGENTS*/, chicago14a, F> {
+  static constexpr unsigned nviews = 3; 
+  static constexpr unsigned npoints = 3;
+  static constexpr unsigned nfreelines = 0;
+  // even though Chicago needs only 2 tangents, api assumes 3 tangents are given,
+  // out of which two are selected by indexing. This is the most common use
+  // case, where all features naturally have tangents. If strictly 2 tangents
+  // are to be passed, you can leave the unused one as zeros throughout the API.
+  static constexpr unsigned ntangents = 2;
+  static constexpr unsigned ncoords = 2;  // just a documented name for the number of inhomog coordinates
+  static constexpr unsigned ncoords_h = 3;  // just a name for the usual number of homog coordinates in P^2
+  // number of lines connecting each pair of points plus going through points
+  // plus the number of free lines in the first order problem.
+  // Note that tangent orientation may help ruling out solutions; this is why
+  // we call it tangent, and not general lines at points. There is more
+  // information at tangents which can be used as part of the model for curves.
+  // The tangent orientation can be constrained by running without orientation
+  // mattering at first, and then propagating these to neighboring features
+  // along curves.
+  static constexpr unsigned nvislines = (npoints*(npoints-1) >> 1 + ntangents + nfreelines) * nviews; 
+  // nvislines = 15 for Chicago.
+  
+#if 0
   static void point_tangents2params(F p[nview][npoints][ncoords], F tgt[nview][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
   static void point_tangents2lines(F p[nview][npoints][ncoords], F tgt[nview][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, F plines[nvislines][ncoords_h]);
+#endif
   static void lines2params(F plines[nvislines][ncoords_h], C<F> * __restrict__ params/*[static M::nparams]*/);
 };
+
+// we only use the first half of the outer
+// 2*M::nparams array 
+// after this fn, complex part zero, but we will use this space later
+// to gammify/randomize
+template <typename F>
+inline void 
+minus_io_shaping<3 /*NVIEWS*/, 3 /*NPOINTS*/, 0 /*NFREELINES*/, 2 /*NTANGENTS*/, chicago14a, F>::
+lines2params(F plines[nvislines][ncoords_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+{
+  typedef minus_util<F> util;
+  typedef minus_3d<F> vec;
+  //    params (P1) is pF||pTriple||pChart  //  Hongyi: [pF; tripleChart; XR'; XT1'; XT2'];
+  //    size              27       12        17 = 56
+
+  // pF ----------------------------------------
+  // converts 1st 9 lines to C<F> (real part zero)
+  // 
+  // 9x3 out of the 15x3 of the pairsiwe lines, linearized as 27x1
+  // Tim: pF is matrix(targetLines^{0..8},27,1);
+  // Order: row-major
+  const F *pl = (const F *)plines;
+  for (unsigned i=0; i < 27; ++i) params[i] = pl[i];
+
+  // pTriple ----------------------------------------
+  unsigned triple_intersections[6][3] = 
+    {{0,3,9},{0+1,3+1,9+1},{0+2,3+2,9+2},{0,6,12},{0+1,6+1,12+1},{0+2,6+2,12+2}};
+
+  C<F> (*params_lines)[2] = (C<F> (*)[2]) (params+27);
+  // express each of the 6 tangents in the basis of the other pairwise lines
+  // intersecting at the same point
+  for (unsigned l=0; l < 6; ++l) {
+    const F *l0 = plines[triple_intersections[l][0]];
+    const F *l1 = plines[triple_intersections[l][1]];
+    const F *l2 = plines[triple_intersections[l][2]];
+    double l0l0 = vec::dot(l0,l0), l0l1 = vec::dot(l0,l1), l1l1 = vec::dot(l1,l1),
+    l2l0 = vec::dot(l2,l0), l2l1 = vec::dot(l2,l1);
+    // cross([l0l0 l1l0 l2l0], [l0l1 l1l1 l2l1], l2_l0l1);
+    double l2_l0l1[3]; 
+    {
+      F v1[3], v2[3];
+      v1[0] = l0l0; v1[1] = l0l1; v1[2] = l2l0;
+      v2[0] = l0l1; v2[1] = l1l1; v2[2] = l2l1;
+      vec::cross(v1, v2, l2_l0l1);
+    }
+    params_lines[l][0] = l2_l0l1[0]/l2_l0l1[2]; // divide by the last coord (see cross prod formula, plug direct)
+    params_lines[l][1] = l2_l0l1[1]/l2_l0l1[2];
+  }
+  //        
+  //    pChart: just unit rands 17x1
+  //        sphere(7,1)|sphere(5,1)|sphere(5,1)
+  //
+  util::rand_sphere(params+27+12,7);
+  util::rand_sphere(params+27+12+7,5);
+  util::rand_sphere(params+27+12+7+5,5);
+}
+
+# if 0
 
 // --- gammify -----------------------------------------------------------------
 //
@@ -7092,62 +7173,6 @@ gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
   assert(i == 56);
 }
 
-// we only use the first half of the outer
-// 2*M::nparams array 
-// after this fn, complex part zero, but we will use this space later
-// to gammify/randomize
-template <typename F>
-inline void 
-minus_io_shaping<chicago14a, F>::
-lines2params(F plines[15][3], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
-{
-  typedef minus_util<F> util;
-  typedef minus_3d<F> vec;
-  //    params (P1) is pF||pTriple||pChart  //  Hongyi: [pF; tripleChart; XR'; XT1'; XT2'];
-  //    size              27       12        17 = 56
-
-  // pF ----------------------------------------
-  // converts 1st 9 lines to C<F> (real part zero)
-  // 
-  // 9x3 out of the 15x3 of the pairsiwe lines, linearized as 27x1
-  // Tim: pF is matrix(targetLines^{0..8},27,1);
-  // Order: row-major
-  const F *pl = (const F *)plines;
-  for (unsigned i=0; i < 27; ++i) params[i] = pl[i];
-
-  // pTriple ----------------------------------------
-  
-  unsigned triple_intersections[6][3] = 
-    {{0,3,9},{0+1,3+1,9+1},{0+2,3+2,9+2},{0,6,12},{0+1,6+1,12+1},{0+2,6+2,12+2}};
-
-  C<F> (*params_lines)[2] = (C<F> (*)[2]) (params+27);
-  // express each of the 6 tangents in the basis of the other pairwise lines
-  // intersecting at the same point
-  for (unsigned l=0; l < 6; ++l) {
-    const F *l0 = plines[triple_intersections[l][0]];
-    const F *l1 = plines[triple_intersections[l][1]];
-    const F *l2 = plines[triple_intersections[l][2]];
-    double l0l0 = vec::dot(l0,l0), l0l1 = vec::dot(l0,l1), l1l1 = vec::dot(l1,l1),
-    l2l0 = vec::dot(l2,l0), l2l1 = vec::dot(l2,l1);
-    // cross([l0l0 l1l0 l2l0], [l0l1 l1l1 l2l1], l2_l0l1);
-    double l2_l0l1[3]; 
-    {
-      F v1[3], v2[3];
-      v1[0] = l0l0; v1[1] = l0l1; v1[2] = l2l0;
-      v2[0] = l0l1; v2[1] = l1l1; v2[2] = l2l1;
-      vec::cross(v1, v2, l2_l0l1);
-    }
-    params_lines[l][0] = l2_l0l1[0]/l2_l0l1[2]; // divide by the last coord (see cross prod formula, plug direct)
-    params_lines[l][1] = l2_l0l1[1]/l2_l0l1[2];
-  }
-  //        
-  //    pChart: just unit rands 17x1
-  //        sphere(7,1)|sphere(5,1)|sphere(5,1)
-  //
-  util::rand_sphere(params+27+12,7);
-  util::rand_sphere(params+27+12+7,5);
-  util::rand_sphere(params+27+12+7+5,5);
-}
 
 // Generate "visible" line representation from input point-tangents
 // 
@@ -7289,5 +7314,6 @@ solution2cams(F rs[NNN], F cameras[2][4][3])
   //  R12 = quat2rotm(transpose(quat12));
   //  R13 = quat2rotm(transpose(quat13));
 }
+#endif
 
 #endif // chicago14a_hxx

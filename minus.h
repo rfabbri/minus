@@ -191,10 +191,13 @@ void minus_core<NSOLS, NNN, NPARAMS, P, F>::evaluate_HxH(const C<F> * __restrict
 // 
 // Note: Needed to create this class since functions do not always support partial
 // specialization
-template <problem P, unsigned NVIEWS, unsigned NPOINTS /* per view*/, unsigned NTANGENTS, /* add more as needed */ typename F>
+// https://stackoverflow.com/questions/1501357/template-specialization-of-particular-members
+// 
+template <unsigned NVIEWS, unsigned NPOINTS /* per view*/, unsigned NFREELINES, unsigned NTANGENTS, /* add more as needed */ problem P, typename F>
 struct minus_io_shaping {
   static constexpr unsigned nviews = NVIEWS; 
   static constexpr unsigned npoints = NPOINTS;
+  static constexpr unsigned nfreelines = NFREELINES;
   // even though Chicago needs only 2 tangents, api assumes 3 tangents are given,
   // out of which two are selected by indexing. This is the most common use
   // case, where all features naturally have tangents. If strictly 2 tangents
@@ -210,18 +213,26 @@ struct minus_io_shaping {
   // The tangent orientation can be constrained by running without orientation
   // mattering at first, and then propagating these to neighboring features
   // along curves.
-  static constexpr unsigned nvislines = (npoints*(npoints-1) >> 1 + ntangents + nfreelines) * nviews;  // just a name for the number of homog coordinates
+  static constexpr unsigned nvislines = (npoints*(npoints-1) >> 1 + ntangents + nfreelines) * nviews; 
   // nvislines = 15 for Chicago.
-  
+
+  // template magic: this maps template parameters to a struct type, to allow
+  // function overload as a way to do partial template specialization for
+  // members
+
+#if 0
   // INPUT ---------------------------------------------------------------------
   static void point_tangents2params(F p[nview][npoints][ncoords], F tgt[nview][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
   static void point_tangents2lines(F p[nview][npoints][ncoords], F tgt[nview][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, F plines[nvislines][ncoords_h]);
+#endif
   static void lines2params(F plines[nvislines][ncoords_h], C<F> * __restrict__ params/*[static M::nparams]*/);
 
+#if 0
   // OUTPUT --------------------------------------------------------------------
   static void solutions2cams(M::solution raw_solutions[M::NSOLS], F cameras[M::NSOLS][2][4][3], unsigned id_sols[M::NSOLS], unsigned *nsols_final);
   static void solution2cams(F rs[NNN], F cameras[2][4][3]);
+#endif
 };
 
 // type alias used to hide a template parameter 
@@ -229,7 +240,7 @@ template<problem P>
 using minus = minus_core<312, 14, 56, P, double>;  // TODO: set 312, 14, 56 conditional on P
 
 template<problem P>
-using minus_io = minus_io_shaping<P, 3, 3, 2, double>;  // TODO: set numbers conditional on P
+using minus_io = minus_io_shaping<3, 3, 0, 2, P, double>;  // TODO: set numbers conditional on P
 
 template<problem P>
 using minus6 = minus_core<312, 6, 45, P, double>;
