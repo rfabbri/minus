@@ -144,14 +144,14 @@ test_get_params_start_target()
   
   {
   complex params[2*M::nparams]; // start-target param pairs, P01 in chicago.m2, like params_ 
-  Float plines[15][3];
+  Float plines[io::nvislines][io:ncoords_h];
   io::get_params_start_target(plines, params);
   TEST("get_params_start_target sanity check", params[0], complex(0));
   }
   
   {
   complex params[2*M::nparams]; // start-target param pairs, P01 in chicago.m2, like params_ 
-  Float plines[15][3];
+  Float plines[io::nvislines][io:ncoords_h];
   io::get_params_start_target(plines, params);
   TEST("get_params_start_target sanity check", params[0], complex(0));
   for (unsigned i=0; i < 2*M::nparams; ++i)
