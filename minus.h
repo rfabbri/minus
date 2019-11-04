@@ -193,8 +193,9 @@ void minus_core<NSOLS, NNN, NPARAMS, P, F>::evaluate_HxH(const C<F> * __restrict
 // specialization
 // https://stackoverflow.com/questions/1501357/template-specialization-of-particular-members
 // 
-template <unsigned NVIEWS, unsigned NPOINTS /* per view*/, unsigned NFREELINES, unsigned NTANGENTS, /* add more as needed */ problem P, typename F>
+template <unsigned NVIEWS, unsigned NPOINTS /* per view*/, unsigned NFREELINES, unsigned NTANGENTS, unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>
 struct minus_io_shaping {
+  typedef minus<unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F> ::solution solution;
   static constexpr unsigned nviews = NVIEWS; 
   static constexpr unsigned npoints = NPOINTS;
   static constexpr unsigned nfreelines = NFREELINES;
@@ -205,6 +206,7 @@ struct minus_io_shaping {
   static constexpr unsigned ntangents = NTANGENTS;
   static constexpr unsigned ncoords = 2;  // just a documented name for the number of inhomog coordinates
   static constexpr unsigned ncoords_h = 3;  // just a name for the usual number of homog coordinates in P^2
+  static constexpr unsigned ncoords3d = 3;  // just a documented name for the number of inhomog 3D coordinates
   // number of lines connecting each pair of points plus going through points
   // plus the number of free lines in the first order problem.
   // Note that tangent orientation may help ruling out solutions; this is why
@@ -212,30 +214,29 @@ struct minus_io_shaping {
   // information at tangents which can be used as part of the model for curves.
   // The tangent orientation can be constrained by running without orientation
   // mattering at first, and then propagating these to neighboring features
-  // along curves.
+  // along curves
   static constexpr unsigned nvislines = (npoints*(npoints-1) >> 1 + ntangents + nfreelines) * nviews; 
   // nvislines = 15 for Chicago.
-#if 0
   // INPUT ---------------------------------------------------------------------
-  static void point_tangents2params(F p[nview][npoints][ncoords], F tgt[nview][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
+  static void point_tangents2params(F p[nviews][npoints][ncoords], F tgt[nviews][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
+
+  // this function is the same for all problems
+  static void get_params_start_target(F plines[/*15 for chicago*/][ncoords_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
-  static void point_tangents2lines(F p[nview][npoints][ncoords], F tgt[nview][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, F plines[nvislines][ncoords_h]);
-#endif
+  static void point_tangents2lines(F p[nviews][npoints][ncoords], F tgt[nviews][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, F plines[nvislines][ncoords_h]);
   static void lines2params(F plines[nvislines][ncoords_h], C<F> * __restrict__ params/*[static M::nparams]*/);
 
-#if 0
   // OUTPUT --------------------------------------------------------------------
-  static void solutions2cams(M::solution raw_solutions[M::NSOLS], F cameras[M::NSOLS][2][4][3], unsigned id_sols[M::NSOLS], unsigned *nsols_final);
-  static void solution2cams(F rs[NNN], F cameras[2][4][3]);
-#endif
-};
+  static void solutions2cams(solution raw_solutions[NSOLS], F cameras[NSOLS][2][4][ncoords3d], unsigned id_sols[NSOLS], unsigned *nsols_final);
+  static void solution2cams(F rs[NNN], F cameras[2][4][ncoords3d]);
+;
 
 // type alias used to hide a template parameter 
 template<problem P>
 using minus = minus_core<312, 14, 56, P, double>;  // TODO: set 312, 14, 56 conditional on P
 
 template<problem P>
-using minus_io = minus_io_shaping<3, 3, 0, 2, P, double>;  // TODO: set numbers conditional on P
+using minus_io = minus_io_shaping<3, 3, 0, 2, 312, 14, 56, P, double>;  // TODO: set numbers conditional on P
 
 template<problem P>
 using minus6 = minus_core<312, 6, 45, P, double>;

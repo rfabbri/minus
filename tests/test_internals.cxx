@@ -102,7 +102,6 @@ test_rand()
   }
 }
 
-#if 0
 void
 test_gamma()
 {
@@ -118,12 +117,11 @@ test_gamma()
   for (unsigned i=0; i < M::nparams; ++i)
     log << p_test[i] << std::endl;
 }
-#endif
 
 void
 test_lines2params()
 {
-  Float plines[15][3] = {0};
+  Float plines[io::nvislines][io::ncoords_h] = {0};
   complex params[M::nparams] = {0};
   io::lines2params(plines, params);
   TEST("lines2params sanity check", params[0], complex(0));
@@ -137,16 +135,6 @@ test_points2lines()
 
   { // hardcoded input points and desired output lines
   }
-}
-
-#if 0
-template <typename F=double>
-void
-get_params_start_target(F plines[15][3], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
-{
-  io::lines2params(plines, params);
-  io::gammify(params);
-  io::gammify(params+M::nparams);
 }
 
 void
@@ -170,19 +158,14 @@ test_get_params_start_target()
     log << params[i] << std::endl;;
   }
 }
-#endif
 
 void
 test_io_shaping()
 {
-#if 0
   test_gamma();
   test_points2lines();
-#endif
   test_lines2params();
-#if 0
   test_get_params_start_target();
-#endif
 }
 
 void

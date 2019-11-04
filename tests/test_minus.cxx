@@ -19,7 +19,6 @@ static constexpr Float tol = 1e-3;
 typedef std::complex<Float> complex;
 using namespace std::chrono;
 
-
 // Start solutions hardcoded for efficiency.
 // If you want to play with different start sols,
 // write another program that accepts start sols in runtime,
@@ -68,7 +67,6 @@ test_full_solve()
   test_against_ground_truth(solutions);
 }
 
-# if 0
 void
 test_end_user_interface()
 {
@@ -92,13 +90,12 @@ test_end_user_interface()
 //  test_final_solve_against_ground_truth(solutions);
   }
 }
-#endif
 
 void
 test_minus()
 {
   test_full_solve();
-  //test_end_user_interface();
+  test_end_user_interface();
 }
 
 TESTMAIN(test_minus);
