@@ -4933,7 +4933,10 @@ static double p_[io::nviews][io::npoints][io::ncoords] = {
   }
 };
 
-static double tgt_[io::nviews][io::ntangents][io::ncoords] = {
+// The tgt_ array is the same size as the p_ array.
+// At each solve only two are used, but since usually all three points have
+// tangents, we ask them as input anyways.
+static double tgt_[io::nviews][io::npoints][io::ncoords] = {
   // tangents for frame 42
   // + sed -n '3012p;3390p' frame_0042-tgts-2d.txt
   {

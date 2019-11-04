@@ -56,7 +56,7 @@ void
 test_full_solve()
 {
   std::cerr << "Starting path tracker" << std::endl;
-  static M::solution solutions[M::nsols];
+  M::solution solutions[M::nsols];
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   M::track_all(M::DEFAULT, start_sols_, params_, solutions); // <<<<<<<<< MEAT
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
@@ -75,8 +75,8 @@ test_end_user_interface()
   // M::solve(M::DEFAULT, start_sols_, points, cameras);
   {
   complex params[2*M::nparams];
-  io::point_tangents2params(p_, tgt_, params);
-  
+  M::solution solutions[M::nsols];
+  io::point_tangents2params(p_, tgt_, 0, 1, params);
   M::track_all(M::DEFAULT, start_sols_, params, solutions);
   TEST("Did it track first solution?", solutions[0].t > 0, true);
   TEST("Did it track the last solution?", solutions[M::nsols-1].t > 0, true);

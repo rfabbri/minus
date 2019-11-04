@@ -7013,7 +7013,8 @@ HxH(const C<F>* __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<
 // lines, tangents or lines at points).
 template <typename F>
 struct minus_io_shaping<3/*NVIEWS*/, 3/*NPOINTS*/, 0/*NFREELINES*/, 2/*NTANGENTS*/, 312/*NSOLS*/, 14/*NVE*/, 56/*NPARAMS*/,  chicago14a, F> {
-  typedef minus<312, 14, 56, chicago14a, F>::solution solution;
+  typedef minus_core<312, 14, 56, chicago14a, F> M;
+  typedef struct M::solution solution;
   static constexpr unsigned nviews = 3; 
   static constexpr unsigned npoints = 3;
   static constexpr unsigned nfreelines = 0;
@@ -7024,6 +7025,7 @@ struct minus_io_shaping<3/*NVIEWS*/, 3/*NPOINTS*/, 0/*NFREELINES*/, 2/*NTANGENTS
   static constexpr unsigned ntangents = 2;
   static constexpr unsigned ncoords = 2;  // just a documented name for the number of inhomog coordinates
   static constexpr unsigned ncoords_h = 3;  // just a name for the usual number of homog coordinates in P^2
+  static constexpr unsigned ncoords3d = 3;  // just a documented name for the number of inhomog 3D coordinates
   // number of lines connecting each pair of points plus going through points
   // plus the number of free lines in the first order problem.
   // Note that tangent orientation may help ruling out solutions; this is why
@@ -7032,17 +7034,19 @@ struct minus_io_shaping<3/*NVIEWS*/, 3/*NPOINTS*/, 0/*NFREELINES*/, 2/*NTANGENTS
   // The tangent orientation can be constrained by running without orientation
   // mattering at first, and then propagating these to neighboring features
   // along curves.
-  static constexpr unsigned nvislines = (npoints*(npoints-1) >> 1 + ntangents + nfreelines) * nviews; 
+  static constexpr unsigned nvislines = ( (npoints*(npoints-1) >> 1) + ntangents + nfreelines ) * nviews; 
   // nvislines = 15 for Chicago.
   // INPUT ---------------------------------------------------------------------
   static void point_tangents2params(F p[nviews][npoints][ncoords], F tgt[nviews][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
+  // this function is the same for all problems
+  static void get_params_start_target(F plines[/*15 for chicago*/][ncoords_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
   static void point_tangents2lines(F p[nviews][npoints][ncoords], F tgt[nviews][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, F plines[nvislines][ncoords_h]);
   static void lines2params(F plines[nvislines][ncoords_h], C<F> * __restrict__ params/*[static M::nparams]*/);
 
   // OUTPUT --------------------------------------------------------------------
-  static void all_solutions2cams(M::solution raw_solutions[M::NSOLS], F cameras[M::NSOLS][2][4][3], unsigned id_sols[M::NSOLS], unsigned *nsols_final);
-  static void solution2cams(F rs[NVE], F cameras[2][4][3]);
+  static void all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], unsigned id_sols[M::nsols], unsigned *nsols_final);
+  static void solution2cams(F rs[M::nve], F cameras[2][4][3]);
 };
 
 // we only use the first half of the outer
@@ -7212,7 +7216,7 @@ gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
 template <typename F>
 inline void 
 minus_io_shaping<3/*NVIEWS*/, 3/*NPOINTS*/, 0/*NFREELINES*/, 2/*NTANGENTS*/, 312/*NSOLS*/, 14/*NVE*/, 56/*NPARAMS*/,  chicago14a, F>::
-point_tangents2lines(F p[nviews][npoints][ncoords], F tgt[nviews][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, F plines[nvislines][ncoords_h]);
+point_tangents2lines(F p[nviews][npoints][ncoords], F t[nviews][npoints][ncoords], unsigned i0, unsigned i1, F plines[nvislines][ncoords_h])
 {
   typedef minus_3d<F> vec;
   
@@ -7265,9 +7269,9 @@ inline void
 minus_io_shaping<3/*NVIEWS*/, 3/*NPOINTS*/, 0/*NFREELINES*/, 2/*NTANGENTS*/, 312/*NSOLS*/, 14/*NVE*/, 56/*NPARAMS*/,  chicago14a, F>::
 get_params_start_target(F plines[/*15 for chicago*/][ncoords_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
-  io::lines2params(plines, params);
-  io::gammify(params);
-  io::gammify(params+M::nparams);
+  lines2params(plines, params);
+  gammify(params);
+  gammify(params+M::nparams);
 }
 
 //
@@ -7286,23 +7290,24 @@ get_params_start_target(F plines[/*15 for chicago*/][ncoords_h], C<F> * __restri
 template <typename F>
 inline void 
 minus_io_shaping<3/*NVIEWS*/, 3/*NPOINTS*/, 0/*NFREELINES*/, 2/*NTANGENTS*/, 312/*NSOLS*/, 14/*NVE*/, 56/*NPARAMS*/,  chicago14a, F>::
-all_solutions2cams(M::solution raw_solutions[M::NSOLS], F cameras[M::NSOLS][2][4][3], 
-               unsigned id_sols[M::NSOLS], unsigned *nsols_final)
+all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], 
+               unsigned id_sols[M::nsols], unsigned *nsols_final)
 {
   *nsols_final = 0;
-  for (unsigned sol=0; sol < M::NSOLS; ++sol)
-    F real_solutions[M::NVE];
+  for (unsigned sol=0; sol < M::nsols; ++sol) {
+    F real_solutions[M::nve];
     if (get_real(raw_solutions[sol], real_solutions)) {
       id_sols[(*nsols_final)++] = sol;
       // build cams by using quat2rotm
       solution2cams(real_solutions, (F [2][4][3] ) (cameras + sol));
     }
+  }
 }
 
 template <typename F>
 inline void 
 minus_io_shaping<3/*NVIEWS*/, 3/*NPOINTS*/, 0/*NFREELINES*/, 2/*NTANGENTS*/, 312/*NSOLS*/, 14/*NVE*/, 56/*NPARAMS*/,  chicago14a, F>::
-solution2cams(F rs[NVE], F cameras[2/*2nd and 3rd cams relative to 1st*/][4][3])
+solution2cams(F rs[M::nve], F cameras[2/*2nd and 3rd cams relative to 1st*/][4][3])
 {
   // camera 0 (2nd camera relative to 1st)
   quat2rotm(rs, (F [3][3]) cameras[0]);

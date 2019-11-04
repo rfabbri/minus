@@ -185,7 +185,8 @@ void minus_core<NSOLS, NVE, NPARAMS, P, F>::evaluate_HxH(const C<F> * __restrict
 // 
 template <unsigned NVIEWS, unsigned NPOINTS /* per view*/, unsigned NFREELINES, unsigned NTANGENTS, unsigned NSOLS, unsigned NVE, unsigned NPARAMS, problem P, typename F>
 struct minus_io_shaping {
-  typedef minus<unsigned NSOLS, unsigned NVE, unsigned NPARAMS, problem P, typename F> ::solution solution;
+  typedef minus_core<NSOLS, NVE, NPARAMS, P, F> M;
+  typedef struct M::solution solution;
   static constexpr unsigned nviews = NVIEWS; 
   static constexpr unsigned npoints = NPOINTS;
   static constexpr unsigned nfreelines = NFREELINES;
@@ -205,11 +206,10 @@ struct minus_io_shaping {
   // The tangent orientation can be constrained by running without orientation
   // mattering at first, and then propagating these to neighboring features
   // along curves
-  static constexpr unsigned nvislines = (npoints*(npoints-1) >> 1 + ntangents + nfreelines) * nviews; 
+  static constexpr unsigned nvislines = ( (npoints*(npoints-1) >> 1) + ntangents + nfreelines ) * nviews; 
   // nvislines = 15 for Chicago.
   // INPUT ---------------------------------------------------------------------
   static void point_tangents2params(F p[nviews][npoints][ncoords], F tgt[nviews][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
-
   // this function is the same for all problems
   static void get_params_start_target(F plines[/*15 for chicago*/][ncoords_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
@@ -217,9 +217,9 @@ struct minus_io_shaping {
   static void lines2params(F plines[nvislines][ncoords_h], C<F> * __restrict__ params/*[static M::nparams]*/);
 
   // OUTPUT --------------------------------------------------------------------
-  static void solutions2cams(solution raw_solutions[NSOLS], F cameras[NSOLS][2][4][ncoords3d], unsigned id_sols[NSOLS], unsigned *nsols_final);
-  static void solution2cams(F rs[NVE], F cameras[2][4][ncoords3d]);
-;
+  static void all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], unsigned id_sols[M::nsols], unsigned *nsols_final);
+  static void solution2cams(F rs[M::nve], F cameras[2][4][3]);
+};
 
 // type alias used to hide a template parameter 
 template<problem P>
