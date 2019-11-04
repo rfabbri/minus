@@ -7223,25 +7223,27 @@ point_tangents2lines(F p[nviews][npoints][ncoords], F t[nviews][npoints][ncoords
   assert (i0 < i1 && i1 < 3);
   unsigned i2 = (i0 == 0) ? ((i1 == 1) ? 2 : 1) : 0;
   
-  vec::cross(p[i0][0], p[i1][0], plines[0]);
-  vec::cross(p[i0][1], p[i1][1], plines[1]);
-  vec::cross(p[i0][2], p[i1][2], plines[2]);
-  vec::cross(p[i0][0], p[i2][0], plines[3]);
-  vec::cross(p[i0][1], p[i2][1], plines[4]);
-  vec::cross(p[i0][2], p[i2][2], plines[5]);
-  vec::cross(p[i1][0], p[i2][0], plines[6]);
-  vec::cross(p[i1][1], p[i2][1], plines[7]);
-  vec::cross(p[i1][2], p[i2][2], plines[8]);
+  vec::cross2(p[0][i0], p[0][i1], plines[0]);
+  vec::cross2(p[1][i0], p[1][i1], plines[1]);
+  vec::cross2(p[2][i0], p[2][i1], plines[2]);
   
+  vec::cross2(p[0][i0], p[0][i2], plines[3]);
+  vec::cross2(p[1][i0], p[1][i2], plines[4]);
+  vec::cross2(p[2][i0], p[2][i2], plines[5]);
+  
+  vec::cross2(p[0][i1], p[0][i2], plines[6]);
+  vec::cross2(p[1][i1], p[1][i2], plines[7]);
+  vec::cross2(p[2][i1], p[2][i2], plines[8]);
+
   // tangent at point p[i0]
-  minus_3d<F>::point_tangent2line(p[i0][0], t[0][0], plines[9]);
-  minus_3d<F>::point_tangent2line(p[i0][1], t[0][1], plines[10]);
-  minus_3d<F>::point_tangent2line(p[i0][2], t[0][2], plines[11]);
+  minus_3d<F>::point_tangent2line(p[0][i0], t[0][i0], plines[9]);
+  minus_3d<F>::point_tangent2line(p[1][i0], t[1][i0], plines[10]);
+  minus_3d<F>::point_tangent2line(p[2][i0], t[2][i0], plines[11]);
  
   // tangent at point p[i1]
-  minus_3d<F>::point_tangent2line(p[i1][0], t[1][0], plines[12]);
-  minus_3d<F>::point_tangent2line(p[i1][1], t[1][1], plines[13]);
-  minus_3d<F>::point_tangent2line(p[i1][2], t[1][2], plines[14]);
+  minus_3d<F>::point_tangent2line(p[0][i1], t[0][i1], plines[12]);
+  minus_3d<F>::point_tangent2line(p[1][i1], t[1][i1], plines[13]);
+  minus_3d<F>::point_tangent2line(p[2][i1], t[2][i1], plines[14]);
   // TODO: test normalize to unit vectors for better numerics
 }
 
@@ -7259,9 +7261,11 @@ inline void
 minus_io_shaping<3/*NVIEWS*/, 3/*NPOINTS*/, 0/*NFREELINES*/, 2/*NTANGENTS*/, 312/*NSOLS*/, 14/*NVE*/, 56/*NPARAMS*/,  chicago14a, F>::
 point_tangents2params(F p[nviews][npoints][ncoords], F tgt[nviews][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
-  F plines[nvislines][3];
+  F plines[nvislines][ncoords_h];
   point_tangents2lines(p, tgt, id_tgt0, id_tgt1, plines);
   lines2params(plines, params);
+  gammify(params);
+k gammify(params+M::nparams);
 }
 
 template <typename F>
@@ -7299,7 +7303,7 @@ all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3
     if (get_real(raw_solutions[sol], real_solutions)) {
       id_sols[(*nsols_final)++] = sol;
       // build cams by using quat2rotm
-      solution2cams(real_solutions, (F [2][4][3] ) (cameras + sol));
+      solution2cams(real_solutions, (F (*)[4][3] ) (cameras + sol));
     }
   }
 }

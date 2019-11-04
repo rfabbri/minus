@@ -124,6 +124,16 @@ struct minus_3d {
   }
   static inline F
   dot(const F v1[3], const F v2[3]) { return v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2]; }
+  
+  // same as cross but assumes points given in inhomogoeneous coordinates
+  // as if v[2] = 1
+  static inline void
+  cross2(const F v1[2], const F v2[2], F r[3])
+  {
+    r[0] = v1[1] - v2[1];
+    r[1] = v2[0] - v1[0];
+    r[2] = v1[0] * v2[1] - v1[1] * v2[0];
+  }
 
   // inhomogeneous points with associated tangents to homogeneous line coefficients
   static inline void 
