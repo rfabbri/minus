@@ -9,25 +9,15 @@
 // Modifications
 //    Leykin Feb82019: Initial sketch as simplified code from Macaulay e/NAG.*
 //    Tim    Feb2019:  Chicago-specific prototype in Macaulay2
-//    Fabbri Mar162019: fully templated code
+//    Fabbri Mar162019: fully templated and optimized code
 // \endverbatim
 //
 // OPTIMIZATIONS
-//  - see trifocal.key in bignotes for basic results
+//  - see Fabbri's trifocal.key in bignotes for basic results
 //  - see CMakeLists.txt and README.md
 
-//#define NSOLS 312  /* template these */
-//#define NNN   14    /* system size */
-//#define NNNPLUS1 15 
-//#define NNNPLUS2 16
-//#define NNN2 196  /* NNN squared */
-//#define NPARAMS 56 /* Number of parameters in parameter homotopy - eg, coefficients, etc, to represent NNNxNNN sys */
 #include <complex>
 #include <random>
-
-// typedef std::complex<double> complex;
-// might have to define eval.hxx through define
-// so
 
 template <typename F=double>
 using C = std::complex<F>;
@@ -35,7 +25,7 @@ using C = std::complex<F>;
 // The problem solvers that this solver template currently supports
 enum problem {chicago14a, chicago6a, standard};
 
-template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F=double>
+template <unsigned NSOLS, unsigned NVE, unsigned NPARAMS, problem P, typename F=double>
 class minus_core { // fully static, not to be instantiated - just used for templating
   public: // ----------- Data structures --------------------------------------
   
@@ -63,7 +53,7 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   
   struct solution
   {
-    C<F> x[NNN];    // array of n coordinates
+    C<F> x[NVE];    // array of n coordinates
     F t;            // last value of parameter t used
     solution_status status;
     //  unsigned num_steps;  // number of steps taken along the path
@@ -71,31 +61,31 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   };
 
   static const track_settings DEFAULT;
-  static constexpr unsigned nnn = NNN;          // the size of the system
+  static constexpr unsigned nve = NVE;          // the size of the system (Number of Variables or Equations)
   static constexpr unsigned nsols = NSOLS;      // the number of solutions
   static constexpr unsigned nparams = NPARAMS;  // the number of parameters
   
   public: // ----------- Functions --------------------------------------------
   
   ///// THE MEAT /////
-  static void track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], 
+  static void track(const track_settings &s, const C<F> s_sols[NVE*NSOLS], 
       const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max);
   
   // helper function: tracks all, no begin or end to specify
-  static void track_all(const track_settings &s, const C<F> s_sols[NNN*NSOLS], 
+  static void track_all(const track_settings &s, const C<F> s_sols[NVE*NSOLS], 
       const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS])
   { track(s, s_sols, params, raw_solutions, 0, NSOLS); }
   
   private: // -----------------------------------------------------------------
-  static constexpr unsigned NNNPLUS1 = NNN+1;
-  static constexpr unsigned NNNPLUS2 = NNN+2;
-  static constexpr unsigned NNN2 = NNN*NNN;
+  static constexpr unsigned NVEPLUS1 = NVE+1;
+  static constexpr unsigned NVEPLUS2 = NVE+2;
+  static constexpr unsigned NVE2 = NVE*NVE;
   static void evaluate_Hxt(const C<F> * __restrict__ x /*x, t*/,    const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
   static void evaluate_HxH(const C<F> * __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
 };
 
-template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>
-struct minus_core<NSOLS, NNN, NPARAMS, P, F>::track_settings {
+template <unsigned NSOLS, unsigned NVE, unsigned NPARAMS, problem P, typename F>
+struct minus_core<NSOLS, NVE, NPARAMS, P, F>::track_settings {
   track_settings():
     init_dt_(0.05),   // m2 tStep, t_step, raw interface code initDt
     min_dt_(1e-7),        // m2 tStepMin, raw interface code minDt
@@ -163,14 +153,14 @@ struct eval {
   static void HxH(const C<F> * __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
 };
 
-template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>
-void minus_core<NSOLS, NNN, NPARAMS, P, F>::evaluate_Hxt(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/)
+template <unsigned NSOLS, unsigned NVE, unsigned NPARAMS, problem P, typename F>
+void minus_core<NSOLS, NVE, NPARAMS, P, F>::evaluate_Hxt(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/)
 {
   eval<P,F>::Hxt(x, params, y);
 }
 
-template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>
-void minus_core<NSOLS, NNN, NPARAMS, P, F>::evaluate_HxH(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/)
+template <unsigned NSOLS, unsigned NVE, unsigned NPARAMS, problem P, typename F>
+void minus_core<NSOLS, NVE, NPARAMS, P, F>::evaluate_HxH(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/)
 {
   eval<P,F>::HxH(x, params, y);
 }
@@ -193,9 +183,9 @@ void minus_core<NSOLS, NNN, NPARAMS, P, F>::evaluate_HxH(const C<F> * __restrict
 // specialization
 // https://stackoverflow.com/questions/1501357/template-specialization-of-particular-members
 // 
-template <unsigned NVIEWS, unsigned NPOINTS /* per view*/, unsigned NFREELINES, unsigned NTANGENTS, unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F>
+template <unsigned NVIEWS, unsigned NPOINTS /* per view*/, unsigned NFREELINES, unsigned NTANGENTS, unsigned NSOLS, unsigned NVE, unsigned NPARAMS, problem P, typename F>
 struct minus_io_shaping {
-  typedef minus<unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F> ::solution solution;
+  typedef minus<unsigned NSOLS, unsigned NVE, unsigned NPARAMS, problem P, typename F> ::solution solution;
   static constexpr unsigned nviews = NVIEWS; 
   static constexpr unsigned npoints = NPOINTS;
   static constexpr unsigned nfreelines = NFREELINES;
@@ -228,7 +218,7 @@ struct minus_io_shaping {
 
   // OUTPUT --------------------------------------------------------------------
   static void solutions2cams(solution raw_solutions[NSOLS], F cameras[NSOLS][2][4][ncoords3d], unsigned id_sols[NSOLS], unsigned *nsols_final);
-  static void solution2cams(F rs[NNN], F cameras[2][4][ncoords3d]);
+  static void solution2cams(F rs[NVE], F cameras[2][4][ncoords3d]);
 ;
 
 // type alias used to hide a template parameter 

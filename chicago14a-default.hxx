@@ -11,7 +11,7 @@
 typedef minus<chicago14a> M;
 typedef minus_io<chicago14a> io;
 
-static complex const start_sols_[M::nnn*M::nsols] = {
+static complex const start_sols_[M::nve*M::nsols] = {
   {-.59336028545681196,-.11013183013512155},
   {.11944671140724233,-.13633687755694085},
   {-.7527462639007193e-1,.36383005180054401},

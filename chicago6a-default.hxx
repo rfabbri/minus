@@ -10,7 +10,7 @@
 
 typedef minus<chicago6a> M;
 
-static complex const start_sols_[M::nnn*M::nsols] = {
+static complex const start_sols_[M::nve*M::nsols] = {
   {.18459386337320918,.49447431349233134},
   {.60152719399766519,-.40662261308333408},
   {.54457804485819084,.69436039721389686},

@@ -12,49 +12,49 @@
 #include "Eigen/LU"
 #include "minus.h"
 
-template <unsigned NNN, typename F>
+template <unsigned NVE, typename F>
 struct minus_array { // Speed critical -----------------------------------------
   static inline void 
   multiply_scalar_to_self(C<F> *__restrict__ a, C<F> b)
   {
-    for (unsigned i = 0; i < NNN; ++i, ++a) *a = *a * b;
+    for (unsigned i = 0; i < NVE; ++i, ++a) *a = *a * b;
   }
 
   static inline void
   negate_self(C<F> * __restrict__ a)
   {
-    for (unsigned i = 0; i < NNN; ++i, ++a) *a = -*a;
+    for (unsigned i = 0; i < NVE; ++i, ++a) *a = -*a;
   }
 
   static inline void 
   multiply_self(C<F> * __restrict__ a, const C<F> * __restrict__ b)
   {
-    for (unsigned int i=0; i < NNN; ++i,++a,++b) *a *= *b;
+    for (unsigned int i=0; i < NVE; ++i,++a,++b) *a *= *b;
   }
 
   static inline void 
   add_to_self(C<F> * __restrict__ a, const C<F> * __restrict__ b)
   {
-    for (unsigned int i=0; i < NNN; ++i,++a,++b) *a += *b;
+    for (unsigned int i=0; i < NVE; ++i,++a,++b) *a += *b;
   }
 
   static inline void 
   add_scalar_to_self(C<F> * __restrict__ a, C<F> b)
   {
-    for (unsigned int i=0; i < NNN; ++i,++a) *a += b;
+    for (unsigned int i=0; i < NVE; ++i,++a) *a += b;
   }
 
   static inline void 
   copy(const C<F> * __restrict__ a, C<F> * __restrict__ b)
   {
-    memcpy(b, a, NNN*sizeof(C<F>));
+    memcpy(b, a, NVE*sizeof(C<F>));
   }
 
   static inline F
   norm2(const C<F> *__restrict__ a)
   {
     F val = 0;
-    C<F> const* __restrict__ end = a+NNN;
+    C<F> const* __restrict__ end = a+NVE;
     while (a != end) val += std::norm(*a++);
     return val;
   }
@@ -68,7 +68,7 @@ struct minus_array { // Speed critical -----------------------------------------
   //
   // Not speed critical.
   static inline bool
-  get_real(C<F> s[NNN], F rs[NNN])
+  get_real(C<F> s[NVE], F rs[NVE])
   {
     // Hongyi function realSolutions = parseSolutionString(output)
     // solutions = reshape(solutions,[14,length(solutions)/14]);
@@ -78,19 +78,19 @@ struct minus_array { // Speed critical -----------------------------------------
     // Fancy way to convert to real is to check if the complex number is close to
     // horizontal then get absolute value.
     /*
-    for (unsigned var = 0; var < NNN; ++var)  // differs from Hongyi criterion
+    for (unsigned var = 0; var < NVE; ++var)  // differs from Hongyi criterion
       if (s->x[var].real() < eps && s->x[var].real() >= eps
           || std::abs(std::tan(std::arg(s->x[var].imag()))) >= eps)
         return false;
     
-    F real_solution[NNN];
-    for (unsigned var = 0; var < NNN; ++var) 
+    F real_solution[NVE];
+    for (unsigned var = 0; var < NVE; ++var) 
       real_solution[var] = ((s->x[var].real() >= 0) ? 1 : -1) * std::abs(s->x[var]);
     */
     unsigned var = 0;
-    for (; var < NNN; ++var)
+    for (; var < NVE; ++var)
       if (std::abs(s[var].imag()) >= eps) return false;
-    for (var = NNN-1; var != (unsigned)-1; --var) 
+    for (var = NVE-1; var != (unsigned)-1; --var) 
       rs[var] = s[var].real();
 
     // quat12 rs(0:3), quat12 rs(4:7)
@@ -194,8 +194,8 @@ std::mt19937 minus_util<F>::rnd{rd()};
 template <typename F>
 std::normal_distribution<F> minus_util<F>::gauss{0.0,1000.0};  
 
-template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F> const typename 
-minus_core<NSOLS, NNN, NPARAMS, P, F>::track_settings minus_core<NSOLS, NNN, NPARAMS, P, F>::DEFAULT;
+template <unsigned NSOLS, unsigned NVE, unsigned NPARAMS, problem P, typename F> const typename 
+minus_core<NSOLS, NVE, NPARAMS, P, F>::track_settings minus_core<NSOLS, NVE, NPARAMS, P, F>::DEFAULT;
 
 // THE MEAT //////////////////////////////////////////////////////////////////////
 // t: tracker settings
@@ -203,37 +203,37 @@ minus_core<NSOLS, NNN, NPARAMS, P, F>::track_settings minus_core<NSOLS, NNN, NPA
 // params: params of target as specialized homotopy params - P01 in SolveChicago
 // compute solutions sol_min...sol_max-1 within NSOLS
 // 
-template <unsigned NSOLS, unsigned NNN, unsigned NPARAMS, problem P, typename F> void 
-minus_core<NSOLS, NNN, NPARAMS, P, F>::
-track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max)
+template <unsigned NSOLS, unsigned NVE, unsigned NPARAMS, problem P, typename F> void 
+minus_core<NSOLS, NVE, NPARAMS, P, F>::
+track(const track_settings &s, const C<F> s_sols[NVE*NSOLS], const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max)
 {
-  C<F> Hxt[NNNPLUS1 * NNN] __attribute__((aligned(16))); 
-  C<F> x0t0xtblock[2*NNNPLUS1] __attribute__((aligned(16)));
-  C<F> dxdt[NNNPLUS1] __attribute__((aligned(16)));
-  C<F> dxi[NNN] __attribute__((aligned(16)));
+  C<F> Hxt[NVEPLUS1 * NVE] __attribute__((aligned(16))); 
+  C<F> x0t0xtblock[2*NVEPLUS1] __attribute__((aligned(16)));
+  C<F> dxdt[NVEPLUS1] __attribute__((aligned(16)));
+  C<F> dxi[NVE] __attribute__((aligned(16)));
   C<F> *x0t0 = x0t0xtblock;  // t = real running in [0,1]
   C<F> *x0 = x0t0;
-  F    *t0 = (F *) (x0t0 + NNN);
-  C<F> *xt = x0t0xtblock + NNNPLUS1; 
+  F    *t0 = (F *) (x0t0 + NVE);
+  C<F> *xt = x0t0xtblock + NVEPLUS1; 
   C<F> *x1t1 = xt;      // reusing xt's space to represent x1t1
   C<F> *const HxH=Hxt;  // HxH is reusing Hxt
   C<F> *const dx = dxdt;
-  const C<F> *const RHS = Hxt + NNN2;  // Hx or Ht, same storage //// UNUSED:  C<F> *const LHS = Hxt;
+  const C<F> *const RHS = Hxt + NVE2;  // Hx or Ht, same storage //// UNUSED:  C<F> *const LHS = Hxt;
   C<F> *const dx4 = dx;   // reuse dx for dx4
-  F    *const dt = (F *)(dxdt + NNN);
+  F    *const dt = (F *)(dxdt + NVE);
   const F &t_step = s.init_dt_;  // initial step
   using namespace Eigen; // only used for linear solve
-  Map<Matrix<C<F>, NNN, 1>,Aligned> dxi_eigen(dxi);
-  Map<Matrix<C<F>, NNN, 1>,Aligned> dx4_eigen(dx4);
-  Map<Matrix<C<F>, NNN, 1>,Aligned> &dx_eigen = dx4_eigen;
-  Map<const Matrix<C<F>, NNN, NNN>,Aligned> AA((C<F> *)Hxt,NNN,NNN);  // accessors for the data
-  Map<const Matrix<C<F>, NNN, 1>, Aligned > bb(RHS);
+  Map<Matrix<C<F>, NVE, 1>,Aligned> dxi_eigen(dxi);
+  Map<Matrix<C<F>, NVE, 1>,Aligned> dx4_eigen(dx4);
+  Map<Matrix<C<F>, NVE, 1>,Aligned> &dx_eigen = dx4_eigen;
+  Map<const Matrix<C<F>, NVE, NVE>,Aligned> AA((C<F> *)Hxt,NVE,NVE);  // accessors for the data
+  Map<const Matrix<C<F>, NVE, 1>, Aligned > bb(RHS);
   static constexpr F the_smallest_number = 1e-13;
-  typedef minus_array<NNN,F> v; typedef minus_array<NNNPLUS1,F> vp;
-  PartialPivLU<Matrix<C<F>, NNN, NNN> > lu;
+  typedef minus_array<NVE,F> v; typedef minus_array<NVEPLUS1,F> vp;
+  PartialPivLU<Matrix<C<F>, NVE, NVE> > lu;
 
   solution *t_s = raw_solutions + sol_min;  // current target solution
-  const C<F>* __restrict__ s_s = s_sols + sol_min*NNN;    // current start solution
+  const C<F>* __restrict__ s_s = s_sols + sol_min*NVE;    // current start solution
   for (unsigned sol_n = sol_min; sol_n < sol_max; ++sol_n) { // solution loop
     t_s->status = PROCESSING;
     bool end_zone = false;
@@ -266,7 +266,7 @@ track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2
       v::multiply_scalar_to_self(dx4, one_half_dt);
       v::add_to_self(xt, dx4);
       v::multiply_scalar_to_self(dx4, 2.);
-      xt[NNN] += one_half_dt;  // t0+.5dt
+      xt[NVE] += one_half_dt;  // t0+.5dt
       evaluate_Hxt(xt, params, Hxt);
       dxi_eigen = lu.compute(AA).solve(bb);  // TODO: reuse pivots
 
@@ -285,7 +285,7 @@ track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2
       v::add_to_self(xt, dxi);
       v::multiply_scalar_to_self(dxi, 2);
       v::add_to_self(dx4, dxi);
-      xt[NNN] = *t0 + *dt;               // t0+dt
+      xt[NVE] = *t0 + *dt;               // t0+dt
       evaluate_Hxt(xt, params, Hxt);
       dxi_eigen = lu.compute(AA).solve(bb);
       v::multiply_scalar_to_self(dxi, *dt);
@@ -317,7 +317,7 @@ track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2
       } else { // predictor success
         ++predictor_successes;
         std::swap(x1t1,x0t0);
-        x0 = x0t0; t0 = (F *) (x0t0 + NNN); xt = x1t1;
+        x0 = x0t0; t0 = (F *) (x0t0 + NVE); xt = x1t1;
         if (predictor_successes >= s.num_successes_before_increase_) {
           predictor_successes = 0;
           *dt *= s.dt_increase_factor_;
@@ -329,7 +329,7 @@ track(const track_settings &s, const C<F> s_sols[NNN*NSOLS], const C<F> params[2
     v::copy(x0, t_s->x); // record the solution
     t_s->t = *t0; // TODO try to include this in the previous memcpy
     if (t_s->status == PROCESSING) t_s->status = REGULAR;
-    ++t_s; s_s += NNN;
+    ++t_s; s_s += NVE;
   } // outer solution loop
 }
 

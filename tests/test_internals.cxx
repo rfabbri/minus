@@ -88,7 +88,7 @@ test_rand()
     complex dot_gt = complex({5,3})*complex({-2,4})
        + complex({3,4})*complex({2,5})+complex({6,5})*complex({3,-4});
     TEST_NEAR("Dot product", std::abs(dot_gt - minus_3d<Float>::dot(a,b)), 0 , tol);
-    // std::cout << "Result: " << dot_gt  << "computed: " << minus_array<M::nnn,Float>::dot(a,b) << std::endl;
+    // std::cout << "Result: " << dot_gt  << "computed: " << minus_array<M::nve,Float>::dot(a,b) << std::endl;
 
 
     complex c_gt[3] = {{38, -40}, {-59, 25}, {17, 27}};

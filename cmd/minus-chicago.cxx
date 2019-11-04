@@ -43,7 +43,7 @@ bool stdio_=true;  // by default read/write from stdio
 //
 // ---------------------------------------------------------
 // If in the future our solver is really fast, we may need Binary IO:
-// complex solutions[NSOLS*NNN];
+// complex solutions[NSOLS*NVE];
 // 
 // To read this output file in matlab, do:
 // fid = fopen(fname,'r');
@@ -84,9 +84,9 @@ mwrite(const M::solution s[M::nsols], const char *fname)
 
   out << "[";
   for (unsigned i=0; i <M::nsols; ++i) {
-    for (unsigned var=0; var < M::nnn; ++var) {
+    for (unsigned var=0; var < M::nve; ++var) {
       out << s[i].x[var].real() << imag << s[i].x[var].imag();
-      if (i*var +1 < M::nnn * M::nsols) 
+      if (i*var +1 < M::nve * M::nsols) 
         out << std::endl;
       // BINARY fsols.write((char *)(s[i].x[var]),2*sizeof(double));
     }

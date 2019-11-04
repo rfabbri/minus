@@ -9,7 +9,7 @@ struct eval<chicago6a, F> {
 
 // Evaluates Hx and Ht at the same time, reusing expressions.
 // 
-// Map from a multivariate poly with x 127-dimensional to y NNNxNNNPLUS1 dimensional
+// Map from a multivariate poly with x 127-dimensional to y NVExNVEPLUS1 dimensional
 // Where 127 = 14 for x, 1 for t, 2*56 total parameters. Returns y = [Hx|Ht]
 // TODO: update this for this formulation
 // 
@@ -2654,7 +2654,7 @@ Hxt(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F>
 
 // Evaluates Hx and H at the same time, reusing expressions.
 // 
-// Map from a multivariate poly with x 127-dimensional to y NNNxNNNPLUS1 dimensional
+// Map from a multivariate poly with x 127-dimensional to y NVExNVEPLUS1 dimensional
 // Where 127 = 14 for x, 1 for t, 2*56 total parameters. Returns where y = [Hx|H]
 // TODO: update this for this formulation
 // 
