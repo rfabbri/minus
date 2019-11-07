@@ -7061,10 +7061,11 @@ lines2params(F plines[nvislines][ncoords_h], C<F> * __restrict__ params/*[static
   typedef minus_util<F> util;
   typedef minus_3d<F> vec;
   //    params (P1) is pF||pTriple||pChart  //  Hongyi: [pF; tripleChart; XR'; XT1'; XT2'];
-  //    size              27       12        17 = 56
+  //    size           27     12      17 = 56
 
   // pF ----------------------------------------
-  // converts 1st 9 lines to C<F> (real part zero)
+  // converts 1st 9 lines to C<F> (imaginary part zero)
+  // remembering: 1st 9 lines are the ones between the points (no tangents)
   // 
   // 9x3 out of the 15x3 of the pairsiwe lines, linearized as 27x1
   // Tim: pF is matrix(targetLines^{0..8},27,1);
@@ -7073,6 +7074,7 @@ lines2params(F plines[nvislines][ncoords_h], C<F> * __restrict__ params/*[static
   for (unsigned i=0; i < 27; ++i) params[i] = pl[i];
 
   // pTriple ----------------------------------------
+  // At points that have tangents, there are 3 lines (triple intersects)
   unsigned triple_intersections[6][3] = 
     {{0,3,9},{0+1,3+1,9+1},{0+2,3+2,9+2},{0,6,12},{0+1,6+1,12+1},{0+2,6+2,12+2}};
 

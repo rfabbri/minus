@@ -4760,7 +4760,6 @@ static complex params_start_target_[2*M::nparams] = {
   {.10077622100718471,.623987226069527e-1},
   {.6890260043220745,.52555620035489847}
 };
-
 // Example specialized homotopy for a specific given input
 // these take almost 1min in Macaulay2
 // Used for testing.
