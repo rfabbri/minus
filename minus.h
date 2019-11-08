@@ -38,8 +38,16 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   // or members of Tracker class if more complete C++ desired
   struct track_settings; 
   struct formulation_parameters; 
-
   typedef formulation_parameters f;
+  /* General content of formulation_parameters (each problem may add to this):
+  template <problem P, typename F>
+  struct minus_core<P, F>::formulation_parameters {
+    // Specific values defined for each problem:
+    static constexpr unsigned nve = NVE;          // the size of the system (Number of Variables or Equations)
+    static constexpr unsigned nsols = NSOLS;      // the number of solutions
+    static constexpr unsigned nparams = NPARAMS;  // the number of parameters
+  }
+  */
   
   enum solution_status {
     UNDETERMINED,
@@ -68,11 +76,11 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   
   ///// THE MEAT /////
   static void track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], 
-      const C<F> params[2*NPARAMS], solution raw_solutions[f::nsols], unsigned sol_min, unsigned sol_max);
+      const C<F> params[2*f::nparams], solution raw_solutions[f::nsols], unsigned sol_min, unsigned sol_max);
   
   // helper function: tracks all, no begin or end to specify
   static void track_all(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], 
-      const C<F> params[2*NPARAMS], solution raw_solutions[f::nsols])
+      const C<F> params[2*f::nparams], solution raw_solutions[f::nsols])
   { track(s, s_sols, params, raw_solutions, 0, f::nsols); }
   
   private: // -----------------------------------------------------------------
@@ -83,17 +91,8 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   static void evaluate_HxH(const C<F> * __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
 };
 
-/*
-template <problem P, typename F>
-struct minus_core<P, F>::formulation_parameters {
-  // Specific values defined for each problem:
-  static constexpr unsigned nve = NVE;          // the size of the system (Number of Variables or Equations)
-  static constexpr unsigned nsols = NSOLS;      // the number of solutions
-  static constexpr unsigned nparams = NPARAMS;  // the number of parameters
-}
-*/
 
-template <problem P, typename F>
+template <problem P, typename F=double>
 struct minus_core<P, F>::track_settings {
   track_settings():
     init_dt_(0.05),   // m2 tStep, t_step, raw interface code initDt
@@ -192,17 +191,15 @@ void minus_core<P, F>::evaluate_HxH(const C<F> * __restrict__ x /*x, t*/, const 
 // specialization
 // https://stackoverflow.com/questions/1501357/template-specialization-of-particular-members
 // 
-template <problem P, typename F>
+template <problem P, typename F=double>
 struct minus_io_shaping {
   typedef minus_core<P, F> M;
   typedef struct M::solution solution;
-  
   static constexpr unsigned ncoords2d = 2;  // just a documented name for the number of inhomog coordinates
   static constexpr unsigned ncoords2d_h = 3;  // just a name for the usual number of homog coordinates in P^2
   static constexpr unsigned ncoords3d = 3;  // just a documented name for the number of inhomog 3D coordinates
-  
-  // Chicago14a <3/*NVIEWS*/, 3/*NPOINTS*/, 0/*NFREELINES*/, 2/*NTANGENTS*/, 312/*NSOLS*/, 14/*NVE*/, 56/*NPARAMS*/>
   struct problem_parameters;  // highlevel problem parameters; the core tracker doesn't need these
+  typedef problem_parameters pp;
 #if 0
   { // The basic structure, defined at each problem-specific .hxx
   // unsigned NVIEWS, unsigned NPOINTS /* per view*/, unsigned NFREELINES, unsigned NTANGENTS, 
@@ -230,25 +227,28 @@ struct minus_io_shaping {
   
   // nvislines = 15 for Chicago.
   // INPUT ---------------------------------------------------------------------
-  static void point_tangents2params(F p[nviews][npoints][ncoords], F tgt[nviews][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
+  static void point_tangents2params(F p[pp:nviews][pp:npoints][ncoords], F tgt[pp:nviews][pp:npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   // this function is the same for all problems
   static void get_params_start_target(F plines[/*15 for chicago*/][ncoords_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
-  static void point_tangents2lines(F p[nviews][npoints][ncoords], F tgt[nviews][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, F plines[nvislines][ncoords_h]);
-  static void lines2params(F plines[nvislines][ncoords_h], C<F> * __restrict__ params/*[static M::n//params]*/);
+  static void point_tangents2lines(F p[pp:nviews][pp:npoints][ncoords], F tgt[pp:nviews][pp:npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, F plines[pp:nvislines][ncoords_h]);
+  static void lines2params(F plines[pp:nvislines][ncoords_h], C<F> * __restrict__ params/*[static M::n//params]*/);
 
   // OUTPUT --------------------------------------------------------------------
   static void all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], unsigned id_sols[M::nsols], unsigned *nsols_final);
-  static void solution2cams(F rs[M::nve], F cameras[2][4][3]);
+  static void solution2cams(F rs[M::f:nve], F cameras[2][4][3]);
 };
 
+
+// Shortcuts and aliases -------------------------------------------------------
+
 // type alias used to hide a template parameter 
-template<problem P>
-using minus = minus_core<P, double>;  // TODO: set 312, 14, 56 conditional on P
+template<problem P, typename F=double>
+using minus = minus_core<P, F>;  // TODO: set 312, 14, 56 conditional on P
 // TODO move to instantiation of M::formulation_parameters 312, 14, 56, 
 
-template<problem P>
-using minus_io = minus_io_shaping<P, double>;  // TODO: set numbers conditional on P
+template<problem P, typename F=double>
+using minus_io = minus_io_shaping<P, F>;  // TODO: set numbers conditional on P
 //using minus_io = minus_io_shaping<3, 3, 0, 2, 312, 14, 56, P, double>;  // TODO: set numbers conditional on P
 
 //template<problem P>

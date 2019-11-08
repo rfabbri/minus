@@ -7007,10 +7007,17 @@ HxH(const C<F>* __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<
   y[209] = -G2836;
 }
 
-//------------------------------------------------------------------------------
+// Problem and Formulation Paramers --------------------------------------------
 
 template <typename F>
-struct problem_parameters<chicago14a, F> {
+struct minus_core<chicago14a, F>::formulation_parameters {
+  static constexpr unsigned nsols = 312;   // number of solutions
+  static constexpr unsigned nve = 14;      // size of the system (Number of Variables or Equations)
+  static constexpr unsigned nparams = 56;  // number of parameters
+};
+
+template <typename F>
+struct minus_io_shaping<chicago14a, F>::problem_parameters {
   static constexpr unsigned nviews = 3; 
   static constexpr unsigned npoints = 3;
   static constexpr unsigned nfreelines = 0;
@@ -7030,33 +7037,6 @@ struct problem_parameters<chicago14a, F> {
   static constexpr unsigned nvislines = ( (npoints*(npoints-1) >> 1) + ntangents + nfreelines ) * nviews; 
   // nvislines = 15 for Chicago.
   // unsigned NVIEWS, unsigned NPOINTS /* per view*/, unsigned NFREELINES, unsigned NTANGENTS, 
-  static constexpr unsigned nviews = 3; 
-  static constexpr unsigned npoints = 3;
-  static constexpr unsigned nfreelines = 0;
-  // even though Chicago needs only 2 tangents, api assumes 3 tangents are given,
-  // out of which two are selected by indexing. This is the most common use
-  // case, where all features naturally have tangents. If strictly 2 tangents
-  // are to be passed, you can leave the unused one as zeros throughout the API.
-  static constexpr unsigned ntangents = 2;
-           
-  static constexpr unsigned nviews = NVIEWS; 
-  static constexpr unsigned npoints = NPOINTS;
-  static constexpr unsigned nfreelines = NFREELINES;
-  // even though Chicago needs only 2 tangents, api assumes 3 tangents are given,
-  // out of which two are selected by indexing. This is the most common use
-  // case, where all features naturally have tangents. If strictly 2 tangents
-  // are to be passed, you can leave the unused one as zeros throughout the API.
-  static constexpr unsigned ntangents = NTANGENTS;
-  // number of lines connecting each pair of points plus going through points
-  // plus the number of free lines in the first order problem.
-  // Note that tangent orientation may help ruling out solutions; this is why
-  // we call it tangent, and not general lines at points. There is more
-  // information at tangents which can be used as part of the model for curves.
-  // The tangent orientation can be constrained by running without orientation
-  // mattering at first, and then propagating these to neighboring features
-  // along curves
-  // for formulations based on all lines -- not all formulations use this
-  static constexpr unsigned nvislines = ( (npoints*(npoints-1) >> 1) + ntangents + nfreelines ) * nviews; 
 };
 
 // we only use the first half of the outer
