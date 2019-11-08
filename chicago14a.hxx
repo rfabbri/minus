@@ -7009,12 +7009,8 @@ HxH(const C<F>* __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<
 
 //------------------------------------------------------------------------------
 
-// A base template class for zero and first-order problems (points,
-// lines, tangents or lines at points).
 template <typename F>
-struct minus_io_shaping<3/*NVIEWS*/, 3/*NPOINTS*/, 0/*NFREELINES*/, 2/*NTANGENTS*/, 312/*NSOLS*/, 14/*NVE*/, 56/*NPARAMS*/,  chicago14a, F> {
-  typedef minus_core<312, 14, 56, chicago14a, F> M;
-  typedef struct M::solution solution;
+struct problem_parameters<chicago14a, F> {
   static constexpr unsigned nviews = 3; 
   static constexpr unsigned npoints = 3;
   static constexpr unsigned nfreelines = 0;
@@ -7023,9 +7019,6 @@ struct minus_io_shaping<3/*NVIEWS*/, 3/*NPOINTS*/, 0/*NFREELINES*/, 2/*NTANGENTS
   // case, where all features naturally have tangents. If strictly 2 tangents
   // are to be passed, you can leave the unused one as zeros throughout the API.
   static constexpr unsigned ntangents = 2;
-  static constexpr unsigned ncoords = 2;  // just a documented name for the number of inhomog coordinates
-  static constexpr unsigned ncoords_h = 3;  // just a name for the usual number of homog coordinates in P^2
-  static constexpr unsigned ncoords3d = 3;  // just a documented name for the number of inhomog 3D coordinates
   // number of lines connecting each pair of points plus going through points
   // plus the number of free lines in the first order problem.
   // Note that tangent orientation may help ruling out solutions; this is why
@@ -7036,17 +7029,34 @@ struct minus_io_shaping<3/*NVIEWS*/, 3/*NPOINTS*/, 0/*NFREELINES*/, 2/*NTANGENTS
   // along curves.
   static constexpr unsigned nvislines = ( (npoints*(npoints-1) >> 1) + ntangents + nfreelines ) * nviews; 
   // nvislines = 15 for Chicago.
-  // INPUT ---------------------------------------------------------------------
-  static void point_tangents2params(F p[nviews][npoints][ncoords], F tgt[nviews][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
-  // this function is the same for all problems
-  static void get_params_start_target(F plines[/*15 for chicago*/][ncoords_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/);
-  static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
-  static void point_tangents2lines(F p[nviews][npoints][ncoords], F tgt[nviews][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, F plines[nvislines][ncoords_h]);
-  static void lines2params(F plines[nvislines][ncoords_h], C<F> * __restrict__ params/*[static M::nparams]*/);
-
-  // OUTPUT --------------------------------------------------------------------
-  static void all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], unsigned id_sols[M::nsols], unsigned *nsols_final);
-  static void solution2cams(F rs[M::nve], F cameras[2][4][3]);
+  // unsigned NVIEWS, unsigned NPOINTS /* per view*/, unsigned NFREELINES, unsigned NTANGENTS, 
+  static constexpr unsigned nviews = 3; 
+  static constexpr unsigned npoints = 3;
+  static constexpr unsigned nfreelines = 0;
+  // even though Chicago needs only 2 tangents, api assumes 3 tangents are given,
+  // out of which two are selected by indexing. This is the most common use
+  // case, where all features naturally have tangents. If strictly 2 tangents
+  // are to be passed, you can leave the unused one as zeros throughout the API.
+  static constexpr unsigned ntangents = 2;
+           
+  static constexpr unsigned nviews = NVIEWS; 
+  static constexpr unsigned npoints = NPOINTS;
+  static constexpr unsigned nfreelines = NFREELINES;
+  // even though Chicago needs only 2 tangents, api assumes 3 tangents are given,
+  // out of which two are selected by indexing. This is the most common use
+  // case, where all features naturally have tangents. If strictly 2 tangents
+  // are to be passed, you can leave the unused one as zeros throughout the API.
+  static constexpr unsigned ntangents = NTANGENTS;
+  // number of lines connecting each pair of points plus going through points
+  // plus the number of free lines in the first order problem.
+  // Note that tangent orientation may help ruling out solutions; this is why
+  // we call it tangent, and not general lines at points. There is more
+  // information at tangents which can be used as part of the model for curves.
+  // The tangent orientation can be constrained by running without orientation
+  // mattering at first, and then propagating these to neighboring features
+  // along curves
+  // for formulations based on all lines -- not all formulations use this
+  static constexpr unsigned nvislines = ( (npoints*(npoints-1) >> 1) + ntangents + nfreelines ) * nviews; 
 };
 
 // we only use the first half of the outer
@@ -7267,7 +7277,7 @@ point_tangents2params(F p[nviews][npoints][ncoords], F tgt[nviews][npoints][ncoo
   point_tangents2lines(p, tgt, id_tgt0, id_tgt1, plines);
   lines2params(plines, params);
   gammify(params);
-k gammify(params+M::nparams);
+  gammify(params+M::nparams);
 }
 
 template <typename F>

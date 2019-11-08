@@ -23,9 +23,9 @@ template <typename F=double>
 using C = std::complex<F>;
 
 // The problem solvers that this solver template currently supports
-enum problem {chicago14a, chicago6a, standard};
+enum problem {chicago14a, chicago6a, phoenix10a /*, standard*/};
 
-template <unsigned NSOLS, unsigned NVE, unsigned NPARAMS, problem P, typename F=double>
+template <problem P, typename F=double>
 class minus_core { // fully static, not to be instantiated - just used for templating
   public: // ----------- Data structures --------------------------------------
   
@@ -36,8 +36,10 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   // 
   // We use underscore in case we want to make setters/getters with same name,
   // or members of Tracker class if more complete C++ desired
-  
   struct track_settings; 
+  struct formulation_parameters; 
+
+  typedef formulation_parameters f;
   
   enum solution_status {
     UNDETERMINED,
@@ -53,7 +55,7 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   
   struct solution
   {
-    C<F> x[NVE];    // array of n coordinates
+    C<F> x[f::nve];    // array of n coordinates
     F t;            // last value of parameter t used
     solution_status status;
     //  unsigned num_steps;  // number of steps taken along the path
@@ -61,31 +63,38 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   };
 
   static const track_settings DEFAULT;
-  static constexpr unsigned nve = NVE;          // the size of the system (Number of Variables or Equations)
-  static constexpr unsigned nsols = NSOLS;      // the number of solutions
-  static constexpr unsigned nparams = NPARAMS;  // the number of parameters
   
   public: // ----------- Functions --------------------------------------------
   
   ///// THE MEAT /////
-  static void track(const track_settings &s, const C<F> s_sols[NVE*NSOLS], 
-      const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS], unsigned sol_min, unsigned sol_max);
+  static void track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], 
+      const C<F> params[2*NPARAMS], solution raw_solutions[f::nsols], unsigned sol_min, unsigned sol_max);
   
   // helper function: tracks all, no begin or end to specify
-  static void track_all(const track_settings &s, const C<F> s_sols[NVE*NSOLS], 
-      const C<F> params[2*NPARAMS], solution raw_solutions[NSOLS])
-  { track(s, s_sols, params, raw_solutions, 0, NSOLS); }
+  static void track_all(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], 
+      const C<F> params[2*NPARAMS], solution raw_solutions[f::nsols])
+  { track(s, s_sols, params, raw_solutions, 0, f::nsols); }
   
   private: // -----------------------------------------------------------------
-  static constexpr unsigned NVEPLUS1 = NVE+1;
-  static constexpr unsigned NVEPLUS2 = NVE+2;
-  static constexpr unsigned NVE2 = NVE*NVE;
+  static constexpr unsigned NVEPLUS1 = f::nve+1;
+  static constexpr unsigned NVEPLUS2 = f::nve+2;
+  static constexpr unsigned NVE2 = f::nve*f::nve;
   static void evaluate_Hxt(const C<F> * __restrict__ x /*x, t*/,    const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
   static void evaluate_HxH(const C<F> * __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
 };
 
-template <unsigned NSOLS, unsigned NVE, unsigned NPARAMS, problem P, typename F>
-struct minus_core<NSOLS, NVE, NPARAMS, P, F>::track_settings {
+/*
+template <problem P, typename F>
+struct minus_core<P, F>::formulation_parameters {
+  // Specific values defined for each problem:
+  static constexpr unsigned nve = NVE;          // the size of the system (Number of Variables or Equations)
+  static constexpr unsigned nsols = NSOLS;      // the number of solutions
+  static constexpr unsigned nparams = NPARAMS;  // the number of parameters
+}
+*/
+
+template <problem P, typename F>
+struct minus_core<P, F>::track_settings {
   track_settings():
     init_dt_(0.05),   // m2 tStep, t_step, raw interface code initDt
     min_dt_(1e-7),        // m2 tStepMin, raw interface code minDt
@@ -153,14 +162,14 @@ struct eval {
   static void HxH(const C<F> * __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
 };
 
-template <unsigned NSOLS, unsigned NVE, unsigned NPARAMS, problem P, typename F>
-void minus_core<NSOLS, NVE, NPARAMS, P, F>::evaluate_Hxt(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/)
+template <problem P, typename F>
+void minus_core<P, F>::evaluate_Hxt(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/)
 {
   eval<P,F>::Hxt(x, params, y);
 }
 
-template <unsigned NSOLS, unsigned NVE, unsigned NPARAMS, problem P, typename F>
-void minus_core<NSOLS, NVE, NPARAMS, P, F>::evaluate_HxH(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/)
+template <problem P, typename F>
+void minus_core<P, F>::evaluate_HxH(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/)
 {
   eval<P,F>::HxH(x, params, y);
 }
@@ -183,10 +192,21 @@ void minus_core<NSOLS, NVE, NPARAMS, P, F>::evaluate_HxH(const C<F> * __restrict
 // specialization
 // https://stackoverflow.com/questions/1501357/template-specialization-of-particular-members
 // 
-template <unsigned NVIEWS, unsigned NPOINTS /* per view*/, unsigned NFREELINES, unsigned NTANGENTS, unsigned NSOLS, unsigned NVE, unsigned NPARAMS, problem P, typename F>
+template <problem P, typename F>
 struct minus_io_shaping {
-  typedef minus_core<NSOLS, NVE, NPARAMS, P, F> M;
+  typedef minus_core<P, F> M;
   typedef struct M::solution solution;
+  
+  static constexpr unsigned ncoords2d = 2;  // just a documented name for the number of inhomog coordinates
+  static constexpr unsigned ncoords2d_h = 3;  // just a name for the usual number of homog coordinates in P^2
+  static constexpr unsigned ncoords3d = 3;  // just a documented name for the number of inhomog 3D coordinates
+  
+  // Chicago14a <3/*NVIEWS*/, 3/*NPOINTS*/, 0/*NFREELINES*/, 2/*NTANGENTS*/, 312/*NSOLS*/, 14/*NVE*/, 56/*NPARAMS*/>
+  struct problem_parameters;  // highlevel problem parameters; the core tracker doesn't need these
+#if 0
+  { // The basic structure, defined at each problem-specific .hxx
+  // unsigned NVIEWS, unsigned NPOINTS /* per view*/, unsigned NFREELINES, unsigned NTANGENTS, 
+           
   static constexpr unsigned nviews = NVIEWS; 
   static constexpr unsigned npoints = NPOINTS;
   static constexpr unsigned nfreelines = NFREELINES;
@@ -195,9 +215,6 @@ struct minus_io_shaping {
   // case, where all features naturally have tangents. If strictly 2 tangents
   // are to be passed, you can leave the unused one as zeros throughout the API.
   static constexpr unsigned ntangents = NTANGENTS;
-  static constexpr unsigned ncoords = 2;  // just a documented name for the number of inhomog coordinates
-  static constexpr unsigned ncoords_h = 3;  // just a name for the usual number of homog coordinates in P^2
-  static constexpr unsigned ncoords3d = 3;  // just a documented name for the number of inhomog 3D coordinates
   // number of lines connecting each pair of points plus going through points
   // plus the number of free lines in the first order problem.
   // Note that tangent orientation may help ruling out solutions; this is why
@@ -206,7 +223,11 @@ struct minus_io_shaping {
   // The tangent orientation can be constrained by running without orientation
   // mattering at first, and then propagating these to neighboring features
   // along curves
+  // for formulations based on all lines -- not all formulations use this
   static constexpr unsigned nvislines = ( (npoints*(npoints-1) >> 1) + ntangents + nfreelines ) * nviews; 
+  }
+#endif
+  
   // nvislines = 15 for Chicago.
   // INPUT ---------------------------------------------------------------------
   static void point_tangents2params(F p[nviews][npoints][ncoords], F tgt[nviews][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
@@ -214,7 +235,7 @@ struct minus_io_shaping {
   static void get_params_start_target(F plines[/*15 for chicago*/][ncoords_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
   static void point_tangents2lines(F p[nviews][npoints][ncoords], F tgt[nviews][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, F plines[nvislines][ncoords_h]);
-  static void lines2params(F plines[nvislines][ncoords_h], C<F> * __restrict__ params/*[static M::nparams]*/);
+  static void lines2params(F plines[nvislines][ncoords_h], C<F> * __restrict__ params/*[static M::n//params]*/);
 
   // OUTPUT --------------------------------------------------------------------
   static void all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], unsigned id_sols[M::nsols], unsigned *nsols_final);
@@ -223,16 +244,19 @@ struct minus_io_shaping {
 
 // type alias used to hide a template parameter 
 template<problem P>
-using minus = minus_core<312, 14, 56, P, double>;  // TODO: set 312, 14, 56 conditional on P
+using minus = minus_core<P, double>;  // TODO: set 312, 14, 56 conditional on P
+// TODO move to instantiation of M::formulation_parameters 312, 14, 56, 
 
 template<problem P>
-using minus_io = minus_io_shaping<3, 3, 0, 2, 312, 14, 56, P, double>;  // TODO: set numbers conditional on P
+using minus_io = minus_io_shaping<P, double>;  // TODO: set numbers conditional on P
+//using minus_io = minus_io_shaping<3, 3, 0, 2, 312, 14, 56, P, double>;  // TODO: set numbers conditional on P
 
-template<problem P>
-using minus6 = minus_core<312, 6, 45, P, double>;
+//template<problem P>
+//using minus6 = minus_core<312, 6, 45, P, double>;
+//using minus6 = minus_core<312, 6, 45, P, double>;
 
-template<problem P>
-using minusPhoenix10a = minus_core<312, 6, 45, P, double>;
+//template<problem P>
+//using minusPhoenix10a = minus_core<312, 6, 45, P, double>;
 // can now use minus<chicago14a>
 // no need to do this:
 // typedef minus<double, 312, 14, 56> minus_chicago14a;
