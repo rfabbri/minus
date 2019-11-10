@@ -7045,8 +7045,8 @@ struct minus_io_shaping<chicago14a, F>::problem_parameters {
 // to gammify/randomize
 template <typename F>
 inline void 
-minus_io_shaping<3/*NVIEWS*/, 3/*NPOINTS*/, 0/*NFREELINES*/, 2/*NTANGENTS*/, 312/*NSOLS*/, 14/*NVE*/, 56/*NPARAMS*/,  chicago14a, F>::
-lines2params(F plines[nvislines][ncoords_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+minus_io_shaping<chicago14a, F>::
+lines2params(F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   typedef minus_util<F> util;
   typedef minus_3d<F> vec;
@@ -7134,7 +7134,7 @@ lines2params(F plines[nvislines][ncoords_h], C<F> * __restrict__ params/*[static
 //
 template <typename F>
 inline void 
-minus_io_shaping<3/*NVIEWS*/, 3/*NPOINTS*/, 0/*NFREELINES*/, 2/*NTANGENTS*/, 312/*NSOLS*/, 14/*NVE*/, 56/*NPARAMS*/,  chicago14a, F>::
+minus_io_shaping<chicago14a, F>::
 gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
 {
   typedef minus_util<F> util;
@@ -7207,8 +7207,8 @@ gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
 // if you intend to reuse it 
 template <typename F>
 inline void 
-minus_io_shaping<3/*NVIEWS*/, 3/*NPOINTS*/, 0/*NFREELINES*/, 2/*NTANGENTS*/, 312/*NSOLS*/, 14/*NVE*/, 56/*NPARAMS*/,  chicago14a, F>::
-point_tangents2lines(F p[nviews][npoints][ncoords], F t[nviews][npoints][ncoords], unsigned i0, unsigned i1, F plines[nvislines][ncoords_h])
+minus_io_shaping<chicago14a, F>::
+point_tangents2lines(F p[pp::nviews][pp::npoints][ncoords2d], F t[pp::nviews][pp::npoints][ncoords2d], unsigned i0, unsigned i1, F plines[pp::nvislines][ncoords2d_h])
 {
   typedef minus_3d<F> vec;
   
@@ -7250,10 +7250,10 @@ point_tangents2lines(F p[nviews][npoints][ncoords], F t[nviews][npoints][ncoords
 // 
 template <typename F>
 inline void 
-minus_io_shaping<3/*NVIEWS*/, 3/*NPOINTS*/, 0/*NFREELINES*/, 2/*NTANGENTS*/, 312/*NSOLS*/, 14/*NVE*/, 56/*NPARAMS*/,  chicago14a, F>::
-point_tangents2params(F p[nviews][npoints][ncoords], F tgt[nviews][npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+minus_io_shaping<chicago14a, F>::
+point_tangents2params(F p[pp::nviews][pp::npoints][ncoords2d], F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
-  F plines[nvislines][ncoords_h];
+  F plines[pp::nvislines][ncoords2d_h];
   point_tangents2lines(p, tgt, id_tgt0, id_tgt1, plines);
   lines2params(plines, params);
   gammify(params);
@@ -7262,8 +7262,8 @@ point_tangents2params(F p[nviews][npoints][ncoords], F tgt[nviews][npoints][ncoo
 
 template <typename F>
 inline void
-minus_io_shaping<3/*NVIEWS*/, 3/*NPOINTS*/, 0/*NFREELINES*/, 2/*NTANGENTS*/, 312/*NSOLS*/, 14/*NVE*/, 56/*NPARAMS*/,  chicago14a, F>::
-get_params_start_target(F plines[/*15 for chicago*/][ncoords_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+minus_io_shaping<chicago14a, F>::
+get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   lines2params(plines, params);
   gammify(params);
@@ -7285,7 +7285,7 @@ get_params_start_target(F plines[/*15 for chicago*/][ncoords_h], C<F> * __restri
 // array with that minimum.
 template <typename F>
 inline void 
-minus_io_shaping<3/*NVIEWS*/, 3/*NPOINTS*/, 0/*NFREELINES*/, 2/*NTANGENTS*/, 312/*NSOLS*/, 14/*NVE*/, 56/*NPARAMS*/,  chicago14a, F>::
+minus_io_shaping<chicago14a, F>::
 all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], 
                unsigned id_sols[M::nsols], unsigned *nsols_final)
 {
@@ -7302,7 +7302,7 @@ all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3
 
 template <typename F>
 inline void 
-minus_io_shaping<3/*NVIEWS*/, 3/*NPOINTS*/, 0/*NFREELINES*/, 2/*NTANGENTS*/, 312/*NSOLS*/, 14/*NVE*/, 56/*NPARAMS*/,  chicago14a, F>::
+minus_io_shaping<chicago14a, F>::
 solution2cams(F rs[M::nve], F cameras[2/*2nd and 3rd cams relative to 1st*/][4][3])
 {
   // camera 0 (2nd camera relative to 1st)

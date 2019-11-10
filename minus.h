@@ -91,7 +91,6 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   static void evaluate_HxH(const C<F> * __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
 };
 
-
 template <problem P, typename F=double>
 struct minus_core<P, F>::track_settings {
   track_settings():
@@ -196,7 +195,7 @@ struct minus_io_shaping {
   typedef minus_core<P, F> M;
   typedef struct M::solution solution;
   static constexpr unsigned ncoords2d = 2;  // just a documented name for the number of inhomog coordinates
-  static constexpr unsigned ncoords2d_h = 3;  // just a name for the usual number of homog coordinates in P^2
+  static constexpr unsigned ncoords2d_h = 3;// just a name for the usual number of homog coordinates in P^2
   static constexpr unsigned ncoords3d = 3;  // just a documented name for the number of inhomog 3D coordinates
   struct problem_parameters;  // highlevel problem parameters; the core tracker doesn't need these
   typedef problem_parameters pp;
@@ -239,9 +238,7 @@ struct minus_io_shaping {
   static void solution2cams(F rs[M::f:nve], F cameras[2][4][3]);
 };
 
-
 // Shortcuts and aliases -------------------------------------------------------
-
 // type alias used to hide a template parameter 
 template<problem P, typename F=double>
 using minus = minus_core<P, F>;  
@@ -258,5 +255,4 @@ using minus_io = minus_io_shaping<P, F>;
 //using minus6 = minus_core<312, 6, 45, P, double>;
 //template<problem P>
 //using minusPhoenix10a = minus_core<312, 6, 45, P, double>;
-
 #endif  // minus_h_
