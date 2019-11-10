@@ -7009,15 +7009,15 @@ HxH(const C<F>* __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<
 
 // Problem and Formulation Paramers --------------------------------------------
 
-template <typename F>
-struct minus_core<chicago14a, F>::formulation_parameters {
+template <>
+struct formulation_parameters<chicago14a> {
   static constexpr unsigned nsols = 312;   // number of solutions
   static constexpr unsigned nve = 14;      // size of the system (Number of Variables or Equations)
   static constexpr unsigned nparams = 56;  // number of parameters
 };
 
-template <typename F>
-struct minus_io_shaping<chicago14a, F>::problem_parameters {
+template <>
+struct problem_parameters<chicago14a> {
   static constexpr unsigned nviews = 3; 
   static constexpr unsigned npoints = 3;
   static constexpr unsigned nfreelines = 0;

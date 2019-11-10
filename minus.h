@@ -25,6 +25,10 @@ using C = std::complex<F>;
 // The problem solvers that this solver template currently supports
 enum problem {chicago14a, chicago6a, phoenix10a /*, standard*/};
 
+// each problem specializes this in their specific .h
+template <problem P>
+struct formulation_parameters {};
+
 template <problem P, typename F=double>
 class minus_core { // fully static, not to be instantiated - just used for templating
   public: // ----------- Data structures --------------------------------------
@@ -37,8 +41,7 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   // We use underscore in case we want to make setters/getters with same name,
   // or members of Tracker class if more complete C++ desired
   struct track_settings; 
-  struct formulation_parameters; 
-  typedef formulation_parameters f;
+  typedef formulation_parameters<P> f;
   /* General content of formulation_parameters (each problem may add to this):
   template <problem P, typename F>
   struct minus_core<P, F>::formulation_parameters {
@@ -176,6 +179,10 @@ void minus_core<P, F>::evaluate_HxH(const C<F> * __restrict__ x /*x, t*/, const 
   eval<P,F>::HxH(x, params, y);
 }
 
+// each problem specializes this in their specific .h
+template <problem P>
+struct problem_parameters {};
+
 // IO shaping: not used in tracker, but only for shaping user data
 // The user specializes this to their problem inside problem.hxx
 // This is a base template class for zero and first-order problems (points,
@@ -201,8 +208,7 @@ struct minus_io_shaping {
   static constexpr unsigned ncoords2d = 2;  // just a documented name for the number of inhomog coordinates
   static constexpr unsigned ncoords2d_h = 3;// just a name for the usual number of homog coordinates in P^2
   static constexpr unsigned ncoords3d = 3;  // just a documented name for the number of inhomog 3D coordinates
-  struct problem_parameters;  // highlevel problem parameters; the core tracker doesn't need these
-  typedef problem_parameters pp;
+  typedef problem_parameters<P> pp;
 #if 0
   { // The basic structure, defined at each problem-specific .hxx
   // unsigned NVIEWS, unsigned NPOINTS /* per view*/, unsigned NFREELINES, unsigned NTANGENTS, 
