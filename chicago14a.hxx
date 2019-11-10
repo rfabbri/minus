@@ -7287,7 +7287,7 @@ template <typename F>
 inline void 
 minus_io_shaping<chicago14a, F>::
 all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], 
-               unsigned id_sols[M::nsols], unsigned *nsols_final)
+                   unsigned id_sols[M::nsols], unsigned *nsols_final)
 {
   *nsols_final = 0;
   for (unsigned sol=0; sol < M::nsols; ++sol) {

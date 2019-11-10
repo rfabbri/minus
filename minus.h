@@ -48,6 +48,9 @@ class minus_core { // fully static, not to be instantiated - just used for templ
     static constexpr unsigned nparams = NPARAMS;  // the number of parameters
   }
   */
+  // shortcuts to the formulation parameters useful to most users
+  static constexpr unsigned nsols = f::nsols;
+  static constexpr unsigned nve = f::nve;
   
   enum solution_status {
     UNDETERMINED,
@@ -91,13 +94,13 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   static void evaluate_HxH(const C<F> * __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
 };
 
-template <problem P, typename F=double>
+template <problem P, typename F>
 struct minus_core<P, F>::track_settings {
   track_settings():
     init_dt_(0.05),   // m2 tStep, t_step, raw interface code initDt
     min_dt_(1e-7),        // m2 tStepMin, raw interface code minDt
     end_zone_factor_(0.05),
-    epsilon_(.000001), // m2 CorrectorTolerance (chicago.m2, track.m2), raw interface code epsilon (interface2.d, NAG.cpp:rawSwetParametersPT)
+    epsilon_(.000001), // m2 CorrectorTolerance (chicago.m2, track.m2), raw interface code epsilon (interface2.d, NAG.cpp::rawSwetParametersPT)
     epsilon2_(epsilon_ * epsilon_), 
     max_corr_steps_(3),  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
     dt_increase_factor_(2.),  // m2 stepIncreaseFactor
@@ -226,12 +229,12 @@ struct minus_io_shaping {
   
   // nvislines = 15 for Chicago.
   // INPUT ---------------------------------------------------------------------
-  static void point_tangents2params(F p[pp:nviews][pp:npoints][ncoords], F tgt[pp:nviews][pp:npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
+  static void point_tangents2params(F p[pp::nviews][pp::npoints][ncoords2d], F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   // this function is the same for all problems
   static void get_params_start_target(F plines[/*15 for chicago*/][ncoords_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
-  static void point_tangents2lines(F p[pp:nviews][pp:npoints][ncoords], F tgt[pp:nviews][pp:npoints][ncoords], unsigned id_tgt0, unsigned id_tgt1, F plines[pp:nvislines][ncoords_h]);
-  static void lines2params(F plines[pp:nvislines][ncoords_h], C<F> * __restrict__ params/*[static M::n//params]*/);
+  static void point_tangents2lines(F p[pp::nviews][pp::npoints][ncoords2d], F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, F plines[pp::nvislines][ncoords_h]);
+  static void lines2params(F plines[pp::nvislines][ncoords_h], C<F> * __restrict__ params/*[static M::n//params]*/);
 
   // OUTPUT --------------------------------------------------------------------
   static void all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], unsigned id_sols[M::nsols], unsigned *nsols_final);
