@@ -217,7 +217,7 @@ minus_core<P, F>::track_settings minus_core<P, F>::DEFAULT;
 // 
 template <problem P, typename F> void 
 minus_core<P, F>::
-track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> params[2*NPARAMS], solution raw_solutions[f::nsols], unsigned sol_min, unsigned sol_max)
+track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> params[2*f::nparams], solution raw_solutions[f::nsols], unsigned sol_min, unsigned sol_max)
 {
   assert(sol_min <= sol_max && sol_max <= f::nsols);
   C<F> Hxt[NVEPLUS1 * f::nve] __attribute__((aligned(16))); 

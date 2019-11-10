@@ -94,6 +94,7 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   static void evaluate_HxH(const C<F> * __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
 };
 
+// TODO: make these static
 template <problem P, typename F>
 struct minus_core<P, F>::track_settings {
   track_settings():
@@ -231,14 +232,14 @@ struct minus_io_shaping {
   // INPUT ---------------------------------------------------------------------
   static void point_tangents2params(F p[pp::nviews][pp::npoints][ncoords2d], F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   // this function is the same for all problems
-  static void get_params_start_target(F plines[/*15 for chicago*/][ncoords_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/);
+  static void get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
-  static void point_tangents2lines(F p[pp::nviews][pp::npoints][ncoords2d], F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, F plines[pp::nvislines][ncoords_h]);
-  static void lines2params(F plines[pp::nvislines][ncoords_h], C<F> * __restrict__ params/*[static M::n//params]*/);
+  static void point_tangents2lines(F p[pp::nviews][pp::npoints][ncoords2d], F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, F plines[pp::nvislines][ncoords2d_h]);
+  static void lines2params(F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ params/*[static M::n//params]*/);
 
   // OUTPUT --------------------------------------------------------------------
   static void all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], unsigned id_sols[M::nsols], unsigned *nsols_final);
-  static void solution2cams(F rs[M::f:nve], F cameras[2][4][3]);
+  static void solution2cams(F rs[M::f::nve], F cameras[2][4][3]);
 };
 
 // Shortcuts and aliases -------------------------------------------------------
