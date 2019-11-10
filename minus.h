@@ -244,25 +244,19 @@ struct minus_io_shaping {
 
 // type alias used to hide a template parameter 
 template<problem P, typename F=double>
-using minus = minus_core<P, F>;  // TODO: set 312, 14, 56 conditional on P
-// TODO move to instantiation of M::formulation_parameters 312, 14, 56, 
-
-template<problem P, typename F=double>
-using minus_io = minus_io_shaping<P, F>;  // TODO: set numbers conditional on P
-//using minus_io = minus_io_shaping<3, 3, 0, 2, 312, 14, 56, P, double>;  // TODO: set numbers conditional on P
-
-//template<problem P>
-//using minus6 = minus_core<312, 6, 45, P, double>;
-//using minus6 = minus_core<312, 6, 45, P, double>;
-
-//template<problem P>
-//using minusPhoenix10a = minus_core<312, 6, 45, P, double>;
+using minus = minus_core<P, F>;  
 // can now use minus<chicago14a>
 // no need to do this:
 // typedef minus<double, 312, 14, 56> minus_chicago14a;
-// TODO ask in stack overflow how to tie the problem name to these numbers
-// Perhaps a secondary class minus_parameters<unsigned NSOLS, unsigned NVE, unsigned NPARAMS>
-// Which minus_core specializes each time, like 
 
+template<problem P, typename F=double>
+using minus_io = minus_io_shaping<P, F>;
+// was:
+// using minus_io = minus_io_shaping<3, 3, 0, 2, 312, 14, 56, P, double>;  // we now set numbers conditional on P
+// TODO: remove this comment and below
+//template<problem P>
+//using minus6 = minus_core<312, 6, 45, P, double>;
+//template<problem P>
+//using minusPhoenix10a = minus_core<312, 6, 45, P, double>;
 
 #endif  // minus_h_
