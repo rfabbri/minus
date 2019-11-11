@@ -346,18 +346,6 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
   } // outer solution loop
 }
 
-template <problem P, typename F>
-constexpr unsigned minus_core<P, F>::nsols;
-template <problem P, typename F>
-constexpr unsigned minus_core<P, F>::nve;
-template <problem P, typename F>
-constexpr unsigned minus_core<P, F>::NVEPLUS1;
-template <problem P, typename F>
-constexpr unsigned minus_core<P, F>::NVEPLUS2;
-template <problem P, typename F>
-constexpr unsigned minus_core<P, F>::NVE2;
-
-
 #include <minus/chicago14a.hxx>      // specific implementation of chicago 14a formulation
 // XXX #include "phoenix10a.hxx"      // specific implementation of phoenix 10a formulation
 // #include "chicago6a.hxx"
