@@ -212,6 +212,10 @@ struct minus_io_shaping {
   static constexpr unsigned ncoords2d_h = 3;// just a name for the usual number of homog coordinates in P^2
   static constexpr unsigned ncoords3d = 3;  // just a documented name for the number of inhomog 3D coordinates
   typedef problem_parameters<P> pp;
+  
+  // shortcuts to the problem parameters
+  static constexpr unsigned  nviews = pp::nviews;
+  static constexpr unsigned  npoints = pp::npoints;
 #if 0
   { // The basic structure, defined at each problem-specific .hxx
   // unsigned NVIEWS, unsigned NPOINTS /* per view*/, unsigned NFREELINES, unsigned NTANGENTS, 

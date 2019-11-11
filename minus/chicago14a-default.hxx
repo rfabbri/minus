@@ -4702,7 +4702,7 @@ static complex const start_sols_[M::nve*M::nsols] = {
 //                                  are initialized here, but we use 
 //                                  the other M::nparams later 
 //                                  to store target system params
-static complex params_start_target_[2*M::nparams] = {
+static complex params_start_target_[2*M::f::nparams] = {
   {.13016671344237549,-.36891394723672405},
   {.2649393534275909,-.23418132862391827},
   {.16966329078346828,.83255014163452079},
@@ -4766,7 +4766,7 @@ static complex params_start_target_[2*M::nparams] = {
 // Gammified (randomized)
 //
 // The point-tangent inputs giving rise to this are given below
-static complex default_params_start_target_gammified_[2*M::nparams] = { // start-target param pairs, P01 in chicago.m2
+static complex default_params_start_target_gammified_[2*M::f::nparams] = { // start-target param pairs, P01 in chicago.m2
   {.391195550619826,-.00262962533857666},
   {.310140709227333,+.169842562835882},
   {-.725705624433656,+.441901252816163},
@@ -4908,7 +4908,7 @@ static complex *params_= default_params_start_target_gammified_; // start-target
 // gammified parameters, though he might have done an
 // off-by-1 mistake for point indexing (3012 vs 3011)
 // 
-static double p_[io::nviews][io::npoints][io::ncoords] = {
+static double p_[io::nviews][io::npoints][io::ncoords2d] = {
   // points for frame 42
   // + sed -n '3012p;3390p;621p' frame_0042-pts-2d.txt
   {  
@@ -4935,7 +4935,7 @@ static double p_[io::nviews][io::npoints][io::ncoords] = {
 // The tgt_ array is the same size as the p_ array.
 // At each solve only two are used, but since usually all three points have
 // tangents, we ask them as input anyways.
-static double tgt_[io::nviews][io::npoints][io::ncoords] = {
+static double tgt_[io::nviews][io::npoints][io::ncoords2d] = {
   // tangents for frame 42
   // + sed -n '3012p;3390p' frame_0042-tgts-2d.txt
   {
