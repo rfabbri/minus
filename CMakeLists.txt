@@ -134,7 +134,7 @@ else()
   include( ${PROJECT_BINARY_DIR}/CMakeListsLocal.txt OPTIONAL )
 endif()
 
-set(MINUS_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR})    #Source includes
+set(MINUS_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/minus)    #Source includes
 set(MINUS_BINARY_INCLUDE_DIR ${PROJECT_BINARY_DIR}) #Generated includes
 set(MINUS_INCLUDE_DIRS ${MINUS_BINARY_INCLUDE_DIR} ${MINUS_INCLUDE_DIR})
 set(MINUS_INSTALL_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include/)
@@ -182,7 +182,7 @@ include(TestBigEndian)
 TEST_BIG_ENDIAN(MY_BIG_ENDIAN)
 
 # For use in client projects that use CMake and not installed version
-set(MINUS_LIBRARY_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} CACHE STATIC "Where all the vxd libraries are, for clients to use." )
+set(MINUS_LIBRARY_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} CACHE STATIC "Where all the minus libraries are, for clients to use." )
 
 
 # For comparison purposes
@@ -196,16 +196,9 @@ set(MINUS_LIBRARY_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} CACHE STATIC "Where all
 #   target_link_libraries( bnld_algo bnld vnl_algo vil brent)
 # endif()
 
-
-# optional, header-only library can be used without this library
-# library is useful when the function will be used in many places
-# to avoid having to include Minus many times and slowdown the compiler
-set (minus_sources
-  minus.hxx minus.h chicago14a.hxx
-)
-
-aux_source_directory(Templates minus_sources)
-
+# main lib
+add_subdirectory(minus)
+# commands / executables
 add_subdirectory(cmd) 
 
 set(BUILD_TESTING OFF CACHE BOOL "Build tests for minus")
@@ -217,9 +210,6 @@ if(VXL_FOUND)  # For now we need vxl to build tests
   endif()
   add_subdirectory(algo)
 endif()
-
-# For now, we have a library
-add_library( minus ${minus_sources} )
 
 # This command must be the last command in this file
 #if(NOT MINUS_NO_EXPORT)
