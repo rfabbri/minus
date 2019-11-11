@@ -27,7 +27,14 @@ enum problem {chicago14a, chicago6a, phoenix10a /*, standard*/};
 
 // each problem specializes this in their specific .h
 template <problem P>
-struct formulation_parameters {};
+struct formulation_parameters;
+
+// each problem specializes this in their specific .h
+template <problem P>
+struct problem_parameters;
+
+// problem specific definitions that must be available before anything, at compile time
+#include <minus/parameters.h>
 
 template <problem P, typename F=double>
 class minus_core { // fully static, not to be instantiated - just used for templating
@@ -178,10 +185,6 @@ void minus_core<P, F>::evaluate_HxH(const C<F> * __restrict__ x /*x, t*/, const 
 {
   eval<P,F>::HxH(x, params, y);
 }
-
-// each problem specializes this in their specific .h
-template <problem P>
-struct problem_parameters {};
 
 // IO shaping: not used in tracker, but only for shaping user data
 // The user specializes this to their problem inside problem.hxx

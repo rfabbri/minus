@@ -6,7 +6,7 @@
 // 
 // to be included after minus.h
 
-#include <minus.h>
+#include <minus/minus.h>
 
 typedef minus<chicago14a> M;
 typedef minus_io<chicago14a> io;

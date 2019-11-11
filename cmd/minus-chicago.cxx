@@ -7,7 +7,7 @@
 #include <iomanip>
 #include <chrono>
 #include <thread>
-#include <minus.h>
+#include <minus/minus.h>
 
 #define Float double
 typedef minus<chicago14a> M;
@@ -19,7 +19,7 @@ using namespace std::chrono;
 // If you want to play with different start sols,
 // write another program that accepts start sols in runtime,
 // but keep this one lean & mean.
-#include <chicago14a-default.hxx> 
+#include <minus/chicago14a-default.hxx> 
 // We include it separately so they don't clutter this app,
 // neither minus.h, and can be reused by other progs
 // TODO(developer note): make this part of Minus' template as a specialization. 

@@ -1,5 +1,6 @@
 #ifndef chicago14a_hxx_
 #define chicago14a_hxx_
+// to be included at the end of minus.hxx
 
 template <typename F>
 struct eval<chicago14a, F> {
@@ -7009,23 +7010,30 @@ HxH(const C<F>* __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<
 
 // Problem and Formulation Paramers --------------------------------------------
 
-template <>
-struct formulation_parameters<chicago14a> {
-  static constexpr unsigned nsols = 312;   // number of solutions
-  static constexpr unsigned nve = 14;      // size of the system (Number of Variables or Equations)
-  static constexpr unsigned nparams = 56;  // number of parameters
-};
+constexpr unsigned formulation_parameters<chicago14a>::nsols;   // number of solutions
+constexpr unsigned formulation_parameters<chicago14a>::nve;      // size of the system (Number of Variables or Equations)
+constexpr unsigned formulation_parameters<chicago14a>::nparams;  // number of parameters
 
-template <>
-struct problem_parameters<chicago14a> {
-  static constexpr unsigned nviews = 3; 
-  static constexpr unsigned npoints = 3;
-  static constexpr unsigned nfreelines = 0;
+template <typename F>
+struct minus_io_shaping<chicago14a, F> {
+  typedef minus_core<chicago14a, F> M;
+  typedef struct M::solution solution;
+  static constexpr unsigned ncoords2d = 2;  // just a documented name for the number of inhomog coordinates
+  static constexpr unsigned ncoords2d_h = 3;// just a name for the usual number of homog coordinates in P^2
+  static constexpr unsigned ncoords3d = 3;  // just a documented name for the number of inhomog 3D coordinates
+  typedef problem_parameters<chicago14a> pp;
+#if 0
+  { // The basic structure, defined at each problem-specific .hxx
+  // unsigned NVIEWS, unsigned NPOINTS /* per view*/, unsigned NFREELINES, unsigned NTANGENTS, 
+           
+  static constexpr unsigned nviews = NVIEWS; 
+  static constexpr unsigned npoints = NPOINTS;
+  static constexpr unsigned nfreelines = NFREELINES;
   // even though Chicago needs only 2 tangents, api assumes 3 tangents are given,
   // out of which two are selected by indexing. This is the most common use
   // case, where all features naturally have tangents. If strictly 2 tangents
   // are to be passed, you can leave the unused one as zeros throughout the API.
-  static constexpr unsigned ntangents = 2;
+  static constexpr unsigned ntangents = NTANGENTS;
   // number of lines connecting each pair of points plus going through points
   // plus the number of free lines in the first order problem.
   // Note that tangent orientation may help ruling out solutions; this is why
@@ -7033,10 +7041,24 @@ struct problem_parameters<chicago14a> {
   // information at tangents which can be used as part of the model for curves.
   // The tangent orientation can be constrained by running without orientation
   // mattering at first, and then propagating these to neighboring features
-  // along curves.
+  // along curves
+  // for formulations based on all lines -- not all formulations use this
   static constexpr unsigned nvislines = ( (npoints*(npoints-1) >> 1) + ntangents + nfreelines ) * nviews; 
+  }
+#endif
+  
   // nvislines = 15 for Chicago.
-  // unsigned NVIEWS, unsigned NPOINTS /* per view*/, unsigned NFREELINES, unsigned NTANGENTS, 
+  // INPUT ---------------------------------------------------------------------
+  static void point_tangents2params(F p[pp::nviews][pp::npoints][ncoords2d], F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
+  // this function is the same for all problems
+  static void get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/);
+  static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
+  static void point_tangents2lines(F p[pp::nviews][pp::npoints][ncoords2d], F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, F plines[pp::nvislines][ncoords2d_h]);
+  static void lines2params(F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ params/*[static M::n//params]*/);
+
+  // OUTPUT --------------------------------------------------------------------
+  static void all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], unsigned id_sols[M::nsols], unsigned *nsols_final);
+  static void solution2cams(F rs[M::f::nve], F cameras[2][4][3]);
 };
 
 // we only use the first half of the outer
@@ -7257,7 +7279,7 @@ point_tangents2params(F p[pp::nviews][pp::npoints][ncoords2d], F tgt[pp::nviews]
   point_tangents2lines(p, tgt, id_tgt0, id_tgt1, plines);
   lines2params(plines, params);
   gammify(params);
-  gammify(params+M::nparams);
+  gammify(params+M::f::nparams);
 }
 
 template <typename F>
@@ -7267,7 +7289,7 @@ get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __rest
 {
   lines2params(plines, params);
   gammify(params);
-  gammify(params+M::nparams);
+  gammify(params+M::f::nparams);
 }
 
 //
@@ -7289,10 +7311,11 @@ minus_io_shaping<chicago14a, F>::
 all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], 
                    unsigned id_sols[M::nsols], unsigned *nsols_final)
 {
+  typedef minus_array<M::nve,F> v;
   *nsols_final = 0;
   for (unsigned sol=0; sol < M::nsols; ++sol) {
     F real_solutions[M::nve];
-    if (get_real(raw_solutions[sol], real_solutions)) {
+    if (v::get_real(raw_solutions[sol].x, real_solutions)) {
       id_sols[(*nsols_final)++] = sol;
       // build cams by using quat2rotm
       solution2cams(real_solutions, (F (*)[4][3] ) (cameras + sol));
@@ -7303,16 +7326,17 @@ all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3
 template <typename F>
 inline void 
 minus_io_shaping<chicago14a, F>::
-solution2cams(F rs[M::nve], F cameras[2/*2nd and 3rd cams relative to 1st*/][4][3])
+solution2cams(/*const but use as scratch*/ F rs[M::nve], F cameras[2/*2nd and 3rd cams relative to 1st*/][4][3])
 {
+  typedef minus_util<F> u;
   // camera 0 (2nd camera relative to 1st)
-  quat2rotm(rs, (F [3][3]) cameras[0]);
+  u::quat2rotm(rs, (F *) cameras[0]);
   cameras[0][3][0] = rs[8];
   cameras[0][3][1] = rs[9];
   cameras[0][3][2] = rs[10];
   
   // camera 1 (3rd camera relative to 1st)
-  quat2rotm(rs, (F [3][3]) cameras[1]);
+  u::quat2rotm(rs, (F *) cameras[1]);
   cameras[1][3][0] = rs[11];
   cameras[1][3][1] = rs[12];
   cameras[1][3][2] = rs[13];
@@ -7323,4 +7347,4 @@ solution2cams(F rs[M::nve], F cameras[2/*2nd and 3rd cams relative to 1st*/][4][
   //  R12 = quat2rotm(transpose(quat12));
   //  R13 = quat2rotm(transpose(quat13));
 }
-#endif // chicago14a_hxx
+#endif // chicago14a_hxx_

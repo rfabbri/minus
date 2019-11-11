@@ -10,51 +10,51 @@
 #include <iomanip>
 #include <cstring>
 #include "Eigen/LU"
-#include "minus.h"
+#include <minus/minus.h>
 
-template <unsigned NVE, typename F>
+template <unsigned N, typename F>
 struct minus_array { // Speed critical -----------------------------------------
   static inline void 
   multiply_scalar_to_self(C<F> *__restrict__ a, C<F> b)
   {
-    for (unsigned i = 0; i < NVE; ++i, ++a) *a = *a * b;
+    for (unsigned i = 0; i < N; ++i, ++a) *a = *a * b;
   }
 
   static inline void
   negate_self(C<F> * __restrict__ a)
   {
-    for (unsigned i = 0; i < NVE; ++i, ++a) *a = -*a;
+    for (unsigned i = 0; i < N; ++i, ++a) *a = -*a;
   }
 
   static inline void 
   multiply_self(C<F> * __restrict__ a, const C<F> * __restrict__ b)
   {
-    for (unsigned int i=0; i < NVE; ++i,++a,++b) *a *= *b;
+    for (unsigned int i=0; i < N; ++i,++a,++b) *a *= *b;
   }
 
   static inline void 
   add_to_self(C<F> * __restrict__ a, const C<F> * __restrict__ b)
   {
-    for (unsigned int i=0; i < NVE; ++i,++a,++b) *a += *b;
+    for (unsigned int i=0; i < N; ++i,++a,++b) *a += *b;
   }
 
   static inline void 
   add_scalar_to_self(C<F> * __restrict__ a, C<F> b)
   {
-    for (unsigned int i=0; i < NVE; ++i,++a) *a += b;
+    for (unsigned int i=0; i < N; ++i,++a) *a += b;
   }
 
   static inline void 
   copy(const C<F> * __restrict__ a, C<F> * __restrict__ b)
   {
-    memcpy(b, a, NVE*sizeof(C<F>));
+    memcpy(b, a, N*sizeof(C<F>));
   }
 
   static inline F
   norm2(const C<F> *__restrict__ a)
   {
     F val = 0;
-    C<F> const* __restrict__ end = a+NVE;
+    C<F> const* __restrict__ end = a+N;
     while (a != end) val += std::norm(*a++);
     return val;
   }
@@ -68,29 +68,29 @@ struct minus_array { // Speed critical -----------------------------------------
   //
   // Not speed critical.
   static inline bool
-  get_real(C<F> s[NVE], F rs[NVE])
+  get_real(C<F> s[N], F rs[N])
   {
     // Hongyi function realSolutions = parseSolutionString(output)
     // solutions = reshape(solutions,[14,length(solutions)/14]);
     static const double eps = 10e-6;
     
     // TODO[improvement]
-    // Fancy way to convert to real is to check if the complex number is close to
+    // Fancy way to coNrt to real is to check if the complex number is close to
     // horizontal then get absolute value.
     /*
-    for (unsigned var = 0; var < NVE; ++var)  // differs from Hongyi criterion
+    for (unsigned var = 0; var < N; ++var)  // differs from Hongyi criterion
       if (s->x[var].real() < eps && s->x[var].real() >= eps
           || std::abs(std::tan(std::arg(s->x[var].imag()))) >= eps)
         return false;
     
-    F real_solution[NVE];
-    for (unsigned var = 0; var < NVE; ++var) 
+    F real_solution[N];
+    for (unsigned var = 0; var < N; ++var) 
       real_solution[var] = ((s->x[var].real() >= 0) ? 1 : -1) * std::abs(s->x[var]);
     */
     unsigned var = 0;
-    for (; var < NVE; ++var)
+    for (; var < N; ++var)
       if (std::abs(s[var].imag()) >= eps) return false;
-    for (var = NVE-1; var != (unsigned)-1; --var) 
+    for (var = N-1; var != (unsigned)-1; --var) 
       rs[var] = s[var].real();
 
     // quat12 rs(0:3), quat12 rs(4:7)
@@ -346,7 +346,19 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
   } // outer solution loop
 }
 
-#include "chicago14a.hxx"      // specific implementation of chicago 14a formulation
+template <problem P, typename F>
+constexpr unsigned minus_core<P, F>::nsols;
+template <problem P, typename F>
+constexpr unsigned minus_core<P, F>::nve;
+template <problem P, typename F>
+constexpr unsigned minus_core<P, F>::NVEPLUS1;
+template <problem P, typename F>
+constexpr unsigned minus_core<P, F>::NVEPLUS2;
+template <problem P, typename F>
+constexpr unsigned minus_core<P, F>::NVE2;
+
+
+#include <minus/chicago14a.hxx>      // specific implementation of chicago 14a formulation
 // XXX #include "phoenix10a.hxx"      // specific implementation of phoenix 10a formulation
 // #include "chicago6a.hxx"
 
