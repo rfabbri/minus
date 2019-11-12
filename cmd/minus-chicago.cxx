@@ -7,7 +7,7 @@
 #include <iomanip>
 #include <chrono>
 #include <thread>
-#include <minus.h>
+#include <minus/minus.h>
 
 #define Float double
 typedef minus<chicago14a> M;
@@ -19,7 +19,7 @@ using namespace std::chrono;
 // If you want to play with different start sols,
 // write another program that accepts start sols in runtime,
 // but keep this one lean & mean.
-#include <chicago14a-default.hxx> 
+#include <minus/chicago14a-default.hxx> 
 // We include it separately so they don't clutter this app,
 // neither minus.h, and can be reused by other progs
 // TODO(developer note): make this part of Minus' template as a specialization. 
@@ -43,7 +43,7 @@ bool stdio_=true;  // by default read/write from stdio
 //
 // ---------------------------------------------------------
 // If in the future our solver is really fast, we may need Binary IO:
-// complex solutions[NSOLS*NNN];
+// complex solutions[NSOLS*NVE];
 // 
 // To read this output file in matlab, do:
 // fid = fopen(fname,'r');
@@ -58,9 +58,7 @@ static bool
 mwrite(const M::solution s[M::nsols], const char *fname)
 {
   bool scilab=false;
-
   std::string imag("+i*");
-
   if (scilab) imag = std::string("+%i*");
     
   std::ofstream fsols;
@@ -81,20 +79,18 @@ mwrite(const M::solution s[M::nsols], const char *fname)
   
   std::ostream out(buf);
   out << std::setprecision(20);
-
   out << "[";
   for (unsigned i=0; i <M::nsols; ++i) {
-    for (unsigned var=0; var < M::nnn; ++var) {
+    for (unsigned var=0; var < M::nve; ++var) {
       out << s[i].x[var].real() << imag << s[i].x[var].imag();
-      if (i*var +1 < M::nnn * M::nsols) 
+      if (i*var +1 < M::nve * M::nsols) 
         out << std::endl;
       // BINARY fsols.write((char *)(s[i].x[var]),2*sizeof(double));
     }
   }
   out << "]\n";
-        
-  if (!stdio_) fsols.close();
   
+  if (!stdio_) fsols.close();
   return true;
 }
 
@@ -137,11 +133,10 @@ mread(const char *fname)
   }
   
   std::istream &in = *inp;
-    
   in.exceptions(std::istream::failbit | std::istream::badbit);
   unsigned i=0;
   F *dparams = (F *)params_;
-  while (!in.eof() && dparams != (F *)params_+2*2*M::nparams) {
+  while (!in.eof() && dparams != (F *)params_+2*2*M::f::nparams) {
       try {
       in >> *dparams++;
       // std::cerr << "reading " <<  *(dparams-1) << std::endl;;
@@ -155,12 +150,10 @@ mread(const char *fname)
         return false;
       }
   }
-  if (dparams != (F *)params_+2*2*M::nparams)
+  if (dparams != (F *)params_+2*2*M::f::nparams)
     std::cerr << "I/O Premature input termination\n";
-
 //  for (unsigned i=0; i < 2*NPARAMS; ++i)
 //    std::cerr << "D " << params_[i] << std::endl;
-
   return true;
 }
 

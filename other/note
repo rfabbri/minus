@@ -1,0 +1,11 @@
+- Monodromy from Bertinini: similar principle to Anton/Tim
+  - how to run: private code. matlab code run things
+  
+  double check where are the start parameters
+
+  - how many H parameters
+
+
+  1) equations to macaulay
+  2) Hongyi's H parameters  to macaulay
+  3) cCode geenerator

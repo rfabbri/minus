@@ -7,6 +7,43 @@ if(NOT CMAKE_CXX_STANDARD_REQUIRED)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
+# This command must be the last command in this file
+#if(NOT MINUS_NO_EXPORT)
+#  include(${CMAKE_CURRENT_LIST_DIR}/config/cmake/export/MINUSCreateProject.cmake)
+#endif()
+
+## TODO: use add_compile_options(-Wall) etc
+# set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall" CACHE STRING "" FORCE)
+
+# Crucial flags for performance
+# set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -march=native" CACHE STRING "" FORCE)
+
+# add_compile_options(
+#     "$<$<CONFIG:RELEASE>:-march=native -ffast-math>"
+#     "$<$<CONFIG:DEBUG>:-Wall>"
+# )
+
+# This one is the most important one - order of magnitude faster
+# See this: https://gcc.gnu.org/ml/gcc/2001-07/msg02150.html
+# if GCC 8
+#   -march=native -freciprocal-math -fno-trapping-math -fno-math-errno -ffinite-math-only -fno-signaling-nans -fno-rounding-math -fcx-limited-range -fexcess-precision=fast
+#   problem with gcc 8 is -fno-signed-zeros
+# else
+# set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffast-math" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffast-math" CACHE STRING "" FORCE)
+
+# --fast-math breaks into these:
+#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-math-errno -ffinite-math-only -fno-rounding-math -fno-signaling-nans -fcx-limited-range -fexcess-precision=fast")
+
+# This is the --fast-math flag that does a big job but sometimes gives wrong
+# results in GCC8: -funsafe-math-optimizations
+# of the flags implied by this one, the most impact comes from
+# -fno-signed-zeros, which is also what breaks GCC8 build
+#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-signed-zeros -fno-trapping-math -fassociative-math -freciprocal-math")
+#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast")
+
 project(MINUS #Project name must be all caps to have properly generated MINUS_VERSION_* variables
     VERSION 1
     DESCRIPTION "Continuation-based Minimal Problem Solver"
@@ -110,7 +147,7 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     elseif(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.9)
       message(WARNING "******************************************\nGCC must be less than 8.0 for reliability!\n******************************************\n")
     endif()
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+elseif (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 else()
     message(WARNING "You are using an unsupported compiler! Compilation has only been tested with Clang and GCC.")
 endif()
@@ -182,30 +219,11 @@ include(TestBigEndian)
 TEST_BIG_ENDIAN(MY_BIG_ENDIAN)
 
 # For use in client projects that use CMake and not installed version
-set(MINUS_LIBRARY_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} CACHE STATIC "Where all the vxd libraries are, for clients to use." )
+set(MINUS_LIBRARY_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} CACHE STATIC "Where all the minus libraries are, for clients to use." )
 
-
-# For comparison purposes
-# find_package(BLAS)
-# find_package(LAPACK)
-# if(LAPACK_FOUND AND BLAS_FOUND)
-#   message("FOUND YEAH" ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
-#   target_link_libraries( bnld_algo bnld vnl_algo vil brent ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
-# else()
-#   message("FOUND NO")
-#   target_link_libraries( bnld_algo bnld vnl_algo vil brent)
-# endif()
-
-
-# optional, header-only library can be used without this library
-# library is useful when the function will be used in many places
-# to avoid having to include Minus many times and slowdown the compiler
-set (minus_sources
-  minus.hxx minus.h chicago14a.hxx
-)
-
-aux_source_directory(Templates minus_sources)
-
+# main lib
+add_subdirectory(minus)
+# commands / executables
 add_subdirectory(cmd) 
 
 set(BUILD_TESTING OFF CACHE BOOL "Build tests for minus")
@@ -218,37 +236,6 @@ if(VXL_FOUND)  # For now we need vxl to build tests
   add_subdirectory(algo)
 endif()
 
-# For now, we have a library
-add_library( minus ${minus_sources} )
-
-# This command must be the last command in this file
-#if(NOT MINUS_NO_EXPORT)
-#  include(${CMAKE_CURRENT_LIST_DIR}/config/cmake/export/MINUSCreateProject.cmake)
-#endif()
-
-## TODO: use add_compile_options(-Wall) etc
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
-
-# Crucial flags for performance
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
-
-# This one is the most important one - order of magnitude faster
-# See this: https://gcc.gnu.org/ml/gcc/2001-07/msg02150.html
-# if GCC 8
-#   -march=native -freciprocal-math -fno-trapping-math -fno-math-errno -ffinite-math-only -fno-signaling-nans -fno-rounding-math -fcx-limited-range -fexcess-precision=fast
-#   problem with gcc 8 is -fno-signed-zeros
-# else
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffast-math")
-
-# --fast-math breaks into these:
-#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-math-errno -ffinite-math-only -fno-rounding-math -fno-signaling-nans -fcx-limited-range -fexcess-precision=fast")
-
-# This is the --fast-math flag that does a big job but sometimes gives wrong
-# results in GCC8: -funsafe-math-optimizations
-# of the flags implied by this one, the most impact comes from
-# -fno-signed-zeros, which is also what breaks GCC8 build
-#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-signed-zeros -fno-trapping-math -fassociative-math -freciprocal-math")
-#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast")
 
 # Good to have / secondary -------
 #
@@ -264,3 +251,14 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffast-math")
 # later on, we can use only this flag if equivalent gains to the more aggressive
 # -fast-math
 # set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fcx-limited-range")
+
+# For comparison purposes
+# find_package(BLAS)
+# find_package(LAPACK)
+# if(LAPACK_FOUND AND BLAS_FOUND)
+#   message("FOUND YEAH" ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+#   target_link_libraries( bnld_algo bnld vnl_algo vil brent ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+# else()
+#   message("FOUND NO")
+#   target_link_libraries( bnld_algo bnld vnl_algo vil brent)
+# endif()

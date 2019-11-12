@@ -6,11 +6,12 @@
 // 
 // to be included after minus.h
 
-#include <minus.h>
+#include <minus/minus.h>
 
 typedef minus<chicago14a> M;
+typedef minus_io<chicago14a> io;
 
-static complex const start_sols_[M::nnn*M::nsols] = {
+static complex const start_sols_[M::nve*M::nsols] = {
   {-.59336028545681196,-.11013183013512155},
   {.11944671140724233,-.13633687755694085},
   {-.7527462639007193e-1,.36383005180054401},
@@ -4691,10 +4692,81 @@ static complex const start_sols_[M::nnn*M::nsols] = {
   {.15356445889843059,-.90598199688147387e-2},
   {-.1721304990664842,-.12755642206752138}
 };
-// Example specialized homotopy for a specific given inputk
+
+// Non-gammified (non-randomized)
+// Start system parameters
+//
+// pDouble||pTriple||pChart
+// 
+//                                  actually just the start M::nparams
+//                                  are initialized here, but we use 
+//                                  the other M::nparams later 
+//                                  to store target system params
+static complex params_start_target_[2*M::f::nparams] = {
+  {.13016671344237549,-.36891394723672405},
+  {.2649393534275909,-.23418132862391827},
+  {.16966329078346828,.83255014163452079},
+  {-.19451110466646152,-.46306348662726932},
+  {.17220398909193774,-.63066005064990804},
+  {.43880466658918199,.35749376043319359},
+  {-.22916469917193943,.40940023366375888},
+  {.19628395931216391,.31547169093942007},
+  {.77876349275103962,.18802295397174107},
+  {-.12469770837513483,-.18650720843441257},
+  {.9837015866757455e-1,-.58885662335588518},
+  {.48375540887037616,.59934750865442754},
+  {.17113976630584507,-.51625176095951775},
+  {.59058534231716642,-.29807928135423012},
+  {.1784709614308819,.48445960728256332},
+  {-.28735458910910039,.10588985139771566},
+  {-.22266571089067089,.33144337676666413},
+  {.47451407182502436,.72223011867410281},
+  {.24231333718874842,-.14468100625864436},
+  {-.28124858225431942,-.61593828684609908},
+  {.62854950308463187,.25845006673926108},
+  {-.15913272215280289,-.43631373660896455},
+  {.63014051089698198,-.58095895905592554},
+  {.42202417925308391e-1,.21894218489584227},
+  {.70268599954125141e-1,-.84106248332575878e-1},
+  {.55213315317125804e-1,.65970479294467455},
+  {.6655342785679782,.32679299698803638},
+  {.31322638286030702,-.59278744896017144},
+  {-.15234563927232452e1,.34290578894102774},
+  {-.17146601578174894e1,-.30121270830835539},
+  {.69117182826057322,-.32098248885963149},
+  {-.1689903485568762,-.10473338430406738e1},
+  {-.67494447530370899e-1,.90804443037356597},
+  {-.85466903715025855,-.71615631622334242},
+  {-.78519926834125464,.82417047634964113},
+  {-.12328690176784407e1,-.13632950107656869e1},
+  {.1535316913124809e1,.11838803415391632e1},
+  {-.64224394839272481,-.81068252221808279},
+  {.15802808549593972,.10285192671147088e1},
+  {-.53135089433935234,.14524154476345777},
+  {-.61267088159450304e-1,.19555582133742169},
+  {.83437226736101644,.26801456245888255},
+  {.74309212837114891,.8003122536078896},
+  {.43164865864313229,.29122667976684002},
+  {.53150158668293912,.62606187256902679},
+  {.15421037837970936,.56022623227810608},
+  {.52847620938210671,-.22142256716280798e-1},
+  {.29861519586677554,.95405559134880358e-1},
+  {-.10338955030500291,.6484865890604512},
+  {.88303125720328068,.73904258165551329},
+  {-.10294791427449455,.18923931132425337},
+  {-.26829255287187675,-.85720722969185137},
+  {.34871448746397582,.19700724876673587},
+  {-.15618061505119296,.51195182333374756},
+  {.10077622100718471,.623987226069527e-1},
+  {.6890260043220745,.52555620035489847}
+};
+// Example specialized homotopy for a specific given input
 // these take almost 1min in Macaulay2
 // Used for testing.
-static complex params_[2*M::nparams] = { // start-target param pairs, P01 in chicago.m2
+// Gammified (randomized)
+//
+// The point-tangent inputs giving rise to this are given below
+static complex default_params_start_target_gammified_[2*M::f::nparams] = { // start-target param pairs, P01 in chicago.m2
   {.391195550619826,-.00262962533857666},
   {.310140709227333,+.169842562835882},
   {-.725705624433656,+.441901252816163},
@@ -4808,6 +4880,82 @@ static complex params_[2*M::nparams] = { // start-target param pairs, P01 in chi
   {-.106561340161159,+.495572246957103},
   {.0663667102234161,-.308643825789244}
 };
+static complex *params_= default_params_start_target_gammified_; // start-target param pairs, P01 in chicago.m2
+
+
+// Input points and tangents corresponding to the above gammified homotopy parameters,
+// extracted from the original synthcurves dataset:
+//
+// http://github.com/rfabbri/synthcurves-multiview-3d-dataset
+// 
+// synthcurves-multiview-3d-dataset/spherical-ascii-100_views-perturb-radius_sigma10-normal_sigma0_01rad-minsep_15deg-no_two_cams_colinear_with_object
+//
+// Frame files: frame_..42, 54, 62
+//
+// Points:
+// 
+// 620
+// 3011  tangents
+// 3389  tangents
+// 0-based ids. +1 to get file line
+// 
+// Extracting this data from those files: use scripts/getlines.sh from
+// synthcurves dataset.
+// 
+// This is exactly the input case in Fabbri's slides in big-notes/trifocal/trifocal.key
+//
+// Personal note: The point order seems to match Hongyi when generating the above
+// gammified parameters, though he might have done an
+// off-by-1 mistake for point indexing (3012 vs 3011)
+// 
+static double p_[io::nviews][io::npoints][io::ncoords2d] = {
+  // points for frame 42
+  // + sed -n '3012p;3390p;621p' frame_0042-pts-2d.txt
+  {  
+    {141.01103052308988595, 270.45312297462106699},
+    {239.89822517853363593, 86.442049763307068133},
+    {286.7673976130331539, 217.06531260627261304}
+  },
+  // points for frame 54
+  // + sed -n '3012p;3390p;621p;' frame_0054-pts-2d.txt
+  {
+    {241.41513314836856807, 447.15662243793082098},
+    {123.95973916849976604, 213.90676875312345828},
+    {257.04360648826406077, 159.4404341695463927}
+  },
+  // points for frame 62
+  // + sed -n '3012p;3390p;621p' frame_0062-pts-2d.txt
+  {
+    {375.60750199363729962, 277.22372936832925916},
+    {295.57132984990698787, 147.80261937455236421},
+    {240.78946527513195974, 410.13737156824942076}
+  }
+};
+
+// The tgt_ array is the same size as the p_ array.
+// At each solve only two are used, but since usually all three points have
+// tangents, we ask them as input anyways.
+static double tgt_[io::nviews][io::npoints][io::ncoords2d] = {
+  // tangents for frame 42
+  // + sed -n '3012p;3390p' frame_0042-tgts-2d.txt
+  {
+    {0.9536809622336909209, -0.3008199166827579818},
+    {0.0082601187924503903515, -0.99996588463683822035}
+  },
+  // tangents for frame 54
+  // + sed -n '3012p;3390p' frame_0054-tgts-2d.txt
+  {
+    {0.18491347256048701331, -0.9827548054655455001},
+    {-0.99542450475950383648, 0.095551322985590561587}
+  },
+  // tangents for frame 62
+  // + sed -n '3012p;3390p' frame_0062-tgts-2d.txt
+  {
+    {0.77931350598248894102, -0.62663423094599701724},
+    {0.76492323888624347283, 0.64412144709812224619}
+  }
+};
+
 // Hongy's format (intermediate, after inverting K, specific for line/minur
 // formulation)
 // 

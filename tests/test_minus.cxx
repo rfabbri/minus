@@ -1,6 +1,8 @@
 // 
 // \author Ricardo Fabbri based on original code by Anton Leykin 
 // \date February 2019
+//
+// Tests more comprehensive runs of minus using the public interface
 // 
 #include <iostream>
 #include <fstream>
@@ -12,6 +14,7 @@
 
 #define Float double
 typedef minus<chicago14a> M;
+typedef minus_io<chicago14a> io;
 static constexpr Float tol = 1e-3;
 typedef std::complex<Float> complex;
 using namespace std::chrono;
@@ -29,6 +32,7 @@ using namespace std::chrono;
 // And in _that_ one, we put these default vectors depending on template tag.
 
 #define  M_VERBOSE 1     // display verbose messages
+
 
 void
 test_against_ground_truth(const M::solution solutions[])
@@ -52,26 +56,46 @@ void
 test_full_solve()
 {
   std::cerr << "Starting path tracker" << std::endl;
-  
-  static M::solution solutions[M::nsols];
+  M::solution solutions[M::nsols];
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
-  
-  M::track_all(M::DEFAULT, start_sols_, params_, solutions);
-  
+  M::track_all(M::DEFAULT, start_sols_, params_, solutions); // <<<<<<<<< MEAT
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   auto duration = duration_cast<milliseconds>(t2 - t1).count();
   std::cerr << "LOG \033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
-  
   TEST("Did it track first solution?", solutions[0].t > 0, true);
   TEST("Did it track the last solution?", solutions[M::nsols-1].t > 0, true);
-
   test_against_ground_truth(solutions);
+}
+
+void
+test_end_user_interface()
+{
+  // static data for points and cams
+
+  // M::solve(M::DEFAULT, start_sols_, points, cameras);
+  {
+  complex params[2*M::nparams];
+  M::solution solutions[M::nsols];
+  io::point_tangents2params(p_, tgt_, 0, 1, params);
+  M::track_all(M::DEFAULT, start_sols_, params, solutions);
+  TEST("Did it track first solution?", solutions[0].t > 0, true);
+  TEST("Did it track the last solution?", solutions[M::nsols-1].t > 0, true);
+  test_against_ground_truth(solutions);
+
+  // test solutions are good before formatting them out,
+  // just like in minus-chicago
+
+  //  XXX 
+//  io::solutions2cams(solutions, cameras, &nsols_final);
+//  test_final_solve_against_ground_truth(solutions);
+  }
 }
 
 void
 test_minus()
 {
   test_full_solve();
+  test_end_user_interface();
 }
 
 TESTMAIN(test_minus);
