@@ -210,7 +210,7 @@ Is shorthand for
 ```C
   #include <minus.hxx>
   ...
-  minus_core<312, 14, 56, chicago14a, double>::track(...)
+  minus_core<chicago14a, double>::track(...)
 ```
 where chicago14a is an enum (int) template parameter.
 
@@ -218,10 +218,25 @@ where chicago14a is an enum (int) template parameter.
 
 Let's say you have a new minimal problem, Chicago 6a, that is, variant
 `a` to the 6x6 formulation of the trifocal pose from points at lines problem.
+You might want to do use this since a small number of variables can mean a
+drastically more efficient linear solve during solution tracking.
 
+Steps:
 - Include a new name `chicago6a` for your problem in the `enum problem` in
-`minus.h`. This is the table of problem tags of Minus.
-- Place your evaluation functions into a file called `chiago6a.hxx`.
+the beginning of `minus.h`. This is the table of problem tags of Minus.
+- Specify the __constant parameters__ for the problem and formulation:
+    - In the file `parameters.h`, write another include line for your problem:
+```C
+#include<chicago6a.h>
+```
+  - Write the header `chicago6a.h` by copying chicago14a.h and filling in the
+    numbers and substituting the string `chicago14a` to `chicago6a`. You can add any constants
+    that you feel are needed for your particular problem. For example, if your
+    minmimal problem involves conics, you might want to add the number of conics.
+    If your minimal problem formulation has multiple start solutions, for speed,
+    you might want to indicate that as well. These are the solver settings that are
+    known at compile time and can't be changed at runtime.
+- Place your __evaluation functions__ into a file called `chiago6a.hxx`.
   using the existing file `chicago14a.hxx` to see how the function should be defined.
   Basically, you need to copy what is in `chicago14a.hxx`, include your function
   bodies according to the format, and substitute chicago14a to chicago6a.
@@ -229,8 +244,16 @@ Let's say you have a new minimal problem, Chicago 6a, that is, variant
     - X are refs: `%s/C X/const C<F> \&X/g`
     - Consts C are constexprs: `%s/C \(C[0-9] =\)/static constexpr C<F> \1/gc`
     - Gates G are variables `%s/C G/const C<F> G/gc` for gates (no ampersand)
-- Optional: Default start system and gammified parameters
-    - mimmick the file `chicago14a-default.hxx` to create your own, eg,
+    - At the end of `minus.hxx`, copy and paste the last include line to your
+      problem, eg: `#include <minus/chicago6a.hxx>`
+- Optional: create your app in `cmd/` immitating `cmd/minus-chicago.cxx`. If you
+  have just added a new formulation solver for the same problem, make the
+  necessary additions to the existing app, e.g., `cmd/minus-chicago.cxx`. 
+- Optional: Default start system and gammified parameters. You might want to
+  define a default start system. you might also want to define default gammified
+  parameters to test your solver independent of I/O functions to convert from
+  user input to gammified homotopy parameters.
+    - mimmick the file `chicago14a-default.hxx` to create your own, e.g.,
     `chicago6a-default.hxx`. 
     - if your start system comes from our Macaulay2 scripts, use the commands in
     `scripts/extract-start-sols.vim` to help you translate to C++
