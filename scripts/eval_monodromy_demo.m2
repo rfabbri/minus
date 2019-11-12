@@ -25,3 +25,13 @@ h=cCode(
 
 -- HxH
 h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{cameraVars|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters})
+
+-- monodromy needs an initial pair of parameter, solution
+-- the command below won't work for most use cases
+-- ie) need 
+(p0, x0) = createSeedPair GS
+(V,np) = monodromySolve(GS,p0,{x0},Verbose=>true,NumberOfNodes=>5)
+-- parameter point
+V.BasePoint
+-- corresponding solutions
+points V.PartialSols
