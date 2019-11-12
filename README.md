@@ -229,13 +229,13 @@ the beginning of `minus.h`. This is the table of problem tags of Minus.
 ```C
 #include<chicago6a.h>
 ```
-  - Write the header `chicago6a.h` by copying chicago14a.h and filling in the
-    numbers and substituting the string `chicago14a` to `chicago6a`. You can add any constants
-    that you feel are needed for your particular problem. For example, if your
-    minmimal problem involves conics, you might want to add the number of conics.
-    If your minimal problem formulation has multiple start solutions, for speed,
-    you might want to indicate that as well. These are the solver settings that are
-    known at compile time and can't be changed at runtime.
+    - Write the header `chicago6a.h` by copying chicago14a.h and filling in the
+      numbers and substituting the string `chicago14a` to `chicago6a`. You can add any constants
+      that you feel are needed for your particular problem. For example, if your
+      minmimal problem involves conics, you might want to add the number of conics.
+      If your minimal problem formulation has multiple start solutions, for speed,
+      you might want to indicate that as well. These are the solver settings that are
+      known at compile time and can't be changed at runtime.
 - Place your __evaluation functions__ into a file called `chiago6a.hxx`.
   using the existing file `chicago14a.hxx` to see how the function should be defined.
   Basically, you need to copy what is in `chicago14a.hxx`, include your function

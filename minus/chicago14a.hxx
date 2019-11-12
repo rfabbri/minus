@@ -14,6 +14,12 @@ struct eval<chicago14a, F> {
 // Where 127 = 14 for x, 1 for t, 2*56 total parameters. Returns y = [Hx|Ht]
 // 
 // cCode(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"Ht",gateMatrix{cameraVars})
+//
+// PH = gate parameter homotopy
+//
+// see scripts/eval_monodromy_demo.m2 to see how to generate these from
+// equations
+// 
 // (Ask Tim for the way to use cCode so that the input orders are like this.
 template <typename F>
 inline void 

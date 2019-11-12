@@ -3,8 +3,8 @@
 
 
 #include <minus/chicago14a.h>
-//#include<chicago6a.h>
+//#include <minus/chicago6a.h>
 //#include<clevelandXa.h>
-//#include<phoenix10a.h>
+#include<minus/phoenix10a.h>
 
 #endif  // parameters_h_
