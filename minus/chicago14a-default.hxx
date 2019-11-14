@@ -4910,6 +4910,7 @@ static complex *params_= default_params_start_target_gammified_; // start-target
 // gammified parameters, though he might have done an
 // off-by-1 mistake for point indexing (3012 vs 3011)
 // 
+// This is in pixel image coordinates
 static double p_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
   // points for frame 42
   // + sed -n '3012p;3390p;621p' frame_0042-pts-2d.txt
@@ -4937,6 +4938,7 @@ static double p_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
 // The tgt_ array is the same size as the p_ array.
 // At each solve only two are used, but since usually all three points have
 // tangents, we ask them as input anyways.
+// This is in pixel-based image coordinates. 
 static double tgt_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
   // tangents for frame 42
   // + sed -n '3012p;3390p' frame_0042-tgts-2d.txt
@@ -4956,6 +4958,17 @@ static double tgt_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
     {0.77931350598248894102, -0.62663423094599701724},
     {0.76492323888624347283, 0.64412144709812224619}
   }
+};
+
+// 3x3 intrinsic matrix for this default test case
+// This representation is specific for fast non-homog action
+// Just eliminate last row 
+//
+// This matrix is calib.intrinsic for the synthcurves spherical dataset
+static double K_[io::ncoords2d][io::ncoords2d_h] = {
+  {2584.9325098195013197, 0, 249.77137587221417903},
+  {0, 2584.7918606057692159, 278.31267937919352562}
+ //  0 0 1 
 };
 
 // Hongy's format (intermediate, after inverting K, specific for line/minur

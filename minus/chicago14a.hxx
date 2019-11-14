@@ -7057,12 +7057,44 @@ struct minus_io_shaping<chicago14a, F> {
   static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
   static void point_tangents2lines(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, F plines[pp::nvislines][ncoords2d_h]);
   static void lines2params(F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ params/*[static M::n//params]*/);
+  static void invert_intrinsics(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const double pix_coords[][ncoords2d], double normalized_coords[][ncoords2d], unsigned npts);
+  static void invert_intrinsics_tgt(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const double pix_tgt_coords[][ncoords2d], double normalized_tgt_coords[][ncoords2d], unsigned npts);
 
   // OUTPUT --------------------------------------------------------------------
   static void all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], unsigned id_sols[M::nsols], unsigned *nsols_final);
   static void solution2cams(F rs[M::f::nve], F cameras[2][4][3]);
 };
 
+// For speed, assumes input point implicitly has 3rd homog coordinate is 1
+// 
+template <typename F>
+inline void 
+minus_io_shaping<chicago14a, F>::
+invert_intrinsics(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const double pix_coords[][ncoords2d], double normalized_coords[][ncoords2d], unsigned npts)
+{
+  for (unsigned p=0; p < npts; ++p) {
+    const F *px = pix_coords[p];
+    F *nrm = normalized_coords[p];
+    nrm[1] = (px[1]-K[1][2])/K[1][1];
+    nrm[0] = (px[0] - K[0][1] - K[0][2])/K[0][0];
+  }
+}
+
+// For speed, assumes input point implicitly has 3rd homog coordinate is 1
+// 
+template <typename F>
+inline void 
+minus_io_shaping<chicago14a, F>::
+invert_intrinsics_tgt(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const double pix_tgt_coords[][ncoords2d], double normalized_tgt_coords[][ncoords2d], unsigned npts)
+{
+  for (unsigned p=0; p < npts; ++p) {
+    const F *tp = pix_tgt_coords[p];
+    F *t = normalized_tgt_coords[p];
+    t[1] = tp[1]/K[1][1];
+    t[0] = (tp[0] - K[0][1]*tp[1])/K[0][0];
+  }
+}
+  
 // we only use the first half of the outer
 // 2*M::nparams array 
 // after this fn, complex part zero, but we will use this space later
@@ -7229,6 +7261,8 @@ gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
 //
 // NOTE: the input tangent vector will be used as scratch so make a copy
 // if you intend to reuse it 
+//
+// Input points and tangents in normalized image coordinates.
 template <typename F>
 inline void 
 minus_io_shaping<chicago14a, F>::

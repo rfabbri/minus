@@ -27,6 +27,144 @@ using namespace std::chrono;
 // but keep this one lean & mean.
 #include <minus/chicago14a-default.hxx> 
 
+#if 0
+template <unsigned N, typename F /* no complex number, only float types */>
+struct minus_array_util { // Not speed critical -----------------------------------------
+  static inline void 
+  multiply_scalar_to_self(F *__restrict__ a, F b)
+  {
+    for (unsigned i = 0; i < N; ++i, ++a) *a = *a * b;
+  }
+
+  static inline void
+  negate_self(F * __restrict__ a)
+  {
+    for (unsigned i = 0; i < N; ++i, ++a) *a = -*a;
+  }
+
+  static inline void 
+  multiply_self(F * __restrict__ a, const F * __restrict__ b)
+  {
+    for (unsigned int i=0; i < N; ++i,++a,++b) *a *= *b;
+  }
+
+  static inline void 
+  add_to_self(F * __restrict__ a, const F * __restrict__ b)
+  {
+    for (unsigned int i=0; i < N; ++i,++a,++b) *a += *b;
+  }
+
+  static inline void 
+  add_scalar_to_self(F * __restrict__ a, F b)
+  {
+    for (unsigned int i=0; i < N; ++i,++a) *a += b;
+  }
+
+  static inline void 
+  copy(const F * __restrict__ a, F * __restrict__ b)
+  {
+    memcpy(b, a, N*sizeof(F));
+  }
+
+  static inline F
+  norm2(const F *__restrict__ a)
+  {
+    F val = 0;
+    F const* __restrict__ end = a+N;
+    while (a != end) val += std::abs(*a++);
+    return val;
+  }
+};
+
+typedef minus_array_util<Float> mu; 
+#endif
+
+
+Float eps_ = 1e-3;
+
+
+void
+print(const Float *v, unsigned n)
+{
+  for (unsigned i=0; i < n; ++i)
+    std::cout << v[i] << "  ";
+  std::cout << std::endl;
+}
+
+void
+print(const Float *v, unsigned nrows, unsigned ncols)
+{
+  for (unsigned i=0; i < nrows; ++i)
+    print(v + i*ncols, ncols);
+}
+
+// test if two vectors of the same size are equal up to tolerance
+bool
+same_vectors(const Float *v, const Float *w, unsigned n, Float tol=eps_)
+{
+  for (unsigned i=0; i < n; ++i)
+    if (std::fabs(v[i] - w[i]) > eps_) {
+      std::cout << "v: \n";
+      print(v, n);
+      std::cout << "w: \n";
+      print(w, n);
+      printf("offending element i, v[i] = [%d], %g\n", i, v[i]);
+      return false;
+    }
+  return true;
+}
+
+// test if two vectors of the same size are equal up to tolerance
+//bool
+//same_homog_vectors(const Float *v, const Float *w, unsigned n, Float tol=eps_)
+//{
+//  for (unsigned i=0; i < n; ++i)
+//  for (unsigned i=0; i < n; ++i)
+//    if (std::fabs(v[i] - w[i]) > eps_) {
+//      std::cout << "v: \n";
+//      print(v, n);
+//      std::cout << "w: \n";
+//      print(w, n);
+//      printf("offending element i, v[i] = [%d], %g\n", i, v[i]);
+//      return false;
+//    }
+//  return true;
+//}
+
+// test if two vectors of the same size are equal up to tolerance
+bool
+same_matrices(const Float *vp, const Float *wp, unsigned nrows, unsigned ncols, Float tol=eps_)
+{
+  const Float (*v)[ncols] = (Float (*)[ncols]) vp, (*w)[ncols] = (Float (*)[ncols]) wp;
+  for (unsigned i=0; i < nrows; ++i)
+    for (unsigned j=0; j < ncols; ++j)
+      if (std::fabs(v[i][j] - w[i][j]) > eps_) {
+        std::cout << "v: \n";
+        print((Float *) v, nrows, ncols);
+        std::cout << "w: \n";
+        print((Float *) w, nrows, ncols); 
+        printf("offending element [i][j] v[i][j], w[i,j] = [%d][%d], %g, %g\n", i, j, v[i][j], w[i][j]);
+        return false;
+      }
+  return true;
+}
+
+void
+test_cross2()
+{
+  Float v[3] = {1, 0, 1};
+  Float s[3] = {-1, 0, 1};
+  Float r[3] = {-1};
+  // Float gt[3] = {0, 2, 0};
+  minus_3d<Float>::cross2(v,s,r);
+  TEST("Cross product, test 2", std::fabs(minus_3d<Float>::dot(r, v)) > eps_, false);
+  TEST("Cross product, test 3", std::fabs(minus_3d<Float>::dot(r, s)) > eps_, false);
+
+  minus_3d<Float>::cross(v,s,r);
+  TEST("Cross product, test 4", std::fabs(minus_3d<Float>::dot(r, v)) > eps_, false);
+  TEST("Cross product, test 5", std::fabs(minus_3d<Float>::dot(r, s)) > eps_, false);
+}
+
 void
 test_rand()
 {
@@ -104,6 +242,7 @@ test_rand()
       m += std::abs(c_gt[i] - c[i]);
     }
     TEST_NEAR("Cross product", m, 0 , tol);
+    test_cross2();
   }
 }
 
@@ -132,18 +271,30 @@ test_lines2params()
   TEST("lines2params sanity check", params[0], complex(0));
 }
 
+
 void 
 test_point_tangents2lines()
 {
-  
   { // sanity check
     Float plines[io::pp::nvislines][io::ncoords2d_h] = {};
-    io::point_tangents2lines(p_, tgt_, 0, 1, plines);
+    Float pn[io::pp::nviews][io::pp::npoints][io::ncoords2d];
+    Float tn[io::pp::nviews][io::pp::npoints][io::ncoords2d];
+    
+    io::invert_intrinsics(K_, p_[0], pn[0], io::pp::npoints);
+    io::invert_intrinsics(K_, p_[1], pn[1], io::pp::npoints);
+    io::invert_intrinsics(K_, p_[1], pn[2], io::pp::npoints);
+    
+    // don't use all three, but just invert all anyways.
+    io::invert_intrinsics_tgt(K_, tgt_[0], tn[0], io::pp::npoints);
+    io::invert_intrinsics_tgt(K_, tgt_[1], tn[1], io::pp::npoints);
+    io::invert_intrinsics_tgt(K_, tgt_[1], tn[2], io::pp::npoints);
+      
+    io::point_tangents2lines(pn, tn, 0, 1, plines);
     
     TEST("lines2params sanity check", plines[1][1] != complex(0), true);
     TEST("lines2params sanity check", plines[2][0] != complex(0) && plines[2][1] != complex(0), true);
-    // does it match macaulay2?
 
+    // does it match macaulay2?
     Float plines_m2[io::pp::nvislines][io::ncoords2d_h] = {
            {.879009, .476806, .0386237},
            {.894813, -.446441, .032208},
@@ -161,7 +312,9 @@ test_point_tangents2lines()
            {-.0458621, -.998948, -.0271292},
            {-.610568, .791964, .0300628}
     };
-  } //! sanity check
+
+    TEST("lines2params matches m2", same_matrices((Float *) plines, (Float *) plines_m2, io::pp::nvislines, io::ncoords2d_h), true);
+  }
 
   { // hardcoded simple input points and desired output lines
   }
