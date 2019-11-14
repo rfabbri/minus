@@ -11,7 +11,7 @@
 typedef minus<chicago14a> M;
 typedef minus_io<chicago14a> io;
 
-static complex const start_sols_[M::nve*M::nsols] = {
+static const complex start_sols_[M::nve*M::nsols] = {
   {-.59336028545681196,-.11013183013512155},
   {.11944671140724233,-.13633687755694085},
   {-.7527462639007193e-1,.36383005180054401},
@@ -4768,7 +4768,7 @@ static complex params_start_target_[2*M::f::nparams] = {
 // Gammified (randomized)
 //
 // The point-tangent inputs giving rise to this are given below
-static complex default_params_start_target_gammified_[2*M::f::nparams] = { // start-target param pairs, P01 in chicago.m2
+static const complex default_params_start_target_gammified_[2*M::f::nparams] = { // start-target param pairs, P01 in chicago.m2
   {.391195550619826,-.00262962533857666},
   {.310140709227333,+.169842562835882},
   {-.725705624433656,+.441901252816163},
@@ -4882,7 +4882,7 @@ static complex default_params_start_target_gammified_[2*M::f::nparams] = { // st
   {-.106561340161159,+.495572246957103},
   {.0663667102234161,-.308643825789244}
 };
-static complex *params_= default_params_start_target_gammified_; // start-target param pairs, P01 in chicago.m2
+static const complex *params_= default_params_start_target_gammified_; // start-target param pairs, P01 in chicago.m2
 
 
 // Input points and tangents corresponding to the above gammified homotopy parameters,
@@ -4911,7 +4911,7 @@ static complex *params_= default_params_start_target_gammified_; // start-target
 // off-by-1 mistake for point indexing (3012 vs 3011)
 // 
 // This is in pixel image coordinates
-static double p_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
+static const double p_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
   // points for frame 42
   // + sed -n '3012p;3390p;621p' frame_0042-pts-2d.txt
   {  
@@ -4939,7 +4939,7 @@ static double p_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
 // At each solve only two are used, but since usually all three points have
 // tangents, we ask them as input anyways.
 // This is in pixel-based image coordinates. 
-static double tgt_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
+static const double tgt_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
   // tangents for frame 42
   // + sed -n '3012p;3390p' frame_0042-tgts-2d.txt
   {
@@ -4965,7 +4965,7 @@ static double tgt_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
 // Just eliminate last row 
 //
 // This matrix is calib.intrinsic for the synthcurves spherical dataset
-static double K_[io::ncoords2d][io::ncoords2d_h] = {
+static const double K_[io::ncoords2d][io::ncoords2d_h] = {
   {2584.9325098195013197, 0, 249.77137587221417903},
   {0, 2584.7918606057692159, 278.31267937919352562}
  //  0 0 1 

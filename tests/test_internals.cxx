@@ -149,6 +149,33 @@ same_matrices(const Float *vp, const Float *wp, unsigned nrows, unsigned ncols, 
   return true;
 }
 
+// test if two vectors of the same size are equal up to tolerance
+bool
+same_matrices_up_to_row_scale(const Float *vp, const Float *wp, unsigned nrows, unsigned ncols, Float tol=eps_)
+{
+  const Float (*v)[ncols] = (Float (*)[ncols]) vp, (*w)[ncols] = (Float (*)[ncols]) wp;
+  for (unsigned i=0; i < nrows; ++i) {
+    bool match = true;
+    for (unsigned j=0; j < ncols; ++j) 
+      if (std::fabs(v[i][j] - w[i][j]) > eps_)  {
+        match = false;
+        break;
+      }
+    if (!match) {
+      for (unsigned j=0; j < ncols; ++j) 
+        if (std::fabs(v[i][j] + w[i][j]) > eps_ && std::fabs(v[i][j] - w[i][j]) > eps_)  {
+            std::cout << "v: \n";
+            print((Float *) v, nrows, ncols);
+            std::cout << "w: \n";
+            print((Float *) w, nrows, ncols); 
+            printf("offending element [i][j] v[i][j], w[i,j] = [%d][%d], %g, %g\n", i, j, v[i][j], w[i][j]);
+            return false;
+        }
+    }
+  }
+  return true;
+}
+
 void
 test_cross2()
 {
@@ -313,7 +340,7 @@ test_point_tangents2lines()
            {-.610568, .791964, .0300628}
     };
 
-    TEST("lines2params matches m2", same_matrices((Float *) plines, (Float *) plines_m2, io::pp::nvislines, io::ncoords2d_h), true);
+    TEST("lines2params matches m2", same_matrices_up_to_row_scale((Float *) plines, (Float *) plines_m2, io::pp::nvislines, io::ncoords2d_h), true);
   }
 
   { // hardcoded simple input points and desired output lines
