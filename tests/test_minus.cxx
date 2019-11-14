@@ -10,7 +10,7 @@
 #include <chrono>
 #include <thread>
 #include <testlib/testlib_test.h>
-#include <minus.h>
+#include <minus/minus.h>
 
 #define Float double
 typedef minus<chicago14a> M;
@@ -23,7 +23,7 @@ using namespace std::chrono;
 // If you want to play with different start sols,
 // write another program that accepts start sols in runtime,
 // but keep this one lean & mean.
-#include <chicago14a-default.hxx> 
+#include <minus/chicago14a-default.hxx> 
 // We include it separately so they don't clutter this app,
 // neither minus.h, and can be reused by other progs
 // TODO(developer note): make this part of Minus' template as a specialization. 
@@ -74,7 +74,7 @@ test_end_user_interface()
 
   // M::solve(M::DEFAULT, start_sols_, points, cameras);
   {
-  complex params[2*M::nparams];
+  complex params[2*M::f::nparams];
   M::solution solutions[M::nsols];
   io::point_tangents2params(p_, tgt_, 0, 1, params);
   M::track_all(M::DEFAULT, start_sols_, params, solutions);

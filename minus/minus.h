@@ -204,6 +204,12 @@ void minus_core<P, F>::evaluate_HxH(const C<F> * __restrict__ x /*x, t*/, const 
 // specialization
 // https://stackoverflow.com/questions/1501357/template-specialization-of-particular-members
 // 
+// TODO: leave this class empty.
+// Just use a mold / inherictance to reuse basic structure
+// useful for all problems. Right now, this is somewhat specific to certain
+// types of problems (points and lines) and formulations (minors-based /
+// visible-line based). Feel free to ignore this in the specialization to your
+// problem, except the constants and typedefs.
 template <problem P, typename F=double>
 struct minus_io_shaping {
   typedef minus_core<P, F> M;

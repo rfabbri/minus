@@ -4693,6 +4693,7 @@ static complex const start_sols_[M::nve*M::nsols] = {
   {-.1721304990664842,-.12755642206752138}
 };
 
+/*
 // Non-gammified (non-randomized)
 // Start system parameters
 //
@@ -4760,6 +4761,7 @@ static complex params_start_target_[2*M::f::nparams] = {
   {.10077622100718471,.623987226069527e-1},
   {.6890260043220745,.52555620035489847}
 };
+*/
 // Example specialized homotopy for a specific given input
 // these take almost 1min in Macaulay2
 // Used for testing.
@@ -4908,7 +4910,7 @@ static complex *params_= default_params_start_target_gammified_; // start-target
 // gammified parameters, though he might have done an
 // off-by-1 mistake for point indexing (3012 vs 3011)
 // 
-static double p_[io::nviews][io::npoints][io::ncoords2d] = {
+static double p_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
   // points for frame 42
   // + sed -n '3012p;3390p;621p' frame_0042-pts-2d.txt
   {  
@@ -4935,7 +4937,7 @@ static double p_[io::nviews][io::npoints][io::ncoords2d] = {
 // The tgt_ array is the same size as the p_ array.
 // At each solve only two are used, but since usually all three points have
 // tangents, we ask them as input anyways.
-static double tgt_[io::nviews][io::npoints][io::ncoords2d] = {
+static double tgt_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
   // tangents for frame 42
   // + sed -n '3012p;3390p' frame_0042-tgts-2d.txt
   {

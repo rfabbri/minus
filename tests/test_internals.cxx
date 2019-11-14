@@ -12,7 +12,7 @@
 #include <iomanip>
 #include <chrono>
 #include <testlib/testlib_test.h>
-#include <minus.hxx>
+#include <minus/minus.hxx>
 
 #define Float double
 typedef minus<chicago14a> M;
@@ -21,6 +21,11 @@ typedef minus_io<chicago14a> io;
 typedef std::complex<Float> complex;
 using namespace std::chrono;
 
+// Start solutions hardcoded for efficiency.
+// If you want to play with different start sols,
+// write another program that accepts start sols in runtime,
+// but keep this one lean & mean.
+#include <minus/chicago14a-default.hxx> 
 
 void
 test_rand()
@@ -107,22 +112,22 @@ test_gamma()
 {
   std::ofstream log("log");
   // sanity check
-  complex p_test[M::nparams];
+  complex p_test[M::f::nparams];
   
   // arbitrary values
-  for (unsigned i=0; i < M::nparams; ++i)
+  for (unsigned i=0; i < M::f::nparams; ++i)
     p_test[i] = 100;
   
   io::gammify(p_test);
-  for (unsigned i=0; i < M::nparams; ++i)
+  for (unsigned i=0; i < M::f::nparams; ++i)
     log << p_test[i] << std::endl;
 }
 
 void
 test_lines2params()
 {
-  Float plines[io::nvislines][io::ncoords_h] = {0};
-  complex params[M::nparams] = {0};
+  Float plines[io::pp::nvislines][io::ncoords2d_h] = {0};
+  complex params[M::f::nparams] = {0};
   io::lines2params(plines, params);
   TEST("lines2params sanity check", params[0], complex(0));
 }
@@ -130,10 +135,17 @@ test_lines2params()
 void 
 test_points2lines()
 {
+  
   { // sanity check
+    Float plines[io::pp::nvislines][io::ncoords2d_h] = {};
+    io::point_tangents2lines(p_, tgt_, 0, 1, plines);
+    
+    TEST("lines2params sanity check", plines[1][1] != complex(0), true);
+    TEST("lines2params sanity check", plines[2][0] != complex(0) && plines[2][1] != complex(0), true);
+    // does it match macaulay2?
   }
 
-  { // hardcoded input points and desired output lines
+  { // hardcoded simple input points and desired output lines
   }
 }
 
@@ -143,18 +155,18 @@ test_get_params_start_target()
   std::ofstream log("log_test_get_params_start_target");
   
   {
-  complex params[2*M::nparams]; // start-target param pairs, P01 in chicago.m2, like params_ 
-  Float plines[io::nvislines][io::ncoords_h];
+  complex params[2*M::f::nparams]; // start-target param pairs, P01 in chicago.m2, like params_ 
+  Float plines[io::pp::nvislines][io::ncoords2d_h] = {};
   io::get_params_start_target(plines, params);
   TEST("get_params_start_target sanity check", params[0], complex(0));
   }
   
   {
-  complex params[2*M::nparams]; // start-target param pairs, P01 in chicago.m2, like params_ 
-  Float plines[io::nvislines][io::ncoords_h];
+  complex params[2*M::f::nparams]; // start-target param pairs, P01 in chicago.m2, like params_ 
+  Float plines[io::pp::nvislines][io::ncoords2d_h] = {};
   io::get_params_start_target(plines, params);
   TEST("get_params_start_target sanity check", params[0], complex(0));
-  for (unsigned i=0; i < 2*M::nparams; ++i)
+  for (unsigned i=0; i < 2*M::f::nparams; ++i)
     log << params[i] << std::endl;;
   }
 }

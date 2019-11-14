@@ -7016,10 +7016,6 @@ HxH(const C<F>* __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<
 
 // Problem and Formulation Paramers --------------------------------------------
 
-constexpr unsigned formulation_parameters<chicago14a>::nsols;   // number of solutions
-constexpr unsigned formulation_parameters<chicago14a>::nve;      // size of the system (Number of Variables or Equations)
-constexpr unsigned formulation_parameters<chicago14a>::nparams;  // number of parameters
-
 template <typename F>
 struct minus_io_shaping<chicago14a, F> {
   typedef minus_core<chicago14a, F> M;
@@ -7059,7 +7055,7 @@ struct minus_io_shaping<chicago14a, F> {
   // this function is the same for all problems
   static void get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
-  static void point_tangents2lines(F p[pp::nviews][pp::npoints][ncoords2d], F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, F plines[pp::nvislines][ncoords2d_h]);
+  static void point_tangents2lines(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, F plines[pp::nvislines][ncoords2d_h]);
   static void lines2params(F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ params/*[static M::n//params]*/);
 
   // OUTPUT --------------------------------------------------------------------
@@ -7236,7 +7232,7 @@ gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
 template <typename F>
 inline void 
 minus_io_shaping<chicago14a, F>::
-point_tangents2lines(F p[pp::nviews][pp::npoints][ncoords2d], F t[pp::nviews][pp::npoints][ncoords2d], unsigned i0, unsigned i1, F plines[pp::nvislines][ncoords2d_h])
+point_tangents2lines(const F p[pp::nviews][pp::npoints][ncoords2d], const F t[pp::nviews][pp::npoints][ncoords2d], unsigned i0, unsigned i1, F plines[pp::nvislines][ncoords2d_h])
 {
   typedef minus_3d<F> vec;
   
