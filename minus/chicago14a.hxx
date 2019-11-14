@@ -7263,6 +7263,16 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][ncoords2d], const F t[pp
   // TODO: test normalize to unit vectors for better numerics
 }
 
+template <typename F>
+inline void
+minus_io_shaping<chicago14a, F>::
+get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+{
+  lines2params(plines, params);
+  gammify(params);
+  gammify(params+M::f::nparams);
+}
+
 // \param[in] tgts: three tangents, one at each point.
 // Only two tangents will actually be used. If one of the points
 // in each image has no reliable or well-defined tangents,
@@ -7279,20 +7289,9 @@ point_tangents2params(F p[pp::nviews][pp::npoints][ncoords2d], F tgt[pp::nviews]
 {
   F plines[pp::nvislines][ncoords2d_h];
   point_tangents2lines(p, tgt, id_tgt0, id_tgt1, plines);
-  lines2params(plines, params);
-  gammify(params);
-  gammify(params+M::f::nparams);
+  get_params_start_target(plines, params);
 }
 
-template <typename F>
-inline void
-minus_io_shaping<chicago14a, F>::
-get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
-{
-  lines2params(plines, params);
-  gammify(params);
-  gammify(params+M::f::nparams);
-}
 
 //
 // returns cameras[0:nsols_final][2][4][3]

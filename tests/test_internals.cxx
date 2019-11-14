@@ -133,7 +133,7 @@ test_lines2params()
 }
 
 void 
-test_points2lines()
+test_point_tangents2lines()
 {
   
   { // sanity check
@@ -143,7 +143,25 @@ test_points2lines()
     TEST("lines2params sanity check", plines[1][1] != complex(0), true);
     TEST("lines2params sanity check", plines[2][0] != complex(0) && plines[2][1] != complex(0), true);
     // does it match macaulay2?
-  }
+
+    Float plines_m2[io::pp::nvislines][io::ncoords2d_h] = {
+           {.879009, .476806, .0386237},
+           {.894813, -.446441, .032208},
+           {.704559, .709645, -.0337046},
+           {-.707246, .706968, -.0278674},
+           {.740916, .671598, -.041628},
+           {.978562, -.205951, .0141882},
+           {-.995987, .0895003, .00280579},
+           {-.15951, .987196, .0168892},
+           {.590905, -.806741, -.0291192},
+           {.383775, .923427, .0189677},
+           {.996132, .0878673, -.00250624},
+           {.594754, .803908, -.0389392},
+           {.998695, .0510648, .00759911},
+           {-.0458621, -.998948, -.0271292},
+           {-.610568, .791964, .0300628}
+    };
+  } //! sanity check
 
   { // hardcoded simple input points and desired output lines
   }
@@ -175,7 +193,7 @@ void
 test_io_shaping()
 {
   test_gamma();
-  test_points2lines();
+  test_point_tangents2lines();
   test_lines2params();
   test_get_params_start_target();
 }
