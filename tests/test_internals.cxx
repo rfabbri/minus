@@ -390,13 +390,13 @@ test_gamma()
     // 1 
     complex params[M::f::nparams] = {};
     io::point_tangents2lines(pn, tn, 0, 1, plines);
-    io::lines2params(plines, params); // ungammified params
+    io::lines2params(plines, params); // ungammified target params
     
     for (unsigned i=0; i < M::f::nparams; ++i)
       params[i] = default_params_start_target_gammified_[i+M::f::nparams] / params[i];
 
     std::cout << "Default test gammas: " << std::endl;
-    print(params, M::f::nparams, true);
+    print(params, M::f::nparams - 17/*pChart are random*/, true);
 
     // 2
     complex uno[M::f::nparams];
@@ -404,7 +404,7 @@ test_gamma()
       uno[i] = 1;
     io::gammify(uno);
     std::cout << "Minus gammas: " << std::endl;
-    print(uno, M::f::nparams, true);
+    print(uno, M::f::nparams - 17, true);
   }
 }
     
