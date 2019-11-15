@@ -386,6 +386,13 @@ test_lines2params()
     TEST("lines2params matches m2 default run except for random pChart", same_vectors((Float *) params_target_m2_, (Float *) p1, M::f::nparams*2 - (7+5+5)*2), true);
     //    pChart: just unit rands 17x1
     //        sphere(7,1)|sphere(5,1)|sphere(5,1)
+
+    Float nrm = minus_array<7,Float>::norm2(params_target_m2_+M::f::nparams - (7+5+5));
+    TEST_NEAR("lines2params random pChart unit", nrm, 1, eps_);
+    nrm = minus_array<5,Float>::norm2(params_target_m2_+M::f::nparams - (5+5));
+    TEST_NEAR("lines2params random pChart unit", nrm, 1, eps_);
+    nrm = minus_array<5,Float>::norm2(params_target_m2_+M::f::nparams - (5));
+    TEST_NEAR("lines2params random pChart unit", nrm, 1, eps_);
   }
 }
 
