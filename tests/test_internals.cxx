@@ -82,6 +82,82 @@ typedef minus_array_util<Float> mu;
 
 Float eps_ = 1e-3;
 
+Float plines_m2_[io::pp::nvislines][io::ncoords2d_h] = {
+       {.879009, .476806, .0386237},
+       {.894813, -.446441, .032208},
+       {.704559, .709645, -.0337046},
+       {-.707246, .706968, -.0278674},
+       {.740916, .671598, -.041628},
+       {.978562, -.205951, .0141882},
+       {-.995987, .0895003, .00280579},
+       {-.15951, .987196, .0168892},
+       {.590905, -.806741, -.0291192},
+       {.383775, .923427, .0189677},
+       {.996132, .0878673, -.00250624},
+       {.594754, .803908, -.0389392},
+       {.998695, .0510648, .00759911},
+       {-.0458621, -.998948, -.0271292},
+       {-.610568, .791964, .0300628}
+};
+
+complex params_target_m2_[M::f::nparams] = {
+ {.879009},
+ {.476806},
+ {.0386237},
+ {.894813},
+ {-.446441},
+ {.032208},
+ {.704559},
+ {.709645},
+ {-.0337046},
+ {-.707246},
+ {.706968},
+ {-.0278674},
+ {.740916},
+ {.671598},
+ {-.041628},
+ {.978562},
+ {-.205951},
+ {.0141882},
+ {-.995987},
+ {.0895003},
+ {.00280579},
+ {-.15951},
+ {.987196},
+ {.0168892},
+ {.590905},
+ {-.806741},
+ {-.0291192},
+ {-.964279},
+ {-.655833},
+ {-.648147},
+ {-.561685},
+ {-1.08294},
+ {.171924},
+ {-.253346},
+ {.779129},
+ {.251946},
+ {1.12584},
+ {.0249},
+ {1.00359},
+ {.0203933},
+ {.205885},
+ {.272273},
+ {.049322},
+ {-.613848},
+ {-.121431},
+ {-.699339},
+ {.141343},
+ {.538675},
+ {-.477745},
+ {-.606832},
+ {-.305558},
+ {.128332},
+ {.424345},
+ {-.608765},
+ {.0000133112},
+ {.657926}
+};
 
 void
 print(const Float *v, unsigned n)
@@ -108,7 +184,7 @@ same_vectors(const Float *v, const Float *w, unsigned n, Float tol=eps_)
       print(v, n);
       std::cout << "w: \n";
       print(w, n);
-      printf("offending element i, v[i] = [%d], %g\n", i, v[i]);
+      printf("offending element i, v[i], w[i] = [%d], %g, %g\n", i, v[i], w[i]);
       return false;
     }
   return true;
@@ -276,6 +352,7 @@ test_rand()
 void
 test_gamma()
 {
+  {
   std::ofstream log("log");
   // sanity check
   complex p_test[M::f::nparams];
@@ -287,15 +364,29 @@ test_gamma()
   io::gammify(p_test);
   for (unsigned i=0; i < M::f::nparams; ++i)
     log << p_test[i] << std::endl;
+  }
 }
 
 void
 test_lines2params()
 {
-  Float plines[io::pp::nvislines][io::ncoords2d_h] = {0};
-  complex params[M::f::nparams] = {0};
+  { // sanity checks
+  Float plines[io::pp::nvislines][io::ncoords2d_h] = {};
+  complex params[M::f::nparams] = {};
   io::lines2params(plines, params);
   TEST("lines2params sanity check", params[0], complex(0));
+  }
+
+  { // does it match default from macaulay?
+    // - define plines just as in hongy's 5-line file to macaulay
+    // - see if the ungammified parameters match the harcoded one
+
+    complex p1[M::f::nparams] = {};
+    io::lines2params(plines_m2_, p1);
+    TEST("lines2params matches m2 default run except for random pChart", same_vectors((Float *) params_target_m2_, (Float *) p1, M::f::nparams*2 - (7+5+5)*2), true);
+    //    pChart: just unit rands 17x1
+    //        sphere(7,1)|sphere(5,1)|sphere(5,1)
+  }
 }
 
 
@@ -309,38 +400,27 @@ test_point_tangents2lines()
     
     io::invert_intrinsics(K_, p_[0], pn[0], io::pp::npoints);
     io::invert_intrinsics(K_, p_[1], pn[1], io::pp::npoints);
-    io::invert_intrinsics(K_, p_[1], pn[2], io::pp::npoints);
+    io::invert_intrinsics(K_, p_[2], pn[2], io::pp::npoints);
+
+    std::cout << "first normalized point" << std::endl;
+    print(pn[0][0], 2);
+    std::cout << "secondnormalized point" << std::endl;
+    print(pn[0][1], 2);
     
     // don't use all three, but just invert all anyways.
     io::invert_intrinsics_tgt(K_, tgt_[0], tn[0], io::pp::npoints);
     io::invert_intrinsics_tgt(K_, tgt_[1], tn[1], io::pp::npoints);
-    io::invert_intrinsics_tgt(K_, tgt_[1], tn[2], io::pp::npoints);
+    io::invert_intrinsics_tgt(K_, tgt_[2], tn[2], io::pp::npoints);
       
     io::point_tangents2lines(pn, tn, 0, 1, plines);
     
     TEST("lines2params sanity check", plines[1][1] != complex(0), true);
     TEST("lines2params sanity check", plines[2][0] != complex(0) && plines[2][1] != complex(0), true);
 
-    // does it match macaulay2?
-    Float plines_m2[io::pp::nvislines][io::ncoords2d_h] = {
-           {.879009, .476806, .0386237},
-           {.894813, -.446441, .032208},
-           {.704559, .709645, -.0337046},
-           {-.707246, .706968, -.0278674},
-           {.740916, .671598, -.041628},
-           {.978562, -.205951, .0141882},
-           {-.995987, .0895003, .00280579},
-           {-.15951, .987196, .0168892},
-           {.590905, -.806741, -.0291192},
-           {.383775, .923427, .0189677},
-           {.996132, .0878673, -.00250624},
-           {.594754, .803908, -.0389392},
-           {.998695, .0510648, .00759911},
-           {-.0458621, -.998948, -.0271292},
-           {-.610568, .791964, .0300628}
-    };
+    // does it match macaulay2? 
+    // actually, we are superior. more than twice the precision.
 
-    TEST("lines2params matches m2", same_matrices_up_to_row_scale((Float *) plines, (Float *) plines_m2, io::pp::nvislines, io::ncoords2d_h), true);
+    TEST("lines2params matches m2", same_matrices_up_to_row_scale((Float *) plines, (Float *) plines_m2_, io::pp::nvislines, io::ncoords2d_h), true);
   }
 
   { // hardcoded simple input points and desired output lines

@@ -7056,7 +7056,7 @@ struct minus_io_shaping<chicago14a, F> {
   static void get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
   static void point_tangents2lines(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, F plines[pp::nvislines][ncoords2d_h]);
-  static void lines2params(F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ params/*[static M::n//params]*/);
+  static void lines2params(F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ params/*[static M::nparams]*/);
   static void invert_intrinsics(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const double pix_coords[][ncoords2d], double normalized_coords[][ncoords2d], unsigned npts);
   static void invert_intrinsics_tgt(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const double pix_tgt_coords[][ncoords2d], double normalized_tgt_coords[][ncoords2d], unsigned npts);
   static void normalize_line(F l[ncoords2d_h]) {
@@ -7291,8 +7291,6 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][ncoords2d], const F t[pp
   unsigned i2 = (i0 == 0) ? ((i1 == 1) ? 2 : 1) : 0;
   
   vec::cross2(p[0][i0], p[0][i1], plines[0]);
-  normalize_line(plines[0]);
-  //xxx
   vec::cross2(p[1][i0], p[1][i1], plines[1]);
   vec::cross2(p[2][i0], p[2][i1], plines[2]);
   
@@ -7314,6 +7312,8 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][ncoords2d], const F t[pp
   minus_3d<F>::point_tangent2line(p[1][i1], t[1][i1], plines[13]);
   minus_3d<F>::point_tangent2line(p[2][i1], t[2][i1], plines[14]);
   // TODO: test normalize to unit vectors for better numerics
+  
+  normalize_lines(plines,pp::nvislines);
 }
 
 template <typename F>

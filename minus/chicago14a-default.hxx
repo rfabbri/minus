@@ -11,6 +11,8 @@
 typedef minus<chicago14a> M;
 typedef minus_io<chicago14a> io;
 
+// 
+// Internal note: m2: script t, variable sols
 static const complex start_sols_[M::nve*M::nsols] = {
   {-.59336028545681196,-.11013183013512155},
   {.11944671140724233,-.13633687755694085},
@@ -4693,9 +4695,15 @@ static const complex start_sols_[M::nve*M::nsols] = {
   {-.1721304990664842,-.12755642206752138}
 };
 
-/*
 // Non-gammified (non-randomized)
-// Start system parameters
+// Start - target system parameters
+//
+// In solve chicago this is
+// P0 || trash
+//
+// Where P0 are the system parameters associated with the start solution
+//
+// start_sols_
 //
 // pDouble||pTriple||pChart
 // 
@@ -4703,6 +4711,7 @@ static const complex start_sols_[M::nve*M::nsols] = {
 //                                  are initialized here, but we use 
 //                                  the other M::nparams later 
 //                                  to store target system params
+//                                  the latter M::nparams are trash
 static complex params_start_target_[2*M::f::nparams] = {
   {.13016671344237549,-.36891394723672405},
   {.2649393534275909,-.23418132862391827},
@@ -4761,11 +4770,15 @@ static complex params_start_target_[2*M::f::nparams] = {
   {.10077622100718471,.623987226069527e-1},
   {.6890260043220745,.52555620035489847}
 };
-*/
+
 // Example specialized homotopy for a specific given input
 // these take almost 1min in Macaulay2
 // Used for testing.
 // Gammified (randomized)
+//
+// Internal note: in m2, function solveChicagoM2
+// 
+//  P01 := (gammify P0)||(gammify P1); 
 //
 // The point-tangent inputs giving rise to this are given below
 static const complex default_params_start_target_gammified_[2*M::f::nparams] = { // start-target param pairs, P01 in chicago.m2
@@ -4945,18 +4958,21 @@ static const double tgt_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
   {
     {0.9536809622336909209, -0.3008199166827579818},
     {0.0082601187924503903515, -0.99996588463683822035}
+    // zero (unused by us)
   },
   // tangents for frame 54
   // + sed -n '3012p;3390p' frame_0054-tgts-2d.txt
   {
     {0.18491347256048701331, -0.9827548054655455001},
     {-0.99542450475950383648, 0.095551322985590561587}
+    // zero (unused by us)
   },
   // tangents for frame 62
   // + sed -n '3012p;3390p' frame_0062-tgts-2d.txt
   {
     {0.77931350598248894102, -0.62663423094599701724},
     {0.76492323888624347283, 0.64412144709812224619}
+    // zero (unused by us)
   }
 };
 
