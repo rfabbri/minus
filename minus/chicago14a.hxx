@@ -7224,7 +7224,7 @@ gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
   util::randc(&g); for (unsigned k=0; k < 7; ++k) params[i++] *= g;
   // diag3 -- qchart, cam 2, gamma
   util::randc(&g); for (unsigned k=0; k < 5; ++k) params[i++] *= g;
-  // diag4 -- qchart, cam 3, gammg
+  // diag4 -- qchart, cam 3, gamma
   util::randc(&g); for (unsigned k=0; k < 5; ++k) params[i++] *= g;
   //  p = (diag0|diag1|diag2|diag3|diag4).*p;
   //  total  27   12    7      5    5 = 56
@@ -7313,7 +7313,7 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][ncoords2d], const F t[pp
   minus_3d<F>::point_tangent2line(p[2][i1], t[2][i1], plines[14]);
   // TODO: test normalize to unit vectors for better numerics
   
-  normalize_lines(plines,pp::nvislines);
+  normalize_lines(plines, pp::nvislines);
 }
 
 template <typename F>

@@ -159,11 +159,12 @@ complex params_target_m2_[M::f::nparams] = {
  {.657926}
 };
 
+template <typename F>
 void
-print(const Float *v, unsigned n)
+print(const F *v, unsigned n, bool newline=false)
 {
   for (unsigned i=0; i < n; ++i)
-    std::cout << v[i] << "  ";
+    std::cout << v[i] << ((newline)? "\n" : " ");
   std::cout << std::endl;
 }
 
@@ -352,7 +353,7 @@ test_rand()
 void
 test_gamma()
 {
-  {
+  { // sanity check
   std::ofstream log("log");
   // sanity check
   complex p_test[M::f::nparams];
@@ -365,7 +366,48 @@ test_gamma()
   for (unsigned i=0; i < M::f::nparams; ++i)
     log << p_test[i] << std::endl;
   }
+
+  { // 1
+    //   - take gammified params
+    //   - divide by non-gammified params
+    // 2
+    //   - take params = {1}
+    //   - see what comes
+
+    Float plines[io::pp::nvislines][io::ncoords2d_h] = {};
+    Float pn[io::pp::nviews][io::pp::npoints][io::ncoords2d];
+    Float tn[io::pp::nviews][io::pp::npoints][io::ncoords2d];
+    
+    // see if uno minus  default_gammas_m2 is less than 1
+    io::invert_intrinsics(K_, p_[0], pn[0], io::pp::npoints);
+    io::invert_intrinsics(K_, p_[1], pn[1], io::pp::npoints);
+    io::invert_intrinsics(K_, p_[2], pn[2], io::pp::npoints);
+    // don't use all three, but just invert all anyways.
+    io::invert_intrinsics_tgt(K_, tgt_[0], tn[0], io::pp::npoints);
+    io::invert_intrinsics_tgt(K_, tgt_[1], tn[1], io::pp::npoints);
+    io::invert_intrinsics_tgt(K_, tgt_[2], tn[2], io::pp::npoints);
+    
+    // 1 
+    complex params[M::f::nparams] = {};
+    io::point_tangents2lines(pn, tn, 0, 1, plines);
+    io::lines2params(plines, params); // ungammified params
+    
+    for (unsigned i=0; i < M::f::nparams; ++i)
+      params[i] = default_params_start_target_gammified_[i] / params[i];
+
+    std::cout << "Default test gammas: " << std::endl;
+    print(params, M::f::nparams, true);
+
+    // 2
+    complex uno[M::f::nparams];
+    for (unsigned i=0; i < M::f::nparams; ++i)
+      uno[i] = 1;
+    io::gammify(uno);
+    std::cout << "Minus gammas: " << std::endl;
+    print(uno, M::f::nparams, true);
+  }
 }
+    
 
 void
 test_lines2params()
@@ -395,7 +437,6 @@ test_lines2params()
     TEST_NEAR("lines2params random pChart unit", nrm, 1, eps_);
   }
 }
-
 
 void 
 test_point_tangents2lines()
@@ -459,8 +500,8 @@ void
 test_io_shaping()
 {
   test_gamma();
-  test_point_tangents2lines();
-  test_lines2params();
+  test_point_tangents2lines();  // OK
+  test_lines2params();  // OK
   test_get_params_start_target();
 }
 
