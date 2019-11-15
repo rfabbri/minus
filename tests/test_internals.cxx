@@ -244,7 +244,7 @@ same_matrices_up_to_row_scale(const Float *vp, const Float *wp, unsigned nrows, 
             print((Float *) v, nrows, ncols);
             std::cout << "w: \n";
             print((Float *) w, nrows, ncols); 
-            printf("offending element [i][j] v[i][j], w[i,j] = [%d][%d], %g, %g\n", i, j, v[i][j], w[i][j]);
+            printf("offending element [i][j] v[i][j], w[i][j] = [%d][%d], %g, %g\n", i, j, v[i][j], w[i][j]);
             return false;
         }
     }

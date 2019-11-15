@@ -141,9 +141,9 @@ struct minus_3d {
   static inline void 
   point_tangent2line(const F p[2], const F tgt[2], F r[3])
   {
-    r[0] = tgt[1]; // normal vector
+    r[0] = -tgt[1]; // normal vector
     r[1] = tgt[0];
-    r[2] = p[0]*tgt[1] + p[1]*tgt[0]; // constant term
+    r[2] = p[0]*tgt[1] - p[1]*tgt[0]; // constant term
   }
 };
 
