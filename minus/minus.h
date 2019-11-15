@@ -250,6 +250,7 @@ struct minus_io_shaping {
   // nvislines = 15 for Chicago.
   // INPUT ---------------------------------------------------------------------
   static void point_tangents2params(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
+  static void point_tangents2params_img(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, const F K[/*3 or 2*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   // this function is the same for all problems
   static void get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);

@@ -74,20 +74,35 @@ test_end_user_interface()
 
   // M::solve(M::DEFAULT, start_sols_, points, cameras);
   {
+  std::cerr << "Starting path tracker in test_end_user_interface" << std::endl;
   M::solution solutions[M::nsols];
-  io::point_tangents2params(p_, tgt_, 0, 1, params_start_target_);
+  io::point_tangents2params_img(p_, tgt_, 0, 1, K_, params_start_target_);
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
   M::track_all(M::DEFAULT, start_sols_, params_start_target_, solutions);
-  TEST("Did it track first solution?", solutions[0].t > 0, true);
-  TEST("Did it track the last solution?", solutions[M::nsols-1].t > 0, true);
+  high_resolution_clock::time_point t2 = high_resolution_clock::now();
+  auto duration = duration_cast<milliseconds>(t2 - t1).count();
+  std::cerr << "LOG \033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
+  TEST("IO: Did it track first solution?", solutions[0].t > 0, true);
+  TEST("IO: Did it track the last solution?", solutions[M::nsols-1].t > 0, true);
   test_against_ground_truth(solutions);
-
   // test solutions are good before formatting them out,
   // just like in minus-chicago
 
-  //  XXX 
-//  io::solutions2cams(solutions, cameras, &nsols_final);
-//  test_final_solve_against_ground_truth(solutions);
-  }
+  Float cameras[M::nsols][2/*2nd and 3rd cams relative to 1st*/][4][3] = {};
+  unsigned nsols_final = 0;
+  unsigned id_sols[M::nsols] = {};
+  io::all_solutions2cams(solutions, cameras, id_sols, &nsols_final);
+
+  
+  // ---------------------------------------------------------------------------
+  // test_final_solve_against_ground_truth(solutions);
+  // optional: filter solutions using positive depth, etc.
+
+  unsigned sol_id;
+  bool found =  io::probe_solutions(solutions, cameras_gt_, &sol_id);
+  TEST("IO: Found GT solution? ", found, true);
+  if (found)
+    std::cout << "found solution at index: " << sol_id << std::endl;
 }
 
 void

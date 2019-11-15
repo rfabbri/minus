@@ -5,6 +5,8 @@ template <>
 struct formulation_parameters<chicago14a> {
   static constexpr unsigned nsols = 312;   // number of solutions
   static constexpr unsigned nve = 14;      // size of the system (Number of Variables or Equations)
+                                           // this formulation: two quaternions and 
+                                           // two translation vectors
   static constexpr unsigned nparams = 56;  // number of parameters
 };
 

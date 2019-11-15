@@ -173,12 +173,16 @@ struct minus_util {
   static std::mt19937 rnd;
   static std::normal_distribution<F> gauss;
   
+  static inline void normalize_quat(F q[4])
+  {
+    const F norm = sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3]);
+    q[0] /= norm; q[1] /= norm; q[2] /= norm; q[3] /= norm;
+  }
   // arbitrary quaternion to rotation matrix.
   // will normalize the quaternion in-place.
   static inline void quat2rotm(F q[4], F r[9])
   {
-    F norm = sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3]);
-    q[0] /= norm; q[1] /= norm; q[2] /= norm; q[3] /= norm;
+    normalize_quat(q);
     const F 
       x2 = q[0] * q[0],  xy = q[0] * q[1],  rx = q[3] * q[0],
       y2 = q[1] * q[1],  yz = q[1] * q[2],  ry = q[3] * q[1],

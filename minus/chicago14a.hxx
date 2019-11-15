@@ -7020,6 +7020,15 @@ template <typename F>
 struct minus_io_shaping<chicago14a, F> {
   typedef minus_core<chicago14a, F> M;
   typedef struct M::solution solution;
+
+  // cast to this to interpret real M::solution::x order
+  struct solution_shape {
+    F q01[4];
+    F q02[4];
+    F t01[3];
+    F t02[3];
+  };
+  
   static constexpr unsigned ncoords2d = 2;  // just a documented name for the number of inhomog coordinates
   static constexpr unsigned ncoords2d_h = 3;// just a name for the usual number of homog coordinates in P^2
   static constexpr unsigned ncoords3d = 3;  // just a documented name for the number of inhomog 3D coordinates
@@ -7052,6 +7061,7 @@ struct minus_io_shaping<chicago14a, F> {
   // nvislines = 15 for Chicago.
   // INPUT ---------------------------------------------------------------------
   static void point_tangents2params(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
+  static void point_tangents2params_img(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, const F K[/*3 or 2*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   // this function is the same for all problems
   static void get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
@@ -7097,6 +7107,56 @@ invert_intrinsics_tgt(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], con
     F *t = normalized_tgt_coords[p];
     t[1] = tp[1]/K[1][1];
     t[0] = (tp[0] - K[0][1]*tp[1])/K[0][0];
+  }
+}
+
+//template <typename F>
+//inline void 
+//minus_io_shaping<chicago14a, F>::
+//rotation_error(const F Ra[ncoords3d][ncoords3d], const F Rb[ncoords3d][ncoords3d])
+//{
+//    dR = norm(skew2v(Rots{n}*R_tilde'));
+//}
+
+// returns the angle of the smallest rotation around an axis, 
+// such that rotations A and B align. See S. Bianco, G. Ciocca, and D. Marelli,
+// “Evaluating the performance of structure from motion pipelines,” Journal of
+// Imaging, vol. 4, no. 8, 2018
+//
+// Input: unit quaternions qa and qb
+template <typename F>
+inline F
+minus_io_shaping<chicago14a, F>::
+rotation_error(const F p[4], const F q[4])
+{
+  normalize_quat(p); normalize_quat(q);
+  // pq = - (p0q0 + p1q1 + p2q2) + i(p1q2 - p2q1) + j(p2q0 - p1 q2) + k(p0q1 - p1q0) 
+  // pq_conj = - (p0q0 - p1q1 - p2q2) + i(-p1q2 + p2q1) + j(p2q0 +p1 q2) + k(-p0q1 - p1q0);
+  
+  const F d[4] = {
+    - p[0]*q[0] + p[1]*q[1] + p[2]*q[2], // real
+    - p[1]*q[2] + p[2]*q[1],
+      p[2]*q[0] + p[1]*q[2],
+    - p[0]*q[1] - p[1]*q[0]
+  };
+
+  const F vnorm = sqrt(q[1]*q[1] + q[2]*q[2] + q[3]*q[3]);
+  return Scalar(2) * std::atan2(vnorm, std::fabs(d[0]));
+}
+
+// 
+// The camera parameter is cameras[img] which is a [4][3] array,
+// where the first 3x3 block is R, and the 4th row is T. img is img 0 or 1,
+// for 2nd and 3rd cams relative to 1st, resp.
+// 
+template <typename F>
+bool F
+minus_io_shaping<chicago14a, F>::
+probe_solutions(const M::solution solutions[M::nsols], const Float probe_cameras[2/*2nd and 3rd cams relative to 1st*/][4][3],
+    unsigned &solution_index)
+{
+  for (unsigned s=0; s < M::nsols; ++s) {
+    rotation_error(solutions[i].x, probe_cameras[i].x
   }
 }
   
@@ -7328,11 +7388,10 @@ get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __rest
   gammify(params+M::f::nparams);
 }
 
-// \param[in] tgts: three tangents, one at each point.
-// Only two tangents will actually be used. If one of the points
-// in each image has no reliable or well-defined tangents,
-// you can pass anything (zeros or unallocated memory); 
-// it will be ignored. 
+// \param[in] tgts: three tangents, one at each point, in normalized coordinates
+// (inverted intrinsics).  Only two tangents will actually be used. If one of
+// the points in each image has no reliable or well-defined tangents, you can
+// pass anything (zeros or unallocated memory); it will be ignored. 
 // only tgt[view][id_tgt0][:] and tgt[view][id_tgt1][:] will be used.
 //
 // id_tgt0  < id_tgt0 < 3
@@ -7349,6 +7408,25 @@ point_tangents2params(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt
   get_params_start_target(plines, params);
 }
 
+// Same but for pixel input
+template <typename F>
+inline void 
+minus_io_shaping<chicago14a, F>::
+point_tangents2params_img(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, const F K[/*3 or 2*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+{
+  F pn[pp::nviews][pp::npoints][ncoords2d];
+  F tn[pp::nviews][pp::npoints][ncoords2d];
+  
+  // see if uno minus  default_gammas_m2 is less than 1
+  invert_intrinsics(K, p[0], pn[0], pp::npoints);
+  invert_intrinsics(K, p[1], pn[1], pp::npoints);
+  invert_intrinsics(K, p[2], pn[2], pp::npoints);
+  // don't use all three, but just invert all anyways.
+  invert_intrinsics_tgt(K, tgt[0], tn[0], pp::npoints);
+  invert_intrinsics_tgt(K, tgt[1], tn[1], pp::npoints);
+  invert_intrinsics_tgt(K, tgt[2], tn[2], pp::npoints);
+  point_tangents2params(pn, tn, id_tgt0, id_tgt1, params/*[static 2*M::nparams]*/);
+}
 
 //
 // returns cameras[0:nsols_final][2][4][3]
@@ -7394,7 +7472,7 @@ solution2cams(/*const but use as scratch*/ F rs[M::nve], F cameras[2/*2nd and 3r
   cameras[0][3][2] = rs[10];
   
   // camera 1 (3rd camera relative to 1st)
-  u::quat2rotm(rs, (F *) cameras[1]);
+  u::quat2rotm(rs+4, (F *) cameras[1]);
   cameras[1][3][0] = rs[11];
   cameras[1][3][1] = rs[12];
   cameras[1][3][2] = rs[13];
