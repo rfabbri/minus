@@ -189,12 +189,13 @@ struct minus_util {
   // mattering the memory order
   struct quaternion_shape { F w; F x; F y; F z; };
   
+  
   // arbitrary quaternion to rotation matrix.
   // will normalize the quaternion in-place.
   // based on VXL/VNL
   static inline void quat2rotm(F qq[4], F r[9])
   {
-    normalize_quat(q);
+    normalize_quat(qq);
     solution_shape *q = (solution_shape *) qq;
     const F 
       x2 = q->x * q->x,  xy = q->x * q->y,  wx = q->w * q->x,
@@ -213,38 +214,38 @@ struct minus_util {
     *r   = w2 - x2 - y2 + z2;    //  rot(2,2) = r[8]
   }
   
-  static inline void rotm2quat(F q[4], F r[9])
+  // always row-major
+  // based on Eigen
+  static inline void rotm2quat(F qq[4], const F rr[9])
   {
     // use a struct to reinterpret q
+    solution_shape *q = (solution_shape *) qq;
+    // coeff_eigen[i] = index in our quaternion shape of corresponding element
+    static constexpr coeff_eigen[4] = {1, 2, 3, 0};
+    const F (*r)[3] = (const F (*)[3]) rr;
 
     // This algorithm comes from  "Quaternion Calculus and Fast Animation",
     // Ken Shoemake, 1987 SIGGRAPH course notes
-    F t = r[] + r[] + r[]; // trace
-    if (t > F(0))
-    {
+    F t = rr[0] + rr[4] + rr[8]; // trace
+    if (t > F(0)) {
       t = std::sqrt(t + F(1.0));
-      q.w() = F(0.5)*t;
+      q->w = F(0.5)*t;
       t = F(0.5)/t;
-      q.x() = (mat.coeff(2,1) - mat.coeff(1,2)) * t;
-      q.y() = (mat.coeff(0,2) - mat.coeff(2,0)) * t;
-      q.z() = (mat.coeff(1,0) - mat.coeff(0,1)) * t;
-    }
-    else
-    {
-      Index i = 0;
-      if (mat.coeff(1,1) > mat.coeff(0,0))
-        i = 1;
-      if (mat.coeff(2,2) > mat.coeff(i,i))
-        i = 2;
-      Index j = (i+1)%3;
-      Index k = (j+1)%3;
-
-      t = std::sqrt(mat.coeff(i,i)-mat.coeff(j,j)-mat.coeff(k,k) + F(1.0));
-      q.coeffs().coeffRef(i) = F(0.5) * t;
+      q->x = (r[2][1] - r[1][2]) * t;
+      q->y = (r[0][2] - r[2][0]) * t;
+      q->z = (r[1][0] - r[0][1]) * t;
+    } else {
+      unsigned i = 0;
+      if (r[1][1] > r[0][0]) i = 1;
+      if (r[2][2] > r[i][i]) i = 2;
+      unsigned j = (i+1)%3;
+      unsigned k = (j+1)%3;
+      t = std::sqrt(r[i][i]-r[j][j]-r[k][k] + F(1.0));
+      qq[coeff_eigen[i]] = F(0.5) * t;
       t = F(0.5)/t;
-      q.w() = (mat.coeff(k,j)-mat.coeff(j,k))*t;
-      q.coeffs().coeffRef(j) = (mat.coeff(j,i)+mat.coeff(i,j))*t;
-      q.coeffs().coeffRef(k) = (mat.coeff(k,i)+mat.coeff(i,k))*t;
+      q->w = (r[k][j]-r[j][k])*t;
+      qq[coeff_eigen[j]] = (r[j][i]+r[i][j])*t;
+      qq[coeff_eigen[k]] = (r[k][i]+r[i][k])*t;
     }
   }
 };
