@@ -4914,20 +4914,44 @@ static const complex *params_= default_params_start_target_gammified_; // start-
 // 3389  tangents
 // 0-based ids. +1 to get file line
 // 
+// NOTE: This is exactly the input case in Fabbri's slides in big-notes/trifocal/trifocal.key
+// However, other developers made an off by 1 mistake, and the actual points
+// obtained for this data are 219 3010 and 3388 using 0-based ids.
+// The original one as described in the above keynote slides are in p_correct_
+// 
 // Extracting this data from those files: use scripts/getlines.sh from
 // synthcurves dataset.
-// 
-// This is exactly the input case in Fabbri's slides in big-notes/trifocal/trifocal.key
 //
-// Personal note: The point order seems to match Hongyi when generating the above
-// gammified parameters, though he might have done an
-// off-by-1 mistake for point indexing (3012 vs 3011)
-// 
 // This is in pixel image coordinates
 static const double p_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
   // points for frame 42
+  // + sed -n '620p;3011p;3389p' frame_0042-pts-2d.txt
+  {
+    {140.31501792041547105, 270.706902669716726},
+    {239.87635969387076784, 87.172102114226248659},
+    {267.83329318961659737, 398.26842358907475727}
+  },
+  // points for frame 54
+  // + sed -n '620p;3011p;3389p' frame_0054-pts-2d.txt
+  {
+    {241.31947844321044272, 447.85067745642191994},
+    {124.57198105880478067, 213.86312665869630223},
+    {411.41587110856499976, 260.20836428975133003}
+  },
+  // points for frame 62
+  // + sed -n '620p;3011p;3389p' frame_0062-pts-2d.txt
+  {
+    {240.14289720461368915, 410.63617766598866865},
+    {375.01041069515321169, 276.74255572857123298},
+    {182.24618217979738688, 135.55834378105294036}
+  }
+};
+
+// If correct indexing were used, this would be the default run
+static const double p_correct_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
+  // points for frame 42
   // + sed -n '3012p;3390p;621p' frame_0042-pts-2d.txt
-  {  
+  {
     {141.01103052308988595, 270.45312297462106699},
     {239.89822517853363593, 86.442049763307068133},
     {286.7673976130331539, 217.06531260627261304}
@@ -4952,7 +4976,36 @@ static const double p_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
 // At each solve only two are used, but since usually all three points have
 // tangents, we ask them as input anyways.
 // This is in pixel-based image coordinates. 
+  
+
+// 2D tangents for frame 54
+// 2D tangents for frame 62
+
 static const double tgt_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
+  // tangents for frame 42
+  // + sed -n '3012p;3390p' frame_0042-tgts-2d.txt
+  {
+    {0.92343413197755341848, -0.38375695941423976221},
+    {0.051067554141759022301, -0.99869520120704413646},
+    {-0.10392540094274631268, 0.99458509492093705173}  // unused in standard tests
+  },
+  // tangents for frame 54
+  // + sed -n '3012p;3390p' frame_0054-tgts-2d.txt
+  {
+    {0.087872086927220469099, -0.99613176655453317121},
+    {-0.99894789612890944053, 0.045859577185420184742},
+    {0.8373862036855406199, 0.54661169570099621406} // unused in standard tests
+  },
+  // tangents for frame 62
+  // + sed -n '3012p;3390p' frame_0062-tgts-2d.txt
+  {
+    {0.80392318869110501733, -0.59473313905038616145},
+    {0.79198027607840204567, 0.61054667495841641323},
+    {-0.9942137007529735504, -0.10742028316419853506} // unused in standard tests
+  }
+};
+
+static const double tgt_correct_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
   // tangents for frame 42
   // + sed -n '3012p;3390p' frame_0042-tgts-2d.txt
   {

@@ -8,14 +8,27 @@ cd /Users/rfabbri/lib/data/synthcurves-multiview-3d-dataset/spherical-ascii-100_
 
 
 frames="42 54 62"
+# off by one mistake by hongyi:
+lines="3011 3389 620"
 #set -x
 for i in $frames; do
   echo "// 2D points for frame $i"
-  sed -n '621p;3012p;3390p' frame_00$i-pts-2d.txt
+  for l in $lines; do
+    sed -n "${l}p" frame_00$i-pts-2d.txt
+  done
+done
+
+for i in $frames; do
+  echo "// 2D tangents for frame $i"
+  for l in $lines; do
+    sed -n "${l}p" frame_00$i-tgts-2d.txt
+  done
 done
 
 echo "// 3D points"
-sed -n '621p;3012p;3390p' crv-3D-pts.txt
+for l in $lines; do
+  sed -n "${l}p" crv-3D-pts.txt
+done
 
 #for i in $frames; do
 #  echo "// tangents for frame $i"

@@ -421,13 +421,12 @@ test_point_tangents2lines()
       
     io::point_tangents2lines(pn, tn, 0, 1, plines);
     
-    TEST("lines2params sanity check", plines[1][1] != complex(0), true);
-    TEST("lines2params sanity check", plines[2][0] != complex(0) && plines[2][1] != complex(0), true);
+    TEST("point_tangents2lines sanity check", plines[1][1] != complex(0), true);
+    TEST("point_tangents2lines sanity check", plines[2][0] != complex(0) && plines[2][1] != complex(0), true);
 
     // does it match macaulay2? 
     // actually, we are superior. more than twice the precision.
-
-    TEST("lines2params matches m2", same_matrices_up_to_row_scale((Float *) plines, (Float *) plines_m2_, io::pp::nvislines, io::ncoords2d_h), true);
+    TEST("point_tangents2lines's lines match m2", same_matrices_up_to_row_scale((Float *) plines, (Float *) plines_m2_, io::pp::nvislines, io::ncoords2d_h), true);
   }
 
   { // hardcoded simple input points and desired output lines
