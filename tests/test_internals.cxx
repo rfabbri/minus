@@ -393,7 +393,7 @@ test_gamma()
     io::lines2params(plines, params); // ungammified params
     
     for (unsigned i=0; i < M::f::nparams; ++i)
-      params[i] = default_params_start_target_gammified_[i] / params[i];
+      params[i] = default_params_start_target_gammified_[i+M::f::nparams] / params[i];
 
     std::cout << "Default test gammas: " << std::endl;
     print(params, M::f::nparams, true);
