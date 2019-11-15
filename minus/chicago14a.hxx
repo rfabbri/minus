@@ -7152,12 +7152,18 @@ rotation_error(const F p[4], const F q[4])
 template <typename F>
 bool F
 minus_io_shaping<chicago14a, F>::
-probe_solutions(const M::solution solutions[M::nsols], const Float probe_cameras[2/*2nd and 3rd cams relative to 1st*/][4][3],
+probe_solutions(const M::solution solutions[M::nsols], solution_shape probe_cameras,
     unsigned &solution_index)
 {
-  for (unsigned s=0; s < M::nsols; ++s) {
-    rotation_error(solutions[i].x, probe_cameras[i].x
-  }
+  typedef minus_array<M::nve,F> v;
+  static constexpr eps = 1e-3;
+  unsigned &sol=*solution_index;
+  F real_solutions[M::nve];
+  for (sol = 0; sol < M::nsols; ++sol) 
+    if (v::get_real(raw_solutions[sol].x, real_solutions) && 
+        rotation_error(real_solutions, probe_cameras.q01) < eps)
+      return true;
+  return false
 }
   
 // we only use the first half of the outer

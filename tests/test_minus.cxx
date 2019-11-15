@@ -93,13 +93,11 @@ test_end_user_interface()
   unsigned id_sols[M::nsols] = {};
   io::all_solutions2cams(solutions, cameras, id_sols, &nsols_final);
 
-  
   // ---------------------------------------------------------------------------
   // test_final_solve_against_ground_truth(solutions);
   // optional: filter solutions using positive depth, etc.
-
   unsigned sol_id;
-  bool found =  io::probe_solutions(solutions, cameras_gt_, &sol_id);
+  bool found =  io::probe_solutions(solutions, cameras_gt_quaternion_, &sol_id);
   TEST("IO: Found GT solution? ", found, true);
   if (found)
     std::cout << "found solution at index: " << sol_id << std::endl;

@@ -4924,22 +4924,19 @@ static const complex *params_= default_params_start_target_gammified_; // start-
 //
 // This is in pixel image coordinates
 static const double p_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
-  // points for frame 42
-  // + sed -n '620p;3011p;3389p' frame_0042-pts-2d.txt
+  // points for frame 42 frame_0042-pts-2d.txt lines 3011 3389 620  (in order)
   {
     {140.31501792041547105, 270.706902669716726},
     {239.87635969387076784, 87.172102114226248659},
     {267.83329318961659737, 398.26842358907475727}
   },
-  // points for frame 54
-  // + sed -n '620p;3011p;3389p' frame_0054-pts-2d.txt
+  // points for frame 54  frame_0054-pts-2d.txt lines 3011 3389 620  (in order)
   {
     {241.31947844321044272, 447.85067745642191994},
     {124.57198105880478067, 213.86312665869630223},
     {411.41587110856499976, 260.20836428975133003}
   },
-  // points for frame 62
-  // + sed -n '620p;3011p;3389p' frame_0062-pts-2d.txt
+  // points for frame 62 frame_0062-pts-2d.txt lines 3011 3389 620 (in order)
   {
     {240.14289720461368915, 410.63617766598866865},
     {375.01041069515321169, 276.74255572857123298},
@@ -4972,6 +4969,43 @@ static const double p_correct_[io::pp::nviews][io::pp::npoints][io::ncoords2d] =
   }
 };
 
+
+// camera format: just like a 3x4 [R|T] but transposed to better fit row-major:
+// | R |
+// | - |
+// | T'|
+//
+// In this case, this data is from the synthcurves multiview dataset,
+// so that instead of T, C is stored:
+// | R |
+// | - |
+// | C'|
+static const double cameras_gt_[M::nviews-1][4][3] = {
+  { // camera for frame 42
+    {-0.097305153950172085242, -0.22322794404612877894, -0.96989741313794208821},
+    {0.96072075769186959793, 0.23341709945525662695, -0.15010690664274928263},
+    {0.25989869710080021337, -0.94640675329312473618, 0.1917470327448986267},
+    {-295.2090359311167731, 1074.0075457376335635, -236.40439390871563319}
+  },
+  { // camera for frame 54
+    {0.81820480546085894158, 0.07511341824191355987, -0.56999900940332604016},
+    {0.54313649506229122466, -0.42609616539484057585, 0.72349485524588375007},
+    {-0.18853022052765816552, -0.90155423144469115648, -0.38943076883056443327},
+    {194.82952402681169701, 1020.3676638972305, 431.76461692675769655}
+  },
+  { // camera for frame 62
+    {-0.61853492444688140672, -0.60388598633423984374, -0.50272881631015808868},
+    {-0.025677143402306701336, -0.62392573537516660132, 0.78106168837247091918},
+    {-0.78533765448129877473, 0.4960225723146879373, 0.37041379052099593361},
+    {887.07508137499985423, -562.68690102473453862, -415.57529638919055515}
+  }
+};
+
+// this is more similar to the format in M::solution::x
+// ie, minus_io_shapping::solution_shape
+static const double cameras_gt_quaternion_[M::nviews-1][4][3] = {
+}
+
 // The tgt_ array is the same size as the p_ array.
 // At each solve only two are used, but since usually all three points have
 // tangents, we ask them as input anyways.
@@ -4987,21 +5021,21 @@ static const double tgt_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
   {
     {0.92343413197755341848, -0.38375695941423976221},
     {0.051067554141759022301, -0.99869520120704413646},
-    {-0.10392540094274631268, 0.99458509492093705173}  // unused in standard tests
+    {-0.10392540094274631268, 0.99458509492093705173}  // unused in our standard tests
   },
   // tangents for frame 54
   // + sed -n '3012p;3390p' frame_0054-tgts-2d.txt
   {
     {0.087872086927220469099, -0.99613176655453317121},
     {-0.99894789612890944053, 0.045859577185420184742},
-    {0.8373862036855406199, 0.54661169570099621406} // unused in standard tests
+    {0.8373862036855406199, 0.54661169570099621406} // unused in our standard tests
   },
   // tangents for frame 62
   // + sed -n '3012p;3390p' frame_0062-tgts-2d.txt
   {
     {0.80392318869110501733, -0.59473313905038616145},
     {0.79198027607840204567, 0.61054667495841641323},
-    {-0.9942137007529735504, -0.10742028316419853506} // unused in standard tests
+    {-0.9942137007529735504, -0.10742028316419853506} // unused in our standard tests
   }
 };
 
@@ -5040,6 +5074,11 @@ static const double K_[io::ncoords2d][io::ncoords2d_h] = {
  //  0 0 1 
 };
 
+static const 
+
+
+
+// OLD COMMENTS:
 // Hongy's format (intermediate, after inverting K, specific for line/minur
 // formulation)
 // 
