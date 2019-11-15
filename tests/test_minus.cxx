@@ -74,10 +74,9 @@ test_end_user_interface()
 
   // M::solve(M::DEFAULT, start_sols_, points, cameras);
   {
-  complex params[2*M::f::nparams];
   M::solution solutions[M::nsols];
-  io::point_tangents2params(p_, tgt_, 0, 1, params);
-  M::track_all(M::DEFAULT, start_sols_, params, solutions);
+  io::point_tangents2params(p_, tgt_, 0, 1, params_start_target_);
+  M::track_all(M::DEFAULT, start_sols_, params_start_target_, solutions);
   TEST("Did it track first solution?", solutions[0].t > 0, true);
   TEST("Did it track the last solution?", solutions[M::nsols-1].t > 0, true);
   test_against_ground_truth(solutions);

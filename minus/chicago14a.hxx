@@ -7321,7 +7321,9 @@ inline void
 minus_io_shaping<chicago14a, F>::
 get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
-  lines2params(plines, params);
+  // the user provides the start params in the first half of params.
+  // we fill the second half and gammify both.
+  lines2params(plines, params+M::f::nparams);
   gammify(params);
   gammify(params+M::f::nparams);
 }
@@ -7340,6 +7342,8 @@ inline void
 minus_io_shaping<chicago14a, F>::
 point_tangents2params(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
+  // the user provides the start params in the first half of params.
+  // we fill the second half and gammify both.
   F plines[pp::nvislines][ncoords2d_h];
   point_tangents2lines(p, tgt, id_tgt0, id_tgt1, plines);
   get_params_start_target(plines, params);
