@@ -68,7 +68,7 @@ struct minus_array { // Speed critical -----------------------------------------
   //
   // Not speed critical.
   static inline bool
-  get_real(C<F> s[N], F rs[N])
+  get_real(const C<F> s[N], F rs[N])
   {
     // Hongyi function realSolutions = parseSolutionString(output)
     // solutions = reshape(solutions,[14,length(solutions)/14]);
@@ -187,7 +187,7 @@ struct minus_util {
   // 
   // Used to cast a q[4] vector to interpret entries and use algorithms not
   // mattering the memory order
-  struct quaternion_shape { F w; F x; F y; F z; };
+  struct quat_shape { F w; F x; F y; F z; };
   
   // arbitrary quaternion to rotation matrix.
   // will normalize the quaternion in-place.
@@ -195,7 +195,7 @@ struct minus_util {
   static inline void quat2rotm(F qq[4], F r[9])
   {
     normalize_quat(qq);
-    solution_shape *q = (solution_shape *) qq;
+    quat_shape *q = (quat_shape *) qq;
     const F 
       x2 = q->x * q->x,  xy = q->x * q->y,  wx = q->w * q->x,
       y2 = q->y * q->y,  yz = q->y * q->z,  wy = q->w * q->y,
@@ -215,13 +215,14 @@ struct minus_util {
   
   // always row-major
   // originally based on Eigen
+  // TODO sanity test: result is unit quaternion
   static inline void rotm2quat(const F rr[9], F qq[4])
   {
     // use a struct to reinterpret q
-    quaternion_shape *q = (quaternion_shape *) qq;
+    quat_shape *q = (quat_shape *) qq;
     const F (*r)[3] = (const F (*)[3]) rr;
     // coeff_eigen[i] = index in our quaternion shape of corresponding element
-    static constexpr coeff_eigen[4] = {1, 2, 3, 0};
+    static constexpr unsigned coeff_eigen[4] = {1, 2, 3, 0};
 
     // This algorithm comes from  "Quaternion Calculus and Fast Animation",
     // Ken Shoemake, 1987 SIGGRAPH course notes
@@ -253,8 +254,8 @@ struct minus_util {
   // conj(a)*b
   static inline void dquat(const F aa[9], const F bb[4], F d[4])
   {
-    const quaternion_shape *a = (quaternion_shape *) aa, 
-                           *b = (quaternion_shape *) bb;
+    const quat_shape *a = (quat_shape *) aa, 
+                     *b = (quat_shape *) bb;
 
     *d++ = a->w * b->z - a->z * b->w - a->x * b->y + a->y * b->x;
     *d++ = a->w * b->w + a->x * b->x + a->y * b->y + a->z * b->z;
@@ -274,14 +275,35 @@ struct minus_util {
 
     // Vector3 uv = this->vec().cross(v);
     F uv[3];
-    cross(q+1, v, uv);
+    minus_3d<F>::cross(q+1, v, uv);
     uv[0] += uv[0]; uv[1] += uv[1]; uv[2] += uv[2];    // uv += uv
     
     // return v + q->w() * uv + q->vec().cross(uv);
-    cross(q+1, uv, vrot);
+    minus_3d<F>::cross(q+1, uv, vrot);
     vrot[0] = v[0] + q[0]*uv[0] + vrot[0];
     vrot[1] = v[1] + q[0]*uv[1] + vrot[1];
     vrot[2] = v[2] + q[0]*uv[2] + vrot[2];
+  }
+  
+  // returns the angle of the smallest rotation around an axis, 
+  // such that rotations A and B align. See S. Bianco, G. Ciocca, and D. Marelli,
+  // “Evaluating the performance of structure from motion pipelines,” Journal of
+  // Imaging, vol. 4, no. 8, 2018
+  //
+  // Input: unit quaternions qa and qb
+  //
+  //rotation_error(const F Ra[ncoords3d][ncoords3d], const F Rb[ncoords3d][ncoords3d])
+  //{
+  //    dR = norm(skew2v(Rots{n}*R_tilde'));
+  //}
+  static inline F rotation_error(const F p[4], const F q[4])
+  {
+    // normalize_quat(p); normalize_quat(q);
+    F d[4];
+    dquat(p, q , d);
+
+    const F vnorm = sqrt(q[1]*q[1] + q[2]*q[2] + q[3]*q[3]);
+    return F(2) * std::atan2(vnorm, std::fabs(d[0]));
   }
 };
 

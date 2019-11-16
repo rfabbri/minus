@@ -214,6 +214,16 @@ template <problem P, typename F=double>
 struct minus_io_shaping {
   typedef minus_core<P, F> M;
   typedef struct M::solution solution;
+
+  // cast to this to interpret real M::solution::x order
+  // internal note: this order is eg  in parser.m2 l 68
+  struct solution_shape {
+    F q01[4];
+    F q02[4];
+    F t01[3];
+    F t02[3];
+  };
+  
   static constexpr unsigned ncoords2d = 2;  // just a documented name for the number of inhomog coordinates
   static constexpr unsigned ncoords2d_h = 3;// just a name for the usual number of homog coordinates in P^2
   static constexpr unsigned ncoords3d = 3;  // just a documented name for the number of inhomog 3D coordinates
@@ -260,10 +270,17 @@ struct minus_io_shaping {
   static void invert_intrinsics_tgt(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const double pix_tgt_coords[][ncoords2d], double normalized_tgt_coords[][ncoords2d], unsigned npts);
   static void normalize_line(F line[ncoords2d_h]);
   static void normalize_lines(F lines[][ncoords2d_h], unsigned nlines);
+  static void initialize_gt();
+  static void RC_to_QT_format(F rc[M::nviews-1][4][3], F qt[M::nve]);
+  static void rotation_error(const F p[4], const F q[4]);
 
   // OUTPUT --------------------------------------------------------------------
   static void all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], unsigned id_sols[M::nsols], unsigned *nsols_final);
   static void solution2cams(F rs[M::f::nve], F cameras[2][4][3]);
+  static void probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *probe_cameras,
+      unsigned *solution_index);
+  static void probe_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
+      unsigned *solution_index);
 };
 
 // Shortcuts and aliases -------------------------------------------------------

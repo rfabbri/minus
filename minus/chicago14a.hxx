@@ -7075,10 +7075,16 @@ struct minus_io_shaping<chicago14a, F> {
     l[0] /= nrm; l[1] /= nrm; l[2] /= nrm;
   }
   static void normalize_lines(F lines[][ncoords2d_h], unsigned nlines);
+  static void RC_to_QT_format(F rc[M::nviews-1][4][3], F qt[M::nve]);
+  static void rotation_error(const F p[4], const F q[4]);
 
   // OUTPUT --------------------------------------------------------------------
   static void all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], unsigned id_sols[M::nsols], unsigned *nsols_final);
   static void solution2cams(F rs[M::f::nve], F cameras[2][4][3]);
+  static bool probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *probe_cameras,
+      unsigned *solution_index);
+  static bool probe_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
+      unsigned *solution_index);
 };
 
 // For speed, assumes input point implicitly has 3rd homog coordinate is 1
@@ -7111,67 +7117,34 @@ invert_intrinsics_tgt(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], con
   }
 }
 
-//template <typename F>
-//inline void 
-//minus_io_shaping<chicago14a, F>::
-//rotation_error(const F Ra[ncoords3d][ncoords3d], const F Rb[ncoords3d][ncoords3d])
-//{
-//    dR = norm(skew2v(Rots{n}*R_tilde'));
-//}
-
-// returns the angle of the smallest rotation around an axis, 
-// such that rotations A and B align. See S. Bianco, G. Ciocca, and D. Marelli,
-// “Evaluating the performance of structure from motion pipelines,” Journal of
-// Imaging, vol. 4, no. 8, 2018
-//
-// Input: unit quaternions qa and qb
-template <typename F>
-inline F
-minus_io_shaping<chicago14a, F>::
-rotation_error(const F p[4], const F q[4])
-{
-  normalize_quat(p); normalize_quat(q);
-  // pq = - (p0q0 + p1q1 + p2q2) + i(p1q2 - p2q1) + j(p2q0 - p1 q2) + k(p0q1 - p1q0) 
-  // pq_conj = - (p0q0 - p1q1 - p2q2) + i(-p1q2 + p2q1) + j(p2q0 +p1 q2) + k(-p0q1 - p1q0);
-  
-  const F d[4] = {
-    - p[0]*q[0] + p[1]*q[1] + p[2]*q[2], // real
-    - p[1]*q[2] + p[2]*q[1],
-      p[2]*q[0] + p[1]*q[2],
-    - p[0]*q[1] - p[1]*q[0]
-  };
-
-  const F vnorm = sqrt(q[1]*q[1] + q[2]*q[2] + q[3]*q[3]);
-  return Scalar(2) * std::atan2(vnorm, std::fabs(d[0]));
-}
-
-// 
 // The camera parameter is cameras[img] which is a [4][3] array,
 // where the first 3x3 block is R, and the 4th row is T. img is img 0 or 1,
 // for 2nd and 3rd cams relative to 1st, resp.
 // 
 template <typename F>
-bool F
+inline bool 
 minus_io_shaping<chicago14a, F>::
-probe_solutions(const M::solution solutions[M::nsols], solution_shape *probe_cameras,
-    unsigned &solution_index)
+probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *probe_cameras,
+    unsigned *solution_index)
 {
-  typedef minus_array<M::nve,F> v;
-  static constexpr eps = 1e-3;
+  typedef minus_array<M::nve,F> v; typedef minus_util<F> u;
+  static constexpr F eps = 1e-3;
   unsigned &sol=*solution_index;
   F real_solutions[M::nve];
   for (sol = 0; sol < M::nsols; ++sol) 
-    if (v::get_real(raw_solutions[sol].x, real_solutions) && 
-        rotation_error(real_solutions, probe_cameras.q01) < eps)
-      return true;
-  return false
+    if (v::get_real(solutions[sol].x, real_solutions)) {
+      u::normalize_quat(real_solutions);
+      if (u::rotation_error(real_solutions, probe_cameras->q01) < eps)
+        return true;
+    }
+  return false;
 }
 
 template <typename F>
-bool F
+inline bool
 minus_io_shaping<chicago14a, F>::
-probe_solutions(const M::solution solutions[M::nsols], solution_shape probe_cameras,
-    unsigned &solution_index)
+probe_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
+    unsigned *solution_index)
 {
   probe_solutions(solutions, (solution_shape *) probe_cameras, solution_index);
 }
@@ -7319,53 +7292,35 @@ normalize_lines(F lines[][ncoords2d_h], unsigned nlines)
     normalize_line(lines[l]);
 }
 
-
-
-// fill in internal format for cameras_gt_
-// into camera_gt_quaternion
-// - convert each rotation to quaternion in the right order
-// - make the rotations all relative to the first camera
-void
-initialize_gt()
-{
-  //  R01 = R1 * inv(R0);
-  //  T01 = R1 * (C0 - C1);
-  //  R12 = R2 * inv(R1);
-  //  T12 = R2 * (C1 - C2);
-
-  // rotation-center format (used in synthcurves dataset)
-  // relative to the world, to internal quaternion-translation format relative
-  // to first camera
-  RC_to_QT_format(cameras_gt_, cameras_gt_quat_);
-}
-
 // RC: same format as cameras_gt_ and synthcurves dataset
 // QT: same format as solution_shape
-void
+template <typename F>
+inline void 
+minus_io_shaping<chicago14a, F>::
 RC_to_QT_format(F rc[M::nviews-1][4][3], F qt[M::nve])
 {
+  typedef minus_util<F> u;
   F q0[4], q1[4], q2[4];
 
-  rotm2quat(rc[0], q0);
-  rotm2quat(rc[1], q1);
-  rotm2quat(rc[2], q2);
+  u::rotm2quat((F *) rc[0], q0);
+  u::rotm2quat((F *) rc[1], q1);
+  u::rotm2quat((F *) rc[2], q2);
 
   // gt = q1 * conj(q0);
   // gt + 4 = q2 * conj(q0);
-  dquat(q0, q1, qt);
-  dquat(q0, q2, qt + 4);
+  u::dquat(q0, q1, qt);
+  u::dquat(q0, q2, qt + 4);
 
   // gt + 8 = q1*(c0-c1)*q1.conj();
   // gt + 8 = quat_transform(q1,c0-c1);
   // gt + 8 + 3 = quat_transform(q2,c0-c2);
   F dc[3];
-  dc[0] = c0[0] - c1[0];
-  dc[1] = c0[1] - c1[1];
-  dc[2] = c0[2] - c1[2];
-  quat_transform(q1,dc, qt + 8);
-  quat_transform(q2,dc, qt + 8 + 3);
+  dc[0] = rc[0][3][0] - rc[1][3][0];
+  dc[1] = rc[0][3][1] - rc[1][3][1];
+  dc[2] = rc[0][3][2] - rc[1][3][2];
+  u::quat_transform(q1,dc, qt + 8);
+  u::quat_transform(q2,dc, qt + 8 + 3);
 }
-
 
 // Generate "visible" line representation from input point-tangents
 // 
