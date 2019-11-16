@@ -173,12 +173,6 @@ struct minus_util {
   static std::mt19937 rnd;
   static std::normal_distribution<F> gauss;
   
-  static inline void normalize_quat(F q[4])
-  {
-    const F norm = sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3]);
-    q[0] /= norm; q[1] /= norm; q[2] /= norm; q[3] /= norm;
-  }
-  
   // The quaternion order used in the following functions.
   // this is for historical reasons the one used in chicago problem.
   // 
@@ -188,6 +182,12 @@ struct minus_util {
   // Used to cast a q[4] vector to interpret entries and use algorithms not
   // mattering the memory order
   struct quat_shape { F w; F x; F y; F z; };
+  
+  static inline void normalize_quat(F q[4])
+  {
+    const F norm = sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3]);
+    q[0] /= norm; q[1] /= norm; q[2] /= norm; q[3] /= norm;
+  }
   
   // arbitrary quaternion to rotation matrix.
   // will normalize the quaternion in-place.
@@ -252,7 +252,7 @@ struct minus_util {
   // computes the relative unit quaternion between two unit quaternions
   // based on Eigen
   // conj(a)*b
-  static inline void dquat(const F aa[9], const F bb[4], F d[4])
+  static inline void dquat(const F aa[4], const F bb[4], F d[4])
   {
     const quat_shape *a = (quat_shape *) aa, 
                      *b = (quat_shape *) bb;
@@ -296,13 +296,14 @@ struct minus_util {
   //{
   //    dR = norm(skew2v(Rots{n}*R_tilde'));
   //}
+  // Based on Eigen
   static inline F rotation_error(const F p[4], const F q[4])
   {
     // normalize_quat(p); normalize_quat(q);
     F d[4];
     dquat(p, q , d);
 
-    const F vnorm = sqrt(q[1]*q[1] + q[2]*q[2] + q[3]*q[3]);
+    const F vnorm = sqrt(d[1]*d[1] + d[2]*d[2] + d[3]*d[3]);
     return F(2) * std::atan2(vnorm, std::fabs(d[0]));
   }
 };
