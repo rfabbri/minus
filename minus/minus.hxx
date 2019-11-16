@@ -250,7 +250,7 @@ struct minus_util {
   }
 
   // computes the relative unit quaternion between two unit quaternions
-  // based on Eigen
+  // based on Eigen quat_product
   // conj(a)*b
   static inline void dquat(const F aa[4], const F bb[4], F d[4])
   {
