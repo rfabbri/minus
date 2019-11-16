@@ -72,7 +72,7 @@ struct minus_array { // Speed critical -----------------------------------------
   {
     // Hongyi function realSolutions = parseSolutionString(output)
     // solutions = reshape(solutions,[14,length(solutions)/14]);
-    static const double eps = 10e-3;
+    static constexpr double eps = 10e-3;
     
     // TODO[improvement]
     // Fancy way to coNrt to real is to check if the complex number is close to

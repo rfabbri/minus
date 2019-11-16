@@ -77,6 +77,9 @@ test_full_solve()
   unsigned id_sols[M::nsols] = {};
   io::all_solutions2cams(solutions, cameras, id_sols, &nsols_final);
   std::cerr << "LOG found " << nsols_final << " real solutions\n";
+  for (unsigned s=0; s < 3; ++s) {
+    print(solutions[id_sols[s]].x, M::nve);
+  }
   }
 
   // ---------------------------------------------------------------------------
