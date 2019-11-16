@@ -7075,7 +7075,7 @@ struct minus_io_shaping<chicago14a, F> {
     l[0] /= nrm; l[1] /= nrm; l[2] /= nrm;
   }
   static void normalize_lines(F lines[][ncoords2d_h], unsigned nlines);
-  static void RC_to_QT_format(F rc[M::nviews-1][4][3], F qt[M::nve]);
+  static void RC_to_QT_format(const F rc[M::nviews][4][3], F qt[M::nve]);
   static void rotation_error(const F p[4], const F q[4]);
 
   // OUTPUT --------------------------------------------------------------------
@@ -7146,7 +7146,7 @@ minus_io_shaping<chicago14a, F>::
 probe_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
     unsigned *solution_index)
 {
-  probe_solutions(solutions, (solution_shape *) probe_cameras, solution_index);
+  return probe_solutions(solutions, (solution_shape *) probe_cameras, solution_index);
 }
   
 // we only use the first half of the outer
@@ -7297,7 +7297,7 @@ normalize_lines(F lines[][ncoords2d_h], unsigned nlines)
 template <typename F>
 inline void 
 minus_io_shaping<chicago14a, F>::
-RC_to_QT_format(F rc[M::nviews-1][4][3], F qt[M::nve])
+RC_to_QT_format(const F rc[M::nviews][4][3], F qt[M::nve])
 {
   typedef minus_util<F> u;
   F q0[4], q1[4], q2[4];

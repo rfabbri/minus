@@ -4980,7 +4980,7 @@ static const double p_correct_[io::pp::nviews][io::pp::npoints][io::ncoords2d] =
 // | R |
 // | - |
 // | C'|
-static const double cameras_gt_[M::nviews-1][4][3] = {
+static const double cameras_gt_[io::pp::nviews][4][3] = {
   { // camera for frame 42
     {-0.097305153950172085242, -0.22322794404612877894, -0.96989741313794208821},
     {0.96072075769186959793, 0.23341709945525662695, -0.15010690664274928263},
@@ -5004,7 +5004,7 @@ static const double cameras_gt_[M::nviews-1][4][3] = {
 // this is more similar to the format in M::solution::x
 // ie, minus_io_shapping::solution_shape,
 // for each other view relative to the first
-static const double cameras_gt_quat_[M::nviews-1][M::nve];
+static double cameras_gt_quat_[M::nve];
 
 // The tgt_ array is the same size as the p_ array.
 // At each solve only two are used, but since usually all three points have
@@ -5106,22 +5106,5 @@ const double line_complex[5][9] =
 0 0 0 0 0 0 0 0 0]
  * */
 
-// fill in internal format for cameras_gt_
-// into camera_gt_quaternion
-// - convert each rotation to quaternion in the right order
-// - make the rotations all relative to the first camera
-static void
-minus_initialize_gt()
-{
-  //  R01 = R1 * inv(R0);
-  //  T01 = R1 * (C0 - C1);
-  //  R12 = R2 * inv(R1);
-  //  T12 = R2 * (C1 - C2);
-
-  // rotation-center format (used in synthcurves dataset)
-  // relative to the world, to internal quaternion-translation format relative
-  // to first camera
-  io::RC_to_QT_format(cameras_gt_, cameras_gt_quat_);
-}
 
 #endif   // chicago14a_default_hxx_

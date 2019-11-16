@@ -271,15 +271,15 @@ struct minus_io_shaping {
   static void normalize_line(F line[ncoords2d_h]);
   static void normalize_lines(F lines[][ncoords2d_h], unsigned nlines);
   static void initialize_gt();
-  static void RC_to_QT_format(F rc[M::nviews-1][4][3], F qt[M::nve]);
+  static void RC_to_QT_format(const F rc[M::nviews-1][4][3], F qt[M::nve]);
   static void rotation_error(const F p[4], const F q[4]);
 
   // OUTPUT --------------------------------------------------------------------
   static void all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], unsigned id_sols[M::nsols], unsigned *nsols_final);
   static void solution2cams(F rs[M::f::nve], F cameras[2][4][3]);
-  static void probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *probe_cameras,
+  static bool probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *probe_cameras,
       unsigned *solution_index);
-  static void probe_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
+  static bool probe_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
       unsigned *solution_index);
 };
 
