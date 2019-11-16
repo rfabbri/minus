@@ -72,7 +72,7 @@ struct minus_array { // Speed critical -----------------------------------------
   {
     // Hongyi function realSolutions = parseSolutionString(output)
     // solutions = reshape(solutions,[14,length(solutions)/14]);
-    static const double eps = 10e-6;
+    static const double eps = 10e-3;
     
     // TODO[improvement]
     // Fancy way to coNrt to real is to check if the complex number is close to
@@ -261,7 +261,28 @@ struct minus_util {
     *d++ = a->w * b->x - a->x * b->w - a->y * b->z + a->z * b->y;
     *d   = a->w * b->y - a->y * b->w - a->z * b->x + a->x * b->z;
   }
-  
+
+  // based on Eigen
+  static inline void quat_transform(F q[4], const F v[3], F vrot[3])
+  {
+    // q*v*q.conj();
+    // Note that this algorithm comes from the optimization by hand
+    // of the conversion to a Matrix followed by a Matrix/Vector product.
+    // It appears to be much faster than the common algorithm found
+    // in the literature (30 versus 39 flops). It also requires two
+    // Vector3 as temporaries.
+
+    // Vector3 uv = this->vec().cross(v);
+    F uv[3];
+    cross(q+1, v, uv);
+    uv[0] += uv[0]; uv[1] += uv[1]; uv[2] += uv[2];    // uv += uv
+    
+    // return v + q->w() * uv + q->vec().cross(uv);
+    cross(q+1, uv, vrot);
+    vrot[0] = v[0] + q[0]*uv[0] + vrot[0];
+    vrot[1] = v[1] + q[0]*uv[1] + vrot[1];
+    vrot[2] = v[2] + q[0]*uv[2] + vrot[2];
+  }
 };
 
 template <typename F>

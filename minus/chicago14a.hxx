@@ -7153,7 +7153,7 @@ rotation_error(const F p[4], const F q[4])
 template <typename F>
 bool F
 minus_io_shaping<chicago14a, F>::
-probe_solutions(const M::solution solutions[M::nsols], solution_shape probe_cameras,
+probe_solutions(const M::solution solutions[M::nsols], solution_shape *probe_cameras,
     unsigned &solution_index)
 {
   typedef minus_array<M::nve,F> v;
@@ -7165,6 +7165,15 @@ probe_solutions(const M::solution solutions[M::nsols], solution_shape probe_came
         rotation_error(real_solutions, probe_cameras.q01) < eps)
       return true;
   return false
+}
+
+template <typename F>
+bool F
+minus_io_shaping<chicago14a, F>::
+probe_solutions(const M::solution solutions[M::nsols], solution_shape probe_cameras,
+    unsigned &solution_index)
+{
+  probe_solutions(solutions, (solution_shape *) probe_cameras, solution_index);
 }
   
 // we only use the first half of the outer
@@ -7310,16 +7319,7 @@ normalize_lines(F lines[][ncoords2d_h], unsigned nlines)
     normalize_line(lines[l]);
 }
 
-dquat(p,q)
-// pq = - (p0q0 + p1q1 + p2q2) + i(p1q2 - p2q1) + j(p2q0 - p1 q2) + k(p0q1 - p1q0) 
-// pq_conj = - (p0q0 - p1q1 - p2q2) + i(-p1q2 + p2q1) + j(p2q0 +p1 q2) + k(-p0q1 - p1q0);
 
-const F d[4] = {
-  - p[0]*q[0] + p[1]*q[1] + p[2]*q[2], // real
-  - p[1]*q[2] + p[2]*q[1],
-    p[2]*q[0] + p[1]*q[2],
-  - p[0]*q[1] - p[1]*q[0]
-};
 
 // fill in internal format for cameras_gt_
 // into camera_gt_quaternion
@@ -7336,29 +7336,34 @@ initialize_gt()
   // rotation-center format (used in synthcurves dataset)
   // relative to the world, to internal quaternion-translation format relative
   // to first camera
-  RC_to_QT_format(cameras_gt_, cameras_gt_quat);
-  
+  RC_to_QT_format(cameras_gt_, cameras_gt_quat_);
 }
 
+// RC: same format as cameras_gt_ and synthcurves dataset
+// QT: same format as solution_shape
 void
-RC_to_QT_format(rc, qt)
+RC_to_QT_format(F rc[M::nviews-1][4][3], F qt[M::nve])
 {
-F q0[4], q1[4], q2[4];
+  F q0[4], q1[4], q2[4];
 
-rotm2quat(rc[0], q0);
-rotm2quat(rc[1], q1);
-rotm2quat(rc[2], q2);
+  rotm2quat(rc[0], q0);
+  rotm2quat(rc[1], q1);
+  rotm2quat(rc[2], q2);
 
-// gt = q1 * conj(q0);
-// gt + 4 = q2 * conj(q0);
-dquat(q0, q1, gt);
-dquat(q0, q2, gt + 4);
+  // gt = q1 * conj(q0);
+  // gt + 4 = q2 * conj(q0);
+  dquat(q0, q1, qt);
+  dquat(q0, q2, qt + 4);
 
-// gt + 8 = q1*(c0-c1)*q1.conj();
-// gt + 8 = quat_transform(q1,c0-c1);
-// gt + 8 + 3 = quat_transform(q2,c0-c2);
-quat_transform(q1,c0-c1, gt + 8);
-quat_transform(q2,c0-c2, gt + 8 + 3);
+  // gt + 8 = q1*(c0-c1)*q1.conj();
+  // gt + 8 = quat_transform(q1,c0-c1);
+  // gt + 8 + 3 = quat_transform(q2,c0-c2);
+  F dc[3];
+  dc[0] = c0[0] - c1[0];
+  dc[1] = c0[1] - c1[1];
+  dc[2] = c0[2] - c1[2];
+  quat_transform(q1,dc, qt + 8);
+  quat_transform(q2,dc, qt + 8 + 3);
 }
 
 
