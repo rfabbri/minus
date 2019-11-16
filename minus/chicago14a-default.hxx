@@ -5002,9 +5002,9 @@ static const double cameras_gt_[M::nviews-1][4][3] = {
 };
 
 // this is more similar to the format in M::solution::x
-// ie, minus_io_shapping::solution_shape
-static const double cameras_gt_quaternion_[M::nviews-1][4][3] = {
-}
+// ie, minus_io_shapping::solution_shape,
+// for each other view relative to the first
+static const double cameras_gt_quat_[M::nviews-1][M::nve];
 
 // The tgt_ array is the same size as the p_ array.
 // At each solve only two are used, but since usually all three points have

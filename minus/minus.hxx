@@ -182,13 +182,12 @@ struct minus_util {
   // The quaternion order used in the following functions.
   // this is for historical reasons the one used in chicago problem.
   // 
-  // Eigen and VXL use {x,y,z,w}, but these function use {w, x, y z} 
+  // Eigen and VXL use {x,y,z,w}, but these functions use {w, x, y z} 
   // Ceres also uses {w, x, y, z}, where w is the scalar part.
   // 
   // Used to cast a q[4] vector to interpret entries and use algorithms not
   // mattering the memory order
   struct quaternion_shape { F w; F x; F y; F z; };
-  
   
   // arbitrary quaternion to rotation matrix.
   // will normalize the quaternion in-place.
@@ -215,14 +214,14 @@ struct minus_util {
   }
   
   // always row-major
-  // based on Eigen
-  static inline void rotm2quat(F qq[4], const F rr[9])
+  // originally based on Eigen
+  static inline void rotm2quat(const F rr[9], F qq[4])
   {
     // use a struct to reinterpret q
-    solution_shape *q = (solution_shape *) qq;
+    quaternion_shape *q = (quaternion_shape *) qq;
+    const F (*r)[3] = (const F (*)[3]) rr;
     // coeff_eigen[i] = index in our quaternion shape of corresponding element
     static constexpr coeff_eigen[4] = {1, 2, 3, 0};
-    const F (*r)[3] = (const F (*)[3]) rr;
 
     // This algorithm comes from  "Quaternion Calculus and Fast Animation",
     // Ken Shoemake, 1987 SIGGRAPH course notes
@@ -248,6 +247,21 @@ struct minus_util {
       qq[coeff_eigen[k]] = (r[k][i]+r[i][k])*t;
     }
   }
+
+  // computes the relative unit quaternion between two unit quaternions
+  // based on Eigen
+  // conj(a)*b
+  static inline void dquat(const F aa[9], const F bb[4], F d[4])
+  {
+    const quaternion_shape *a = (quaternion_shape *) aa, 
+                           *b = (quaternion_shape *) bb;
+
+    *d++ = a->w * b->z - a->z * b->w - a->x * b->y + a->y * b->x;
+    *d++ = a->w * b->w + a->x * b->x + a->y * b->y + a->z * b->z;
+    *d++ = a->w * b->x - a->x * b->w - a->y * b->z + a->z * b->y;
+    *d   = a->w * b->y - a->y * b->w - a->z * b->x + a->x * b->z;
+  }
+  
 };
 
 template <typename F>

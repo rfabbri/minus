@@ -7022,6 +7022,7 @@ struct minus_io_shaping<chicago14a, F> {
   typedef struct M::solution solution;
 
   // cast to this to interpret real M::solution::x order
+  // internal note: this order is eg  in parser.m2 l 68
   struct solution_shape {
     F q01[4];
     F q02[4];
@@ -7307,6 +7308,57 @@ normalize_lines(F lines[][ncoords2d_h], unsigned nlines)
 {
   for (unsigned l=0; l < nlines; ++l)
     normalize_line(lines[l]);
+}
+
+dquat(p,q)
+// pq = - (p0q0 + p1q1 + p2q2) + i(p1q2 - p2q1) + j(p2q0 - p1 q2) + k(p0q1 - p1q0) 
+// pq_conj = - (p0q0 - p1q1 - p2q2) + i(-p1q2 + p2q1) + j(p2q0 +p1 q2) + k(-p0q1 - p1q0);
+
+const F d[4] = {
+  - p[0]*q[0] + p[1]*q[1] + p[2]*q[2], // real
+  - p[1]*q[2] + p[2]*q[1],
+    p[2]*q[0] + p[1]*q[2],
+  - p[0]*q[1] - p[1]*q[0]
+};
+
+// fill in internal format for cameras_gt_
+// into camera_gt_quaternion
+// - convert each rotation to quaternion in the right order
+// - make the rotations all relative to the first camera
+void
+initialize_gt()
+{
+  //  R01 = R1 * inv(R0);
+  //  T01 = R1 * (C0 - C1);
+  //  R12 = R2 * inv(R1);
+  //  T12 = R2 * (C1 - C2);
+
+  // rotation-center format (used in synthcurves dataset)
+  // relative to the world, to internal quaternion-translation format relative
+  // to first camera
+  RC_to_QT_format(cameras_gt_, cameras_gt_quat);
+  
+}
+
+void
+RC_to_QT_format(rc, qt)
+{
+F q0[4], q1[4], q2[4];
+
+rotm2quat(rc[0], q0);
+rotm2quat(rc[1], q1);
+rotm2quat(rc[2], q2);
+
+// gt = q1 * conj(q0);
+// gt + 4 = q2 * conj(q0);
+dquat(q0, q1, gt);
+dquat(q0, q2, gt + 4);
+
+// gt + 8 = q1*(c0-c1)*q1.conj();
+// gt + 8 = quat_transform(q1,c0-c1);
+// gt + 8 + 3 = quat_transform(q2,c0-c2);
+quat_transform(q1,c0-c1, gt + 8);
+quat_transform(q2,c0-c2, gt + 8 + 3);
 }
 
 
