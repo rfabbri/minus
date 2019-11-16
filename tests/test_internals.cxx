@@ -15,20 +15,11 @@
 #include <minus/minus.hxx>
 #include "debug_common.h"
 
-#define Float double
-typedef minus<chicago14a> M;
-typedef minus_util<Float> util;
-typedef minus_io<chicago14a> io;
-typedef std::complex<Float> complex;
-using namespace std::chrono;
-
 // Start solutions hardcoded for efficiency.
 // If you want to play with different start sols,
 // write another program that accepts start sols in runtime,
 // but keep this one lean & mean.
 #include <minus/chicago14a-default.hxx> 
-
-Float eps_ = 1e-3;
 
 Float plines_m2_[io::pp::nvislines][io::ncoords2d_h] = {
        {.879009, .476806, .0386237},

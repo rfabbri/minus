@@ -13,13 +13,6 @@
 #include <minus/minus.h>
 #include "debug_common.h"
 
-#define Float double
-typedef minus<chicago14a> M;
-typedef minus_io<chicago14a> io;
-static constexpr Float tol = 1e-3;
-typedef std::complex<Float> complex;
-using namespace std::chrono;
-
 // Start solutions hardcoded for efficiency.
 // If you want to play with different start sols,
 // write another program that accepts start sols in runtime,
@@ -42,8 +35,8 @@ test_against_ground_truth(const M::solution solutions[])
   // two random entries. Just a sanity check against the original code prototype.
   // Not a Full comparison to ground truth cameras!
   bool ok=false;
-  if (std::abs(solutions[1].x[1] - complex(-.25177177692982444e1, -.84845195030295639)) <= tol &&
-      std::abs(solutions[M::nsols-2].x[2] - complex(.7318330016224166, .10129116603501138)) <= tol) {
+  if (std::abs(solutions[1].x[1] - complex(-.25177177692982444e1, -.84845195030295639)) <= eps_ &&
+      std::abs(solutions[M::nsols-2].x[2] - complex(.7318330016224166, .10129116603501138)) <= eps_) {
     std::cerr << "LOG solutions look OK\n"; ok = true;
   } else  {
     std::cerr << "LOG \033[1;91merror:\e[m solutions dont match original code. Errors: ";

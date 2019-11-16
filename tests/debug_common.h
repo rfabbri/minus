@@ -1,7 +1,20 @@
 #ifndef debug_common_h_
 #define debug_common_h_
+
+#include <minus/minus.hxx>
+
+
+#define Float double
+typedef minus<chicago14a> M;
+typedef minus_util<Float> util;
+typedef minus_io<chicago14a> io;
+typedef std::complex<Float> complex;
+using namespace std::chrono;
+
+static constexpr Float eps_ = 1e-3;
+
 template <typename F>
-void
+inline void
 print(const F *v, unsigned n, bool newline=false)
 {
   for (unsigned i=0; i < n; ++i)
@@ -9,7 +22,7 @@ print(const F *v, unsigned n, bool newline=false)
   std::cout << std::endl;
 }
 
-void
+inline void
 print(const Float *v, unsigned nrows, unsigned ncols)
 {
   for (unsigned i=0; i < nrows; ++i)
@@ -17,7 +30,7 @@ print(const Float *v, unsigned nrows, unsigned ncols)
 }
 
 // test if two vectors of the same size are equal up to tolerance
-bool
+inline bool
 same_vectors(const Float *v, const Float *w, unsigned n, Float tol=eps_)
 {
   for (unsigned i=0; i < n; ++i)
@@ -33,7 +46,7 @@ same_vectors(const Float *v, const Float *w, unsigned n, Float tol=eps_)
 }
 
 // test if two vectors of the same size are equal up to tolerance
-bool
+inline bool
 same_matrices(const Float *vp, const Float *wp, unsigned nrows, unsigned ncols, Float tol=eps_)
 {
   const Float (*v)[ncols] = (Float (*)[ncols]) vp, (*w)[ncols] = (Float (*)[ncols]) wp;
@@ -51,7 +64,7 @@ same_matrices(const Float *vp, const Float *wp, unsigned nrows, unsigned ncols, 
 }
 
 // test if two vectors of the same size are equal up to tolerance
-bool
+inline bool
 same_matrices_up_to_row_scale(const Float *vp, const Float *wp, unsigned nrows, unsigned ncols, Float tol=eps_)
 {
   const Float (*v)[ncols] = (Float (*)[ncols]) vp, (*w)[ncols] = (Float (*)[ncols]) wp;
