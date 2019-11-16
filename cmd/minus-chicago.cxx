@@ -28,7 +28,7 @@ using namespace std::chrono;
 // And in _that_ one, we put these default vectors depending on template tag.
 
 #define  M_VERBOSE 1     // display verbose messages
-static void
+void
 print_usage()
 {
   std::cerr << "Usage: minus [input solutions]\n\n";

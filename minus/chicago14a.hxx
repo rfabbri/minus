@@ -7134,8 +7134,8 @@ probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *
   for (sol = 0; sol < M::nsols; ++sol) 
     if (v::get_real(solutions[sol].x, real_solution)) {
       // XXX debut these quat-related functions in detail
-      u::normalize_quat(real_solutions);
-      if (u::rotation_error(real_solutions, probe_cameras->q01) < eps)
+      u::normalize_quat(real_solution);
+      if (u::rotation_error(real_solution, probe_cameras->q01) < eps)
         return true;
     }
   return false;
@@ -7469,11 +7469,11 @@ all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3
   typedef minus_array<M::nve,F> v;
   *nsols_final = 0;
   for (unsigned sol=0; sol < M::nsols; ++sol) {
-    F real_solutions[M::nve];
-    if (v::get_real(raw_solutions[sol].x, real_solutions)) {
+    F real_solution[M::nve];
+    if (v::get_real(raw_solutions[sol].x, real_solution)) {
       id_sols[(*nsols_final)++] = sol;
       // build cams by using quat2rotm
-      solution2cams(real_solutions, (F (*)[4][3] ) (cameras + sol));
+      solution2cams(real_solution, (F (*)[4][3] ) (cameras + sol));
     }
   }
 }
