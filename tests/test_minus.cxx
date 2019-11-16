@@ -11,6 +11,7 @@
 #include <thread>
 #include <testlib/testlib_test.h>
 #include <minus/minus.h>
+#include "debug_common.h"
 
 #define Float double
 typedef minus<chicago14a> M;
@@ -58,13 +59,44 @@ test_full_solve()
   std::cerr << "Starting path tracker" << std::endl;
   M::solution solutions[M::nsols];
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
-  M::track_all(M::DEFAULT, start_sols_, params_, solutions); // <<<<<<<<< MEAT
+  // M::track_all(M::DEFAULT, start_sols_, params_, solutions); // <<<<<<<<< MEAT
+  {
+    #ifdef M_VERBOSE
+    std::cerr << "LOG \033[0;33mUsing 4 threads by default\e[m\n" << std::endl;
+    #endif 
+    std::thread t[4];
+    t[0] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 0, 78);
+    t[1] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 78, 78*2);
+    t[2] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 78*2, 78*3);
+    t[3] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 78*3, 78*4);
+    t[0].join(); t[1].join(); t[2].join(); t[3].join();
+  }
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   auto duration = duration_cast<milliseconds>(t2 - t1).count();
   std::cerr << "LOG \033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
   TEST("Did it track first solution?", solutions[0].t > 0, true);
   TEST("Did it track the last solution?", solutions[M::nsols-1].t > 0, true);
   test_against_ground_truth(solutions);
+  // ---------------------------------------------------------------------------
+  {
+  Float cameras[M::nsols][2/*2nd and 3rd cams relative to 1st*/][4][3] = {};
+  unsigned nsols_final = 0;
+  unsigned id_sols[M::nsols] = {};
+  io::all_solutions2cams(solutions, cameras, id_sols, &nsols_final);
+  std::cerr << "LOG found " << nsols_final << " real solutions\n";
+  }
+
+  // ---------------------------------------------------------------------------
+  // test_final_solve_against_ground_truth(solutions);
+  // optional: filter solutions using positive depth, etc.
+  {
+  unsigned sol_id;
+  bool found = io::probe_solutions(solutions, cameras_gt_quat_, &sol_id);
+  TEST("IO: Found GT solution? ", found, true);
+  if (found)
+    std::cout << "found solution at index: " << sol_id << std::endl;
+  }
+  
 }
 
 // fill in internal format for cameras_gt_
@@ -107,16 +139,15 @@ test_end_user_interface()
   // just like in minus-chicago
 
   Float cameras[M::nsols][2/*2nd and 3rd cams relative to 1st*/][4][3] = {};
-  unsigned nsols_final = 0;
-  unsigned id_sols[M::nsols] = {};
-  io::all_solutions2cams(solutions, cameras, id_sols, &nsols_final);
+  //  unsigned nsols_final = 0;
+  // unsigned id_sols[M::nsols] = {};
+  // io::all_solutions2cams(solutions, cameras, id_sols, &nsols_final);
   // to output
 
   // ---------------------------------------------------------------------------
   // test_final_solve_against_ground_truth(solutions);
   // optional: filter solutions using positive depth, etc.
   unsigned sol_id;
-  minus_initialize_gt();
   bool found = io::probe_solutions(solutions, cameras_gt_quat_, &sol_id);
   TEST("IO: Found GT solution? ", found, true);
   if (found)
@@ -127,8 +158,9 @@ test_end_user_interface()
 void
 test_minus()
 {
+  minus_initialize_gt();
   test_full_solve();
-  test_end_user_interface();
+  // test_end_user_interface();
 }
 
 TESTMAIN(test_minus);

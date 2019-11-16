@@ -7133,6 +7133,7 @@ probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *
   F real_solutions[M::nve];
   for (sol = 0; sol < M::nsols; ++sol) 
     if (v::get_real(solutions[sol].x, real_solutions)) {
+      std::cerr << "Found real solution at id" << sol << std::endl;
       u::normalize_quat(real_solutions);
       if (u::rotation_error(real_solutions, probe_cameras->q01) < eps)
         return true;
