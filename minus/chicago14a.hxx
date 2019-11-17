@@ -7128,7 +7128,7 @@ probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *
     unsigned *solution_index)
 {
   typedef minus_array<M::nve,F> v; typedef minus_util<F> u;
-  static constexpr F eps = 1e-3;
+  static constexpr F eps = 1000;
   unsigned &sol=*solution_index;
   F real_solution[M::nve];
   for (sol = 0; sol < M::nsols; ++sol) 

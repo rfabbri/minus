@@ -77,7 +77,7 @@ test_full_solve()
   unsigned id_sols[M::nsols] = {};
   io::all_solutions2cams(solutions, cameras, id_sols, &nsols_final);
   std::cerr << "LOG found " << nsols_final << " real solutions\n";
-  for (unsigned s=0; s < 3; ++s) {
+  for (unsigned s=0; s < 2; ++s) {
     print(solutions[id_sols[s]].x, M::nve);
   }
   }
@@ -92,7 +92,6 @@ test_full_solve()
   if (found)
     std::cout << "found solution at index: " << sol_id << std::endl;
   }
-  
 }
 
 // fill in internal format for cameras_gt_
