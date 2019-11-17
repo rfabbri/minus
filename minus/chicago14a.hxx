@@ -7128,12 +7128,11 @@ probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *
     unsigned *solution_index)
 {
   typedef minus_array<M::nve,F> v; typedef minus_util<F> u;
-  static constexpr F eps = 1000;
+  static constexpr F eps = 1;
   unsigned &sol=*solution_index;
   F real_solution[M::nve];
   for (sol = 0; sol < M::nsols; ++sol) 
     if (v::get_real(solutions[sol].x, real_solution)) {
-      // XXX debut these quat-related functions in detail
       u::normalize_quat(real_solution);
       if (u::rotation_error(real_solution, probe_cameras->q01) < eps)
         return true;

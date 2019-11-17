@@ -120,19 +120,40 @@ test_quat()
   {
     Float p[4]  = { 1, 1, 1, 1 };
     Float q[4]  = { 1.0001, 1.0001, 1.0001, 0.9999 };
-    Float r[4]  = { 1.000001, 1.000001, 1.000001, 0.9999998 };
+    Float r[4]  = { 1.0, -1.0, 1.0, 0.9};
     Float d[4];
 
     util::normalize_quat(p); util::normalize_quat(q);
 
-    print(p,4);
-    print(q,4);
-    util::dquat(p,q,d);
-    print(d,4);
-    
     TEST("rotation error to itself is zero?", util::rotation_error(p,p) < eps_, true);
-    TEST("rotation error", util::rotation_error(p,q) < eps_, true);
-    TEST("rotation error", util::rotation_error(p,r) < eps_, true);
+    TEST("rotation error p,q", util::rotation_error(p,q) < eps_, true);
+    TEST("rotation error p,r", util::rotation_error(p,r) > eps_, true);
+  }
+  {
+    Float q_id[4] = {1, 0, 0, 0};
+    Float v[3] = {3, 5, 11};
+    Float vt[3] = {};
+    util::quat_transform(q_id, v, vt);
+      
+    Float d[3];
+    d[0] = v[0] - vt[0];
+    d[1] = v[1] - vt[1];
+    d[2] = v[2] - vt[2];
+
+    TEST("transform by identity quat", std::sqrt(d[0]*d[0] + d[1]*d[1] + d[2]*d[2]) < eps_, true);
+    
+    Float r[3][3] = {
+      {1, 0, 0},
+      {0, 1, 0},
+      {0, 0, 1}
+    };
+    
+    Float qr[4] = {-1, -1, -1, -1};
+    util::rotm2quat((Float *)r, qr);
+    print(qr, 4);
+    
+    TEST("identity rotm to quat", util::rotation_error(qr,q_id) < eps_, true);
+
   }
 }
 
