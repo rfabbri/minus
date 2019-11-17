@@ -12,7 +12,7 @@
 #include <iomanip>
 #include <chrono>
 #include <testlib/testlib_test.h>
-#include <minus/minus.hxx>
+#include <minus/internal_util.hxx>
 #include "debug_common.h"
 
 // Start solutions hardcoded for efficiency.
