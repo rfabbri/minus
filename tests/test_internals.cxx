@@ -114,6 +114,28 @@ test_cross2()
   TEST("Cross product, test 5", std::fabs(minus_3d<Float>::dot(r, s)) > eps_, false);
 }
 
+void 
+test_quat()
+{
+  {
+    Float p[4]  = { 1, 1, 1, 1 };
+    Float q[4]  = { 1.0001, 1.0001, 1.0001, 0.9999 };
+    Float r[4]  = { 1.000001, 1.000001, 1.000001, 0.9999998 };
+    Float d[4];
+
+    util::normalize_quat(p); util::normalize_quat(q);
+
+    print(p,4);
+    print(q,4);
+    util::dquat(p,q,d);
+    print(d,4);
+    
+    TEST("rotation error to itself is zero?", util::rotation_error(p,p) < eps_, true);
+    TEST("rotation error", util::rotation_error(p,q) < eps_, true);
+    TEST("rotation error", util::rotation_error(p,r) < eps_, true);
+  }
+}
+
 void
 test_rand()
 {
@@ -369,6 +391,7 @@ test_internals()
 {
    test_rand();
    test_io_shaping();
+   test_quat();
 }
 
 TESTMAIN(test_internals);
