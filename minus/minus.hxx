@@ -251,16 +251,16 @@ struct minus_util {
 
   // computes the relative unit quaternion between two unit quaternions
   // based on Eigen quat_product
-  // conj(a)*b
+  // a*conj(b)
   static inline void dquat(const F aa[4], const F bb[4], F d[4])
   {
     const quat_shape *a = (quat_shape *) aa, 
                      *b = (quat_shape *) bb;
-
-    *d++ = a->w * b->z - a->z * b->w - a->x * b->y + a->y * b->x;
-    *d++ = a->w * b->w + a->x * b->x + a->y * b->y + a->z * b->z;
-    *d++ = a->w * b->x - a->x * b->w - a->y * b->z + a->z * b->y;
-    *d   = a->w * b->y - a->y * b->w - a->z * b->x + a->x * b->z;
+    
+     *d++ = -a->w * b->z + a->z * b->w - a->x * b->y + a->y * b->x;
+     *d++ =  a->w * b->w + a->x * b->x + a->y * b->y + a->z * b->z;
+     *d++ = -a->w * b->x + a->x * b->w - a->y * b->z + a->z * b->y;
+     *d   = -a->w * b->y + a->y * b->w - a->z * b->x + a->x * b->z;
   }
 
   // based on Eigen
