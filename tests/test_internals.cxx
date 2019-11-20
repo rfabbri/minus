@@ -154,6 +154,76 @@ test_quat()
     
     TEST("identity rotm to quat", util::rotation_error(qr,q_id) < eps_, true);
   }
+  
+  {
+    Float q[4] = {0, 1, 0, 0};
+    Float v[3] = {3, 5, 11};
+    Float v_gt[3] = {3, -5, -11};
+    Float vt[3] = {};
+    util::quat_transform(q, v, vt);
+      
+    Float d[3];
+    d[0] = v_gt[0] - vt[0];
+    d[1] = v_gt[1] - vt[1];
+    d[2] = v_gt[2] - vt[2];
+
+    TEST_NEAR("transform by 0 1 0 0 quat", std::sqrt(d[0]*d[0] + d[1]*d[1] + d[2]*d[2]), 0,  eps_);
+  }
+  
+  {
+    Float q[4] = {0, 0, 1, 0};
+    Float v[3] = {3, 5, 11};
+    Float v_gt[3] = {-3, 5, -11};
+    Float vt[3] = {};
+    util::quat_transform(q, v, vt);
+      
+    Float d[3];
+    d[0] = v_gt[0] - vt[0];
+    d[1] = v_gt[1] - vt[1];
+    d[2] = v_gt[2] - vt[2];
+
+    TEST_NEAR("transform by 0 0 1 0 quat", std::sqrt(d[0]*d[0] + d[1]*d[1] + d[2]*d[2]), 0,  eps_);
+  }
+  
+  {
+    Float q[4] = {0, 0, 0, 1};
+    Float v[3] = {3, 5, 11};
+    Float v_gt[3] = {-3, -5, 11};
+    Float vt[3] = {};
+    util::quat_transform(q, v, vt);
+      
+    Float d[3];
+    d[0] = v_gt[0] - vt[0];
+    d[1] = v_gt[1] - vt[1];
+    d[2] = v_gt[2] - vt[2];
+
+    TEST_NEAR("transform by 0 0 0 1 quat", std::sqrt(d[0]*d[0] + d[1]*d[1] + d[2]*d[2]), 0,  eps_);
+  }
+  
+  {
+    std::cout << "\n--------------------------------------------------------------\n";
+    Float q[4] = {-1, 1, -3, 2};
+    Float v[3] = {3, 5, 11};
+    Float vt_gt[3] = { 4.466666666666665, -7.666666666666665, -8.733333333333334};
+    Float vt[3] = {};
+    
+    util::normalize_quat(q);
+    util::quat_transform(q, v, vt);
+
+    std::cout << "q norm" << std::endl;
+    print(q, 4);
+    
+    std::cout << "vt" << std::endl;
+    print(vt, 3);
+      
+    Float d[3];
+    d[0] = vt_gt[0] - vt[0];
+    d[1] = vt_gt[1] - vt[1];
+    d[2] = vt_gt[2] - vt[2];
+
+    TEST_NEAR("transform by -1 1 -3 2 quat", std::sqrt(d[0]*d[0] + d[1]*d[1] + d[2]*d[2]), 0,  eps_);
+    std::cout << "--------------------------------------------------------------\n";
+  }
 
   {
     Float q_gt[4] = {0.790532489152731, -0.321383239619688, -0.178689068700286,  -0.489736065256140};
