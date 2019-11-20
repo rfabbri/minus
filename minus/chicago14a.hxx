@@ -7308,8 +7308,8 @@ RC_to_QT_format(const F rc[M::nviews][4][3], F qt[M::nve])
 
   // gt = q1 * conj(q0);
   // gt + 4 = q2 * conj(q0);
-  u::dquat(q0, q1, qt);
-  u::dquat(q0, q2, qt + 4);
+  u::dquat(q1, q0, qt);
+  u::dquat(q2, q0, qt + 4);
 
   // gt + 8 = q1*(c0-c1)*q1.conj();
   // gt + 8 = quat_transform(q1,c0-c1);
