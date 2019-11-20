@@ -201,7 +201,6 @@ test_quat()
   }
   
   {
-    std::cout << "\n--------------------------------------------------------------\n";
     Float q[4] = {-1, 1, -3, 2};
     Float v[3] = {3, 5, 11};
     Float vt_gt[3] = { 4.466666666666665, -7.666666666666665, -8.733333333333334};
@@ -222,7 +221,6 @@ test_quat()
     d[2] = vt_gt[2] - vt[2];
 
     TEST_NEAR("transform by -1 1 -3 2 quat", std::sqrt(d[0]*d[0] + d[1]*d[1] + d[2]*d[2]), 0,  eps_);
-    std::cout << "--------------------------------------------------------------\n";
   }
 
   {
@@ -245,6 +243,7 @@ test_quat()
   }
 
   {
+    std::cout << "\n--------------------------------------------------------------\n";
     io::RC_to_QT_format(cameras_gt_, cameras_gt_quat_);
     
     Float t01_gt[3] = {
@@ -263,6 +262,11 @@ test_quat()
     
     TEST("RC_to_QT: relative rotation", same_matrices(r01_computed, r01_gt, 3, 3), true);
     TEST("RC_to_QT: relative translation", same_vectors(cameras_gt_quat_ + 8, t01_gt, 3), true);
+    
+    std::cout << "gt_quat:" << std::endl;
+    print(cameras_gt_quat_,M::nve);
+    
+    std::cout << "--------------------------------------------------------------\n";
   }
 
   {
