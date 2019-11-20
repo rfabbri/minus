@@ -153,7 +153,25 @@ test_quat()
     print(qr, 4);
     
     TEST("identity rotm to quat", util::rotation_error(qr,q_id) < eps_, true);
+  }
 
+  {
+    Float q_gt[4] = {0.790532489152731, -0.321383239619688, -0.178689068700286,  -0.489736065256140};
+    Float r_gt[3][3] = {
+         0.456457606228917,  0.889159884956647,  0.032266897893194,
+        -0.659449197822556,  0.313742799357976,  0.683148747596164,
+         0.597304954949274, -0.333106821957916,  0.729566060037158
+    };
+    
+    Float q[4] = {};
+    Float r[3][3] = {};
+
+    util::quat2rotm(q_gt, (Float *)r);
+
+    TEST("quat2rotm rot matches gt", same_matrices((Float *) r, (Float *) r_gt, 3, 3), true);
+    
+    util::rotm2quat((Float *)r_gt, q);
+    TEST("rotm2quat quat matches gt", same_vectors(q, q_gt, 4), true);
   }
 }
 
