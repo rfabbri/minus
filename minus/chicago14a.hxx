@@ -7144,6 +7144,8 @@ probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *
   return false;
 }
 
+#include<tests/debug_util.h>
+
 // like probe_solutions but tests all M::nsols in case more than one is close to
 // the probe. Use this for debugging / investigation
 template <typename F>
@@ -7178,6 +7180,83 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
         found = true;
       }
     }
+
+
+  // check the remaining parts of the solutions also match, not just rot
+  v::get_real(solutions[*solution_index].x, real_solution);
+  u::normalize_quat(real_solution+4);
+  F rerror = u::rotation_error(real_solution+4, probe_cameras->q02);
+  if (rerror < eps) {
+    std::cerr << "probe: Rotation 02 also match\n";
+    found = true;
+  } else
+    found = false;
+
+  solution_shape *s = (solution_shape *) real_solution;
+
+  F scale = std::sqrt(minus_3d<F>::dot(s->t01, s->t01));
+  F scale_probe = std::sqrt(minus_3d<F>::dot(probe_cameras->t01, probe_cameras->t01));
+  
+  { // t01
+  s->t01[0] /= scale; s->t01[1] /= scale; s->t01[2] /= scale;
+  F dt[3];
+  dt[0] = s->t01[0] - probe_cameras->t01[0]/scale_probe;
+  dt[1] = s->t01[1] - probe_cameras->t01[1]/scale_probe;
+  dt[2] = s->t01[2] - probe_cameras->t01[2]/scale_probe;
+  
+  if (minus_3d<F>::dot(dt, dt) < eps*eps) {
+    std::cerr << "probe: translation 01 also match\n";
+    found = true;
+  } else {
+    dt[0] = s->t01[0] + probe_cameras->t01[0]/scale_probe;
+    dt[1] = s->t01[1] + probe_cameras->t01[1]/scale_probe;
+    dt[2] = s->t01[2] + probe_cameras->t01[2]/scale_probe;
+    if (minus_3d<F>::dot(dt, dt) < eps*eps) {
+      std::cerr << "probe: translation 01 also match\n";
+      found = true;
+    } else {
+      found = false;
+      std::cerr << "probe: translation 01 DO NOT match\n";
+    }
+  }
+  }
+  
+  std::cerr << "\n----------------------------------------------------------------\n";
+  { // t02
+  s->t02[0] /= scale; s->t02[1] /= scale; s->t02[2] /= scale;
+  F dt[3];
+  dt[0] = s->t02[0] - probe_cameras->t02[0]/scale_probe;
+  dt[1] = s->t02[1] - probe_cameras->t02[1]/scale_probe;
+  dt[2] = s->t02[2] - probe_cameras->t02[2]/scale_probe;
+  
+  if (minus_3d<F>::dot(dt, dt) < eps*eps) {
+    std::cerr << "probe: translation 02 also match\n";
+    found = true;
+  } else {
+    std::cerr << "dt fail atttempt 1 " << std::endl;
+    print(dt,3);
+    std::cerr << "t02 fail atttempt 1 " << std::endl;
+    print(s->t02,3);
+    std::cerr << "probe t02 fail atttempt 1 " << std::endl;
+    print(probe_cameras->t02,3);
+    
+    dt[0] = s->t02[0] + probe_cameras->t02[0]/scale_probe;
+    dt[1] = s->t02[1] + probe_cameras->t02[1]/scale_probe;
+    dt[2] = s->t02[2] + probe_cameras->t02[2]/scale_probe;
+    if (minus_3d<F>::dot(dt, dt) < eps*eps) {
+      std::cerr << "probe: translation 02 also match\n";
+      found = true;
+    } else {
+      found = false;
+      std::cerr << "probe: translation 02 DO NOT match\n";
+      std::cerr << "dt" << std::endl;
+      print(dt,3);
+    }
+  }
+  }
+  std::cerr << "\n----------------------------------------------------------------\n";
+  
+  // s->t02[0] /= scale; s->t02[1] /= scale; s->t02[2] /= scale;
   return found;
 }
 

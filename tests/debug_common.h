@@ -13,21 +13,7 @@ using namespace std::chrono;
 
 static constexpr Float eps_ = 1e-3;
 
-template <typename F>
-inline void
-print(const F *v, unsigned n, bool newline=false)
-{
-  for (unsigned i=0; i < n; ++i)
-    std::cout << v[i] << ((newline)? "\n" : " ");
-  std::cout << std::endl;
-}
-
-inline void
-print(const Float *v, unsigned nrows, unsigned ncols)
-{
-  for (unsigned i=0; i < nrows; ++i)
-    print(v + i*ncols, ncols);
-}
+#include "debug_util.h"
 
 // test if two vectors of the same size are equal up to tolerance
 inline bool
