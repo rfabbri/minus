@@ -206,7 +206,6 @@ struct minus_util {
   
   // always row-major
   // originally based on Eigen
-  // TODO sanity test: result is unit quaternion
   static inline void rotm2quat(const F rr[9], F qq[4])
   {
     // use a struct to reinterpret q

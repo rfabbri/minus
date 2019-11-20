@@ -157,7 +157,7 @@ test_quat()
 
   {
     Float q_gt[4] = {0.790532489152731, -0.321383239619688, -0.178689068700286,  -0.489736065256140};
-    Float r_gt[3][3] = {
+    Float r_gt[9] = {
          0.456457606228917,  0.889159884956647,  0.032266897893194,
         -0.659449197822556,  0.313742799357976,  0.683148747596164,
          0.597304954949274, -0.333106821957916,  0.729566060037158
@@ -172,6 +172,75 @@ test_quat()
     
     util::rotm2quat((Float *)r_gt, q);
     TEST("rotm2quat quat matches gt", same_vectors(q, q_gt, 4), true);
+  }
+
+  {
+    io::RC_to_QT_format(cameras_gt_, cameras_gt_quat_);
+    
+    Float t01[3] = {
+      -016.0671554493513,  -772.4304156395458,   304.2333869269318
+    };
+
+    Float r01_gt[9] = {
+      0.421871545392702, -0.905392317912096,  0.047845060912651,
+      -0.107603898390777,  0.002399074549834,  0.994190950216512,
+      -0.900247632731728, -0.424569187656224, -0.096411641692553
+    };
+    
+    Float r01_computed[3] = {};
+    
+    util::quat2rotm(cameras_gt_quat_, r01_computed);
+    
+    TEST("RC_to_QT: relative rotation", same_matrices(r01_computed, r01_gt, 3, 3), true);
+    TEST("RC_to_QT: relative translation", same_vectors(cameras_gt_quat_ + 8, t01, 3), true);
+
+  }
+
+  {
+    Float r0_computed[9] = {};
+    Float q0[4];
+    
+    util::rotm2quat((Float *) cameras_gt_[0], q0);
+
+    std::cout << "q0" << std::endl;
+    print(q0,4);
+    
+    util::quat2rotm(q0, r0_computed);
+    
+    TEST("rotm2quat -> quat2rotm", same_matrices(r0_computed, (Float*) cameras_gt_[0], 3, 3), true);
+  }
+    
+  {
+    std::cout << "\n--------------------------------------------------------------\n";
+    Float q0[4], q1[4];
+    Float r01_gt[9] = {
+      0.456457606228917,  0.889159884956647,  0.032266897893194,
+     -0.659449197822556,  0.313742799357977,  0.683148747596164,
+      0.597304954949274, -0.333106821957916,  0.729566060037158
+    };
+    Float r01_computed[9] = {};
+
+    util::rotm2quat((Float *) cameras_gt_[0], q0);
+    util::rotm2quat((Float *) cameras_gt_[1], q1);
+
+    std::cout << "q0: " << std::endl;
+    print(q0, 4);
+    
+    std::cout << "q1: " << std::endl;
+    print(q1, 4);
+    
+    Float d[4] = {};
+    util::dquat(q1, q0, d);
+    TEST_NEAR("dquat d unit", std::sqrt(d[0]*d[0] + d[1]*d[1] + d[2]*d[2] + d[3]*d[3]), 1, eps_);
+    TEST_NEAR("dquat q1 unit", std::sqrt(q1[0]*q1[0] + q1[1]*q1[1] + q1[2]*q1[2] + q1[3]*q1[3]), 1, eps_);
+    TEST_NEAR("dquat q0 unit", std::sqrt(q0[0]*q0[0] + q0[1]*q0[1] + q0[2]*q0[2] + q0[3]*q0[3]), 1, eps_);
+    
+    std::cout << "d: " << std::endl;
+    print(d, 4);
+    
+    util::quat2rotm(d, r01_computed);
+    TEST("relative rotation through quaternion", same_matrices(r01_computed, r01_gt, 3, 3), true);
+    std::cout << "--------------------------------------------------------------\n";
   }
 }
 
