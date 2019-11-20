@@ -254,7 +254,7 @@ struct minus_util {
   }
 
   // based on Eigen
-  static inline void quat_transform(F q[4], const F v[3], F vrot[3])
+  static inline void quat_transform(const F q[4], const F v[3], F vrot[3])
   {
     // q*v*q.conj();
     // Note that this algorithm comes from the optimization by hand

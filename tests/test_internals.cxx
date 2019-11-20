@@ -177,7 +177,7 @@ test_quat()
   {
     io::RC_to_QT_format(cameras_gt_, cameras_gt_quat_);
     
-    Float t01[3] = {
+    Float t01_gt[3] = {
       -016.0671554493513,  -772.4304156395458,   304.2333869269318
     };
 
@@ -192,8 +192,7 @@ test_quat()
     util::quat2rotm(cameras_gt_quat_, r01_computed);
     
     TEST("RC_to_QT: relative rotation", same_matrices(r01_computed, r01_gt, 3, 3), true);
-    TEST("RC_to_QT: relative translation", same_vectors(cameras_gt_quat_ + 8, t01, 3), true);
-
+    TEST("RC_to_QT: relative translation", same_vectors(cameras_gt_quat_ + 8, t01_gt, 3), true);
   }
 
   {
