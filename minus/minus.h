@@ -281,6 +281,10 @@ struct minus_io_shaping {
       unsigned *solution_index);
   static bool probe_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
       unsigned *solution_index);
+  static bool probe_all_solutions(const typename M::solution solutions[M::nsols], solution_shape *probe_cameras,
+      unsigned *solution_index);
+  static bool probe_all_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
+      unsigned *solution_index);
 };
 
 // Shortcuts and aliases -------------------------------------------------------

@@ -7085,6 +7085,10 @@ struct minus_io_shaping<chicago14a, F> {
       unsigned *solution_index);
   static bool probe_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
       unsigned *solution_index);
+  static bool probe_all_solutions(const typename M::solution solutions[M::nsols], solution_shape *probe_cameras,
+      unsigned *solution_index);
+  static bool probe_all_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
+      unsigned *solution_index);
 };
 
 // For speed, assumes input point implicitly has 3rd homog coordinate is 1
@@ -7128,7 +7132,7 @@ probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *
     unsigned *solution_index)
 {
   typedef minus_array<M::nve,F> v; typedef minus_util<F> u;
-  static constexpr F eps = 1;
+  static constexpr F eps = 1e-3;
   unsigned &sol=*solution_index;
   F real_solution[M::nve];
   for (sol = 0; sol < M::nsols; ++sol) 
@@ -7140,6 +7144,43 @@ probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *
   return false;
 }
 
+// like probe_solutions but tests all M::nsols in case more than one is close to
+// the probe. Use this for debugging / investigation
+template <typename F>
+inline bool 
+minus_io_shaping<chicago14a, F>::
+probe_all_solutions(const typename M::solution solutions[M::nsols], solution_shape *probe_cameras,
+    unsigned *solution_index)
+{
+  typedef minus_array<M::nve,F> v; typedef minus_util<F> u;
+  static constexpr F eps = 1e-3;
+  F real_solution[M::nve];
+  bool found=false;
+  F min_rerror;
+  for (unsigned sol = 0; sol < M::nsols; ++sol) 
+    if (v::get_real(solutions[sol].x, real_solution)) {
+      u::normalize_quat(real_solution);
+      F rerror = u::rotation_error(real_solution, probe_cameras->q01);
+      if (rerror < eps) {
+        if (found == true) {
+          std::cerr << "Found another similar solution at " << sol << std::endl;
+          std::cerr << "Error: " << rerror << std::endl;
+          if (rerror < min_rerror) {
+            min_rerror = rerror;
+            *solution_index = sol;
+          }
+        } else {
+          std::cerr << "Found a solution at " << sol << std::endl;
+          std::cerr << "Error: " << rerror << std::endl;
+          min_rerror = rerror;
+          *solution_index = sol;
+        }
+        found = true;
+      }
+    }
+  return found;
+}
+
 template <typename F>
 inline bool
 minus_io_shaping<chicago14a, F>::
@@ -7147,6 +7188,15 @@ probe_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[
     unsigned *solution_index)
 {
   return probe_solutions(solutions, (solution_shape *) probe_cameras, solution_index);
+}
+
+template <typename F>
+inline bool
+minus_io_shaping<chicago14a, F>::
+probe_all_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
+    unsigned *solution_index)
+{
+  return probe_all_solutions(solutions, (solution_shape *) probe_cameras, solution_index);
 }
   
 // we only use the first half of the outer

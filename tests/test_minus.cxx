@@ -87,7 +87,7 @@ test_full_solve()
   // optional: filter solutions using positive depth, etc.
   {
   unsigned sol_id;
-  bool found = io::probe_solutions(solutions, cameras_gt_quat_, &sol_id);
+  bool found = io::probe_all_solutions(solutions, cameras_gt_quat_, &sol_id);
   TEST("IO: Found GT solution? ", found, true);
   if (found)
     std::cout << "found solution at index: " << sol_id << std::endl;
@@ -143,7 +143,7 @@ test_end_user_interface()
   // test_final_solve_against_ground_truth(solutions);
   // optional: filter solutions using positive depth, etc.
   unsigned sol_id;
-  bool found = io::probe_solutions(solutions, cameras_gt_quat_, &sol_id);
+  bool found = io::probe_all_solutions(solutions, cameras_gt_quat_, &sol_id);
   TEST("IO: Found GT solution? ", found, true);
   if (found)
     std::cout << "found solution at index: " << sol_id << std::endl;
@@ -154,8 +154,8 @@ void
 test_minus()
 {
   minus_initialize_gt();
-  test_full_solve();
-  // test_end_user_interface();
+  //test_full_solve();
+  test_end_user_interface();
 }
 
 TESTMAIN(test_minus);
