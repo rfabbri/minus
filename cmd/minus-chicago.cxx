@@ -34,6 +34,64 @@ print_usage()
   std::cerr << "Usage: minus [input solutions]\n\n";
   std::cerr << "If no argument is given, 'input' is assumed stdin,\n\
   'solutions' will be output to stdout\n";
+  std::cerr << "Example: \n"
+               "  minus input_file solutions_file\n"
+               "  minus <input_file >solutions_file\n"
+               "  minus -g       # (or --profile) : performs a default solve for profiling\n"
+               "  minus -i       # (or --image_data) : reads point-tangents from stdin\n"
+            <<
+  R"(-i | --image_data usage:
+ 
+  Input format (notation _view_points_coords. any number of spaces and newlines optional. can be in
+  one row or one column as well). This input format assumes tangent data for
+  all points, but you can specify which one to use for the estimation by
+  passing -id_tgt0 and -id_tgt1 arguments. When missing, will try to select the
+  better conditioned / least degenerate tangents 
+ 
+  p000 p001
+  p010 p011
+  p020 p021
+  
+  p100 p101
+  p110 p111
+  p120 p121
+  
+  p100 p101
+  p110 p111
+  p120 p121
+ 
+  t000 t001
+  t010 t011
+  t020 t021
+  
+  t100 t101
+  t110 t111
+  t120 t121
+  
+  t100 t101
+  t110 t111
+  t120 t121
+  
+  id0 id1           # id \in {0,1,2} of the point to consider the tangent
+  
+  K00 K01 K02       # intrinsic parameters: only these elements
+      K11 K22
+                    # GROUND TRUTH (optional) if -gt flag provided, pass the ground truth here:
+  r000 r001 r002    # default camera format if synthcurves flag passed: 
+  r010 r011 r012    # just like a 3x4 [R|T] but transposed to better fit row-major:
+  r020 r021 r022    #         | R |
+   c00  c01  c02    # P_4x3 = | - |
+                    #         | C'|
+  r100 r101 r102
+  r110 r111 r112
+  r120 r121 r122
+   c10  c11  c12 
+  
+  r200 r201 r202
+  r210 r211 r212
+  r220 r221 r222
+   c20  c21  c22)";
+            
   exit(1);
 }
 
@@ -174,6 +232,8 @@ main(int argc, char **argv)
   if (argc == 1) {
     if (std::string (argv[1]) == "-g" || std::string (argv[1]) == "--profile")
       profile = true;
+    else if (std::string (argv[1]) == "-h" || std::string (argv[1]) == "--help")
+      print_usage();
   } else if (argc == 2) {
     input = argv[1];
     output = argv[2];
