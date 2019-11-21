@@ -7187,6 +7187,8 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
       }
     }
 
+  if (!found)
+    return false;
 
   // check the remaining parts of the solutions also match, not just rot
   v::get_real(solutions[*solution_index].x, real_solution);
@@ -7199,6 +7201,9 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
     found = true;
   } else
     found = false;
+  
+  if (!found)
+    return false;
 
   solution_shape *s = (solution_shape *) real_solution;
 
@@ -7234,6 +7239,9 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
     }
   }
   }
+  
+  if (!found)
+    return false;
   
   { // t02
   s->t02[0] /= scale; s->t02[1] /= scale; s->t02[2] /= scale;
@@ -7320,7 +7328,7 @@ lines2params(const F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ par
 
   // pTriple ----------------------------------------
   // At points that have tangents, there are 3 lines (triple intersects)
-  unsigned triple_intersections[6][3] = 
+  static unsigned constexpr triple_intersections[6][3] = 
     {{0,3,9},{0+1,3+1,9+1},{0+2,3+2,9+2},{0,6,12},{0+1,6+1,12+1},{0+2,6+2,12+2}};
 
   C<F> (*params_lines)[2] = (C<F> (*)[2]) (params+27);
@@ -7350,6 +7358,12 @@ lines2params(const F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ par
   util::rand_sphere(params+27+12,7);
   util::rand_sphere(params+27+12+7,5);
   util::rand_sphere(params+27+12+7+5,5);
+//  F c1[7] = {0.356520517738511 ,  0.450534892837314 ,  0.497658671520414 ,  0.530494023592847 ,0.350361054584548 ,  0.040309061260114 ,  0.128240708712460};
+//  memcpy(params+27+12,c1,7*sizeof(F));
+
+//  F c2[5] =  { 0.608716490477115 ,  0.290014694962129 ,  0.462945690541627 ,  0.548557032724055 ,0.173557426764642};
+//  memcpy(params+27+12+7,c2,5*sizeof(F));
+//  memcpy(params+27+12+7+5,c2,5*sizeof(F));
 }
 
 // --- gammify -----------------------------------------------------------------
@@ -7404,7 +7418,7 @@ gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
   }
   
   // ids of two point-point lines at tangents
-  unsigned triple_intersect[6][2] = {{0,3},{0+1,3+1},{0+2,3+2},{0,6},{0+1,6+1},{0+2,6+2}};
+  static unsigned constexpr triple_intersect[6][2] = {{0,3},{0+1,3+1},{0+2,3+2},{0,6},{0+1,6+1},{0+2,6+2}};
 
   // diag1 --> pTriple in params -----------------------------------------------
   unsigned i = 9*3;
@@ -7552,8 +7566,8 @@ get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __rest
   // the user provides the start params in the first half of params.
   // we fill the second half and gammify both.
   lines2params(plines, params+M::f::nparams);
-//  gammify(params);
-//  gammify(params+M::f::nparams);
+  gammify(params);
+  gammify(params+M::f::nparams);
 }
 
 // \param[in] tgts: three tangents, one at each point, in normalized coordinates
