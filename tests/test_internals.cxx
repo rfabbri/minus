@@ -256,7 +256,7 @@ test_quat()
        0.597304954949274,  -0.333106821957916,   0.729566060037158
     };
     
-    Float r01_computed[3] = {};
+    Float r01_computed[9] = {};
     
     util::quat2rotm(cameras_gt_quat_, r01_computed);
     
