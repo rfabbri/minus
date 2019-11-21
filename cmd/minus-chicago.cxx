@@ -153,8 +153,61 @@ mwrite(const M::solution s[M::nsols], const char *fname)
   return true;
 }
 
-// reads into the global variable start_sols_
+// Try to read n elements, filling in p in row-major order.
+template <typename F=double>
+static bool
+read_block(std::istream &in, F *p, unsigned n)
+{
+  const F *end = p + n;
+  while (!in.eof() && p != end) {
+      try {
+        in >> *p++;
+        if (in.eof()) {
+          std::cerr << "I/O Error: Premature input termination\n";
+          return false;
+        }
+      } catch (std::istream::failure &E) {
+        std::cerr << "I/O Error: Invalid input conversion or other error\n";
+        return false;
+      }
+  }
+  if (p != end)
+    std::cerr << "I/O Premature input termination\n";
+}
+  
+//
+// Reads the format specified in the print_usage() for the -i flag
+// 
+// This is processed into the global params_start_target_
+// 
+template <typename F=double>
+static bool
+iread(const char *fname)
+{
+  std::ifstream infp;
+  std::istream *inp = &std::cin;
+  
+  if (!stdio_) {
+    infp.open(fname, std::ios::in);
+    if (!infp) {
+      std::cerr << "I/O Error opening input " << fname << std::endl;
+      return false;
+    }
+    inp = &infp;
+  }
+  
+  std::istream &in = *inp;
+  in.exceptions(std::istream::failbit | std::istream::badbit);
+
+  read_block(in, p, n);
+  
+  return true;
+}
+
+// reads into the global variable params_
 // Format is just like P01 variable in solveChicago in chicago.m2
+// and contains the concatenated parameters of the start system
+// and of the target system, with some randomization to improve conditioning.
 // But here there is no imaginary 'i' string:
 //
 // P01(0).real()  P01(0).imag()      // I mean P01(0) or P01#0
@@ -193,7 +246,6 @@ mread(const char *fname)
   
   std::istream &in = *inp;
   in.exceptions(std::istream::failbit | std::istream::badbit);
-  unsigned i=0;
   F *dparams = (F *)params_;
   while (!in.eof() && dparams != (F *)params_+2*2*M::f::nparams) {
       try {
@@ -256,14 +308,11 @@ main(int argc, char **argv)
     std::cerr << "LOG Running default solve for profiling\n";
   #endif 
 
-  if (!profile && (image_data && !iread<Float> || !mread<Float>(input) )) return 1; // reads into global params_
-
-  if (!profile) {
-    // read some files
-    if (image_data) {  // read image I/O parameters
+  if (!profile) { // read files
+    if (image_data) {  // read image pixel-based I/O parameters
       if (!iread<Float>(input))
         return 1;
-    } else {  // read raw I/O parametrs
+    } else {  // read raw I/O homotopy parameters (to be used as engine)
       if (!mread<Float>(input))  // reads into global params_
         return 1;
       params_start_target_ = params_;
