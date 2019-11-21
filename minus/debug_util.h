@@ -18,7 +18,7 @@ print(const F *v, unsigned nrows, unsigned ncols)
     print(v + i*ncols, ncols);
 }
 
-#define LOG(msg)
+#define LOG(msg) do { } while (0)
 
 //#ifndef NDEBUG
 #ifdef M_VERBOSE

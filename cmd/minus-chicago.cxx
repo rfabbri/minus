@@ -45,7 +45,7 @@ print_usage()
                "  minus -g       # (or --profile) : performs a default solve for profiling\n"
                "  minus -i       # (or --image_data) : reads point-tangents from stdin\n"
                "  minus -h       # (or --help) : print this help message\n"
-               " -r or --real : outputs only real solutions
+               " -r or --real : outputs only real solutions\n"
             <<
   R"(-i | --image_data usage:
  
@@ -211,21 +211,24 @@ iread(const char *fname)
   in.exceptions(std::istream::failbit | std::istream::badbit);
 
   LOG("reading p_");
-  if (!read_block(in, p_, io::pp::nviews*io::pp::npoints*io::ncoords2d))
+  if (!read_block(in, (F *)p_, io::pp::nviews*io::pp::npoints*io::ncoords2d))
     return false;
   LOG("reading tgt_");
-  if (!read_block(in, tgt_, io::pp::nviews*io::pp::npoints*io::ncoords2d))
+  if (!read_block(in, (F *)tgt_, io::pp::nviews*io::pp::npoints*io::ncoords2d))
     return false;
   unsigned tgt_ids[2];
   LOG("reading tgt_ids");
   if (!read_block<unsigned>(in, tgt_ids, 2))
     return false;
   LOG("reading K_");
-  if (!read_block(in, K_, io::ncoords2d*io::ncoords2d_h))
+  if (!read_block(in, (F *) K_, io::ncoords2d*io::ncoords2d_h))
     return false;
   LOG("reading ground truth cams");
-  if (ground_truth_ && !read_block(in, cameras_gt_, io::pp::nviews*4*3))
+  if (ground_truth_ && !read_block(in, (F *) cameras_gt_, io::pp::nviews*4*3))
     return false;
+  
+  io::point_tangents2params_img(p_, tgt_, tgt_ids[0], tgt_ids[1], K_, params_start_target_);
+
   return true;
 }
 
@@ -359,10 +362,10 @@ main(int argc, char **argv)
     if (image_data) {  // read image pixel-based I/O parameters
       if (!iread<Float>(input))
         return 1;
+       params_ = params_start_target_;
     } else {  // read raw I/O homotopy parameters (to be used as engine)
       if (!mread<Float>(input))  // reads into global params_
         return 1;
-      params_start_target_ = params_;
     }
   }
   
@@ -378,10 +381,10 @@ main(int argc, char **argv)
     std::cerr << "LOG \033[0;33mUsing 4 threads by default\e[m\n" << std::endl;
     #endif 
     std::thread t[4];
-    t[0] = std::thread(M::track, M::DEFAULT, start_sols_, params_start_target_, solutions, 0, 78);
-    t[1] = std::thread(M::track, M::DEFAULT, start_sols_, params_start_target_, solutions, 78, 78*2);
-    t[2] = std::thread(M::track, M::DEFAULT, start_sols_, params_start_target_, solutions, 78*2, 78*3);
-    t[3] = std::thread(M::track, M::DEFAULT, start_sols_, params_start_target_, solutions, 78*3, 78*4);
+    t[0] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 0, 78);
+    t[1] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 78, 78*2);
+    t[2] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 78*2, 78*3);
+    t[3] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 78*3, 78*4);
     t[0].join(); t[1].join(); t[2].join(); t[3].join();
   }
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
@@ -402,6 +405,16 @@ main(int argc, char **argv)
   #ifdef M_VERBOSE
   std::cerr << "LOG \033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
   #endif
+
+  // ---------------------------------------------------------------------------
+  // test_final_solve_against_ground_truth(solutions);
+  // optional: filter solutions using positive depth, etc.
+  {
+  unsigned sol_id;
+  bool found = io::probe_all_solutions(solutions, cameras_gt_quat_, &sol_id);
+  if (found)
+    LOG("found solution at index: " << sol_id);
+  }
    
   return 0;
 }
