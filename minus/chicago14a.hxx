@@ -7075,7 +7075,7 @@ struct minus_io_shaping<chicago14a, F> {
     l[0] /= nrm; l[1] /= nrm; l[2] /= nrm;
   }
   static void normalize_lines(F lines[][ncoords2d_h], unsigned nlines);
-  static void RC_to_QT_format(const F rc[M::nviews][4][3], F qt[M::nve]);
+  static void RC_to_QT_format(const F rc[pp::nviews][4][3], F qt[M::nve]);
   static void rotation_error(const F p[4], const F q[4]);
 
   // OUTPUT --------------------------------------------------------------------
@@ -7394,7 +7394,7 @@ gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
 {
   typedef minus_util<F> util;
   //  params = (diag0|diag1|diag2|diag3|diag4).*params;
-  // diag0
+  // diag0 --> pF in params ----------------------------------------------------
   C<F> (*p)[3] = (C<F> (*)[3]) params;
   C<F> gammas[9]; 
   for (unsigned l=0; l < 9; ++l) {
@@ -7406,13 +7406,14 @@ gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
   // ids of two point-point lines at tangents
   unsigned triple_intersect[6][2] = {{0,3},{0+1,3+1},{0+2,3+2},{0,6},{0+1,6+1},{0+2,6+2}};
 
-  // diag1
+  // diag1 --> pTriple in params -----------------------------------------------
   unsigned i = 9*3;
   for (unsigned tl=0; tl < 6; ++tl) {  // for each tangent line
     params[i++] *= std::conj(gammas[triple_intersect[tl][0]]);
     params[i++] *= std::conj(gammas[triple_intersect[tl][1]]);
   }
   
+  // pChart gammas -------------------------------------------------------------
   C<F> g;
   // diag2 -- tchart gamma
   util::randc(&g); for (unsigned k=0; k < 7; ++k) params[i++] *= g;
@@ -7442,7 +7443,7 @@ normalize_lines(F lines[][ncoords2d_h], unsigned nlines)
 template <typename F>
 inline void 
 minus_io_shaping<chicago14a, F>::
-RC_to_QT_format(const F rc[M::nviews][4][3], F qt[M::nve])
+RC_to_QT_format(const F rc[pp::nviews][4][3], F qt[M::nve])
 {
   typedef minus_util<F> u;
   F q0[4], q1[4], q2[4];
