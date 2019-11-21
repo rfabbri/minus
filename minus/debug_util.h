@@ -18,4 +18,15 @@ print(const F *v, unsigned nrows, unsigned ncols)
     print(v + i*ncols, ncols);
 }
 
+#define LOG(msg)
+
+//#ifndef NDEBUG
+#ifdef M_VERBOSE
+#undef LOG
+#define LOG(msg) do { \
+  std::cerr << "LOG " << msg << std::endl; \
+} while(0)
+#endif // M_VERBOSE
+// #endif // NDEBUG
+
 #endif // debug_util_h_

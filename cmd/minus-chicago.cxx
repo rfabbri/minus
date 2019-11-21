@@ -27,7 +27,12 @@ using namespace std::chrono;
 // Perhaps a minus class should be written that wraps the lean minus_core.
 // And in _that_ one, we put these default vectors depending on template tag.
 
+
 #define  M_VERBOSE 1     // display verbose messages
+// comment this out plus the printouts if you prefer no debug and no dependency
+// on this header
+#include <minus/debug_util.h>
+
 void
 print_usage()
 {
@@ -76,7 +81,7 @@ print_usage()
   id0 id1           # id \in {0,1,2} of the point to consider the tangent
   
   K00 K01 K02       # intrinsic parameters: only these elements
-      K11 K22
+   0  K11 K22
                     # GROUND TRUTH (optional) if -gt flag provided, pass the ground truth here:
   r000 r001 r002    # default camera format if synthcurves flag passed: 
   r010 r011 r012    # just like a 3x4 [R|T] but transposed to better fit row-major:
@@ -97,6 +102,7 @@ print_usage()
 }
 
 bool stdio_=true;  // by default read/write from stdio
+bool ground_truth_=false;  // by default read/write from stdio
 
 // Output solutions in ASCII matlab format
 //
@@ -158,10 +164,12 @@ template <typename F=double>
 static bool
 read_block(std::istream &in, F *p, unsigned n)
 {
+  LOG("reading");
   const F *end = p + n;
   while (!in.eof() && p != end) {
       try {
         in >> *p++;
+        std::cerr << *(p-1) << std::endl;
         if (in.eof()) {
           std::cerr << "I/O Error: Premature input termination\n";
           return false;
@@ -171,8 +179,11 @@ read_block(std::istream &in, F *p, unsigned n)
         return false;
       }
   }
-  if (p != end)
+  if (p != end) {
     std::cerr << "I/O Premature input termination\n";
+    return false;
+  }
+  return true;
 }
   
 //
@@ -199,8 +210,22 @@ iread(const char *fname)
   std::istream &in = *inp;
   in.exceptions(std::istream::failbit | std::istream::badbit);
 
-  read_block(in, p, n);
-  
+  LOG("reading p_");
+  if (!read_block(in, p_, io::pp::nviews*io::pp::npoints*io::ncoords2d))
+    return false;
+  LOG("reading tgt_");
+  if (!read_block(in, tgt_, io::pp::nviews*io::pp::npoints*io::ncoords2d))
+    return false;
+  unsigned tgt_ids[2];
+  LOG("reading tgt_ids");
+  if (!read_block<unsigned>(in, tgt_ids, 2))
+    return false;
+  LOG("reading K_");
+  if (!read_block(in, K_, io::ncoords2d*io::ncoords2d_h))
+    return false;
+  LOG("reading ground truth cams");
+  if (ground_truth_ && !read_block(in, cameras_gt_, io::pp::nviews*4*3))
+    return false;
   return true;
 }
 
@@ -283,24 +308,46 @@ main(int argc, char **argv)
   bool profile = false;   // run some default solves for profiling
   bool image_data = false;
     
-  if (argc == 1) {
+  if (argc >= 1) {
     if (std::string (argv[1]) == "-g" || std::string (argv[1]) == "--profile")
       profile = true;
     else if (std::string (argv[1]) == "-h" || std::string (argv[1]) == "--help")
       print_usage();
-    else if (std::string (argv[1]) == "-i" || std::string (argv[1]) == "--image_data") {
+    else if (std::string (argv[1]) == "-i" || std::string (argv[1]) == "--image_data")
       image_data = true; 
+    
+    if (!profile && argc >= 2) {
+      if (image_data) {
+        if (std::string (argv[2]) == "-gt")
+          ground_truth_ = true;
+      } else if (argc == 2) {
+          input = argv[1];
+          output = argv[2];
+          stdio_ = false;
+      } else {
+          std::cerr << "minus: \033[1;91m error\e[m\n";
+          print_usage();
+      }
     }
-  } else if (argc == 2) {
-    input = argv[1];
-    output = argv[2];
-    stdio_ = false;
-  } else if (argc != 0) {
-    std::cerr << "minus: \033[1;91m error\e[m\n";
-    print_usage();
   }
 
   #ifdef M_VERBOSE
+
+  if (image_data) {
+    LOG("param: input is image pixel data");
+    if (ground_truth_)
+      LOG("param: reading ground truth appended to input pixel data");
+  }
+  
+  if (profile)
+    LOG("param: profiling");
+
+  if (stdio_)
+    LOG("reading from stdio");
+  else
+    LOG("reading from " << input << " writing to " << output);
+  
+  
   if (!profile) {
     std::cerr << "LOG Input being read from " << input << std::endl;
     std::cerr << "LOG Output being written to " << output << std::endl;

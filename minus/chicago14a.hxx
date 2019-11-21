@@ -7145,7 +7145,7 @@ probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *
 }
 
 #ifndef NDEBUG
-#include<tests/debug_util.h>
+#include<minus/debug_util.h>
 #endif
 
 // like probe_solutions but tests all M::nsols in case more than one is close to
