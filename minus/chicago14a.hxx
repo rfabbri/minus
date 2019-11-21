@@ -7144,7 +7144,9 @@ probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *
   return false;
 }
 
+#ifndef NDEBUG
 #include<tests/debug_util.h>
+#endif
 
 // like probe_solutions but tests all M::nsols in case more than one is close to
 // the probe. Use this for debugging / investigation
@@ -7165,15 +7167,19 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
       F rerror = u::rotation_error(real_solution, probe_cameras->q01);
       if (rerror < eps) {
         if (found == true) {
+#ifndef NDEBUG
           std::cerr << "Found another similar solution at " << sol << std::endl;
           std::cerr << "Error: " << rerror << std::endl;
+#endif
           if (rerror < min_rerror) {
             min_rerror = rerror;
             *solution_index = sol;
           }
         } else {
+#ifndef NDEBUG
           std::cerr << "Found a solution at " << sol << std::endl;
           std::cerr << "Error: " << rerror << std::endl;
+#endif
           min_rerror = rerror;
           *solution_index = sol;
         }
@@ -7187,7 +7193,9 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
   u::normalize_quat(real_solution+4);
   F rerror = u::rotation_error(real_solution+4, probe_cameras->q02);
   if (rerror < eps) {
+#ifndef NDEBUG
     std::cerr << "probe: Rotation 02 also match\n";
+#endif
     found = true;
   } else
     found = false;
@@ -7205,23 +7213,28 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
   dt[2] = s->t01[2] - probe_cameras->t01[2]/scale_probe;
   
   if (minus_3d<F>::dot(dt, dt) < eps*eps) {
+#ifndef NDEBUG
     std::cerr << "probe: translation 01 also match\n";
+#endif
     found = true;
   } else {
     dt[0] = s->t01[0] + probe_cameras->t01[0]/scale_probe;
     dt[1] = s->t01[1] + probe_cameras->t01[1]/scale_probe;
     dt[2] = s->t01[2] + probe_cameras->t01[2]/scale_probe;
     if (minus_3d<F>::dot(dt, dt) < eps*eps) {
+#ifndef NDEBUG
       std::cerr << "probe: translation 01 also match\n";
+#endif
       found = true;
     } else {
       found = false;
+#ifndef NDEBUG
       std::cerr << "probe: translation 01 DO NOT match\n";
+#endif
     }
   }
   }
   
-  std::cerr << "\n----------------------------------------------------------------\n";
   { // t02
   s->t02[0] /= scale; s->t02[1] /= scale; s->t02[2] /= scale;
   F dt[3];
@@ -7230,7 +7243,9 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
   dt[2] = s->t02[2] - probe_cameras->t02[2]/scale_probe;
   
   if (minus_3d<F>::dot(dt, dt) < eps*eps) {
+#ifndef NDEBUG
     std::cerr << "probe: translation 02 also match\n";
+#endif
     found = true;
   } else {
     //    std::cerr << "dt fail atttempt 1 " << std::endl;
@@ -7244,19 +7259,20 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
     dt[1] = s->t02[1] + probe_cameras->t02[1]/scale_probe;
     dt[2] = s->t02[2] + probe_cameras->t02[2]/scale_probe;
     if (minus_3d<F>::dot(dt, dt) < eps*eps) {
+#ifndef NDEBUG
       std::cerr << "probe: translation 02 also match\n";
+#endif
       found = true;
     } else {
       found = false;
+#ifndef NDEBUG
       std::cerr << "probe: translation 02 DO NOT match\n";
       std::cerr << "dt" << std::endl;
       print(dt,3);
+#endif
     }
   }
   }
-  std::cerr << "\n----------------------------------------------------------------\n";
-  
-  // s->t02[0] /= scale; s->t02[1] /= scale; s->t02[2] /= scale;
   return found;
 }
 
