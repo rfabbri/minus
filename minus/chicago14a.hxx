@@ -7233,12 +7233,12 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
     std::cerr << "probe: translation 02 also match\n";
     found = true;
   } else {
-    std::cerr << "dt fail atttempt 1 " << std::endl;
-    print(dt,3);
-    std::cerr << "t02 fail atttempt 1 " << std::endl;
-    print(s->t02,3);
-    std::cerr << "probe t02 fail atttempt 1 " << std::endl;
-    print(probe_cameras->t02,3);
+    //    std::cerr << "dt fail atttempt 1 " << std::endl;
+    //    print(dt,3);
+    //    std::cerr << "t02 fail atttempt 1 " << std::endl;
+    //    print(s->t02,3);
+    //    std::cerr << "probe t02 fail atttempt 1 " << std::endl;
+    // print(probe_cameras->t02,3);
     
     dt[0] = s->t02[0] + probe_cameras->t02[0]/scale_probe;
     dt[1] = s->t02[1] + probe_cameras->t02[1]/scale_probe;
@@ -7535,8 +7535,8 @@ get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __rest
   // the user provides the start params in the first half of params.
   // we fill the second half and gammify both.
   lines2params(plines, params+M::f::nparams);
-  gammify(params);
-  gammify(params+M::f::nparams);
+//  gammify(params);
+//  gammify(params+M::f::nparams);
 }
 
 // \param[in] tgts: three tangents, one at each point, in normalized coordinates

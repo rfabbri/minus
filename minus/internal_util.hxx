@@ -153,6 +153,7 @@ struct minus_util {
       v[i] = C<F>{r};
       m += r*r;
     }
+    // normalization doesn't affect much, just guarantees even sample
     m = std::sqrt(m);
     for (unsigned i=0; i < n; ++i)
       v[i] /= m;

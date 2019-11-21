@@ -165,7 +165,7 @@ void
 test_minus()
 {
   minus_initialize_gt();
-  test_full_solve();
+  // test_full_solve();
   test_end_user_interface();
 }
 
