@@ -123,7 +123,18 @@ test_end_user_interface()
   M::solution solutions[M::nsols];
   io::point_tangents2params_img(p_, tgt_, 0, 1, K_, params_start_target_);
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
-  M::track_all(M::DEFAULT, start_sols_, params_start_target_, solutions);
+  // M::track_all(M::DEFAULT, start_sols_, params_start_target_, solutions);
+  {
+    #ifdef M_VERBOSE
+    std::cerr << "LOG \033[0;33mUsing 4 threads by default\e[m\n" << std::endl;
+    #endif 
+    std::thread t[4];
+    t[0] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 0, 78);
+    t[1] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 78, 78*2);
+    t[2] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 78*2, 78*3);
+    t[3] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 78*3, 78*4);
+    t[0].join(); t[1].join(); t[2].join(); t[3].join();
+  }
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   auto duration = duration_cast<milliseconds>(t2 - t1).count();
   std::cerr << "LOG \033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
@@ -154,7 +165,7 @@ void
 test_minus()
 {
   minus_initialize_gt();
-  //test_full_solve();
+  test_full_solve();
   test_end_user_interface();
 }
 

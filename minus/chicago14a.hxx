@@ -7452,7 +7452,7 @@ RC_to_QT_format(const F rc[M::nviews][4][3], F qt[M::nve])
   dc[0] = rc[0][3][0] - rc[2][3][0];
   dc[1] = rc[0][3][1] - rc[2][3][1];
   dc[2] = rc[0][3][2] - rc[2][3][2];
-  u::quat_transform(q2+4,dc, qt + 8 + 3);
+  u::quat_transform(q2,dc, qt + 8 + 3);
 }
 
 // Generate "visible" line representation from input point-tangents
