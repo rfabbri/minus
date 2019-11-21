@@ -34,65 +34,6 @@ print_usage()
   std::cerr << "Usage: minus [input solutions]\n\n";
   std::cerr << "If no argument is given, 'input' is assumed stdin,\n\
   'solutions' will be output to stdout\n";
-  std::cerr << "Example: \n"
-               "  minus input_file solutions_file\n"
-               "  minus <input_file >solutions_file\n"
-               "  minus -g       # (or --profile) : performs a default solve for profiling\n"
-               "  minus -i       # (or --image_data) : reads point-tangents from stdin\n"
-               "  minus -h       # (or --help) : print this help message\n"
-               " -r or --real : outputs only real solutions
-            <<
-  R"(-i | --image_data usage:
- 
-  Input format (notation _view_points_coords. any number of spaces and newlines optional. can be in
-  one row or one column as well). This input format assumes tangent data for
-  all points, but you specify which one to use in id0 and id1 below. When
-  --use_all_tangents is passed (TODO), will try to select the better conditioned / least degenerate tangents 
- 
-  p000 p001
-  p010 p011
-  p020 p021
-  
-  p100 p101
-  p110 p111
-  p120 p121
-  
-  p100 p101
-  p110 p111
-  p120 p121
- 
-  t000 t001
-  t010 t011
-  t020 t021
-  
-  t100 t101
-  t110 t111
-  t120 t121
-  
-  t100 t101
-  t110 t111
-  t120 t121
-  
-  id0 id1           # id \in {0,1,2} of the point to consider the tangent
-  
-  K00 K01 K02       # intrinsic parameters: only these elements
-      K11 K22
-                    # GROUND TRUTH (optional) if -gt flag provided, pass the ground truth here:
-  r000 r001 r002    # default camera format if synthcurves flag passed: 
-  r010 r011 r012    # just like a 3x4 [R|T] but transposed to better fit row-major:
-  r020 r021 r022    #         | R |
-   c00  c01  c02    # P_4x3 = | - |
-                    #         | C'|
-  r100 r101 r102
-  r110 r111 r112
-  r120 r121 r122
-   c10  c11  c12 
-  
-  r200 r201 r202
-  r210 r211 r212
-  r220 r221 r222
-   c20  c21  c22)";
-            
   exit(1);
 }
 
@@ -229,16 +170,10 @@ main(int argc, char **argv)
   const char *output="stdout";
   --argc;
   bool profile = false;   // run some default solves for profiling
-  bool image_data = false;
     
   if (argc == 1) {
     if (std::string (argv[1]) == "-g" || std::string (argv[1]) == "--profile")
       profile = true;
-    else if (std::string (argv[1]) == "-h" || std::string (argv[1]) == "--help")
-      print_usage();
-    else if (std::string (argv[1]) == "-i" || std::string (argv[1]) == "--image_data") {
-      image_data = true; 
-    }
   } else if (argc == 2) {
     input = argv[1];
     output = argv[2];
@@ -256,19 +191,7 @@ main(int argc, char **argv)
     std::cerr << "LOG Running default solve for profiling\n";
   #endif 
 
-  if (!profile && (image_data && !iread<Float> || !mread<Float>(input) )) return 1; // reads into global params_
-
-  if (!profile) {
-    // read some files
-    if (image_data) {  // read image I/O parameters
-      if (!iread<Float>(input))
-        return 1;
-    } else {  // read raw I/O parametrs
-      if (!mread<Float>(input))  // reads into global params_
-        return 1;
-      params_start_target_ = params_;
-    }
-  }
+  if (!profile && !mread<Float>(input)) return 1; // reads into global params_
   
   static M::solution solutions[M::nsols];
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
@@ -282,10 +205,10 @@ main(int argc, char **argv)
     std::cerr << "LOG \033[0;33mUsing 4 threads by default\e[m\n" << std::endl;
     #endif 
     std::thread t[4];
-    t[0] = std::thread(M::track, M::DEFAULT, start_sols_, params_start_target_, solutions, 0, 78);
-    t[1] = std::thread(M::track, M::DEFAULT, start_sols_, params_start_target_, solutions, 78, 78*2);
-    t[2] = std::thread(M::track, M::DEFAULT, start_sols_, params_start_target_, solutions, 78*2, 78*3);
-    t[3] = std::thread(M::track, M::DEFAULT, start_sols_, params_start_target_, solutions, 78*3, 78*4);
+    t[0] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 0, 78);
+    t[1] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 78, 78*2);
+    t[2] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 78*2, 78*3);
+    t[3] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 78*3, 78*4);
     t[0].join(); t[1].join(); t[2].join(); t[3].join();
   }
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
