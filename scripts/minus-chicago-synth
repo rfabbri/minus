@@ -1,0 +1,6 @@
+# runs minus on synthspheres dataset
+# returns 3 if solver failed (no ground truth solution found)
+minus_chicago=/Users/rfabbri/cprg/vxlprg/lemsvpe/minus-bin/bin/minus-chicago
+synthdata $* | ${minus_chicago} --image_data -gt ; solver_fail="${PIPESTATUS[1]}"
+
+exit $solver_fail
