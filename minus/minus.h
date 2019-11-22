@@ -113,12 +113,12 @@ struct minus_core<P, F>::track_settings {
     end_zone_factor_(0.05),
     epsilon_(.0000001), // m2 CorrectorTolerance (chicago.m2, track.m2), raw interface code epsilon (interface2.d, NAG.cpp::rawSwetParametersPT)
     epsilon2_(epsilon_ * epsilon_), 
-    max_corr_steps_(3),  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
     dt_increase_factor_(2.),  // m2 stepIncreaseFactor
     dt_decrease_factor_(1./dt_increase_factor_),  // m2 stepDecreaseFactor not existent in DEFAULT, using what is in track.m2:77 
-    num_successes_before_increase_(20), // m2 numberSuccessesBeforeIncrease
     infinity_threshold_(1e7), // m2 InfinityThreshold
     infinity_threshold2_(infinity_threshold_ * infinity_threshold_)
+    max_corr_steps_(3),  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
+    num_successes_before_increase_(20) // m2 numberSuccessesBeforeIncrease
   { }
   
   F init_dt_;   // m2 tStep, t_step, raw interface code initDt
@@ -126,12 +126,12 @@ struct minus_core<P, F>::track_settings {
   F end_zone_factor_;
   F epsilon_; // m2 CorrectorTolerance (chicago.m2, track.m2), raw interface code epsilon (interface2.d, NAG.cpp:rawSwetParametersPT)
   F epsilon2_; 
-  unsigned max_corr_steps_;  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
   F dt_increase_factor_;  // m2 stepIncreaseFactor
   F dt_decrease_factor_;  // m2 stepDecreaseFactor not existent in DEFAULT, using what is in track.m2:77 
-  unsigned num_successes_before_increase_; // m2 numberSuccessesBeforeIncrease
   F infinity_threshold_; // m2 InfinityThreshold
   F infinity_threshold2_;
+  unsigned max_corr_steps_;  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
+  unsigned num_successes_before_increase_; // m2 numberSuccessesBeforeIncrease
 };
 // Original settings from Tim: Fri Feb 22 12:00:06 -03 2019 Git 0ec3340
 // o9 = MutableHashTable{AffinePatches => DynamicPatch     }

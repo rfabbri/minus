@@ -338,6 +338,7 @@ main(int argc, char **argv)
   std::string arg;
   enum {INITIAL_ARGS, AFTER_INITIAL_ARGS, IMAGE_DATA, MAX_CORR_STEPS} argstate = INITIAL_ARGS;
   bool incomplete = false;
+  M::track_settings settings = M::DEFAULT;
   
   // switches that can show up only in 1st position
   if (argc) {
@@ -376,8 +377,16 @@ main(int argc, char **argv)
         }
       }
       
-      if (argstate & MAX_CORR_STEPS_) {
-        max_corr_steps_ << arg;
+      if (argstate == MAX_CORR_STEPS) {
+        settings.max_corr_steps << arg;
+        --argc; ++argv;
+        argstate = AFTER_INITIAL_ARGS;
+        incomplete = false;
+        continue;
+      }
+      
+      if (argstate == EPSILON) {
+        settings.epsilon_ << arg;
         --argc; ++argv;
         argstate = AFTER_INITIAL_ARGS;
         incomplete = false;
@@ -388,6 +397,12 @@ main(int argc, char **argv)
       if (arg == "--max_corr_steps") {
         --argc; ++argv;
         argstate = MAX_CORR_STEPS;
+        incomplete = true;
+        continue;
+      }
+      if (arg == "--epsilon") {
+        --argc; ++argv;
+        argstate = EPSILON;
         incomplete = true;
         continue;
       }
@@ -446,10 +461,10 @@ main(int argc, char **argv)
     std::cerr << "LOG \033[0;33mUsing 4 threads by default\e[m\n" << std::endl;
     #endif 
     std::thread t[4];
-    t[0] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 0, 78);
-    t[1] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 78, 78*2);
-    t[2] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 78*2, 78*3);
-    t[3] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 78*3, 78*4);
+    t[0] = std::thread(M::track, settings, start_sols_, params_, solutions, 0, 78);
+    t[1] = std::thread(M::track, settings, start_sols_, params_, solutions, 78, 78*2);
+    t[2] = std::thread(M::track, settings, start_sols_, params_, solutions, 78*2, 78*3);
+    t[3] = std::thread(M::track, settings, start_sols_, params_, solutions, 78*3, 78*4);
     t[0].join(); t[1].join(); t[2].join(); t[3].join();
   }
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
