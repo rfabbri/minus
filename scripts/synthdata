@@ -4,27 +4,46 @@
 # from synthetic data  files
 #
 
+# echoerr() { echo "LOG $@" 1>&2; }
+echoerr() { printf "LOG %s\n" "$*" >&2; }
+#echoerr() { printf "LOG %s\n" "$*" >/dev/null; }
+
+case $# in
+  0) 
+    frames="42 54 62"
+    # off by one mistake by hongyi:
+    lines="3011 3389 620"  # actual 0-id samples are 1 less this.
+    ;;
+  6) 
+    frames="$1 $2 $3"
+    # off by one mistake by hongyi:
+    lines="$4 $5 $6"  # actual 0-id samples are 1 less this.
+    ;;
+  *) echo 'Usage: synthdata [frame1 frame2 frame3 file_line1 file_line2 file_line3]' 1>&2; exit 2
+esac
+
+
 cd /Users/rfabbri/lib/data/synthcurves-multiview-3d-dataset/spherical-ascii-100_views-perturb-radius_sigma10-normal_sigma0_01rad-minsep_15deg-no_two_cams_colinear_with_object
 
-# echoerr() { echo "LOG $@" 1>&2; }
-#echoerr() { printf "LOG %s\n" "$*" >&2; }
-echoerr() { printf "LOG %s\n" "$*" >/dev/null; }
 
-frames="42 54 62"
-# off by one mistake by hongyi:
-lines="3011 3389 620"  # actual 0-id samples are 1 less this.
+frame_id=""
+for i in $frames; do
+  frame_id="$frame_id"\ $(printf "%04d" $i)
+done
+frames="$frame_id"
+
 #set -x
 for i in $frames; do
   echoerr "2D points for frame $i"
   for l in $lines; do
-    sed -n "${l}p" frame_00$i-pts-2d.txt
+    sed -n "${l}p" frame_$i-pts-2d.txt
   done
 done
 
 for i in $frames; do
   echoerr "2D tangents for frame $i"
   for l in $lines; do
-    sed -n "${l}p" frame_00$i-tgts-2d.txt
+    sed -n "${l}p" frame_$i-tgts-2d.txt
   done
 done
 
@@ -45,5 +64,5 @@ head -n 2 calib.intrinsic
 
 for i in $frames; do
   echoerr "extrinsics for frame $i"
-  cat frame_00$i.extrinsic
+  cat frame_$i.extrinsic
 done
