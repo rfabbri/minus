@@ -473,17 +473,25 @@ main(int argc, char **argv)
   }
   
   static M::solution solutions[M::nsols];
-  high_resolution_clock::time_point t1 = high_resolution_clock::now();
+  bool failing=false;
+  LOG("\033[0;33mUsing 4 threads by default\e[m\n");
   #ifdef M_VERBOSE
   std::cerr << "LOG \033[0;33mStarting path tracker\e[m\n" << std::endl;
   #endif 
+  std::thread t[4];
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
   //  unsigned retval = 
   //  ptrack(&MINUS_DEFAULT, start_sols_, params_, solutions);
   {
-    #ifdef M_VERBOSE
-    std::cerr << "LOG \033[0;33mUsing 4 threads by default\e[m\n" << std::endl;
-    #endif 
-    std::thread t[4];
+    t[0] = std::thread(M::track, settings, start_sols_, params_, solutions, 0, 78);
+    t[1] = std::thread(M::track, settings, start_sols_, params_, solutions, 78, 78*2);
+    t[2] = std::thread(M::track, settings, start_sols_, params_, solutions, 78*2, 78*3);
+    t[3] = std::thread(M::track, settings, start_sols_, params_, solutions, 78*3, 78*4);
+    t[0].join(); t[1].join(); t[2].join(); t[3].join();
+  }
+  if (!io::has_valid_solutions(solutions)) {
+    failing=true;
+    // rerun once if solutions are not valid
     t[0] = std::thread(M::track, settings, start_sols_, params_, solutions, 0, 78);
     t[1] = std::thread(M::track, settings, start_sols_, params_, solutions, 78, 78*2);
     t[2] = std::thread(M::track, settings, start_sols_, params_, solutions, 78*2, 78*3);
@@ -492,6 +500,13 @@ main(int argc, char **argv)
   }
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   auto duration = duration_cast<milliseconds>(t2 - t1).count();
+  #ifdef M_VERBOSE
+  std::cerr << "LOG \033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
+  #endif
+  
+  if (failing && io::has_valid_solutions(solutions))
+    LOG("WON a failed solution!");
+  
   if (profile) {
     // compare solutions to certain values from M2
     // two random entries
@@ -505,27 +520,26 @@ main(int argc, char **argv)
     }
   }
   if (!mwrite<Float>(solutions, output)) return 2;
-  #ifdef M_VERBOSE
-  std::cerr << "LOG \033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
-  #endif
 
   // ---------------------------------------------------------------------------
   // test_final_solve_against_ground_truth(solutions);
   // optional: filter solutions using positive depth, etc.
-  if (ground_truth_) {
+  if (ground_truth_ || profile) {
     io::RC_to_QT_format(cameras_gt_, cameras_gt_quat_);
     unsigned sol_id;
     bool found = io::probe_all_solutions(solutions, cameras_gt_quat_, &sol_id);
-    if (found)
+    if (found) {
       LOG("found solution at index: " << sol_id);
-    else {
+      if (solutions[sol_id].status != M::REGULAR)
+        LOG("PROBLEM found ground truth but it is not REGULAR: " << sol_id);
+    } else {
       LOG("\033[1;91mFAIL:\e[m  ground-truth not found " << sol_id);
-      return SOLVER_FAILURE;
+      return SOLVER_FAILURE; 
       // you can detect solver failure by checking this exit code.
       // if you use shell, see:
       // https://www.thegeekstuff.com/2010/03/bash-shell-exit-status
     }
-  }
-   
+  } else if (!io::has_valid_solutions(solutions)) // if no ground-truth is provided, it will return error
+    return SOLVER_FAILURE;                    // if it can detect that the solver failed by generic tests
   return 0;
 }

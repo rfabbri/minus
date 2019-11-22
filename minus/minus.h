@@ -63,15 +63,15 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   static constexpr unsigned nve = f::nve;
   
   enum solution_status {
-    UNDETERMINED,
-    PROCESSING,
-    REGULAR,
-    SINGULAR,
-    INFINITY_FAILED,
-    MIN_STEP_FAILED,
-    ORIGIN_FAILED,
-    INCREASE_PRECISION,
-    DECREASE_PRECISION
+    UNDETERMINED,       // 0
+    PROCESSING,         // 1
+    REGULAR,            // 2 OK. rest is error.
+    SINGULAR,           // 3 unused
+    INFINITY_FAILED,    // 4
+    MIN_STEP_FAILED,    // 5
+    ORIGIN_FAILED,      // 6 unused
+    INCREASE_PRECISION, // 7 unused
+    DECREASE_PRECISION  // 8 unused
   };
   
   struct solution
@@ -285,6 +285,7 @@ struct minus_io_shaping {
       unsigned *solution_index);
   static bool probe_all_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
       unsigned *solution_index);
+  static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
 };
 
 // Shortcuts and aliases -------------------------------------------------------

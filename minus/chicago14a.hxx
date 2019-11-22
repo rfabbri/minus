@@ -7089,6 +7089,7 @@ struct minus_io_shaping<chicago14a, F> {
       unsigned *solution_index);
   static bool probe_all_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
       unsigned *solution_index);
+  static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
 };
 
 // For speed, assumes input point implicitly has 3rd homog coordinate is 1
@@ -7161,31 +7162,33 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
   F real_solution[M::nve];
   bool found=false;
   F min_rerror;
-  for (unsigned sol = 0; sol < M::nsols; ++sol) 
-    if (v::get_real(solutions[sol].x, real_solution)) {
-      u::normalize_quat(real_solution);
-      F rerror = u::rotation_error(real_solution, probe_cameras->q01);
-      if (rerror < eps) {
-        if (found == true) {
+  for (unsigned sol = 0; sol < M::nsols; ++sol)  {
+    if (!v::get_real(solutions[sol].x, real_solution))
+      continue;
+    u::normalize_quat(real_solution);
+    F rerror = u::rotation_error(real_solution, probe_cameras->q01);
+    if (rerror < eps) {
+      if (found == true) {
 #ifndef NDEBUG
-          std::cerr << "Found another similar solution at " << sol << std::endl;
-          std::cerr << "Error: " << rerror << std::endl;
+        std::cerr << "Found another similar solution at " << sol << std::endl;
+        std::cerr << "Error: " << rerror << std::endl;
 #endif
-          if (rerror < min_rerror) {
-            min_rerror = rerror;
-            *solution_index = sol;
-          }
-        } else {
-#ifndef NDEBUG
-          std::cerr << "Found a solution at " << sol << std::endl;
-          std::cerr << "Error: " << rerror << std::endl;
-#endif
+        if (rerror < min_rerror) {
           min_rerror = rerror;
           *solution_index = sol;
         }
-        found = true;
+        
+      } else {
+#ifndef NDEBUG
+        std::cerr << "Found a solution at " << sol << std::endl;
+        std::cerr << "Error: " << rerror << std::endl;
+#endif
+        min_rerror = rerror;
+        *solution_index = sol;
       }
+      found = true;
     }
+  }
 
   if (!found)
     return false;
@@ -7282,6 +7285,24 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
   }
   }
   return found;
+}
+
+//
+// Performs tests to see if there are potentially valid solutions,
+// without making use of ground truth. 
+// 
+template <typename F>
+inline bool 
+minus_io_shaping<chicago14a, F>::
+has_valid_solutions(const typename M::solution solutions[M::nsols])
+{
+  typedef minus_array<M::nve,F> v; typedef minus_util<F> u;
+  static constexpr F eps = 1e-3;
+  F real_solution[M::nve];
+  for (unsigned sol = 0; sol < M::nsols; ++sol) 
+    if (solutions[sol].status == M::REGULAR && v::get_real(solutions[sol].x, real_solution))
+      return true;
+  return false;
 }
 
 template <typename F>
