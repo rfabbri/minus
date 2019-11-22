@@ -393,6 +393,7 @@ main(int argc, char **argv)
     
     while (argc) { // second and beyond: above switches must already be set
       arg = std::string(*argv);
+      LOG("parsing arg " + arg);
       
       // argstate >= AFTER_INITIAL_ARGS ----------------------------------------
       if (argstate == IMAGE_DATA) {
@@ -413,7 +414,8 @@ main(int argc, char **argv)
       }
       
       if (argstate == EPSILON) {
-        settings.epsilon_ = std::stoi(arg);
+        settings.epsilon_ = std::stod(arg);
+        settings.epsilon2_ = settings.epsilon_*settings.epsilon_;
         --argc; ++argv;
         argstate = AFTER_INITIAL_ARGS;
         incomplete = false;
