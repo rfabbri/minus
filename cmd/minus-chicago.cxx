@@ -325,7 +325,7 @@ print_settings(const M::track_settings *settings)
 {
   #ifdef M_VERBOSE
   std::cerr << " track settings -----------------------------------------------\n";
-  char *names[11] = {
+  const char *names[11] = {
     "init_dt_",
     "min_dt_",
     "end_zone_factor_",
@@ -337,8 +337,8 @@ print_settings(const M::track_settings *settings)
     "infinity_threshold2_",
     "max_corr_steps_",
     "num_successes_before_increase_"
-  }
-  F *ptr = (F *) settings;
+  };
+  Float *ptr = (Float *) settings;
   for (int i=0; i < 9; ++i)
     std::cerr << names[i] << " = " << *ptr++ << std::endl;
   std::cerr << names[9] << " = " << settings->max_corr_steps_ << std::endl;
@@ -363,7 +363,7 @@ main(int argc, char **argv)
   bool image_data = false;
   bool image_data_state = false;
   std::string arg;
-  enum {INITIAL_ARGS, AFTER_INITIAL_ARGS, IMAGE_DATA, MAX_CORR_STEPS} argstate = INITIAL_ARGS;
+  enum {INITIAL_ARGS, AFTER_INITIAL_ARGS, IMAGE_DATA, MAX_CORR_STEPS, EPSILON} argstate = INITIAL_ARGS;
   bool incomplete = false;
   M::track_settings settings = M::DEFAULT;
   
@@ -380,7 +380,7 @@ main(int argc, char **argv)
       image_data = true; 
       argstate = IMAGE_DATA;
       --argc; ++argv;
-    } else if (arg does not contain "-") {
+    } else if (arg[0] != '-') {
       if (argc == 2) {
           input = argv[1];
           output = argv[2];
@@ -433,6 +433,8 @@ main(int argc, char **argv)
         incomplete = true;
         continue;
       }
+      std::cerr << "minus: \033[1;91m error\e[m\n - unrecognized argument" << arg << std::endl;;
+      print_usage();
     }
 
     if (incomplete) {
