@@ -96,7 +96,11 @@ print_usage()
   r200 r201 r202
   r210 r211 r212
   r220 r221 r222
-   c20  c21  c22)";
+   c20  c21  c22
+
+  One way to use this is 
+    synthdata | minus-chicago -i
+  where synthdata is provided in minus/scripts)";
             
   exit(1);
 }
