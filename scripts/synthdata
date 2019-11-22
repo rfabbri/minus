@@ -6,12 +6,13 @@
 
 cd /Users/rfabbri/lib/data/synthcurves-multiview-3d-dataset/spherical-ascii-100_views-perturb-radius_sigma10-normal_sigma0_01rad-minsep_15deg-no_two_cams_colinear_with_object
 
-echoerr() { echo "LOG $@" 1>&2; }
-echoerr hello world
+# echoerr() { echo "LOG $@" 1>&2; }
+#echoerr() { printf "LOG %s\n" "$*" >&2; }
+echoerr() { printf "LOG %s\n" "$*" >/dev/null; }
 
 frames="42 54 62"
 # off by one mistake by hongyi:
-lines="3011 3389 620"
+lines="3011 3389 620"  # actual 0-id samples are 1 less this.
 #set -x
 for i in $frames; do
   echoerr "2D points for frame $i"
@@ -30,16 +31,16 @@ done
 echoerr id0 id1
 echo 0 1
 
-echoerr "3D points"
-for l in $lines; do
-  sed -n "${l}p" crv-3D-pts.txt
-done
+#echoerr "3D points"
+#for l in $lines; do
+#  sed -n "${l}p" crv-3D-pts.txt
+#done
 
 #for i in $frames; do
 #  echoerr "tangents for frame $i"
 #  sed -n '3012p;3390p' frame_00$i-tgts-2d.txt
 #done
-echoerr "3D points"
+echoerr K
 head -n 2 calib.intrinsic
 
 for i in $frames; do

@@ -4923,7 +4923,7 @@ static const complex *params_= default_params_start_target_gammified_; // start-
 // synthcurves dataset.
 //
 // This is in pixel image coordinates
-static const double p_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
+static double p_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
   // points for frame 42 frame_0042-pts-2d.txt lines 3011 3389 620  (in order)
   {
     {140.31501792041547105, 270.706902669716726},
@@ -4980,7 +4980,7 @@ static const double p_correct_[io::pp::nviews][io::pp::npoints][io::ncoords2d] =
 // | R |
 // | - |
 // | C'|
-static const double cameras_gt_[io::pp::nviews][4][3] = {
+static double cameras_gt_[io::pp::nviews][4][3] = {
   { // camera for frame 42
     {-0.097305153950172085242, -0.22322794404612877894, -0.96989741313794208821},
     {0.96072075769186959793, 0.23341709945525662695, -0.15010690664274928263},
@@ -5015,7 +5015,7 @@ static double cameras_gt_quat_[M::nve];
 // 2D tangents for frame 54
 // 2D tangents for frame 62
 
-static const double tgt_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
+static double tgt_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
   // tangents for frame 42
   // + sed -n '3012p;3390p' frame_0042-tgts-2d.txt
   {
@@ -5068,7 +5068,7 @@ static const double tgt_correct_[io::pp::nviews][io::pp::npoints][io::ncoords2d]
 // Just eliminate last row 
 //
 // This matrix is calib.intrinsic for the synthcurves spherical dataset
-static const double K_[io::ncoords2d][io::ncoords2d_h] = {
+static double K_[io::ncoords2d][io::ncoords2d_h] = {
   {2584.9325098195013197, 0, 249.77137587221417903},
   {0, 2584.7918606057692159, 278.31267937919352562}
  //  0 0 1 
