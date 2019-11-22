@@ -11,7 +11,7 @@
 #include <thread>
 #include <testlib/testlib_test.h>
 #include <minus/minus.h>
-#include "debug_common.h"
+#include <minus/debug_common.h>
 
 // Start solutions hardcoded for efficiency.
 // If you want to play with different start sols,

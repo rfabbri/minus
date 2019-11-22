@@ -13,7 +13,7 @@
 #include <chrono>
 #include <testlib/testlib_test.h>
 #include <minus/internal_util.hxx>
-#include "debug_common.h"
+#include <minus/debug_common.h>
 
 // Start solutions hardcoded for efficiency.
 // If you want to play with different start sols,

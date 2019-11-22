@@ -321,7 +321,7 @@ mread(const char *fname)
 }
 
 void
-print_settings(const M::track_settings *settings)
+print_settings(const M::track_settings &settings)
 {
   #ifdef M_VERBOSE
   std::cerr << " track settings -----------------------------------------------\n";
@@ -338,11 +338,11 @@ print_settings(const M::track_settings *settings)
     "max_corr_steps_",
     "num_successes_before_increase_"
   };
-  Float *ptr = (Float *) settings;
+  Float *ptr = (Float *) &settings;
   for (int i=0; i < 9; ++i)
     std::cerr << names[i] << " = " << *ptr++ << std::endl;
-  std::cerr << names[9] << " = " << settings->max_corr_steps_ << std::endl;
-  std::cerr << names[10] << " = " << settings->num_successes_before_increase_ << std::endl;
+  std::cerr << names[9] << " = " << settings.max_corr_steps_ << std::endl;
+  std::cerr << names[10] << " = " << settings.num_successes_before_increase_ << std::endl;
   std::cerr << "---------------------------------------------------------------\n";
   #endif 
 }
@@ -405,7 +405,7 @@ main(int argc, char **argv)
       }
       
       if (argstate == MAX_CORR_STEPS) {
-        settings.max_corr_steps << arg;
+        settings.max_corr_steps_ = std::stoi(arg);
         --argc; ++argv;
         argstate = AFTER_INITIAL_ARGS;
         incomplete = false;
@@ -413,7 +413,7 @@ main(int argc, char **argv)
       }
       
       if (argstate == EPSILON) {
-        settings.epsilon_ << arg;
+        settings.epsilon_ = std::stoi(arg);
         --argc; ++argv;
         argstate = AFTER_INITIAL_ARGS;
         incomplete = false;
@@ -457,7 +457,7 @@ main(int argc, char **argv)
   else
     LOG("reading from " << input << " writing to " << output);
 
-  print_settings();
+  print_settings(settings);
 
   if (!profile) { // read files: either stdio or physical
     if (image_data) {  // read image pixel-based I/O parameters
