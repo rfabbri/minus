@@ -320,6 +320,33 @@ mread(const char *fname)
   return true;
 }
 
+void
+print_settings(const M::track_settings *settings)
+{
+  #ifdef M_VERBOSE
+  std::cerr << " track settings -----------------------------------------------\n";
+  char *names[11] = {
+    "init_dt_",
+    "min_dt_",
+    "end_zone_factor_",
+    "epsilon_",
+    "epsilon2_",
+    "dt_increase_factor_",
+    "dt_decrease_factor_",
+    "infinity_threshold_",
+    "infinity_threshold2_",
+    "max_corr_steps_",
+    "num_successes_before_increase_"
+  }
+  F *ptr = (F *) settings;
+  for (int i=0; i < 9; ++i)
+    std::cerr << names[i] << " = " << *ptr++ << std::endl;
+  std::cerr << names[9] << " = " << settings->max_corr_steps_ << std::endl;
+  std::cerr << names[10] << " = " << settings->num_successes_before_increase_ << std::endl;
+  std::cerr << "---------------------------------------------------------------\n";
+  #endif 
+}
+
 // Simplest possible command to compute the Chicago problem
 // for estimating calibrated trifocal geometry from points and lines at points
 //
@@ -413,7 +440,6 @@ main(int argc, char **argv)
       print_usage();
     }
   }
-  // for each remaining
 
   if (image_data) {
     LOG("param: input is image pixel data");
@@ -422,23 +448,16 @@ main(int argc, char **argv)
   }
   
   if (profile)
-    LOG("param: profiling");
+    LOG("Running default solve for profiling");
 
   if (stdio_)
     LOG("reading from stdio");
   else
     LOG("reading from " << input << " writing to " << output);
-  
-  
-  #ifdef M_VERBOSE
-  if (!profile) {
-    std::cerr << "LOG Input being read from " << input << std::endl;
-    std::cerr << "LOG Output being written to " << output << std::endl;
-  } else
-    std::cerr << "LOG Running default solve for profiling\n";
-  #endif 
 
-  if (!profile) { // read files
+  print_settings();
+
+  if (!profile) { // read files: either stdio or physical
     if (image_data) {  // read image pixel-based I/O parameters
       if (!iread<Float>(input))
         return 1;
