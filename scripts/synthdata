@@ -8,6 +8,11 @@
 echoerr() { printf "LOG %s\n" "$*" >&2; }
 #echoerr() { printf "LOG %s\n" "$*" >/dev/null; }
 
+# frames are 0-indexed
+# lines are 0-indexed
+#
+# each line is 0-5116 (number of points in synthdata is 5117)
+# each frame is 0-99 (number of frames in synthdata is 100)
 case $# in
   0) 
     frames="42 54 62"
@@ -25,12 +30,17 @@ esac
 
 cd /Users/rfabbri/lib/data/synthcurves-multiview-3d-dataset/spherical-ascii-100_views-perturb-radius_sigma10-normal_sigma0_01rad-minsep_15deg-no_two_cams_colinear_with_object
 
-
 frame_id=""
 for i in $frames; do
   frame_id="$frame_id"\ $(printf "%04d" $i)
 done
 frames="$frame_id"
+
+lines0id=""
+for l in $lines; do
+   lines0id="$lines0id"\ `echo $l + 1 | bc`
+done
+lines="$lines0id"
 
 #set -x
 for i in $frames; do
