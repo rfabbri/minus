@@ -331,23 +331,29 @@ main(int argc, char **argv)
 {
   const char *input="stdin";
   const char *output="stdout";
-  --argc;
+  --argc;++argv;
   bool profile = false;   // run some default solves for profiling
   bool image_data = false;
-    
-  if (argc >= 1) {
-    if (std::string (argv[1]) == "-g" || std::string (argv[1]) == "--profile")
-      profile = true;
-    else if (std::string (argv[1]) == "-h" || std::string (argv[1]) == "--help")
+  bool image_data_state = false;
+  std::string arg;
+  enum {INITIAL_ARGS, AFTER_INITIAL_ARGS, IMAGE_DATA, MAX_CORR_STEPS} argstate = INITIAL_ARGS;
+  bool incomplete = false;
+  
+  // switches that can show up only in 1st position
+  if (argc) {
+    arg = std::string(*argv);
+    if (arg == "-h" || arg == "--help")
       print_usage();
-    else if (std::string (argv[1]) == "-i" || std::string (argv[1]) == "--image_data")
+    if (arg == "-g" || arg == "--profile") {
+      profile = true;
+      argstate = AFTER_INITIAL_ARGS;
+      --argc; ++argv;
+    } else if (arg == "-i" || arg == "--image_data") {
       image_data = true; 
-    
-    if (!profile && argc >= 2) {
-      if (image_data) {
-        if (std::string (argv[2]) == "-gt")
-          ground_truth_ = true;
-      } else if (argc == 2) {
+      argstate = IMAGE_DATA;
+      --argc; ++argv;
+    } else if (arg does not contain "-") {
+      if (argc == 2) {
           input = argv[1];
           output = argv[2];
           stdio_ = false;
@@ -356,9 +362,43 @@ main(int argc, char **argv)
           print_usage();
       }
     }
-  }
+    
+    while (argc) { // second and beyond: above switches must already be set
+      arg = std::string(*argv);
+      
+      // argstate >= AFTER_INITIAL_ARGS ----------------------------------------
+      if (argstate == IMAGE_DATA) {
+        if (arg == "-gt") {
+          ground_truth_ = true;
+          --argc; ++argv;
+          argstate = AFTER_INITIAL_ARGS;
+          continue;
+        }
+      }
+      
+      if (argstate & MAX_CORR_STEPS_) {
+        max_corr_steps_ << arg;
+        --argc; ++argv;
+        argstate = AFTER_INITIAL_ARGS;
+        incomplete = false;
+        continue;
+      }
 
-  #ifdef M_VERBOSE
+      // argstate == AFTER_INITIAL_ARGS ----------------------------------------
+      if (arg == "--max_corr_steps") {
+        --argc; ++argv;
+        argstate = MAX_CORR_STEPS;
+        incomplete = true;
+        continue;
+      }
+    }
+
+    if (incomplete) {
+      std::cerr << "LOG \033[1;91merror: argument incomplete, (internal state: " << argstate << ")\n";
+      print_usage();
+    }
+  }
+  // for each remaining
 
   if (image_data) {
     LOG("param: input is image pixel data");
@@ -375,6 +415,7 @@ main(int argc, char **argv)
     LOG("reading from " << input << " writing to " << output);
   
   
+  #ifdef M_VERBOSE
   if (!profile) {
     std::cerr << "LOG Input being read from " << input << std::endl;
     std::cerr << "LOG Output being written to " << output << std::endl;

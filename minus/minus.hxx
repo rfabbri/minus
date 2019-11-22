@@ -124,7 +124,7 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
         evaluate_HxH(x1t1, params, HxH);
         dx_eigen = lu.compute(AA).solve(bb);
         v::add_to_self(x1t1, dx);
-        is_successful = v::norm2(dx) < s.epsilon2_ * v::norm2(x1t1);
+        is_successful = v::norm2(dx) < s.epsilon2_ * v::norm2(x1t1); // |dx|^2/|x1|^2 < eps2
       } while (!is_successful && n_corr_steps < s.max_corr_steps_);
       
       if (!is_successful) { // predictor failure
