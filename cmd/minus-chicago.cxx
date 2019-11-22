@@ -504,8 +504,12 @@ main(int argc, char **argv)
   std::cerr << "LOG \033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
   #endif
   
-  if (failing && io::has_valid_solutions(solutions))
+  if (failing && io::has_valid_solutions(solutions)) {
     LOG("WON a failed solution!");
+    failing=false;
+  } else {
+    LOG("There are real and regular solutions");
+  }
   
   if (profile) {
     // compare solutions to certain values from M2
@@ -533,7 +537,7 @@ main(int argc, char **argv)
       if (solutions[sol_id].status != M::REGULAR)
         LOG("PROBLEM found ground truth but it is not REGULAR: " << sol_id);
     } else {
-      LOG("\033[1;91mFAIL:\e[m  ground-truth not found " << sol_id);
+      LOG("\033[1;91mFAIL:\e[m  ground-truth not found among solutions");
       return SOLVER_FAILURE; 
       // you can detect solver failure by checking this exit code.
       // if you use shell, see:

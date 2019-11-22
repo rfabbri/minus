@@ -7145,6 +7145,8 @@ probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *
   return false;
 }
 
+// #undef NDEBUG
+
 #ifndef NDEBUG
 #include<minus/debug_util.h>
 #endif
@@ -7187,6 +7189,10 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
         *solution_index = sol;
       }
       found = true;
+    } else {
+#ifndef NDEBUG
+        std::cerr << "Solution is real but not close (sol,isvalid)" << sol << "," << solutions[sol].status << std::endl;
+#endif
     }
   }
 
