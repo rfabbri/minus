@@ -123,6 +123,82 @@ solutions = system( pipe input to minus-chicago )
 # solutions are output of the command that goes directly into Matlab
 ```
 
+By default, minus reads `input` in a raw format with least overhead,
+the purpose being to use only the minus core solver from other programs,
+which is fastest and has the least potential for bugs, but requires the calling
+program to do a lot of pre-processing.
+
+#### Image pixel data as input
+```bash
+minus-chicago -i
+```
+will read input in image data measured in pixels (before inverting intrinsics
+K). It will read from standard input by default, which can be used with other
+programs with in-memory I/O, avoiding physical files:
+
+```bash
+synthdata | minus-chicago -i              # synthdata is in minus/scripts/synthdata
+```
+or
+```bash
+minus-chicago -i  < input > output            # synthdata is in minus/scripts/synthdata
+```
+The input to `minus-chicago -i` is as follows:
+Input format (notation is `_view_points_coords`. any number of spaces and newlines optional. Can be in
+one row or one column as well). This input format assumes tangent data for
+all points, but you specify which one to use in id0 and id1 below. When
+`--use_all_tangents` is passed, will try to select the better conditioned / least degenerate tangents 
+ 
+```bash
+  p000 p001
+  p010 p011
+  p020 p021
+  
+  p100 p101
+  p110 p111
+  p120 p121
+  
+  p100 p101
+  p110 p111
+  p120 p121
+ 
+  t000 t001
+  t010 t011
+  t020 t021
+  
+  t100 t101
+  t110 t111
+  t120 t121
+  
+  t100 t101
+  t110 t111
+  t120 t121
+  
+  id0 id1           # id \in {0,1,2} of the point to consider the tangent
+  
+  K00 K01 K02       # intrinsic parameters: only these elements
+   0  K11 K22
+                    # GROUND TRUTH (optional) if -gt flag provided, pass the ground truth here:
+  r000 r001 r002    # default camera format if synthcurves flag passed: 
+  r010 r011 r012    # just like a 3x4 [R|T] but transposed to better fit row-major:
+  r020 r021 r022    #         | R |
+   c00  c01  c02    # P_4x3 = | - |
+                    #         | C'|
+  r100 r101 r102
+  r110 r111 r112
+  r120 r121 r122
+   c10  c11  c12 
+  
+  r200 r201 r202
+  r210 r211 r212
+  r220 r221 r222
+   c20  c21  c22
+```
+
+Further information is provided by typing `minus-chicago --help`.
+
+#### Distributed parallelism for RANSAC
+
 For now, each time you run minus-chicago inside RANSAC, you will have to call
 minus again. But this is OK since you can parallelize your RANSAC using GNU
 Parallel. Example:
