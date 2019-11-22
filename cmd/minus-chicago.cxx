@@ -33,6 +33,26 @@ using namespace std::chrono;
 // on this header
 #include <minus/debug_util.h>
 
+
+//  exit code. Conventions:
+//  0 (Zero)	Success
+// Non-zero	Failure
+// 2	Incorrect usage
+// 127	Command Not found
+// 126	Not an executable 
+// 
+// The return value of a command is its exit status, or 128
+// + N if the command is terminated by signal N. 
+//
+// Exit status is used to check the
+// result (success/failure) of the execution of the command. If the exit status
+// is zero, then the command is success. If the command is failed the exit status
+// will be non-zero.
+//
+// The codes below are between 3 and 126 inclusive
+//
+#define SOLVER_FAILURE 3
+
 void
 print_usage()
 {
@@ -106,7 +126,7 @@ print_usage()
 }
 
 bool stdio_=true;  // by default read/write from stdio
-bool ground_truth_=false;  // by default read/write from stdio
+bool ground_truth_=false;
 
 // Output solutions in ASCII matlab format
 //
@@ -413,11 +433,19 @@ main(int argc, char **argv)
   // ---------------------------------------------------------------------------
   // test_final_solve_against_ground_truth(solutions);
   // optional: filter solutions using positive depth, etc.
-  {
-  unsigned sol_id;
-  bool found = io::probe_all_solutions(solutions, cameras_gt_quat_, &sol_id);
-  if (found)
-    LOG("found solution at index: " << sol_id);
+  if (ground_truth_) {
+    io::RC_to_QT_format(cameras_gt_, cameras_gt_quat_);
+    unsigned sol_id;
+    bool found = io::probe_all_solutions(solutions, cameras_gt_quat_, &sol_id);
+    if (found)
+      LOG("found solution at index: " << sol_id);
+    else {
+      LOG("\033[1;91mFAIL:\e[m  ground-truth not found " << sol_id);
+      return SOLVER_FAILURE;
+      // you can detect solver failure by checking this exit code.
+      // if you use shell, see:
+      // https://www.thegeekstuff.com/2010/03/bash-shell-exit-status
+    }
   }
    
   return 0;

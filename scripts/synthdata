@@ -21,8 +21,10 @@ case $# in
     ;;
   6) 
     frames="$1 $2 $3"
+    echoerr "frames: $frames"
     # off by one mistake by hongyi:
     lines="$4 $5 $6"  # actual 0-id samples are 1 less this.
+    echoerr "lines: $lines"
     ;;
   *) echo 'Usage: synthdata [frame1 frame2 frame3 file_line1 file_line2 file_line3]' 1>&2; exit 2
 esac
