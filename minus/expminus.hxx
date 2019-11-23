@@ -144,7 +144,8 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
       }
       if (v::norm2(x0) > s.infinity_threshold2_)
         t_s->status = m::INFINITY_FAILED;
-      ++count;
+      if (++count > 500)
+        break;
     } // while (t loop)
     v::copy(x0, t_s->x); // record the solution
     t_s->t = *t0; // TODO try to include this in the previous memcpy

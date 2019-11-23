@@ -271,7 +271,7 @@ struct minus_io_shaping {
   static void normalize_line(F line[ncoords2d_h]);
   static void normalize_lines(F lines[][ncoords2d_h], unsigned nlines);
   static void initialize_gt();
-  static void RC_to_QT_format(const F rc[M::nviews-1][4][3], F qt[M::nve]);
+  static void RC_to_QT_format(const F rc[3][4][3], F qt[M::nve]);
   static void rotation_error(const F p[4], const F q[4]);
 
   // OUTPUT --------------------------------------------------------------------
