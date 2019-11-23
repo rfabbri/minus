@@ -323,7 +323,7 @@ mread(const char *fname)
 }
 
 void
-print_settings(const M::track_settings &settings)
+print_settings(const EXPM::track_settings &settings)
 {
   #ifdef M_VERBOSE
   std::cerr << " track settings -----------------------------------------------\n";
@@ -349,6 +349,25 @@ print_settings(const M::track_settings &settings)
   #endif 
 }
 
+template <typename F=double>
+static bool
+write_solution_info(const EXPM::solution s[M::nsols], unsigned long *num_steps)
+{
+  LOG("solution info start ----------------------------------------------------");
+  std::cerr << std::setprecision(20);
+  *num_steps = 0;
+  for (unsigned sol=0; sol < M::nsols; ++sol) {
+    *num_steps += s[sol].num_steps;
+    std::cerr << s[sol].num_steps;
+    std::cerr << "\t\t\% number of steps in path" << std::endl;
+    std::cerr << s[sol].status ;
+    std::cerr << "\t\t\% status" << std::endl;
+  }
+  LOG("Total steps of solver: \033[1;32m" << *num_steps << "\e[m");
+  LOG("solution info end ------------------------------------------------------");
+  return true;
+}
+
 // Simplest possible command to compute the Chicago problem
 // for estimating calibrated trifocal geometry from points and lines at points
 //
@@ -367,7 +386,7 @@ main(int argc, char **argv)
   std::string arg;
   enum {INITIAL_ARGS, AFTER_INITIAL_ARGS, IMAGE_DATA, MAX_CORR_STEPS, EPSILON} argstate = INITIAL_ARGS;
   bool incomplete = false;
-  M::track_settings settings = M::DEFAULT;
+  EXPM::track_settings settings = EXPM::DEFAULT;
   
   // switches that can show up only in 1st position
   if (argc) {
@@ -474,30 +493,18 @@ main(int argc, char **argv)
     }
   }
   
-  static M::solution solutions[M::nsols];
-  bool failing=false;
+  static EXPM::solution solutions[M::nsols];
   LOG("\033[0;33mUsing 4 threads by default\e[m\n");
   #ifdef M_VERBOSE
   std::cerr << "LOG \033[0;33mStarting path tracker\e[m\n" << std::endl;
   #endif 
-  std::thread t[4];
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
-  //  unsigned retval = 
-  //  ptrack(&MINUS_DEFAULT, start_sols_, params_, solutions);
   {
-    t[0] = std::thread(M::track, settings, start_sols_, params_, solutions, 0, 78);
-    t[1] = std::thread(M::track, settings, start_sols_, params_, solutions, 78, 78*2);
-    t[2] = std::thread(M::track, settings, start_sols_, params_, solutions, 78*2, 78*3);
-    t[3] = std::thread(M::track, settings, start_sols_, params_, solutions, 78*3, 78*4);
-    t[0].join(); t[1].join(); t[2].join(); t[3].join();
-  }
-  if (!io::has_valid_solutions(solutions)) {
-    failing=true;
-    // rerun once if solutions are not valid
-    t[0] = std::thread(M::track, settings, start_sols_, params_, solutions, 0, 78);
-    t[1] = std::thread(M::track, settings, start_sols_, params_, solutions, 78, 78*2);
-    t[2] = std::thread(M::track, settings, start_sols_, params_, solutions, 78*2, 78*3);
-    t[3] = std::thread(M::track, settings, start_sols_, params_, solutions, 78*3, 78*4);
+    std::thread t[4];
+    t[0] = std::thread(EXPM::track, settings, start_sols_, params_, solutions, 0, 78);
+    t[1] = std::thread(EXPM::track, settings, start_sols_, params_, solutions, 78, 78*2);
+    t[2] = std::thread(EXPM::track, settings, start_sols_, params_, solutions, 78*2, 78*3);
+    t[3] = std::thread(EXPM::track, settings, start_sols_, params_, solutions, 78*3, 78*4);
     t[0].join(); t[1].join(); t[2].join(); t[3].join();
   }
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
@@ -505,13 +512,6 @@ main(int argc, char **argv)
   #ifdef M_VERBOSE
   std::cerr << "LOG \033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
   #endif
-  
-  if (failing && io::has_valid_solutions(solutions)) {
-    LOG("WON a failed solution!");
-    failing=false;
-  } else {
-    LOG("There are real and regular solutions");
-  }
   
   if (profile) {
     // compare solutions to certain values from M2
@@ -527,16 +527,27 @@ main(int argc, char **argv)
   }
   if (!mwrite<Float>(solutions, output)) return 2;
 
+  unsigned long num_steps;
+  write_solution_info(solutions, &num_steps);
+
+  LOG("Time per step: " << duration*1e3/num_steps << " microsecond/step");
+  
+  static M::solution msolutions[M::nsols];
+  //emsolutions2m(solution, msolutions);
+  for (unsigned sol=0; sol < M::nsols; ++sol) {
+    msolutions[sol] = solutions[sol];
+  }
+
   // ---------------------------------------------------------------------------
-  // test_final_solve_against_ground_truth(solutions);
-  // optional: filter solutions using positive depth, etc.
+  // test_final_solve_against_ground_truth(msolutions);
+  // optional: filter msolutions using positive depth, etc.
   if (ground_truth_ || profile) {
     io::RC_to_QT_format(cameras_gt_, cameras_gt_quat_);
     unsigned sol_id;
-    bool found = io::probe_all_solutions(solutions, cameras_gt_quat_, &sol_id);
+    bool found = io::probe_all_solutions(msolutions, cameras_gt_quat_, &sol_id);
     if (found) {
       LOG("found solution at index: " << sol_id);
-      if (solutions[sol_id].status != M::REGULAR)
+      if (msolutions[sol_id].status != M::REGULAR)
         LOG("PROBLEM found ground truth but it is not REGULAR: " << sol_id);
     } else {
       LOG("\033[1;91mFAIL:\e[m  ground-truth not found among solutions");
@@ -545,7 +556,7 @@ main(int argc, char **argv)
       // if you use shell, see:
       // https://www.thegeekstuff.com/2010/03/bash-shell-exit-status
     }
-  } else if (!io::has_valid_solutions(solutions)) // if no ground-truth is provided, it will return error
+  } else if (!io::has_valid_solutions(msolutions)) // if no ground-truth is provided, it will return error
     return SOLVER_FAILURE;                    // if it can detect that the solver failed by generic tests
   return 0;
 }

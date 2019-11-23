@@ -45,25 +45,9 @@ class expminus_core { // fully static, not to be instantiated - just used for te
   static constexpr unsigned nsols = f::nsols;
   static constexpr unsigned nve = f::nve;
   
-  enum solution_status {
-    UNDETERMINED,       // 0
-    PROCESSING,         // 1
-    REGULAR,            // 2 OK. rest is error.
-    SINGULAR,           // 3 unused
-    INFINITY_FAILED,    // 4
-    MIN_STEP_FAILED,    // 5
-    ORIGIN_FAILED,      // 6 unused
-    INCREASE_PRECISION, // 7 unused
-    DECREASE_PRECISION  // 8 unused
-  };
-  
-  struct solution
+  struct solution : public minus_core<P,F>::solution
   {
-    C<F> x[f::nve];    // array of n coordinates
-    F t;            // last value of parameter t used
-    solution_status status;
-    unsigned num_steps;  // number of steps taken along the path
-    solution() : status(UNDETERMINED) { }
+    unsigned num_steps;  // number of steps taken along the path: don't mess with order!
   };
 
   static const track_settings DEFAULT;

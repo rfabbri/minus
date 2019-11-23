@@ -48,19 +48,20 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
   Map<const Matrix<C<F>, f::nve, 1>, Aligned > bb(RHS);
   static constexpr F the_smallest_number = 1e-13;
   typedef minus_array<f::nve,F> v; typedef minus_array<NVEPLUS1,F> vp;
+  typedef minus<P,F> m;
   PartialPivLU<Matrix<C<F>, f::nve, f::nve> > lu;
 
   solution *t_s = raw_solutions + sol_min;  // current target solution
   const C<F>* __restrict__ s_s = s_sols + sol_min*f::nve;    // current start solution
   for (unsigned sol_n = sol_min; sol_n < sol_max; ++sol_n) { // solution loop
-    t_s->status = PROCESSING;
+    t_s->status = minus<P,F>::PROCESSING;
     bool end_zone = false;
     v::copy(s_s, x0);
     *t0 = 0; *dt = t_step;
     unsigned predictor_successes = 0, count = 0;  // number of steps
 
     // track H(x,t) for t in [0,1]
-    while (t_s->status == PROCESSING && 1 - *t0 > the_smallest_number) {
+    while (t_s->status == m::PROCESSING && 1 - *t0 > the_smallest_number) {
       if (!end_zone && 1 - *t0 <= s.end_zone_factor_ + the_smallest_number)
         end_zone = true; // TODO: see if this path coincides with any other path on entry to the end zone
       if (end_zone) {
@@ -131,7 +132,7 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
       if (!is_successful) { // predictor failure
         predictor_successes = 0;
         *dt *= s.dt_decrease_factor_;
-        if (*dt < s.min_dt_) t_s->status = MIN_STEP_FAILED; // slight difference to SLP-imp.hpp:612
+        if (*dt < s.min_dt_) t_s->status = m::MIN_STEP_FAILED; // slight difference to SLP-imp.hpp:612
       } else { // predictor success
         ++predictor_successes;
         std::swap(x1t1,x0t0);
@@ -142,15 +143,18 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
         }
       }
       if (v::norm2(x0) > s.infinity_threshold2_)
-        t_s->status = INFINITY_FAILED;
+        t_s->status = m::INFINITY_FAILED;
       ++count;
     } // while (t loop)
     v::copy(x0, t_s->x); // record the solution
     t_s->t = *t0; // TODO try to include this in the previous memcpy
-    if (t_s->status == PROCESSING) t_s->status = REGULAR;
+    if (t_s->status == m::PROCESSING) t_s->status = m::REGULAR;
     t_s->num_steps = count;
     ++t_s; s_s += f::nve;
   } // outer solution loop
 }
+
+template <problem P, typename F> const typename 
+expminus_core<P, F>::track_settings expminus_core<P, F>::DEFAULT;
 
 #endif // expminus_hxx_

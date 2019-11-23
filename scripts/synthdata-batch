@@ -1,8 +1,8 @@
 #!/usr/local/bin/bash
 # echoerr() { echo "LOG $@" 1>&2; }
-#stamp=100_triplets-no_gammify_start
+#stamp=100_triplets-no_gammify_start-steps
 #triplet_file=100-configurations-synthdata 
-stamp=tiny
+stamp=tiny-steps
 triplet_file=tiny-configurations-synthdata #100-configurations-synthdata 
 #
 #
