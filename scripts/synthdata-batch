@@ -9,7 +9,7 @@ triplet_file=100-configurations-synthdata
 #
 echoerr() { printf "LOG %s\n" "$*" >&2; }
 
-print_usage() { echoerr 'Usage: synthdata_batch [max_corr_steps tol_eps]'; exit 2; }
+print_usage() { echoerr 'Usage: synthdata-batch [max_corr_steps tol_eps]'; exit 2; }
 
 echoerr number of args $#
 case $# in
@@ -17,7 +17,7 @@ case $# in
   ;;
   1)  case $1 in
           -h | --help) 
-            echo 'Usage: synthdata_batch [max_corr_steps tol_eps]' 1>&2; exit 2 
+            echo 'Usage: synthdata-batch [max_corr_steps tol_eps]' 1>&2; exit 2 
           ;;
       esac
   ;;
@@ -40,7 +40,7 @@ echoerr started sequential batch minus tester
 if [ ! -d $eval_dir ]; then
   echoerr creating directory $eval_dir
   if ! mkdir $eval_dir; then
-    echoerr synthdata_batch: could not create directory $eval_dir.
+    echoerr synthdata-batch: could not create directory $eval_dir.
     exit 1
   fi
   # if it exists, we keep dumping files at it, differentiated by PID
