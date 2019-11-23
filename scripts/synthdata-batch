@@ -1,9 +1,9 @@
 #!/usr/local/bin/bash
 # echoerr() { echo "LOG $@" 1>&2; }
-stamp=100_triplets-no_gammify_start
-triplet_file=100-configurations-synthdata 
-#stamp=tiny
-#triplet_file=tiny-configurations-synthdata #100-configurations-synthdata 
+#stamp=100_triplets-no_gammify_start
+#triplet_file=100-configurations-synthdata 
+stamp=tiny
+triplet_file=tiny-configurations-synthdata #100-configurations-synthdata 
 #
 #
 #
@@ -21,7 +21,7 @@ case $# in
           ;;
       esac
   ;;
-  0) echoer using default minus args
+  0) echoerr using default minus args
   ;;
   *) print_usage
 esac
@@ -33,13 +33,13 @@ if [ ! -z "$max_corr_steps" ]; then
   export minus_args="--epsilon $epsilon --max_corr_steps $max_corr_steps"
   stamp=$stamp-max_corr_steps_$max_corr_steps-epsilon_$epsilon
 fi
-eval_dir=$HOME/cprg/vxlprg/lemsvpe/minus/scripts/results-synth/work-$stamp
+eval_dir=$HOME/cprg/vxlprg/lemsvpe/minus/scripts/results-synth/work/work-$stamp
 
 echoerr started sequential batch minus tester
 
 if [ ! -d $eval_dir ]; then
   echoerr creating directory $eval_dir
-  if ! mkdir $eval_dir; then
+  if ! mkdir -p $eval_dir; then
     echoerr synthdata-batch: could not create directory $eval_dir.
     exit 1
   fi
