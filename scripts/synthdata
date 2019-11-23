@@ -30,7 +30,7 @@ case $# in
 esac
 
 
-cd /Users/rfabbri/lib/data/synthcurves-multiview-3d-dataset/spherical-ascii-100_views-perturb-radius_sigma10-normal_sigma0_01rad-minsep_15deg-no_two_cams_colinear_with_object
+cd $HOME/lib/data/synthcurves-multiview-3d-dataset/spherical-ascii-100_views-perturb-radius_sigma10-normal_sigma0_01rad-minsep_15deg-no_two_cams_colinear_with_object
 
 frame_id=""
 for i in $frames; do
@@ -48,14 +48,14 @@ lines="$lines0id"
 for i in $frames; do
   echoerr "2D points for frame $i"
   for l in $lines; do
-    sed -n "${l}p" frame_$i-pts-2d.txt
+    sed -n "${l}p" frame_$i-pts-2D.txt
   done
 done
 
 for i in $frames; do
   echoerr "2D tangents for frame $i"
   for l in $lines; do
-    sed -n "${l}p" frame_$i-tgts-2d.txt
+    sed -n "${l}p" frame_$i-tgts-2D.txt
   done
 done
 
