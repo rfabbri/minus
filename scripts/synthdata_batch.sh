@@ -1,5 +1,12 @@
 #!/usr/local/bin/bash
 # echoerr() { echo "LOG $@" 1>&2; }
+stamp=100_triplets-no_gammify_start
+triplet_file=100-configurations-synthdata 
+#stamp=tiny
+#triplet_file=tiny-configurations-synthdata #100-configurations-synthdata 
+#
+#
+#
 echoerr() { printf "LOG %s\n" "$*" >&2; }
 
 print_usage() { echoerr 'Usage: synthdata_batch [max_corr_steps tol_eps]'; exit 2; }
@@ -20,10 +27,6 @@ case $# in
 esac
 
 set -x
-stamp=100_triplets
-triplet_file=100-configurations-synthdata 
-#stamp=tiny
-#triplet_file=tiny-configurations-synthdata #100-configurations-synthdata 
 
 # used inside minus-chicago-synth
 if [ ! -z "$max_corr_steps" ]; then
@@ -61,3 +64,6 @@ do
   tfile=$eval_dir/${sample_id_tr}-$stamp-time.$$;
   grep 'Time of solver' $mstderr |grep -o '[0-9][0-9]*ms'|grep -o '[0-9][0-9]*' > $tfile
 done < $triplet_file
+
+echoerr median time
+cat $eval_dir/*time*| st --median 
