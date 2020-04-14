@@ -23,7 +23,7 @@ template <typename F=double>
 using C = std::complex<F>;
 
 // The problem solvers that this solver template currently supports
-enum problem {chicago14a, chicago6a, phoenix10a /*, standard*/};
+enum problem {chicago14a, chicago6a, cleveland14a, phoenix10a /*, standard*/};
 
 // each problem specializes this in their specific .h
 template <problem P>
