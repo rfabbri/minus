@@ -47,16 +47,6 @@ matrix:
       env:
       - MATRIX_NAME="clang_xcode11"
       
-    - os: osx
-      osx_image: xcode10.2
-      addons:
-        homebrew:
-          packages:
-          - gcc@5
-      env:
-        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
-        - MATRIX_NAME="gcc-5_xcode10.2"
-      
     # There is a specific bug with Xcode11 
     # when including cstdlib, due to gcc including an apple "standard" header
     # that misses a nonstandard definition just introduced by apple
@@ -80,6 +70,16 @@ matrix:
       env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
         - MATRIX_NAME="gcc-5_xcode11"
+    - os: osx
+      osx_image: xcode10.2
+      addons:
+        homebrew:
+          packages:
+          - gcc@5
+      env:
+        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+        - MATRIX_NAME="gcc-5_xcode10.2"
+      
           
 # addons:
 #   apt:
