@@ -6,4 +6,3 @@
 #include <minus/minus.hxx>
 template class minus_core<chicago14a, double>;
 template class minus_io_shaping<chicago14a, double>;
-template class minus_util<double>;
