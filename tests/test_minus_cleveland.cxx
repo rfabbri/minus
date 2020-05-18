@@ -12,6 +12,7 @@
 #include <testlib/testlib_test.h>
 #include <minus/minus.h>
 #include <minus/debug_common.h>
+#include "test_common.h"
 
 // Start solutions hardcoded for efficiency.
 // If you want to play with different start sols,
@@ -46,6 +47,7 @@ test_against_ground_truth(const M::solution solutions[])
 //  TEST("Solutions match original code", ok, true);
 }
 
+// tests on internal solutions
 void
 test_full_solve()
 {
@@ -94,24 +96,6 @@ test_full_solve()
   }
 }
 
-// fill in internal format for cameras_gt_
-// into camera_gt_quaternion
-// - convert each rotation to quaternion in the right order
-// - make the rotations all relative to the first camera
-static void
-minus_initialize_gt()
-{
-  //  R01 = R1 * inv(R0);
-  //  T01 = R1 * (C0 - C1);
-  //  R12 = R2 * inv(R1);
-  //  T12 = R2 * (C1 - C2);
-
-  // rotation-center format (used in synthcurves dataset)
-  // relative to the world, to internal quaternion-translation format relative
-  // to first camera
-  io::RC_to_QT_format(cameras_gt_, cameras_gt_quat_);
-}
-
 void
 test_end_user_interface()
 {
@@ -121,7 +105,7 @@ test_end_user_interface()
   {
   std::cerr << "Starting path tracker in test_end_user_interface" << std::endl;
   M::solution solutions[M::nsols];
-  io::point_tangents2params_img(p_, tgt_, 0, 1, K_, params_start_target_);
+  io::point_lines2params_img(p_, l_, 0, 1, K_, params_start_target_);   // TODO
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   // M::track_all(M::DEFAULT, start_sols_, params_start_target_, solutions);
   {
