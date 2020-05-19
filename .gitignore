@@ -110,3 +110,10 @@ scripts/screencasts
 tests/2colmap
 tests/2openmvg
 tests/o
+cmd/expminus-chicago
+cmd/minus-cleveland
+scripts/minus-chicago
+scripts/tst
+tags
+tests/log_test_get_params_start_target
+doc/papers
