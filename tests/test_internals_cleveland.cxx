@@ -21,7 +21,7 @@
 // but keep this one lean & mean.
 #include <minus/cleveland14a-default.hxx> 
 
-Float plines_m2_[io::pp::nvislines][io::ncoords2d_h] = {
+static Float plines_m2_[io::pp::nvislines][io::ncoords2d_h] = {
        {.879009, .476806, .0386237},
        {.894813, -.446441, .032208},
        {.704559, .709645, -.0337046},
@@ -39,7 +39,7 @@ Float plines_m2_[io::pp::nvislines][io::ncoords2d_h] = {
        {-.610568, .791964, .0300628}
 };
 
-complex params_target_m2_[M::f::nparams] = {
+static complex params_target_m2_[M::f::nparams] = {
  {.879009},
  {.476806},
  {.0386237},
@@ -98,7 +98,7 @@ complex params_target_m2_[M::f::nparams] = {
  {.657926}
 };
 
-void
+static void
 test_cross2()
 {
   Float v[3] = {1, 0, 1};
@@ -114,7 +114,7 @@ test_cross2()
   TEST("Cross product, test 5", std::fabs(minus_3d<Float>::dot(r, s)) > eps_, false);
 }
 
-void 
+static void 
 test_quat()
 {
   {
@@ -317,7 +317,7 @@ test_quat()
   }
 }
 
-void
+static void
 test_gamma()
 {
   { // sanity check
@@ -390,7 +390,7 @@ test_gamma()
 }
     
 
-void
+static void
 test_lines2params()
 {
   { // sanity checks
@@ -419,7 +419,7 @@ test_lines2params()
   }
 }
 
-void 
+static void 
 test_point_tangents2lines()
 {
   { // sanity check
@@ -455,7 +455,7 @@ test_point_tangents2lines()
   }
 }
 
-void
+static void
 test_get_params_start_target()
 {
   std::ofstream log("log_test_get_params_start_target");
@@ -477,7 +477,7 @@ test_get_params_start_target()
   }
 }
 
-void
+static void
 test_io_shaping()
 {
   test_gamma();

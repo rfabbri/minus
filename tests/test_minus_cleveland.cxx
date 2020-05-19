@@ -12,7 +12,6 @@
 #include <testlib/testlib_test.h>
 #include <minus/minus.h>
 #include <minus/debug_common.h>
-#include "test_common.h"
 
 // Start solutions hardcoded for efficiency.
 // If you want to play with different start sols,
@@ -25,11 +24,12 @@
 // But for efficiency I chose to do it outside.
 // Perhaps a minus class should be written that wraps the lean minus_core.
 // And in _that_ one, we put these default vectors depending on template tag.
+#include "test_common.h"
 
 #define  M_VERBOSE 1     // display verbose messages
 
 
-void
+static void
 test_against_ground_truth(const M::solution solutions[])
 {
   // compare solutions to certain values from Macaulay2
@@ -48,7 +48,7 @@ test_against_ground_truth(const M::solution solutions[])
 }
 
 // tests on internal solutions
-void
+static void
 test_full_solve()
 {
   std::cerr << "Starting path tracker" << std::endl;
@@ -96,6 +96,7 @@ test_full_solve()
   }
 }
 
+#if 0
 void
 test_end_user_interface()
 {
@@ -144,13 +145,14 @@ test_end_user_interface()
     std::cout << "found solution at index: " << sol_id << std::endl;
   }
 }
+#endif
 
 void
-test_minus()
+test_minus_cleveland()
 {
   minus_initialize_gt();
-  // test_full_solve();
-  test_end_user_interface();
+  test_full_solve();
+  // test_end_user_interface();
 }
 
-TESTMAIN(test_minus);
+TESTMAIN(test_minus_cleveland);

@@ -19,4 +19,4 @@ minus_initialize_gt()
   io::RC_to_QT_format(cameras_gt_, cameras_gt_quat_);
 }
 
-#endif test_common_h
+#endif // test_common_h

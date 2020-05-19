@@ -106,3 +106,7 @@ tests/parameters.h
 tests/phoenix10a.h
 tests/phoenix10a.hxx
 README_INTERNAL.md
+scripts/screencasts
+tests/2colmap
+tests/2openmvg
+tests/o

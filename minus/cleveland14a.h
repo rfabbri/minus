@@ -9,13 +9,13 @@ struct formulation_parameters<cleveland14a> {
                                            // this formulation: two quaternions and 
                                            // two translation vectors
   static constexpr unsigned nparams = 53;  // number of parameters
-  //    params  is pF||pTriple||pChart  //  Hongyi: [pF; tripleChart; XR'; XT1'; XT2'];
-  //    size       27     12     17 = 56
+  //    params  is pF||pFreeLine ||pChart  //  Hongyi: [pF; tripleChart; XR'; XT1'; XT2'];
+  //    size       27     9          17 = 53
   //    pF: lines between points: 3lines*3views*3coordinates = 27
-  //    pTriple: tangent lines each with 2 numbers: 2tangents*3views*2coords = 12
+  //    pFreeLine: free line  1line*3views*3coordinates = 9
   //    pChart: 2xquaternions + 2translations + 1 homg coord per quat + 1 homg
   //    coord per [t01 t02] pair = 2*4+2*3+2+1 = 17
-  //    internal note: see inGates in cleveland.m2
+  //    internal note: see inGates in chicago.m2
 };
 
 template <>
