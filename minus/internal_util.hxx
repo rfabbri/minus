@@ -1,5 +1,5 @@
-#ifndef internal_util_h_
-#define internal_util_h_
+#ifndef internal_util_hxx_
+#define internal_util_hxx_
 
 #include <minus/minus.h>
 
@@ -311,4 +311,4 @@ std::normal_distribution<F> minus_util<F>::gauss{0.0,1000.0};
 template <problem P, typename F> const typename 
 minus_core<P, F>::track_settings minus_core<P, F>::DEFAULT;
 
-#endif // internal_util_h_
+#endif // internal_util_hxx_

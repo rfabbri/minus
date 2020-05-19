@@ -10,7 +10,8 @@
 #include <minus/minus.h>
 
 #define Float double
-typedef minus<cleveland14a> M;
+// XXX typedef minus<cleveland14a> M;
+typedef minus<chicago14a> M;
 static constexpr Float tol = 1e-3;
 typedef std::complex<Float> complex;
 using namespace std::chrono;
@@ -19,7 +20,8 @@ using namespace std::chrono;
 // If you want to play with different start sols,
 // write another program that accepts start sols in runtime,
 // but keep this one lean & mean.
-#include <minus/cleveland14a-default.hxx> 
+// XXX #include <minus/cleveland14a-default.hxx> 
+#include <minus/chicago14a-default.hxx> 
 // We include it separately so they don't clutter this app,
 // neither minus.h, and can be reused by other progs
 // TODO(developer note): make this part of Minus' template as a specialization. 

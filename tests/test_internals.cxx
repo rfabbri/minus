@@ -335,6 +335,7 @@ test_rand()
   TEST("Is the random generator gaussian(0,1000) average not too far from 0?", s/NRAND < 100, true);
   }
 
+#if 0
   { // randc ------------------------------------------------------------------
   constexpr Float tol = 0.001;
   constexpr unsigned n = 1000;
@@ -396,6 +397,7 @@ test_rand()
     TEST_NEAR("Cross product", m, 0 , tol);
     test_cross2();
   }
+#endif
 }
 
 static void
@@ -561,8 +563,8 @@ test_get_params_start_target()
 static void
 test_io_shaping()
 {
-  test_gamma();
   test_point_tangents2lines();  // OK
+  test_gamma();
   test_lines2params();  // OK
   test_get_params_start_target();
 }
@@ -570,9 +572,9 @@ test_io_shaping()
 void
 test_internals()
 {
+//  test_quat();
   test_rand();
-  test_io_shaping();
-  test_quat();
+//  test_io_shaping();
 }
 
 TESTMAIN(test_internals);

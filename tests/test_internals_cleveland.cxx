@@ -480,8 +480,8 @@ test_get_params_start_target()
 static void
 test_io_shaping()
 {
-  test_gamma();
   test_point_tangents2lines();
+  test_gamma();
   test_lines2params();
   test_get_params_start_target();
 }
