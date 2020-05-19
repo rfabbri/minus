@@ -9,6 +9,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cstring>
+#include <random>
 #include "Eigen/LU"
 #include <minus/minus.h>
 #include <minus/internal_util.hxx>

@@ -1,6 +1,7 @@
 #ifndef internal_util_hxx_
 #define internal_util_hxx_
 
+#include <random>
 #include <minus/minus.h>
 
 template <unsigned N, typename F>

@@ -17,7 +17,6 @@
 //  - see CMakeLists.txt and README.md
 
 #include <complex>
-#include <random>
 
 template <typename F=double>
 using C = std::complex<F>;
