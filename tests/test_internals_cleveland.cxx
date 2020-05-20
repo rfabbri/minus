@@ -12,8 +12,8 @@
 #include <iomanip>
 #include <chrono>
 #include <testlib/testlib_test.h>
-#include <minus/internal_util.hxx>
 #include <minus/debug_common.h>
+#include <minus/chicago14a-internals.h>
 
 // Start solutions hardcoded for efficiency.
 // If you want to play with different start sols,

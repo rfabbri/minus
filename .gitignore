@@ -117,3 +117,4 @@ scripts/tst
 tags
 tests/log_test_get_params_start_target
 doc/papers
+tests/log

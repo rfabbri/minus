@@ -1,7 +1,8 @@
 #ifndef debug_common_h_
 #define debug_common_h_
 
-#include <minus/minus.hxx>
+#include <minus/minus.h>
+#include <minus/internal_util.h>
 
 
 #define Float double
