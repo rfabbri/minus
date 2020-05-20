@@ -17,6 +17,7 @@ target_link_libraries(minus_test_all minus ${VXL_LIB_PREFIX}vnl ${VXL_LIB_PREFIX
 add_test( NAME test_minus COMMAND minus_test_all test_minus )
 add_test( NAME test_minus_cleveland COMMAND minus_test_all test_minus_cleveland )
 add_test( NAME test_internals COMMAND minus_test_all test_internals )
+add_test( NAME test_internals_cleveland COMMAND minus_test_all test_internals_cleveland )
 
 add_executable(minus_test_include test_include.cxx)
 target_link_libraries(minus_test_include minus)

@@ -8,10 +8,8 @@
 
 #include <minus/minus.h>
 
-//typedef minus<cleveland14a> M;
-//typedef minus_io<cleveland14a> io;
-typedef minus<chicago14a> M;
-typedef minus_io<chicago14a> io;
+typedef minus<cleveland14a> M;
+typedef minus_io<cleveland14a> io;
 
 // 
 // Internal note: m2: script t, variable sols

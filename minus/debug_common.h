@@ -6,9 +6,7 @@
 
 
 #define Float double
-typedef minus<chicago14a> M;
 typedef minus_util<Float> util;
-typedef minus_io<chicago14a> io;
 typedef std::complex<Float> complex;
 using namespace std::chrono;
 
