@@ -572,9 +572,9 @@ test_io_shaping()
 void
 test_internals()
 {
-//  test_quat();
+  test_quat();
   test_rand();
-//  test_io_shaping();
+  test_io_shaping();
 }
 
 TESTMAIN(test_internals);
