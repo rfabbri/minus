@@ -7029,7 +7029,7 @@ invert_intrinsics(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const d
     const F *px = pix_coords[p];
     F *nrm = normalized_coords[p];
     nrm[1] = (px[1]-K[1][2])/K[1][1];
-    nrm[0] = (px[0] - K[0][1] - K[0][2])/K[0][0];
+    nrm[0] = (px[0] - K[0][1]*nrm[1] - K[0][2])/K[0][0];
   }
 }
 

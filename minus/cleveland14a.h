@@ -51,6 +51,7 @@ struct formulation_parameters<cleveland14a> {
                                            // this formulation: two quaternions and 
                                            // two translation vectors
   static constexpr unsigned nparams = 56;  // number of parameters
+  //    more detail on exact format of params: see my 19may20 notes
   //    params  is pF||pTriple||pChart  //  Hongyi: [pF; tripleChart; XR'; XT1'; XT2'];
   //    size       27     12     17 = 56
   //    pF: lines between points: 3lines*3views*3coordinates = 27

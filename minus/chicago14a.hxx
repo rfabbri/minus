@@ -7029,7 +7029,22 @@ invert_intrinsics(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const d
     const F *px = pix_coords[p];
     F *nrm = normalized_coords[p];
     nrm[1] = (px[1]-K[1][2])/K[1][1];
-    nrm[0] = (px[0] - K[0][1] - K[0][2])/K[0][0];
+    nrm[0] = (px[0] - K[0][1]*nrm[1] - K[0][2])/K[0][0];
+  }
+}
+
+// For speed, assumes input point implicitly has 3rd homog coordinate is 1
+// 
+template <typename F>
+inline void 
+minus_io_shaping<chicago14a, F>::
+invert_intrinsics_tgt(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const double pix_tgt_coords[][ncoords2d], double normalized_tgt_coords[][ncoords2d], unsigned npts)
+{
+  for (unsigned p=0; p < npts; ++p) {
+    const F *tp = pix_tgt_coords[p];
+    F *t = normalized_tgt_coords[p];
+    t[1] = tp[1]/K[1][1];
+    t[0] = (tp[0] - K[0][1]*tp[1])/K[0][0];
   }
 }
 

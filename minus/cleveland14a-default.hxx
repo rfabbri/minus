@@ -4705,7 +4705,7 @@ static const complex start_sols_[M::nve*M::nsols] = {
 //
 // start_sols_
 //
-// pDouble||pTriple||pChart
+// pDouble||pFreeLine||pChart  : see exct format in problem.h
 // 
 //                                  actually just the start M::nparams
 //                                  are initialized here, but we use 

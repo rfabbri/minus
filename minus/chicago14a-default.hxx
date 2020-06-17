@@ -5074,7 +5074,6 @@ static double K_[io::ncoords2d][io::ncoords2d_h] = {
  //  0 0 1 
 };
 
-
 // OLD COMMENTS:
 // Hongy's format (intermediate, after inverting K, specific for line/minur
 // formulation)
