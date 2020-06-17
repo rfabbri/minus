@@ -7048,21 +7048,6 @@ invert_intrinsics_tgt(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], con
   }
 }
 
-// For speed, assumes input point implicitly has 3rd homog coordinate is 1
-// 
-template <typename F>
-inline void 
-minus_io_shaping<chicago14a, F>::
-invert_intrinsics_tgt(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const double pix_tgt_coords[][ncoords2d], double normalized_tgt_coords[][ncoords2d], unsigned npts)
-{
-  for (unsigned p=0; p < npts; ++p) {
-    const F *tp = pix_tgt_coords[p];
-    F *t = normalized_tgt_coords[p];
-    t[1] = tp[1]/K[1][1];
-    t[0] = (tp[0] - K[0][1]*tp[1])/K[0][0];
-  }
-}
-
 // The camera parameter is cameras[img] which is a [4][3] array,
 // where the first 3x3 block is R, and the 4th row is T. img is img 0 or 1,
 // for 2nd and 3rd cams relative to 1st, resp.
@@ -7633,4 +7618,5 @@ solution2cams(/*const but use as scratch*/ F rs[M::nve], F cameras[2/*2nd and 3r
   //  R12 = quat2rotm(transpose(quat12));
   //  R13 = quat2rotm(transpose(quat13));
 }
+
 #endif // chicago14a_hxx_

@@ -5,15 +5,27 @@
 // for inclusion in minus app for default
 // 
 // to be included after minus.h
+//
+//
+// Developer Notes:
+// Start solutions hardcoded for efficiency.
+// If you want to play with different start sols,
+// write another program that accepts start sols in runtime,
+// but keep this one lean & mean.
+// We include it separately so they don't clutter this app,
+// neither minus.h, and can be reused by other progs
+// TODO(developer note): make this part of Minus' template as a specialization. 
+// But for efficiency I chose to do it outside.
+// Perhaps a minus class should be written that wraps the lean minus_core.
+// And in _that_ one, we put these default vectors depending on template tag.
+
 
 #include <minus/minus.h>
-
-typedef minus<chicago14a> M;
-typedef minus_io<chicago14a> io;
+#include <minus/chicago14a-default.h>
 
 // 
 // Internal note: m2: script t, variable sols
-static const complex start_sols_[M::nve*M::nsols] = {
+const complex start_sols_[M::nve*M::nsols] = {
   {-.59336028545681196,-.11013183013512155},
   {.11944671140724233,-.13633687755694085},
   {-.7527462639007193e-1,.36383005180054401},
@@ -4712,7 +4724,7 @@ static const complex start_sols_[M::nve*M::nsols] = {
 //                                  the other M::nparams later 
 //                                  to store target system params
 //                                  the latter M::nparams are trash
-static complex params_start_target_[2*M::f::nparams] = {
+complex params_start_target_[2*M::f::nparams] = {
   {.13016671344237549,-.36891394723672405},
   {.2649393534275909,-.23418132862391827},
   {.16966329078346828,.83255014163452079},
@@ -4781,7 +4793,7 @@ static complex params_start_target_[2*M::f::nparams] = {
 //  P01 := (gammify P0)||(gammify P1); 
 //
 // The point-tangent inputs giving rise to this are given below
-static const complex default_params_start_target_gammified_[2*M::f::nparams] = { // start-target param pairs, P01 in chicago.m2
+const complex default_params_start_target_gammified_[2*M::f::nparams] = { // start-target param pairs, P01 in chicago.m2
   {.391195550619826,-.00262962533857666},
   {.310140709227333,+.169842562835882},
   {-.725705624433656,+.441901252816163},
@@ -4895,7 +4907,7 @@ static const complex default_params_start_target_gammified_[2*M::f::nparams] = {
   {-.106561340161159,+.495572246957103},
   {.0663667102234161,-.308643825789244}
 };
-static const complex *params_= default_params_start_target_gammified_; // start-target param pairs, P01 in chicago.m2
+const complex *params_= default_params_start_target_gammified_; // start-target param pairs, P01 in chicago.m2
 
 
 // Input points and tangents corresponding to the above gammified homotopy parameters,
@@ -4923,7 +4935,7 @@ static const complex *params_= default_params_start_target_gammified_; // start-
 // synthcurves dataset.
 //
 // This is in pixel image coordinates
-static double p_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
+Float p_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
   // points for frame 42 frame_0042-pts-2d.txt lines 3011 3389 620  (in order)
   {
     {140.31501792041547105, 270.706902669716726},
@@ -4945,7 +4957,7 @@ static double p_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
 };
 
 // If correct indexing were used, this would be the default run
-static const double p_correct_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
+const Float p_correct_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
   // points for frame 42
   // + sed -n '3012p;3390p;621p' frame_0042-pts-2d.txt
   {
@@ -4980,7 +4992,7 @@ static const double p_correct_[io::pp::nviews][io::pp::npoints][io::ncoords2d] =
 // | R |
 // | - |
 // | C'|
-static double cameras_gt_[io::pp::nviews][4][3] = {
+Float cameras_gt_[io::pp::nviews][4][3] = {
   { // camera for frame 42
     {-0.097305153950172085242, -0.22322794404612877894, -0.96989741313794208821},
     {0.96072075769186959793, 0.23341709945525662695, -0.15010690664274928263},
@@ -5004,7 +5016,7 @@ static double cameras_gt_[io::pp::nviews][4][3] = {
 // this is more similar to the format in M::solution::x
 // ie, minus_io_shapping::solution_shape,
 // for each other view relative to the first
-static double cameras_gt_quat_[M::nve];
+Float cameras_gt_quat_[M::nve];
 
 // The tgt_ array is the same size as the p_ array.
 // At each solve only two are used, but since usually all three points have
@@ -5015,7 +5027,7 @@ static double cameras_gt_quat_[M::nve];
 // 2D tangents for frame 54
 // 2D tangents for frame 62
 
-static double tgt_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
+Float tgt_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
   // tangents for frame 42
   // + sed -n '3012p;3390p' frame_0042-tgts-2d.txt
   {
@@ -5039,7 +5051,7 @@ static double tgt_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
   }
 };
 
-static const double tgt_correct_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
+const Float tgt_correct_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
   // tangents for frame 42
   // + sed -n '3012p;3390p' frame_0042-tgts-2d.txt
   {
@@ -5068,7 +5080,7 @@ static const double tgt_correct_[io::pp::nviews][io::pp::npoints][io::ncoords2d]
 // Just eliminate last row 
 //
 // This matrix is calib.intrinsic for the synthcurves spherical dataset
-static double K_[io::ncoords2d][io::ncoords2d_h] = {
+Float K_[io::ncoords2d][io::ncoords2d_h] = {
   {2584.9325098195013197, 0, 249.77137587221417903},
   {0, 2584.7918606057692159, 278.31267937919352562}
  //  0 0 1 
