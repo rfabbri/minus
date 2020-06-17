@@ -13,13 +13,13 @@
 #include <chrono>
 #include <testlib/testlib_test.h>
 #include <minus/debug_common.h>
-#include <minus/chicago14a-internals.h>
+#include <minus/cleveland14a-internals.h>
 
 // Start solutions hardcoded for efficiency.
 // If you want to play with different start sols,
 // write another program that accepts start sols in runtime,
 // but keep this one lean & mean.
-#include <minus/chicago14a-default.hxx> 
+#include <minus/cleveland14a-default.hxx> 
 
 static Float plines_m2_[io::pp::nvislines][io::ncoords2d_h] = {
        {.879009, .476806, .0386237},
@@ -318,89 +318,6 @@ test_quat()
 }
 
 static void
-test_rand()
-{
-  std::cout << "Random number generation \n";
-  { // gaussian random --------------------------------------------------------
-  static constexpr unsigned NRAND = 20000.;
-  Float d[NRAND];
-  for (unsigned i=0; i < NRAND; ++i)
-    d[i] = util::gauss(util::rnd);
-  double s = 0;
-  for (unsigned i=0; i < NRAND; ++i)
-    s+= d[i];
-  #ifdef M_VERBOSE     // display verbose messages
-  std::cout << "***** avg: " << s/NRAND << std::endl;
-  #endif
-  TEST("Is the random generator gaussian(0,1000) average not too far from 0?", s/NRAND < 100, true);
-  }
-
-#if 0
-  { // randc ------------------------------------------------------------------
-  constexpr Float tol = 0.001;
-  constexpr unsigned n = 1000;
-  complex z[n] = {};
-  // std::ofstream log("log");
-  for (unsigned i=0; i < n; ++i) {
-    util::randc(z+i);
-    // log << z[i] << std::endl;
-  }
-  
-  bool test = true;
-  for (unsigned i=0; i < n; ++i) {
-    Float mag = std::abs(z[i]);
-    if (mag > 1 + tol || mag < 1 - tol) {
-      TEST("Is randc unit magnitude", true, false);
-      test = false;
-    }
-  }
-  if (test == true) TEST("Is randc unit magnitude", true, true);
-  }
-
-  { // rand_sphere ------------------------------------------------------------
-    constexpr unsigned n = 7;
-    constexpr Float tol = 1e-6;
-    complex p[7];
-    util::rand_sphere(p,7);
-    std::ofstream log("log");
-    
-    Float real_mag = 0;
-    Float complex_sum = 0;
-    for (unsigned i=0; i < n; ++i) {
-      log << p[i] << std::endl;
-      real_mag += p[i].real()*p[i].real();
-      complex_sum += p[i].imag();
-    }
-    TEST_NEAR("rand_sphere complex sum", complex_sum, 0, tol);
-    TEST_NEAR("rand_sphere total real magnitude", std::sqrt(real_mag), 1, tol);
-  }
-
-  { // dot and cross -----------------------------------------------------------
-    constexpr Float tol = 1e-6;
-    std::cout << "dot and cross products\n";
-    complex a[3] = {{5,3}, {3,4}, {6,5}};
-    complex b[3] = {{-2,4}, {2,5}, {3,-4}};
-    // complex cross_gt = { { , }, { , }, { ,-4} };
-    complex dot_gt = complex({5,3})*complex({-2,4})
-       + complex({3,4})*complex({2,5})+complex({6,5})*complex({3,-4});
-    TEST_NEAR("Dot product", std::abs(dot_gt - minus_3d<Float>::dot(a,b)), 0 , tol);
-    // std::cout << "Result: " << dot_gt  << "computed: " << minus_array<M::nve,Float>::dot(a,b) << std::endl;
-
-
-    complex c_gt[3] = {{38, -40}, {-59, 25}, {17, 27}};
-    complex c[3];
-    minus_3d<Float>::cross(a,b,c);
-    Float m = 0; 
-    for (unsigned i=0; i < 3; ++i) {
-      m += std::abs(c_gt[i] - c[i]);
-    }
-    TEST_NEAR("Cross product", m, 0 , tol);
-    test_cross2();
-  }
-#endif
-}
-
-static void
 test_gamma()
 {
   { // sanity check
@@ -563,18 +480,16 @@ test_get_params_start_target()
 static void
 test_io_shaping()
 {
-  test_point_tangents2lines();  // OK
+  test_point_tangents2lines();
   test_gamma();
-  test_lines2params();  // OK
+  test_lines2params();
   test_get_params_start_target();
 }
 
 void
-test_internals()
+test_internals_cleveland()
 {
-  test_quat();
-  test_rand();
   test_io_shaping();
 }
 
-TESTMAIN(test_internals);
+TESTMAIN(test_internals_cleveland);

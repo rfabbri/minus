@@ -8,13 +8,26 @@
 #include <chrono>
 #include <thread>
 #include <minus/minus.h>
-#include <minus/chicago14a-default.h>
 
 #define Float double
+// XXX typedef minus<cleveland14a> M;
 typedef minus<chicago14a> M;
 static constexpr Float tol = 1e-3;
 typedef std::complex<Float> complex;
 using namespace std::chrono;
+
+// Start solutions hardcoded for efficiency.
+// If you want to play with different start sols,
+// write another program that accepts start sols in runtime,
+// but keep this one lean & mean.
+// XXX #include <minus/cleveland14a-default.hxx> 
+#include <minus/chicago14a-default.hxx> 
+// We include it separately so they don't clutter this app,
+// neither minus.h, and can be reused by other progs
+// TODO(developer note): make this part of Minus' template as a specialization. 
+// But for efficiency I chose to do it outside.
+// Perhaps a minus class should be written that wraps the lean minus_core.
+// And in _that_ one, we put these default vectors depending on template tag.
 
 
 #define  M_VERBOSE 1     // display verbose messages

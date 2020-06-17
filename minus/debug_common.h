@@ -1,13 +1,12 @@
 #ifndef debug_common_h_
 #define debug_common_h_
 
-#include <minus/minus.hxx>
+#include <minus/minus.h>
+#include <minus/internal_util.h>
 
 
 #define Float double
-typedef minus<chicago14a> M;
 typedef minus_util<Float> util;
-typedef minus_io<chicago14a> io;
 typedef std::complex<Float> complex;
 using namespace std::chrono;
 

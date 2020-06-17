@@ -1,9 +1,9 @@
-#ifndef chicago14a_hxx_
-#define chicago14a_hxx_
+#ifndef cleveland14a_hxx_
+#define cleveland14a_hxx_
 // to be included at the end of minus.hxx
 
 template <typename F>
-struct eval<chicago14a, F> {
+struct eval<cleveland14a, F> {
   static void Hxt(const C<F> * __restrict__ x /*x, t*/,    const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
   static void HxH(const C<F> * __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
 };
@@ -23,7 +23,7 @@ struct eval<chicago14a, F> {
 // (Ask Tim for the way to use cCode so that the input orders are like this.
 template <typename F>
 inline void 
-eval<chicago14a, F>::
+eval<cleveland14a, F>::
 Hxt(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/) 
 {
   const C<F> &X0 = x[0];
@@ -3828,7 +3828,7 @@ Hxt(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F>
 // (Ask Tim for the way to use cCode so that the input orders are like this.
 template <typename F>
 inline void 
-eval<chicago14a, F>::
+eval<cleveland14a, F>::
 HxH(const C<F>* __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F>* __restrict__ y /*HxH*/) 
 {
   const C<F> &X0 = x[0];
@@ -7016,13 +7016,13 @@ HxH(const C<F>* __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<
 
 // Problem and Formulation Paramers --------------------------------------------
 
-#include "chicago14a-internals.h"
+#include "cleveland14a-internals.h"
 
 // For speed, assumes input point implicitly has 3rd homog coordinate is 1
 // 
 template <typename F>
 inline void 
-minus_io_shaping<chicago14a, F>::
+minus_io_shaping<cleveland14a, F>::
 invert_intrinsics(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const double pix_coords[][ncoords2d], double normalized_coords[][ncoords2d], unsigned npts)
 {
   for (unsigned p=0; p < npts; ++p) {
@@ -7037,7 +7037,7 @@ invert_intrinsics(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const d
 // 
 template <typename F>
 inline void 
-minus_io_shaping<chicago14a, F>::
+minus_io_shaping<cleveland14a, F>::
 invert_intrinsics_tgt(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const double pix_tgt_coords[][ncoords2d], double normalized_tgt_coords[][ncoords2d], unsigned npts)
 {
   for (unsigned p=0; p < npts; ++p) {
@@ -7054,7 +7054,7 @@ invert_intrinsics_tgt(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], con
 // 
 template <typename F>
 inline bool 
-minus_io_shaping<chicago14a, F>::
+minus_io_shaping<cleveland14a, F>::
 probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *probe_cameras,
     unsigned *solution_index)
 {
@@ -7081,7 +7081,7 @@ probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *
 // the probe. Use this for debugging / investigation
 template <typename F>
 inline bool 
-minus_io_shaping<chicago14a, F>::
+minus_io_shaping<cleveland14a, F>::
 probe_all_solutions(const typename M::solution solutions[M::nsols], solution_shape *probe_cameras,
     unsigned *solution_index)
 {
@@ -7225,7 +7225,7 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
 // 
 template <typename F>
 inline bool 
-minus_io_shaping<chicago14a, F>::
+minus_io_shaping<cleveland14a, F>::
 has_valid_solutions(const typename M::solution solutions[M::nsols])
 {
   typedef minus_array<M::nve,F> v; typedef minus_util<F> u;
@@ -7239,7 +7239,7 @@ has_valid_solutions(const typename M::solution solutions[M::nsols])
 
 template <typename F>
 inline bool
-minus_io_shaping<chicago14a, F>::
+minus_io_shaping<cleveland14a, F>::
 probe_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
     unsigned *solution_index)
 {
@@ -7248,7 +7248,7 @@ probe_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[
 
 template <typename F>
 inline bool
-minus_io_shaping<chicago14a, F>::
+minus_io_shaping<cleveland14a, F>::
 probe_all_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
     unsigned *solution_index)
 {
@@ -7261,7 +7261,7 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], F probe_came
 // to gammify/randomize
 template <typename F>
 inline void 
-minus_io_shaping<chicago14a, F>::
+minus_io_shaping<cleveland14a, F>::
 lines2params(const F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   typedef minus_util<F> util;
@@ -7356,7 +7356,7 @@ lines2params(const F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ par
 //
 template <typename F>
 inline void 
-minus_io_shaping<chicago14a, F>::
+minus_io_shaping<cleveland14a, F>::
 gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
 {
   typedef minus_util<F> util;
@@ -7398,7 +7398,7 @@ gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
 // Normalizes line normals to unit
 template <typename F>
 inline void 
-minus_io_shaping<chicago14a, F>::
+minus_io_shaping<cleveland14a, F>::
 normalize_lines(F lines[][ncoords2d_h], unsigned nlines)
 {
   for (unsigned l=0; l < nlines; ++l)
@@ -7409,7 +7409,7 @@ normalize_lines(F lines[][ncoords2d_h], unsigned nlines)
 // QT: same format as solution_shape
 template <typename F>
 inline void 
-minus_io_shaping<chicago14a, F>::
+minus_io_shaping<cleveland14a, F>::
 RC_to_QT_format(const F rc[pp::nviews][4][3], F qt[M::nve])
 {
   typedef minus_util<F> u;
@@ -7477,7 +7477,7 @@ RC_to_QT_format(const F rc[pp::nviews][4][3], F qt[M::nve])
 // Input points and tangents in normalized image coordinates.
 template <typename F>
 inline void 
-minus_io_shaping<chicago14a, F>::
+minus_io_shaping<cleveland14a, F>::
 point_tangents2lines(const F p[pp::nviews][pp::npoints][ncoords2d], const F t[pp::nviews][pp::npoints][ncoords2d], unsigned i0, unsigned i1, F plines[pp::nvislines][ncoords2d_h])
 {
   typedef minus_3d<F> vec;
@@ -7513,7 +7513,7 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][ncoords2d], const F t[pp
 
 template <typename F>
 inline void
-minus_io_shaping<chicago14a, F>::
+minus_io_shaping<cleveland14a, F>::
 get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   // the user provides the start params in the first half of params.
@@ -7533,7 +7533,7 @@ get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __rest
 // 
 template <typename F>
 inline void 
-minus_io_shaping<chicago14a, F>::
+minus_io_shaping<cleveland14a, F>::
 point_tangents2params(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   // the user provides the start params in the first half of params.
@@ -7546,7 +7546,7 @@ point_tangents2params(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt
 // Same but for pixel input
 template <typename F>
 inline void 
-minus_io_shaping<chicago14a, F>::
+minus_io_shaping<cleveland14a, F>::
 point_tangents2params_img(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, const F K[/*3 or 2*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   F pn[pp::nviews][pp::npoints][ncoords2d];
@@ -7578,7 +7578,7 @@ point_tangents2params_img(const F p[pp::nviews][pp::npoints][ncoords2d], const F
 // array with that minimum.
 template <typename F>
 inline void 
-minus_io_shaping<chicago14a, F>::
+minus_io_shaping<cleveland14a, F>::
 all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], 
                    unsigned id_sols[M::nsols], unsigned *nsols_final)
 {
@@ -7596,7 +7596,7 @@ all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3
 
 template <typename F>
 inline void 
-minus_io_shaping<chicago14a, F>::
+minus_io_shaping<cleveland14a, F>::
 solution2cams(/*const but use as scratch*/ F rs[M::nve], F cameras[2/*2nd and 3rd cams relative to 1st*/][4][3])
 {
   typedef minus_util<F> u;
@@ -7618,5 +7618,4 @@ solution2cams(/*const but use as scratch*/ F rs[M::nve], F cameras[2/*2nd and 3r
   //  R12 = quat2rotm(transpose(quat12));
   //  R13 = quat2rotm(transpose(quat13));
 }
-
-#endif // chicago14a_hxx_
+#endif // cleveland14a_hxx_

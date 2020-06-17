@@ -17,7 +17,7 @@
 // If you want to play with different start sols,
 // write another program that accepts start sols in runtime,
 // but keep this one lean & mean.
-#include <minus/chicago14a-default.hxx> 
+#include <minus/cleveland14a-default.hxx> 
 // We include it separately so they don't clutter this app,
 // neither minus.h, and can be reused by other progs
 // TODO(developer note): make this part of Minus' template as a specialization. 
@@ -47,6 +47,7 @@ test_against_ground_truth(const M::solution solutions[])
 //  TEST("Solutions match original code", ok, true);
 }
 
+// tests on internal solutions
 static void
 test_full_solve()
 {
@@ -95,6 +96,7 @@ test_full_solve()
   }
 }
 
+#if 0
 void
 test_end_user_interface()
 {
@@ -104,7 +106,7 @@ test_end_user_interface()
   {
   std::cerr << "Starting path tracker in test_end_user_interface" << std::endl;
   M::solution solutions[M::nsols];
-  io::point_tangents2params_img(p_, tgt_, 0, 1, K_, params_start_target_);
+  io::point_lines2params_img(p_, l_, 0, 1, K_, params_start_target_);   // TODO
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   // M::track_all(M::DEFAULT, start_sols_, params_start_target_, solutions);
   {
@@ -143,13 +145,14 @@ test_end_user_interface()
     std::cout << "found solution at index: " << sol_id << std::endl;
   }
 }
+#endif
 
 void
-test_minus()
+test_minus_cleveland()
 {
   minus_initialize_gt();
-  // test_full_solve();
-  test_end_user_interface();
+  test_full_solve();
+  // test_end_user_interface();
 }
 
-TESTMAIN(test_minus);
+TESTMAIN(test_minus_cleveland);

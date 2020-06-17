@@ -151,7 +151,6 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
 }
 
 #include <minus/chicago14a.hxx>      // specific implementation of chicago 14a formulation
-#include <minus/cleveland14a.hxx>      // specific implementation of cleveland 14a formulation now in PLMP
 // #include <minus/phoenix10a.hxx>      // specific implementation of chicago 14a formulation
 // #include "chicago6a.hxx"
 

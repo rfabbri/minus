@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# A collection of processing tasks
+
+fs=`ls *mark_regular*`
+
+cd $f
+cat *time*|st --complete
+grep 3 *fail*|wc -l
+
+./expminus-chicago -g >/dev/null 2>bla; grep -i time bla
+./minus-chicago -g --epsilon 0.000001 --max_corr_steps 4 >/dev/null
+
+# best is generated based on those that have error < value
+# see history-ub-20191123 
+
+findbest()
+{
+  for i in `cat best`; do
+   echo $i
+   grep 'Total steps' $i/*err* |cut -f 3 -d :| awk '{$1=$1};1' | sed 's/\x1b\[[0-9;]*m//g' | st --median --complete
+  donek
+}
+
+
+# failure rate for all -----------------------------------------------
+# timing in terms of number of iterations --------------------------------------

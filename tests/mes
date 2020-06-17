@@ -1,0 +1,4 @@
+for i in `seq 1 10`; do
+  ./te 2>&1 >/dev/null | grep 'Time of solver' |grep -o '[0-9][0-9]*ms'|grep -o '[0-9][0-9]*' 
+done | st
+mysay oh baby
