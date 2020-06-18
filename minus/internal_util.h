@@ -3,7 +3,7 @@
 
 #include <random>
 
-template <typename F=double>
+template <typename F>
 using C = std::complex<F>;
 
 template <unsigned N, typename F>

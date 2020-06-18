@@ -18,7 +18,7 @@
 
 #include <complex>
 
-template <typename F=double>
+template <typename F>
 using C = std::complex<F>;
 
 // The problem solvers that this solver template currently supports
