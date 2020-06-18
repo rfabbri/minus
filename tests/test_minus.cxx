@@ -4,6 +4,7 @@
 //
 // Tests more comprehensive runs of minus using the public interface
 // 
+#include <cstring>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -13,6 +14,7 @@
 #include <minus/minus.h>
 #include <minus/debug_common.h>
 #include <minus/chicago14a-default.h> 
+// #include <minus/chicago14a-internals.h>
 #include "test_common.h"
 
 #define  M_VERBOSE 1     // display verbose messages
@@ -157,11 +159,21 @@ test_toplevel_interface()
   // ---------------------------------------------------------------------------
   // test_final_solve_against_ground_truth(solutions);
   // optional: filter solutions using positive depth, etc.
-//  unsigned sol_id;
-//  bool found = io::probe_all_solutions(solutions, cameras_gt_quat_, &sol_id);
-//  TEST("IO: Found GT solution? ", found, true);
-//  if (found)
-//    std::cout << "found solution at index: " << sol_id << std::endl;
+
+  Float cameras_quat[M::nsols][M::nve];
+
+  for (unsigned s=0; s < nsols_final; ++s) {
+    util::rotm2quat((Float *) cameras[0], cameras_quat[M::nsols]);
+    util::rotm2quat((Float *) cameras[1], cameras_quat[M::nsols]+4);
+    memcpy(cameras_quat+8,cameras[0][3],3*sizeof(Float));
+    memcpy(cameras_quat+8+3,cameras[1][3],3*sizeof(Float));
+  }
+  
+  unsigned sol_id;
+  bool found = io::probe_all_solutions_quat(cameras_quat, cameras_gt_quat_, nsols_final, &sol_id);
+  TEST("IO: Found GT solution? ", found, true);
+  if (found)
+    std::cout << "found solution at index: " << sol_id << std::endl;
 }
 
 void

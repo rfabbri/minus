@@ -74,6 +74,10 @@ struct minus_io_shaping<chicago14a, F> {
       unsigned *solution_index);
   static bool probe_all_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
       unsigned *solution_index);
+  static bool probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], solution_shape *probe_cameras,
+    unsigned nsols, unsigned *solution_index);
+  static bool probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], F probe_cameras[M::nve],
+    unsigned nsols, unsigned *solution_index);
   static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
 };
 
