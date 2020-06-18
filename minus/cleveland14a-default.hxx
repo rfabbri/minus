@@ -8,7 +8,7 @@
 
 #include <minus/minus.h>
 
-typedef minus<cleveland14a> M;
+typedef minus_core<cleveland14a> M;
 typedef minus_io<cleveland14a> io;
 
 // 

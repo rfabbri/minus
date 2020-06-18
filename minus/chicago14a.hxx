@@ -7641,13 +7641,13 @@ minus<chicago14a, F>::solve(
     F *nsols_final) 
 {
   C<F> params[2*M::f::nparams];
-#if 0
   memcpy(params, params_start_target_, M::f::nparams*sizeof(C<F>));
   
   constexpr int id_tgt0 = 0; constexpr int id_tgt1 = 1; // TODO: select the best / least degenerate directions
-  point_tangents2params(p, t, id_tgt0, id_tgt1, params);
+  point_tangents2params(p, tgt, id_tgt0, id_tgt1, params);
 
-  M::solution solutions[M::nsols];
+  typename M::solution solutions[M::nsols];
+  typename M::track_settings settings = M::DEFAULT;
   std::thread t[4];
   { // TODO: smarter way to select start solutions
     t[0] = std::thread(M::track, settings, start_sols_, params, solutions, 0, 78);
@@ -7666,7 +7666,6 @@ minus<chicago14a, F>::solve(
   // decode solutions into 3x4 cams
   unsigned id_sols[M::nsols];
   io::all_solutions2cams(solutions, solutions_cams, id_sols, nsols_final);
-#endif
 }
 
 #endif // chicago14a_hxx_
