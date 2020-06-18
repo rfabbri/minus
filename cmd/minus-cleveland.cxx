@@ -11,7 +11,7 @@
 
 #define Float double
 // XXX typedef minus<cleveland14a> M;
-typedef minus<chicago14a> M;
+typedef minus_core<chicago14a> M;
 static constexpr Float tol = 1e-3;
 typedef std::complex<Float> complex;
 using namespace std::chrono;
