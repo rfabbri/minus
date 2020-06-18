@@ -7692,14 +7692,15 @@ minus<chicago14a, F>::solve_img(
 {
   F pn[pp::nviews][pp::npoints][io::ncoords2d];
   F tn[pp::nviews][pp::npoints][io::ncoords2d];
-  constexpr int id_tgt0 = 0; constexpr int id_tgt1 = 1; // TODO: select the best / least degenerate directions
   
   // see if uno minus  default_gammas_m2 is less than 1
   io::invert_intrinsics(K, p[0], pn[0], pp::npoints);
   io::invert_intrinsics(K, p[1], pn[1], pp::npoints);
   io::invert_intrinsics(K, p[2], pn[2], pp::npoints);
-  io::invert_intrinsics_tgt(K, tgt[id_tgt0], tn[id_tgt0], pp::npoints);
-  io::invert_intrinsics_tgt(K, tgt[id_tgt1], tn[id_tgt1], pp::npoints);
+  // don't use all three, but just invert all anyways.
+  io::invert_intrinsics_tgt(K, tgt[0], tn[0], pp::npoints);
+  io::invert_intrinsics_tgt(K, tgt[1], tn[1], pp::npoints);
+  io::invert_intrinsics_tgt(K, tgt[2], tn[2], pp::npoints);
 
   solve(pn, tn, solutions_cams, nsols_final);
 }
