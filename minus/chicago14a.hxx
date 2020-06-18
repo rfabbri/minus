@@ -7237,7 +7237,7 @@ probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], solution_s
   F real_solution[M::nve];
   bool found=false;
   F min_rerror;
-  for (unsigned sol = 0; sol < M::nsols; ++sol)  {
+  for (unsigned sol = 0; sol < nsols; ++sol)  {
     memcpy(real_solution, solutions_cameras[sol], M::nve*sizeof(F));
     u::normalize_quat(real_solution);
     F rerror = u::rotation_error(real_solution, probe_cameras->q01);
@@ -7789,6 +7789,12 @@ solution2cams(/*const but use as scratch*/ F rs[M::nve], F cameras[2/*2nd and 3r
 // where view_id is 0 or 1 for second and third camera relative to the first,
 // resp.
 //
+// Output: nsols, the number of solutions
+// Output: id_sols
+// a vector of the ids of the points that lead to each solution:
+// So each solution is actually cameras[id_sols[i]][view_id][:][:], for i=1 to
+// nsols.
+//
 // This design is for cache speed. Translation in the camera matrix is stored
 // such that its coordinates are memory contiguous.
 // 
@@ -7801,7 +7807,9 @@ minus<chicago14a, F>::solve(
     const F p[pp::nviews][pp::npoints][io::ncoords2d], 
     const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
     F solutions_cams[M::nsols][pp::nviews-1][4][3],  // first camera is always [I | 0]
-    unsigned *nsols_final) 
+    unsigned id_sols[M::nsols],
+    unsigned *nsols_final
+    ) 
 {
   C<F> params[2*M::f::nparams];
   memcpy(params, params_start_target_, M::f::nparams*sizeof(C<F>));
@@ -7827,7 +7835,6 @@ minus<chicago14a, F>::solve(
     t[0].join(); t[1].join(); t[2].join(); t[3].join();
   }
   // decode solutions into 3x4 cams (actually 4x3 in mem)
-  unsigned id_sols[M::nsols];
   io::all_solutions2cams(solutions, solutions_cams, id_sols, nsols_final);
 }
 
@@ -7839,6 +7846,7 @@ minus<chicago14a, F>::solve_img(
     const F p[pp::nviews][pp::npoints][io::ncoords2d], 
     const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
     F solutions_cams[M::nsols][pp::nviews-1][4][3],  // first camera is always [I | 0]
+    unsigned id_sols[M::nsols],
     unsigned *nsols_final)
 {
   F pn[pp::nviews][pp::npoints][io::ncoords2d];
@@ -7853,7 +7861,7 @@ minus<chicago14a, F>::solve_img(
   io::invert_intrinsics_tgt(K, tgt[1], tn[1], pp::npoints);
   io::invert_intrinsics_tgt(K, tgt[2], tn[2], pp::npoints);
 
-  solve(pn, tn, solutions_cams, nsols_final);
+  solve(pn, tn, solutions_cams, id_sols, nsols_final);
 }
 
 #endif // chicago14a_hxx_

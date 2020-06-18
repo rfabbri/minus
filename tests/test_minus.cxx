@@ -145,11 +145,12 @@ test_toplevel_interface()
   std::cerr << "Starting solver in test_toplevel_interface" << std::endl;
   Float cameras[M::nsols][2/*2nd and 3rd cams relative to 1st*/][4][3] = {};
   unsigned nsols_final = 0;
+  unsigned id_sols[M::nsols];
   
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   
   /// MAIN INTERFACE //////////////////////////////////////////////////
-  minus<chicago14a>::solve_img(K_, p_, tgt_, cameras, &nsols_final);
+  minus<chicago14a>::solve_img(K_, p_, tgt_, cameras, id_sols, &nsols_final);
   /////////////////////////////////////////////////////////////////////
   
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
@@ -163,25 +164,27 @@ test_toplevel_interface()
   Float cameras_quat[M::nsols][M::nve];
 
   for (unsigned s=0; s < nsols_final; ++s) {
-    util::rotm2quat((Float *) cameras[s][0], cameras_quat[s]);
-    util::rotm2quat((Float *) cameras[s][1], cameras_quat[s]+4);
-    memcpy(cameras_quat[s]+8,   cameras[s][0][3],3*sizeof(Float));
-    memcpy(cameras_quat[s]+8+3, cameras[s][1][3],3*sizeof(Float));
+    util::rotm2quat((Float *) cameras[id_sols[s]][0], cameras_quat[s]);
+    util::rotm2quat((Float *) cameras[id_sols[s]][1], cameras_quat[s]+4);
+    memcpy(cameras_quat[s]+8,   cameras[id_sols[s]][0][3], 3*sizeof(Float));
+    memcpy(cameras_quat[s]+8+3, cameras[id_sols[s]][1][3], 3*sizeof(Float));
   }
   
   unsigned sol_id;
   bool found = io::probe_all_solutions_quat(cameras_quat, cameras_gt_quat_, nsols_final, &sol_id);
   TEST("IO: Found GT solution? ", found, true);
-  if (found)
-    std::cout << "found solution at index: " << sol_id << std::endl;
+  if (found) {
+    std::cout << "found solution at index: " << sol_id << " out of " << nsols_final << std::endl;
+    std::cout << "which came from track number " << id_sols[sol_id] << " out of " << M::nsols << std::endl;
+  }
 }
 
 void
 test_minus()
 {
   minus_initialize_gt();
-  test_full_solve();
-  test_end_user_interface();
+//  test_full_solve();
+//  test_end_user_interface();
   test_toplevel_interface();
 }
 
