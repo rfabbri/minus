@@ -288,59 +288,20 @@ struct minus_io_shaping {
   static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
 };
 
-#if 0
+
 // Highlevel API
 template <problem P, typename F=double>
 struct minus {
-  typedef minus_core<P, F> M;
-  typedef minus_io_shaping<P, F> io;
-  typedef problem_parameters<P> pp;
-
-  // Intrinsics already inverted 
-  // (inside RANSAC one will alredy have pre-inverted K)
-  //
-  // Input: points in pp:nviews views
-  // Input: tangents in pp:nviews views (e.g., SIFT orientations)
-  // Input: how to pick the tangent. For now, for Chicago we only consider
-  // the tangents on the first two points on each view.
-  static void solve(
-      const F p[pp::nviews][pp::npoints][io::ncoords2d], 
-      const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
-      F solutions_cams[pp::nsols][pp::nviews-1][3][4],  // first camera is always [I | 0]
-      F *nsols_final) {
-    C<F> params[2*M::f::nparams];
-    memcpy(params, params_start_target_, M::f::nparams*sizeof(complex));
-    
-    constexpr id_tgt0 = 0; constexpr id_tgt1 = 1; // TODO: select the best / least degenerate directions
-    point_tangents2params(p, t, id_tgt0, id_tgt1, params);
-
-    M::solution solutions[M::nsols];
-    std::thread t[4];
-    { // TODO: smarter way to select start solutions
-      t[0] = std::thread(M::track, settings, start_sols_, params, solutions, 0, 78);
-      t[1] = std::thread(M::track, settings, start_sols_, params, solutions, 78, 78*2);
-      t[2] = std::thread(M::track, settings, start_sols_, params, solutions, 78*2, 78*3);
-      t[3] = std::thread(M::track, settings, start_sols_, params, solutions, 78*3, 78*4);
-      t[0].join(); t[1].join(); t[2].join(); t[3].join();
-    }
-    if (!io::has_valid_solutions(solutions)) { // rerun once in the rare case the solutions are not valid
-      t[0] = std::thread(M::track, settings, start_sols_, params, solutions, 0, 78);
-      t[1] = std::thread(M::track, settings, start_sols_, params, solutions, 78, 78*2);
-      t[2] = std::thread(M::track, settings, start_sols_, params, solutions, 78*2, 78*3);
-      t[3] = std::thread(M::track, settings, start_sols_, params, solutions, 78*3, 78*4);
-      t[0].join(); t[1].join(); t[2].join(); t[3].join();
-    }
-    // decode solutions into 3x4 cams
-    unsigned id_sols[M::nsols];
-    io::all_solutions2cams(solutions, solutions_cams, id_sols, nsols_final);
-  }
+  // all specializations provide a solve() function
+  // each with its own I/O parameters
 };
-#endif
+
+#include <minus/problem-defs.h>
 
 // Shortcuts and aliases -------------------------------------------------------
 // type alias used to hide a template parameter 
 template<problem P, typename F=double>
-using minus = minus_core<P, F>;  
+using minus = minus<P, F>;  
 // can now use minus<chicago14a>
 // no need to do this:
 // typedef minus<double, 312, 14, 56> minus_chicago14a;

@@ -110,7 +110,7 @@ scripts/screencasts
 tests/2colmap
 tests/2openmvg
 tests/o
-cmd/expminus-chicago
+algo/cmd/expminus-chicago
 cmd/minus-cleveland
 scripts/minus-chicago
 scripts/tst

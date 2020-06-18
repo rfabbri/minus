@@ -7619,4 +7619,90 @@ solution2cams(/*const but use as scratch*/ F rs[M::nve], F cameras[2/*2nd and 3r
   //  R13 = quat2rotm(transpose(quat13));
 }
 
+// Higlevel solver interface - Class minus ------------------------------------
+
+#include <thread>
+#include <minus/chicago14a-default.h>
+
+
+// Intrinsics already inverted 
+// (inside RANSAC one will alredy have pre-inverted K)
+//
+// Input: points in pp:nviews views
+// Input: tangents in pp:nviews views (e.g., SIFT orientations)
+// Input: how to pick the tangent. For now, for Chicago we only consider
+// the tangents on the first two points on each view.
+// 
+// Output: solutions_cams
+// where the camera matrix P^t = [R|T]^t is cameras[sol_number][view_id][:][:]
+// where view_id is 0 or 1 for second and third camera relative to the first,
+// resp.
+//
+// This design is for cache speed. Translation in the camera matrix is stored
+// such that its coordinates are memory contiguous.
+// 
+// The cameras array is fixed in size to NSOLS which is the max
+// number of solutions, which perfectly fits in memory. The caller must pass an
+// array with that minimum.
+template <typename F>
+inline void 
+minus<chicago14a, F>::solve(
+    const F p[pp::nviews][pp::npoints][io::ncoords2d], 
+    const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
+    F solutions_cams[M::nsols][pp::nviews-1][4][3],  // first camera is always [I | 0]
+    unsigned *nsols_final) 
+{
+  C<F> params[2*M::f::nparams];
+  memcpy(params, params_start_target_, M::f::nparams*sizeof(C<F>));
+  
+  constexpr int id_tgt0 = 0; constexpr int id_tgt1 = 1; // TODO: select the best / least degenerate directions
+  io::point_tangents2params(p, tgt, id_tgt0, id_tgt1, params);
+
+  typename M::solution solutions[M::nsols];
+  typename M::track_settings settings = M::DEFAULT;
+  std::thread t[4];
+  { // TODO: smarter way to select start solutions
+    t[0] = std::thread(M::track, settings, start_sols_, params, solutions, 0, 78);
+    t[1] = std::thread(M::track, settings, start_sols_, params, solutions, 78, 78*2);
+    t[2] = std::thread(M::track, settings, start_sols_, params, solutions, 78*2, 78*3);
+    t[3] = std::thread(M::track, settings, start_sols_, params, solutions, 78*3, 78*4);
+    t[0].join(); t[1].join(); t[2].join(); t[3].join();
+  }
+  if (!io::has_valid_solutions(solutions)) { // rerun once in the rare case the solutions are not valid
+    t[0] = std::thread(M::track, settings, start_sols_, params, solutions, 0, 78);
+    t[1] = std::thread(M::track, settings, start_sols_, params, solutions, 78, 78*2);
+    t[2] = std::thread(M::track, settings, start_sols_, params, solutions, 78*2, 78*3);
+    t[3] = std::thread(M::track, settings, start_sols_, params, solutions, 78*3, 78*4);
+    t[0].join(); t[1].join(); t[2].join(); t[3].join();
+  }
+  // decode solutions into 3x4 cams (actually 4x3 in mem)
+  unsigned id_sols[M::nsols];
+  io::all_solutions2cams(solutions, solutions_cams, id_sols, nsols_final);
+}
+
+// same as solve() but intrinsics not inverted (input is in actual pixel units)
+template <typename F>
+inline void 
+minus<chicago14a, F>::solve_img(
+    const F K[/*3 or 2 ignoring last line*/][io::ncoords2d_h],
+    const F p[pp::nviews][pp::npoints][io::ncoords2d], 
+    const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
+    F solutions_cams[M::nsols][pp::nviews-1][4][3],  // first camera is always [I | 0]
+    unsigned *nsols_final)
+{
+  F pn[pp::nviews][pp::npoints][io::ncoords2d];
+  F tn[pp::nviews][pp::npoints][io::ncoords2d];
+  
+  // see if uno minus  default_gammas_m2 is less than 1
+  io::invert_intrinsics(K, p[0], pn[0], pp::npoints);
+  io::invert_intrinsics(K, p[1], pn[1], pp::npoints);
+  io::invert_intrinsics(K, p[2], pn[2], pp::npoints);
+  // don't use all three, but just invert all anyways.
+  io::invert_intrinsics_tgt(K, tgt[0], tn[0], pp::npoints);
+  io::invert_intrinsics_tgt(K, tgt[1], tn[1], pp::npoints);
+  io::invert_intrinsics_tgt(K, tgt[2], tn[2], pp::npoints);
+
+  solve(pn, tn, solutions_cams, nsols_final);
+}
+
 #endif // chicago14a_hxx_

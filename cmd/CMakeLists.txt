@@ -6,7 +6,3 @@ target_link_libraries(minus-chicago Threads::Threads)
 
 add_executable(minus-cleveland minus-cleveland.cxx)
 target_link_libraries(minus-cleveland Threads::Threads)
-
-# TODO Move to algo/
-add_executable(expminus-chicago expminus-chicago.cxx)
-target_link_libraries(expminus-chicago Threads::Threads)

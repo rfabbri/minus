@@ -12,18 +12,7 @@
 #include <testlib/testlib_test.h>
 #include <minus/minus.h>
 #include <minus/debug_common.h>
-
-// Start solutions hardcoded for efficiency.
-// If you want to play with different start sols,
-// write another program that accepts start sols in runtime,
-// but keep this one lean & mean.
-#include <minus/chicago14a-default.hxx> 
-// We include it separately so they don't clutter this app,
-// neither minus.h, and can be reused by other progs
-// TODO(developer note): make this part of Minus' template as a specialization. 
-// But for efficiency I chose to do it outside.
-// Perhaps a minus class should be written that wraps the lean minus_core.
-// And in _that_ one, we put these default vectors depending on template tag.
+#include <minus/chicago14a-default.h> 
 #include "test_common.h"
 
 #define  M_VERBOSE 1     // display verbose messages
@@ -145,11 +134,43 @@ test_end_user_interface()
 }
 
 void
+test_toplevel_interface()
+{
+  // static data for points and cams
+
+  // M::solve(M::DEFAULT, start_sols_, points, cameras);
+  
+  std::cerr << "Starting solver in test_toplevel_interface" << std::endl;
+  Float cameras[M::nsols][2/*2nd and 3rd cams relative to 1st*/][4][3] = {};
+  unsigned nsols_final = 0;
+  
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
+  
+  /// MAIN INTERFACE //////////////////////////////////////////////////
+  minus<chicago14a>::solve_img(K_, p_, tgt_, cameras, &nsols_final);
+  /////////////////////////////////////////////////////////////////////
+  
+  high_resolution_clock::time_point t2 = high_resolution_clock::now();
+  auto duration = duration_cast<milliseconds>(t2 - t1).count();
+  std::cerr << "LOG \033[1;32mTime of toplevel interface to solver: " << duration << "ms\e[m" << std::endl;
+  
+  // ---------------------------------------------------------------------------
+  // test_final_solve_against_ground_truth(solutions);
+  // optional: filter solutions using positive depth, etc.
+//  unsigned sol_id;
+//  bool found = io::probe_all_solutions(solutions, cameras_gt_quat_, &sol_id);
+//  TEST("IO: Found GT solution? ", found, true);
+//  if (found)
+//    std::cout << "found solution at index: " << sol_id << std::endl;
+}
+
+void
 test_minus()
 {
   minus_initialize_gt();
   // test_full_solve();
   test_end_user_interface();
+  test_toplevel_interface();
 }
 
 TESTMAIN(test_minus);

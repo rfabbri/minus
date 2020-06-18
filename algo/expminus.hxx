@@ -54,7 +54,7 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
   solution *t_s = raw_solutions + sol_min;  // current target solution
   const C<F>* __restrict__ s_s = s_sols + sol_min*f::nve;    // current start solution
   for (unsigned sol_n = sol_min; sol_n < sol_max; ++sol_n) { // solution loop
-    t_s->status = minus<P,F>::PROCESSING;
+    t_s->status = minus_core<P,F>::PROCESSING;
     bool end_zone = false;
     v::copy(s_s, x0);
     *t0 = 0; *dt = t_step;
