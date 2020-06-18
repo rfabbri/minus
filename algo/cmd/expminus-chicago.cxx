@@ -1,0 +1,562 @@
+// 
+// \author Ricardo Fabbri based on original code by Anton Leykin 
+// \date February 2019
+// 
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <chrono>
+#include <thread>
+#include <minus/minus.h>
+#include <minus/expminus.h>
+
+#define Float double
+typedef minus<chicago14a> M;
+typedef expminus<chicago14a> EXPM;
+static constexpr Float tol = 1e-3;
+typedef std::complex<Float> complex;
+using namespace std::chrono;
+
+// Start solutions hardcoded for efficiency.
+// If you want to play with different start sols,
+// write another program that accepts start sols in runtime,
+// but keep this one lean & mean.
+#include <minus/chicago14a-default.hxx> 
+// We include it separately so they don't clutter this app,
+// neither minus.h, and can be reused by other progs
+// TODO(developer note): make this part of Minus' template as a specialization. 
+// But for efficiency I chose to do it outside.
+// Perhaps a minus class should be written that wraps the lean minus_core.
+// And in _that_ one, we put these default vectors depending on template tag.
+
+
+#define  M_VERBOSE 1     // display verbose messages
+// comment this out plus the printouts if you prefer no debug and no dependency
+// on this header
+#include <minus/debug_util.h>
+
+
+//  exit code. Conventions:
+//  0 (Zero)	Success
+// Non-zero	Failure
+// 2	Incorrect usage
+// 127	Command Not found
+// 126	Not an executable 
+// 
+// The return value of a command is its exit status, or 128
+// + N if the command is terminated by signal N. 
+//
+// Exit status is used to check the
+// result (success/failure) of the execution of the command. If the exit status
+// is zero, then the command is success. If the command is failed the exit status
+// will be non-zero.
+//
+// The codes below are between 3 and 126 inclusive
+//
+#define SOLVER_FAILURE 3
+
+void
+print_usage()
+{
+  std::cerr << "Usage: minus [input solutions]\n\n";
+  std::cerr << "If no argument is given, 'input' is assumed stdin,\n\
+  'solutions' will be output to stdout\n";
+  std::cerr << "Example: \n"
+               "  minus input_file solutions_file\n"
+               "  minus <input_file >solutions_file\n"
+               "  minus -g       # (or --profile) : performs a default solve for profiling\n"
+               "  minus -i       # (or --image_data) : reads point-tangents from stdin\n"
+               "  minus -h       # (or --help) : print this help message\n"
+               " -r or --real : outputs only real solutions\n"
+            <<
+  R"(-i | --image_data usage:
+ 
+  Input format (notation _view_points_coords. any number of spaces and newlines optional. can be in
+  one row or one column as well). This input format assumes tangent data for
+  all points, but you specify which one to use in id0 and id1 below. When
+  --use_all_tangents is passed (TODO), will try to select the better conditioned / least degenerate tangents 
+ 
+  p000 p001
+  p010 p011
+  p020 p021
+  
+  p100 p101
+  p110 p111
+  p120 p121
+  
+  p100 p101
+  p110 p111
+  p120 p121
+ 
+  t000 t001
+  t010 t011
+  t020 t021
+  
+  t100 t101
+  t110 t111
+  t120 t121
+  
+  t100 t101
+  t110 t111
+  t120 t121
+  
+  id0 id1           # id \in {0,1,2} of the point to consider the tangent
+  
+  K00 K01 K02       # intrinsic parameters: only these elements
+   0  K11 K22
+                    # GROUND TRUTH (optional) if -gt flag provided, pass the ground truth here:
+  r000 r001 r002    # default camera format if synthcurves flag passed: 
+  r010 r011 r012    # just like a 3x4 [R|T] but transposed to better fit row-major:
+  r020 r021 r022    #         | R |
+   c00  c01  c02    # P_4x3 = | - |
+                    #         | C'|
+  r100 r101 r102
+  r110 r111 r112
+  r120 r121 r122
+   c10  c11  c12 
+  
+  r200 r201 r202
+  r210 r211 r212
+  r220 r221 r222
+   c20  c21  c22
+
+  One way to use this is 
+    synthdata | minus-chicago -i
+  where synthdata is provided in minus/scripts)";
+            
+  exit(1);
+}
+
+bool stdio_=true;  // by default read/write from stdio
+bool ground_truth_=false;
+
+// Output solutions in ASCII matlab format
+//
+// ---------------------------------------------------------
+// If in the future our solver is really fast, we may need Binary IO:
+// complex solutions[NSOLS*NVE];
+// 
+// To read this output file in matlab, do:
+// fid = fopen(fname,'r');
+// a_raw = fread(fid,'double');
+// fclose(fid);
+//
+// Reshape a to have proper real and imaginary parts
+// a = a_raw(1:2:end) + i*a_raw(2:2:end);
+// 
+template <typename F=double>
+static bool
+mwrite(const M::solution s[M::nsols], const char *fname)
+{
+  bool scilab=false;
+  std::string imag("+i*");
+  if (scilab) imag = std::string("+%i*");
+    
+  std::ofstream fsols;
+  std::streambuf *buf;
+  
+  if (stdio_) {
+    buf = std::cout.rdbuf();
+    std::cout << std::setprecision(20);
+  } else {
+    fsols.open(fname,std::ios::out);
+    if (!fsols) {
+      std::cerr << "minus: error, unable to open file name" << std::endl;
+      return false;
+    }
+    buf = fsols.rdbuf();
+    fsols << std::setprecision(20);
+  }
+  
+  std::ostream out(buf);
+  out << std::setprecision(20);
+  out << "[";
+  for (unsigned i=0; i <M::nsols; ++i) {
+    for (unsigned var=0; var < M::nve; ++var) {
+      out << s[i].x[var].real() << imag << s[i].x[var].imag();
+      if (i*var +1 < M::nve * M::nsols) 
+        out << std::endl;
+      // BINARY fsols.write((char *)(s[i].x[var]),2*sizeof(double));
+    }
+  }
+  out << "]\n";
+  
+  if (!stdio_) fsols.close();
+  return true;
+}
+
+// Try to read n elements, filling in p in row-major order.
+template <typename F=double>
+static bool
+read_block(std::istream &in, F *p, unsigned n)
+{
+  LOG("reading");
+  const F *end = p + n;
+  while (!in.eof() && p != end) {
+      try {
+        in >> *p++;
+        std::cerr << *(p-1) << std::endl;
+        if (in.eof()) {
+          std::cerr << "I/O Error: Premature input termination\n";
+          return false;
+        }
+      } catch (std::istream::failure &E) {
+        std::cerr << "I/O Error: Invalid input conversion or other error\n";
+        return false;
+      }
+  }
+  if (p != end) {
+    std::cerr << "I/O Premature input termination\n";
+    return false;
+  }
+  return true;
+}
+  
+//
+// Reads the format specified in the print_usage() for the -i flag
+// 
+// This is processed into the global params_start_target_
+// 
+template <typename F=double>
+static bool
+iread(const char *fname)
+{
+  std::ifstream infp;
+  std::istream *inp = &std::cin;
+  
+  if (!stdio_) {
+    infp.open(fname, std::ios::in);
+    if (!infp) {
+      std::cerr << "I/O Error opening input " << fname << std::endl;
+      return false;
+    }
+    inp = &infp;
+  }
+  
+  std::istream &in = *inp;
+  in.exceptions(std::istream::failbit | std::istream::badbit);
+
+  LOG("reading p_");
+  if (!read_block(in, (F *)p_, io::pp::nviews*io::pp::npoints*io::ncoords2d))
+    return false;
+  LOG("reading tgt_");
+  if (!read_block(in, (F *)tgt_, io::pp::nviews*io::pp::npoints*io::ncoords2d))
+    return false;
+  unsigned tgt_ids[2];
+  LOG("reading tgt_ids");
+  if (!read_block<unsigned>(in, tgt_ids, 2))
+    return false;
+  LOG("reading K_");
+  if (!read_block(in, (F *) K_, io::ncoords2d*io::ncoords2d_h))
+    return false;
+  LOG("reading ground truth cams");
+  if (ground_truth_ && !read_block(in, (F *) cameras_gt_, io::pp::nviews*4*3))
+    return false;
+  
+  io::point_tangents2params_img(p_, tgt_, tgt_ids[0], tgt_ids[1], K_, params_start_target_);
+
+  return true;
+}
+
+// reads into the global variable params_
+// Format is just like P01 variable in solveChicago in chicago.m2
+// and contains the concatenated parameters of the start system
+// and of the target system, with some randomization to improve conditioning.
+// But here there is no imaginary 'i' string:
+//
+// P01(0).real()  P01(0).imag()      // I mean P01(0) or P01#0
+// P01(1).real()  P01(1).imag()
+// P01(2).real()  P01(2).imag()
+// P01(3).real()  P01(3).imag()
+// ...
+//
+// The file can also be one line, listing the above in row-major order like so:
+// 
+// P01(0).real()  
+// P01(0).imag() 
+// P01(1).real()
+// P01(1).imag()
+// ...
+// 
+// It is up to the user to build this from an actual input for a target system,
+// be it point-tangents as in Ric's format, be it a linecomplex as in Hongy's format
+//
+// This format is generic enough to be adapted to M2 or matlab
+template <typename F=double>
+static bool
+mread(const char *fname)
+{
+  std::ifstream infp;
+  std::istream *inp = &std::cin;
+  
+  if (!stdio_) {
+    infp.open(fname, std::ios::in);
+    if (!infp) {
+      std::cerr << "I/O Error opening input " << fname << std::endl;
+      return false;
+    }
+    inp = &infp;
+  }
+  
+  std::istream &in = *inp;
+  in.exceptions(std::istream::failbit | std::istream::badbit);
+  F *dparams = (F *)params_;
+  while (!in.eof() && dparams != (F *)params_+2*2*M::f::nparams) {
+      try {
+      in >> *dparams++;
+      // std::cerr << "reading " <<  *(dparams-1) << std::endl;;
+      if (in.eof()) {
+        std::cerr << "I/O Error: Premature input termination\n";
+        return false;
+      }
+      in >> *dparams++;
+      } catch (std::istream::failure &E) {
+        std::cerr << "I/O Error: Invalid input conversion or other error\n";
+        return false;
+      }
+  }
+  if (dparams != (F *)params_+2*2*M::f::nparams)
+    std::cerr << "I/O Premature input termination\n";
+//  for (unsigned i=0; i < 2*NPARAMS; ++i)
+//    std::cerr << "D " << params_[i] << std::endl;
+  return true;
+}
+
+void
+print_settings(const EXPM::track_settings &settings)
+{
+  #ifdef M_VERBOSE
+  std::cerr << " track settings -----------------------------------------------\n";
+  const char *names[11] = {
+    "init_dt_",
+    "min_dt_",
+    "end_zone_factor_",
+    "epsilon_",
+    "epsilon2_",
+    "dt_increase_factor_",
+    "dt_decrease_factor_",
+    "infinity_threshold_",
+    "infinity_threshold2_",
+    "max_corr_steps_",
+    "num_successes_before_increase_"
+  };
+  Float *ptr = (Float *) &settings;
+  for (int i=0; i < 9; ++i)
+    std::cerr << names[i] << " = " << *ptr++ << std::endl;
+  std::cerr << names[9] << " = " << settings.max_corr_steps_ << std::endl;
+  std::cerr << names[10] << " = " << settings.num_successes_before_increase_ << std::endl;
+  std::cerr << "---------------------------------------------------------------\n";
+  #endif 
+}
+
+template <typename F=double>
+static bool
+write_solution_info(const EXPM::solution s[M::nsols], unsigned long *num_steps)
+{
+  LOG("solution info start ----------------------------------------------------");
+  std::cerr << std::setprecision(20);
+  *num_steps = 0;
+  for (unsigned sol=0; sol < M::nsols; ++sol) {
+    *num_steps += s[sol].num_steps;
+    std::cerr << s[sol].num_steps;
+    std::cerr << "\t\t\% number of steps in path" << std::endl;
+    std::cerr << s[sol].status ;
+    std::cerr << "\t\t\% status" << std::endl;
+  }
+  LOG("Total steps of solver: \033[1;32m" << *num_steps << "\e[m");
+  LOG("solution info end ------------------------------------------------------");
+  return true;
+}
+
+// Simplest possible command to compute the Chicago problem
+// for estimating calibrated trifocal geometry from points and lines at points
+//
+// This is to be kept very simple C with only minimal C++ with Templates.
+// If you want to complicate this, please create another executable.
+// 
+int
+main(int argc, char **argv)
+{
+  const char *input="stdin";
+  const char *output="stdout";
+  --argc;++argv;
+  bool profile = false;   // run some default solves for profiling
+  bool image_data = false;
+  bool image_data_state = false;
+  std::string arg;
+  enum {INITIAL_ARGS, AFTER_INITIAL_ARGS, IMAGE_DATA, MAX_CORR_STEPS, EPSILON} argstate = INITIAL_ARGS;
+  bool incomplete = false;
+  EXPM::track_settings settings = EXPM::DEFAULT;
+  
+  // switches that can show up only in 1st position
+  if (argc) {
+    arg = std::string(*argv);
+    if (arg == "-h" || arg == "--help")
+      print_usage();
+    if (arg == "-g" || arg == "--profile") {
+      profile = true;
+      argstate = AFTER_INITIAL_ARGS;
+      --argc; ++argv;
+    } else if (arg == "-i" || arg == "--image_data") {
+      image_data = true; 
+      argstate = IMAGE_DATA;
+      --argc; ++argv;
+    } else if (arg[0] != '-') {
+      if (argc == 2) {
+          input = argv[1];
+          output = argv[2];
+          stdio_ = false;
+      } else {
+          std::cerr << "minus: \033[1;91m error\e[m\n";
+          print_usage();
+      }
+    }
+    
+    while (argc) { // second and beyond: above switches must already be set
+      arg = std::string(*argv);
+      LOG("parsing arg " + arg);
+      
+      // argstate >= AFTER_INITIAL_ARGS ----------------------------------------
+      if (argstate == IMAGE_DATA) {
+        if (arg == "-gt") {
+          ground_truth_ = true;
+          --argc; ++argv;
+          argstate = AFTER_INITIAL_ARGS;
+          continue;
+        }
+      }
+      
+      if (argstate == MAX_CORR_STEPS) {
+        settings.max_corr_steps_ = std::stoi(arg);
+        --argc; ++argv;
+        argstate = AFTER_INITIAL_ARGS;
+        incomplete = false;
+        continue;
+      }
+      
+      if (argstate == EPSILON) {
+        settings.epsilon_ = std::stod(arg);
+        settings.epsilon2_ = settings.epsilon_*settings.epsilon_;
+        --argc; ++argv;
+        argstate = AFTER_INITIAL_ARGS;
+        incomplete = false;
+        continue;
+      }
+
+      // argstate == AFTER_INITIAL_ARGS ----------------------------------------
+      if (arg == "--max_corr_steps") {
+        --argc; ++argv;
+        argstate = MAX_CORR_STEPS;
+        incomplete = true;
+        continue;
+      }
+      if (arg == "--epsilon") {
+        --argc; ++argv;
+        argstate = EPSILON;
+        incomplete = true;
+        continue;
+      }
+      std::cerr << "minus: \033[1;91m error\e[m\n - unrecognized argument" << arg << std::endl;;
+      print_usage();
+    }
+
+    if (incomplete) {
+      std::cerr << "LOG \033[1;91merror: argument incomplete, (internal state: " << argstate << ")\n";
+      print_usage();
+    }
+  }
+
+  if (image_data) {
+    LOG("param: input is image pixel data");
+    if (ground_truth_)
+      LOG("param: reading ground truth appended to input pixel data");
+  }
+  
+  if (profile)
+    LOG("Running default solve for profiling");
+
+  if (stdio_)
+    LOG("reading from stdio");
+  else
+    LOG("reading from " << input << " writing to " << output);
+
+  print_settings(settings);
+
+  if (!profile) { // read files: either stdio or physical
+    if (image_data) {  // read image pixel-based I/O parameters
+      if (!iread<Float>(input))
+        return 1;
+       params_ = params_start_target_;
+    } else {  // read raw I/O homotopy parameters (to be used as engine)
+      if (!mread<Float>(input))  // reads into global params_
+        return 1;
+    }
+  }
+  
+  static EXPM::solution solutions[M::nsols];
+  LOG("\033[0;33mUsing 4 threads by default\e[m\n");
+  #ifdef M_VERBOSE
+  std::cerr << "LOG \033[0;33mStarting path tracker\e[m\n" << std::endl;
+  #endif 
+  high_resolution_clock::time_point t1 = high_resolution_clock::now();
+  {
+    std::thread t[4];
+    t[0] = std::thread(EXPM::track, settings, start_sols_, params_, solutions, 0, 78);
+    t[1] = std::thread(EXPM::track, settings, start_sols_, params_, solutions, 78, 78*2);
+    t[2] = std::thread(EXPM::track, settings, start_sols_, params_, solutions, 78*2, 78*3);
+    t[3] = std::thread(EXPM::track, settings, start_sols_, params_, solutions, 78*3, 78*4);
+    t[0].join(); t[1].join(); t[2].join(); t[3].join();
+  }
+  high_resolution_clock::time_point t2 = high_resolution_clock::now();
+  auto duration = duration_cast<milliseconds>(t2 - t1).count();
+  #ifdef M_VERBOSE
+  std::cerr << "LOG \033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
+  #endif
+  
+  if (profile) {
+    // compare solutions to certain values from M2
+    // two random entries
+    if (std::abs(solutions[1].x[1] - complex(-.25177177692982444e1, -.84845195030295639)) <= tol &&
+        std::abs(solutions[M::nsols-2].x[2] - complex(.7318330016224166, .10129116603501138)) <= tol)
+      std::cerr << "LOG solutions look OK\n";
+    else  {
+      std::cerr << "LOG \033[1;91merror:\e[m solutions dont match m2. Errors: ";
+      std::cerr << std::abs(solutions[1].x[2] - complex(-.25177177692982444e1, -.84845195030295639)) << ", "
+          << std::abs(solutions[M::nsols-2].x[2] - complex(.7318330016224166, .10129116603501138)) << std::endl;
+    }
+  }
+  if (!mwrite<Float>(solutions, output)) return 2;
+
+  unsigned long num_steps;
+  write_solution_info(solutions, &num_steps);
+
+  LOG("Time per step: " << duration*1e3/num_steps << " microsecond/step");
+  
+  static M::solution msolutions[M::nsols];
+  //emsolutions2m(solution, msolutions);
+  for (unsigned sol=0; sol < M::nsols; ++sol) {
+    msolutions[sol] = solutions[sol];
+  }
+
+  // ---------------------------------------------------------------------------
+  // test_final_solve_against_ground_truth(msolutions);
+  // optional: filter msolutions using positive depth, etc.
+  if (ground_truth_ || profile) {
+    io::RC_to_QT_format(cameras_gt_, cameras_gt_quat_);
+    unsigned sol_id;
+    bool found = io::probe_all_solutions(msolutions, cameras_gt_quat_, &sol_id);
+    if (found) {
+      LOG("found solution at index: " << sol_id);
+      if (msolutions[sol_id].status != M::REGULAR)
+        LOG("PROBLEM found ground truth but it is not REGULAR: " << sol_id);
+    } else {
+      LOG("\033[1;91mFAIL:\e[m  ground-truth not found among solutions");
+      return SOLVER_FAILURE; 
+      // you can detect solver failure by checking this exit code.
+      // if you use shell, see:
+      // https://www.thegeekstuff.com/2010/03/bash-shell-exit-status
+    }
+  } else if (!io::has_valid_solutions(msolutions)) // if no ground-truth is provided, it will return error
+    return SOLVER_FAILURE;                    // if it can detect that the solver failed by generic tests
+  return 0;
+}
