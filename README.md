@@ -57,7 +57,7 @@ points and lines, simply use the problem tag:
   minus<cleveland>::solve(p, tgt, solutions_cameras, &nsols_final);
 ```
 
-If your measurements are in pixels, you can use `solve_img` and pass your calibration matrix `K`:
+If your measurements are in pixels, use `solve_img` and pass your calibration matrix `K`:
 ```C
   minus<cleveland>::solve_img(K, p, tgt, solutions_cameras, &nsols_final);
 ```
