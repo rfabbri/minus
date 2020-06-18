@@ -163,10 +163,10 @@ test_toplevel_interface()
   Float cameras_quat[M::nsols][M::nve];
 
   for (unsigned s=0; s < nsols_final; ++s) {
-    util::rotm2quat((Float *) cameras[0], cameras_quat[M::nsols]);
-    util::rotm2quat((Float *) cameras[1], cameras_quat[M::nsols]+4);
-    memcpy(cameras_quat+8,cameras[0][3],3*sizeof(Float));
-    memcpy(cameras_quat+8+3,cameras[1][3],3*sizeof(Float));
+    util::rotm2quat((Float *) cameras[s][0], cameras_quat[s]);
+    util::rotm2quat((Float *) cameras[s][1], cameras_quat[s]+4);
+    memcpy(cameras_quat[s]+8,   cameras[s][0][3],3*sizeof(Float));
+    memcpy(cameras_quat[s]+8+3, cameras[s][1][3],3*sizeof(Float));
   }
   
   unsigned sol_id;
@@ -180,7 +180,7 @@ void
 test_minus()
 {
   minus_initialize_gt();
-  // test_full_solve();
+  test_full_solve();
   test_end_user_interface();
   test_toplevel_interface();
 }

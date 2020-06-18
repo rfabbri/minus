@@ -7219,6 +7219,7 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
   return found;
 }
 
+#undef NDEBUG
 // like probe_all_solutions but both solutions and ground truth probe are in
 // quaternion-translation format (solution_shape)
 template <typename F>
@@ -7227,12 +7228,16 @@ minus_io_shaping<chicago14a, F>::
 probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], solution_shape *probe_cameras,
     unsigned nsols, unsigned *solution_index)
 {
+#ifndef NDEBUG
+  std::cerr << "Test xxxxxxxxxxx" << std::endl;
+  std::cerr << "Nsols" <<  nsols << std::endl;
+#endif
   typedef minus_array<M::nve,F> v; typedef minus_util<F> u;
   static constexpr F eps = 1e-3;
   F real_solution[M::nve];
   bool found=false;
   F min_rerror;
-  for (unsigned sol = 0; sol < nsols; ++sol)  {
+  for (unsigned sol = 0; sol < M::nsols; ++sol)  {
     memcpy(real_solution, solutions_cameras[sol], M::nve*sizeof(F));
     u::normalize_quat(real_solution);
     F rerror = u::rotation_error(real_solution, probe_cameras->q01);
@@ -7256,11 +7261,7 @@ probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], solution_s
         *solution_index = sol;
       }
       found = true;
-    } else {
-#ifndef NDEBUG
-        std::cerr << "Solution is real but not close (sol,isvalid)" << sol << "," << solutions[sol].status << std::endl;
-#endif
-    }
+    } 
   }
 
   if (!found)
@@ -7351,8 +7352,8 @@ probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], solution_s
       found = false;
 #ifndef NDEBUG
       std::cerr << "probe: translation 02 DO NOT match\n";
-      std::cerr << "dt" << std::endl;
-      print(dt,3);
+      // std::cerr << "dt" << std::endl;
+      // print(dt,3);
 #endif
     }
   }

@@ -36,10 +36,10 @@ Simply do:
 
 And use `minus<chicago>` like so:
 ```C
-  minus<chicago>::track(minus<chicago>::DEFAULT, start_sols, params, solutions);
+  minus<chicago>::solve(p, tgt, solutions_cameras, &nsols_final);
 ```
 to solve a trifocal pose problem from lines at points ("Chicago"), using the default
-formulation.  See the full example in `cmd/minus-chicago.cxx`.  This is
+formulation.  See the full example in `cmd/minus-chicago.cxx` and `tests/test-minus.cxx`.  This is
 efficient *static* code, so no allocations are performed.  
 
 The size and key parameters of the minimal problem are hardcoded as template
@@ -54,7 +54,13 @@ formulation for the same problem instead.
 To solve another problem, say the `Cleveland` trifocal pose problem from mixed
 points and lines, simply use the problem tag:
 ```C
-  minus<cleveland>::track(minus<cleveland>::DEFAULT, start_sols, params, solutions);
+  minus<cleveland>::solve(p, tgt, solutions_cameras, &nsols_final);
+```
+
+If your measurements are in pixels, before inverting the intrinsic parameters,
+you can use `solve_img` and pass your calibration matrix `K`:
+```C
+  minus<cleveland>::solve_img(K, p, tgt, solutions_cameras, &nsols_final);
 ```
 
 ### Further control on template parametrs
@@ -92,7 +98,7 @@ Do an initial test
 
 ```bash
 cd cmd
-./minus-chicago -g         # -g profiles with a predefined input, to get a time
+./minus-chicago -g         # -g profiles a predefined worst case, to get a time
 
 Output:
   LOG Time of solver: xxxms
