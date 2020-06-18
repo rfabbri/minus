@@ -304,8 +304,8 @@ struct minus {
 
 // Shortcuts and aliases -------------------------------------------------------
 // type alias used to hide a template parameter 
-template<problem P, typename F=double>
-using minus = minus<P, F>;  
+//template<problem P, typename F=double>
+//using minus = minus<P, F>;  
 // can now use minus<chicago14a>
 // no need to do this:
 // typedef minus<double, 312, 14, 56> minus_chicago14a;
