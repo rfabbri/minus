@@ -145,7 +145,11 @@ test_toplevel_interface()
   unsigned nsols_final = 0;
   
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
+  
+  /// MAIN INTERFACE //////////////////////////////////////////////////
   minus<chicago14a>::solve_img(K_, p_, tgt_, cameras, &nsols_final);
+  /////////////////////////////////////////////////////////////////////
+  
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   auto duration = duration_cast<milliseconds>(t2 - t1).count();
   std::cerr << "LOG \033[1;32mTime of toplevel interface to solver: " << duration << "ms\e[m" << std::endl;
