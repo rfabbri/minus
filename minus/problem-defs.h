@@ -11,11 +11,20 @@ struct minus<P, F> {
   typedef minus_io_shaping<P, F> io;
   typedef problem_parameters<P> pp;
 
+  // documentation in P.hxx
   static void solve(
       const F p[pp::nviews][pp::npoints][io::ncoords2d], 
       const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
-      F solutions_cams[M::nsols][pp::nviews-1][3][4],  // first camera is always [I | 0]
-      F *nsols_final);
+      F solutions_cams[M::nsols][pp::nviews-1][4][3],  // first camera is always [I | 0]^t
+      unsigned *nsols_final);
+ 
+  // documentation in P.hxx
+  static void solve_img(
+      const F K[/*3 or 2 ignoring last line*/][io::ncoords2d_h],
+      const F p[pp::nviews][pp::npoints][io::ncoords2d], 
+      const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
+      F solutions_cams[M::nsols][pp::nviews-1][4][3],  // first camera is always [I | 0]^t
+      unsigned *nsols_final);
 };
 #undef P
 

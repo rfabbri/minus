@@ -7,4 +7,5 @@
 #include <minus/chicago14a-default.hxx>
 template class minus_core<chicago14a, double>;
 template class minus_io_shaping<chicago14a, double>;
+template class minus<chicago14a, double>;
 
