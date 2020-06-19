@@ -40,7 +40,7 @@ struct problem_parameters;
 // Problem specific definitions that must be available before anything, at compile time
 #include <minus/parameters.h>
 
-// Lowlevel API
+// Lowlevel API ----------------------------------------------------------------
 template <problem P, typename F=double>
 class minus_core { // fully static, not to be instantiated - just used for templating
   public: // ----------- Data structures --------------------------------------
@@ -298,7 +298,7 @@ struct minus_io_shaping {
 };
 
 
-// Highlevel API
+// Highlevel API ---------------------------------------------------------------
 template <problem P, typename F=double>
 struct minus {
   // all specializations provide a solve() function
