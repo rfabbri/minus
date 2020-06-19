@@ -66,8 +66,8 @@ If your measurements are in pixels, use `solve_img` and pass your calibration ma
 ### Further control on template parametrs
 
 If you want to have full control on templating, say, to change from `double` to
-`float`, `minus<problem>` is just a shorthand for `minus_core<problem,double>`.
-So you can use `minus_core<chicago14a, float>`. See the section Hacking for how
+`float`, `minus<problem>` is just a shorthand for `minus<problem,double>`.
+So you can use `minus<chicago, float>`. See the section Hacking for how
 to add your own problem formulation to Minus.
 
 ## Commandline programs
