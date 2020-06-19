@@ -174,8 +174,8 @@ test_toplevel_interface()
   bool found = io::probe_all_solutions_quat(cameras_quat, cameras_gt_quat_, nsols_final, &sol_id);
   TEST("IO: Found GT solution? ", found, true);
   if (found) {
-    std::cout << "found solution at index: " << sol_id << " out of " << nsols_final << std::endl;
-    std::cout << "which came from track number " << id_sols[sol_id] << " out of " << M::nsols << std::endl;
+    std::cout << "found solution number: " << sol_id + 1 << " out of " << nsols_final << std::endl;
+    std::cout << "which came from track number " << id_sols[sol_id] + 1 << " out of the 1 to " << M::nsols << std::endl;
   }
 }
 

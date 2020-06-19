@@ -7219,7 +7219,6 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
   return found;
 }
 
-#undef NDEBUG
 // like probe_all_solutions but both solutions and ground truth probe are in
 // quaternion-translation format (solution_shape)
 template <typename F>
@@ -7836,6 +7835,8 @@ minus<chicago14a, F>::solve(
   }
   // decode solutions into 3x4 cams (actually 4x3 in mem)
   io::all_solutions2cams(solutions, solutions_cams, id_sols, nsols_final);
+
+  // filter solutions that have no positive >1 depth for all three views
 }
 
 // same as solve() but intrinsics not inverted (input is in actual pixel units)
