@@ -24,15 +24,20 @@ using C = std::complex<F>;
 // The problem solvers that this solver template currently supports
 enum problem {chicago14a, chicago6a, cleveland14a, phoenix10a /*, standard*/};
 
-// each problem specializes this in their specific .h
+// The current best formulations for each problem
+constexpr problem chicago = problem::chicago14a;
+constexpr problem cleveland = problem::cleveland14a;
+// You can now use minus<chicago> to default to the best formulation
+
+// Each problem specializes this in their specific .h
 template <problem P>
 struct formulation_parameters;
 
-// each problem specializes this in their specific .h
+// Each problem specializes this in their specific .h
 template <problem P>
 struct problem_parameters;
 
-// problem specific definitions that must be available before anything, at compile time
+// Problem specific definitions that must be available before anything, at compile time
 #include <minus/parameters.h>
 
 // Lowlevel API

@@ -11,7 +11,7 @@
 #include <minus/chicago14a-default.h>
 
 #define Float double
-typedef minus_core<chicago14a> M;
+typedef minus_core<chicago> M;
 static constexpr Float tol = 1e-3;
 typedef std::complex<Float> complex;
 using namespace std::chrono;

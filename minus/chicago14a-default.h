@@ -5,8 +5,8 @@
 #include <minus/minus.h>
 
 #define Float double // XXX TODO: make these as part of template, otherwise dup sym when using two pbms
-typedef minus_core<chicago14a> M;
-typedef minus_io<chicago14a> io;
+typedef minus_core<chicago> M;
+typedef minus_io<chicago> io;
 typedef std::complex<Float> complex;
 
 extern const complex start_sols_[M::nve*M::nsols];
