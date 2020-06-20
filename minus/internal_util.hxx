@@ -4,6 +4,8 @@
 #include "internal_util.h"
 #include "minus.h"
 
+namespace minus {
+  
 template <typename F>
 std::random_device minus_util<F>::rd;
 
@@ -15,5 +17,7 @@ std::normal_distribution<F> minus_util<F>::gauss{0.0,1000.0};
 
 template <problem P, typename F> const typename 
 minus_core<P, F>::track_settings minus_core<P, F>::DEFAULT;
+
+} // namespace minus
 
 #endif // internal_util_hxx_

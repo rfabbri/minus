@@ -2,6 +2,8 @@
 #define chicago14a_hxx_
 // to be included at the end of minus.hxx
 
+namespace minus {
+  
 template <typename F>
 struct eval<chicago14a, F> {
   static void Hxt(const C<F> * __restrict__ x /*x, t*/,    const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
@@ -7768,12 +7770,14 @@ solution2cams(/*const but use as scratch*/ F rs[M::nve], F cameras[2/*2nd and 3r
   //  R12 = quat2rotm(transpose(quat12));
   //  R13 = quat2rotm(transpose(quat13));
 }
+} // namespace minus
 
 // Higlevel solver interface - Class minus ------------------------------------
 
 #include <thread>
 #include "chicago14a-default.h"
 
+namespace minus {
 
 // Intrinsics already inverted 
 // (inside RANSAC one will alredy have pre-inverted K)
@@ -7802,7 +7806,7 @@ solution2cams(/*const but use as scratch*/ F rs[M::nve], F cameras[2/*2nd and 3r
 // array with that minimum.
 template <typename F>
 inline void 
-minus<chicago14a, F>::solve(
+solver<chicago14a, F>::solve(
     const F p[pp::nviews][pp::npoints][io::ncoords2d], 
     const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
     F solutions_cams[M::nsols][pp::nviews-1][4][3],  // first camera is always [I | 0]
@@ -7842,7 +7846,7 @@ minus<chicago14a, F>::solve(
 // same as solve() but intrinsics not inverted (input is in actual pixel units)
 template <typename F>
 inline void 
-minus<chicago14a, F>::solve_img(
+solver<chicago14a, F>::solve_img(
     const F K[/*3 or 2 ignoring last line*/][io::ncoords2d_h],
     const F p[pp::nviews][pp::npoints][io::ncoords2d], 
     const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
@@ -7863,6 +7867,7 @@ minus<chicago14a, F>::solve_img(
   io::invert_intrinsics_tgt(K, tgt[2], tn[2], pp::npoints);
 
   solve(pn, tn, solutions_cams, id_sols, nsols_final);
+}
 }
 
 #endif // chicago14a_hxx_

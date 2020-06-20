@@ -3,6 +3,8 @@
 
 #include <random>
 
+namespace minus {
+  
 template <typename F>
 using C = std::complex<F>;
 
@@ -301,5 +303,7 @@ struct minus_util {
     return F(2) * std::atan2(vnorm, std::fabs(d[0]));
   }
 };
+
+} // namespace minus
 
 #endif // internal_util_h_

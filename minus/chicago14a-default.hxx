@@ -23,6 +23,7 @@
 #include "minus.h"
 #include "chicago14a-default.h"
 
+namespace minus {
 // 
 // Internal note: m2: script t, variable sols
 const complex start_sols_[M::nve*M::nsols] = {
@@ -5114,5 +5115,6 @@ const double line_complex[5][9] =
 0 0 0 0 0 0 0 0 0]
  * */
 
+} // namespace minus
 
 #endif   // chicago14a_default_hxx_

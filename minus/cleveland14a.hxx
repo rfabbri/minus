@@ -2,6 +2,8 @@
 #define cleveland14a_hxx_
 // to be included at the end of minus.hxx
 
+namespace minus {
+  
 template <typename F>
 struct eval<cleveland14a, F> {
   static void Hxt(const C<F> * __restrict__ x /*x, t*/,    const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
@@ -7618,4 +7620,6 @@ solution2cams(/*const but use as scratch*/ F rs[M::nve], F cameras[2/*2nd and 3r
   //  R12 = quat2rotm(transpose(quat12));
   //  R13 = quat2rotm(transpose(quat13));
 }
+
+} // namespace minus
 #endif // cleveland14a_hxx_

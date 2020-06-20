@@ -13,6 +13,8 @@
 #include "minus.h"
 #include "internal_util.hxx"
 
+namespace minus {
+
 // THE MEAT //////////////////////////////////////////////////////////////////////
 // t: tracker settings
 // s_sols: start sols      
@@ -149,6 +151,8 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
     ++t_s; s_s += f::nve;
   } // outer solution loop
 }
+
+} // namespace minus
 
 #include "chicago14a.hxx"      // specific implementation of chicago 14a formulation
 #include "cleveland14a.hxx"      // specific implementation of cleveland 14a formulation now in PLMP

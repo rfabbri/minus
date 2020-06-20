@@ -5,7 +5,9 @@
 // \date Created: Fri Feb  8 17:42:49 EST 2019
 #include <minus/minus.hxx>
 #include <minus/chicago14a-default.hxx>
+using namespace minus;
+
 template class minus_core<chicago14a, double>;
 template class minus_io_shaping<chicago14a, double>;
-template class minus<chicago14a, double>;
+template class solver<chicago14a, double>;
 

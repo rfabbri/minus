@@ -18,6 +18,8 @@
 
 #include <complex>
 
+namespace minus {
+  
 template <typename F>
 using C = std::complex<F>;
 
@@ -27,7 +29,7 @@ enum problem {chicago14a, chicago6a, cleveland14a, phoenix10a /*, standard*/};
 // The current best formulations for each problem
 constexpr problem chicago = problem::chicago14a;
 constexpr problem cleveland = problem::cleveland14a;
-// You can now use minus<chicago> to default to the best formulation
+// You can now use solver<chicago> to default to the best formulation
 
 // Each problem specializes this in their specific .h
 template <problem P>
@@ -297,10 +299,9 @@ struct minus_io_shaping {
   static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
 };
 
-
 // Highlevel API ---------------------------------------------------------------
 template <problem P, typename F=double>
-struct minus {
+struct solver {
   // all specializations provide a solve() function
   // each with its own I/O parameters
 };
@@ -324,4 +325,5 @@ using minus_io = minus_io_shaping<P, F>;
 //using minus6 = minus_core<312, 6, 45, P, double>;
 //template<problem P>
 //using minusPhoenix10a = minus_core<312, 6, 45, P, double>;
+} // namespace minus
 #endif  // minus_h_

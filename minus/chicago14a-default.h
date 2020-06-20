@@ -4,6 +4,8 @@
 
 #include "minus.h"
 
+namespace minus {
+
 #define Float double // XXX TODO: make these as part of template, otherwise dup sym when using two pbms
 typedef minus_core<chicago> M;
 typedef minus_io<chicago> io;
@@ -20,5 +22,7 @@ extern Float cameras_gt_quat_[M::nve];
 extern Float tgt_[io::pp::nviews][io::pp::npoints][io::ncoords2d];
 extern const Float tgt_correct_[io::pp::nviews][io::pp::npoints][io::ncoords2d];
 extern Float K_[io::ncoords2d][io::ncoords2d_h];
+
+}
 
 #endif   // chicago14a_default_h_
