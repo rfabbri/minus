@@ -21,6 +21,8 @@
 // but keep this one lean & mean.
 #include <minus/chicago14a-default.hxx> 
 
+using namespace minus;
+
 static Float plines_m2_[io::pp::nvislines][io::ncoords2d_h] = {
        {.879009, .476806, .0386237},
        {.894813, -.446441, .032208},

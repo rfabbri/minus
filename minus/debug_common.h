@@ -4,6 +4,7 @@
 #include <minus/minus.h>
 #include <minus/internal_util.h>
 
+namespace minus {
 
 #define Float double
 typedef minus_util<Float> util;
@@ -126,4 +127,5 @@ struct minus_array_util { // Not speed critical --------------------------------
 typedef minus_array_util<Float> mu; 
 #endif
 
+} // namespace minus
 #endif // debug_common_h_

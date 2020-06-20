@@ -7018,7 +7018,11 @@ HxH(const C<F>* __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<
 
 // Problem and Formulation Paramers --------------------------------------------
 
+} // namespace minus
+
 #include "chicago14a-internals.h"
+
+namespace minus {
 
 // For speed, assumes input point implicitly has 3rd homog coordinate is 1
 // 

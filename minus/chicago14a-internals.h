@@ -1,6 +1,8 @@
 #ifndef chicago14a_internals_h
 #define chicago14a_internals_h
 
+namespace minus {
+  
 template <typename F>
 struct minus_io_shaping<chicago14a, F> {
   typedef minus_core<chicago14a, F> M;
@@ -80,5 +82,7 @@ struct minus_io_shaping<chicago14a, F> {
     unsigned nsols, unsigned *solution_index);
   static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
 };
+
+} // namespace minus
 
 #endif //chicago14a_internals_h

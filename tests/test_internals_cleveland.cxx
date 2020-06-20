@@ -13,6 +13,7 @@
 #include <chrono>
 #include <testlib/testlib_test.h>
 #include <minus/debug_common.h>
+using namespace minus;
 #include <minus/cleveland14a-internals.h>
 
 // Start solutions hardcoded for efficiency.

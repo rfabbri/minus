@@ -1,6 +1,8 @@
 #ifndef cleveland14a_internals_h
 #define cleveland14a_internals_h
 
+namespace minus {
+  
 template <typename F>
 struct minus_io_shaping<cleveland14a, F> {
   typedef minus_core<cleveland14a, F> M;
@@ -76,5 +78,7 @@ struct minus_io_shaping<cleveland14a, F> {
       unsigned *solution_index);
   static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
 };
+
+} // namespace minus
 
 #endif //cleveland14a_internals_h
