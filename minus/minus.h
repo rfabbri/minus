@@ -38,7 +38,7 @@ template <problem P>
 struct problem_parameters;
 
 // Problem specific definitions that must be available before anything, at compile time
-#include <minus/parameters.h>
+#include "parameters.h"
 
 // Lowlevel API ----------------------------------------------------------------
 template <problem P, typename F=double>
@@ -305,7 +305,7 @@ struct minus {
   // each with its own I/O parameters
 };
 
-#include <minus/problem-defs.h>
+#include "problem-defs.h"
 
 // Shortcuts and aliases -------------------------------------------------------
 // type alias used to hide a template parameter 

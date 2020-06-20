@@ -2,7 +2,7 @@
 #define chicago14a_default_h_
 // see .hxx for documentation
 
-#include <minus/minus.h>
+#include "minus.h"
 
 #define Float double // XXX TODO: make these as part of template, otherwise dup sym when using two pbms
 typedef minus_core<chicago> M;

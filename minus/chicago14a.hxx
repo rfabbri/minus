@@ -7074,7 +7074,7 @@ probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *
 // #undef NDEBUG
 
 #ifndef NDEBUG
-#include<minus/debug_util.h>
+#include "debug_util.h"
 #endif
 
 // like probe_solutions but tests all M::nsols in case more than one is close to
@@ -7772,7 +7772,7 @@ solution2cams(/*const but use as scratch*/ F rs[M::nve], F cameras[2/*2nd and 3r
 // Higlevel solver interface - Class minus ------------------------------------
 
 #include <thread>
-#include <minus/chicago14a-default.h>
+#include "chicago14a-default.h"
 
 
 // Intrinsics already inverted 
