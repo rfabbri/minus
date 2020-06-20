@@ -24,8 +24,9 @@
 // But for efficiency I chose to do it outside.
 // Perhaps a minus class should be written that wraps the lean minus_core.
 // And in _that_ one, we put these default vectors depending on template tag.
-#include "test_common.h"
+#include "test-common.h"
 
+using namespace minus;
 #define  M_VERBOSE 1     // display verbose messages
 
 

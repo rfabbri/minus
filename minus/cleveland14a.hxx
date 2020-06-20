@@ -7079,7 +7079,7 @@ probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *
 // #undef NDEBUG
 
 #ifndef NDEBUG
-#include "debug_util.h"
+#include "debug-util.h"
 #endif
 
 // like probe_solutions but tests all M::nsols in case more than one is close to

@@ -35,39 +35,39 @@ Simply do:
 #include <minus.hxx>
 ```
 
-And use `minus<chicago>` like so:
+And use `minus::solve<chicago>` like so:
 ```C
-  minus<chicago>::solve(p, tgt, solutions_cameras, &nsols_final);
+  minus::solve<chicago>(p, tgt, solutions_cameras, &nsols_final);
 ```
 to solve a trifocal pose problem from lines at points ("Chicago"), using the default
 formulation.  See the full example in `cmd/minus-chicago.cxx` and `tests/test-minus.cxx`.  This is
 efficient *static* code, so no allocations are performed.  
 
 The size and key parameters of the minimal problem are hardcoded as template
-parameters in advance, for efficiency. `minus<>` is a shorthand for a generic
+parameters in advance, for efficiency. `solver<>` is a shorthand for a generic
 template, so you have full control to add your own compiled formulations, or
 change the floating point implementation.  You can easily specify the
-formulation by using, e.g., `minus<chicago14a>` instead of `minus<chicago>`,
+formulation by using, e.g., `solver<chicago14a>` instead of `solver<chicago>`,
 which will use a 14x14 formulation for the Chicago problem.  Other
-available instances are available, e.g. `minus<chicago6a>` to solve a 6x6
+available instances are available, e.g. `solver<chicago6a>` to solve a 6x6
 formulation for the same problem instead. 
 
 To solve another problem, say the `Cleveland` trifocal pose problem from mixed
 points and lines, simply use the problem tag:
 ```C
-  minus<cleveland>::solve(p, tgt, solutions_cameras, &nsols_final);
+  solver<cleveland>::solve(p, tgt, solutions_cameras, &nsols_final);
 ```
 
 If your measurements are in pixels, use `solve_img` and pass your calibration matrix `K`:
 ```C
-  minus<cleveland>::solve_img(K, p, tgt, solutions_cameras, &nsols_final);
+  solver<cleveland>::solve_img(K, p, tgt, solutions_cameras, &nsols_final);
 ```
 
 ### Further control on template parametrs
 
 If you want to have full control on templating, say, to change from `double` to
-`float`, `minus<problem>` is just a shorthand for `minus<problem,double>`.
-So you can use `minus<chicago, float>`. See the section Hacking for how
+`float`, `solver<problem>` is just a shorthand for `solver<problem,double>`.
+So you can use `solver<chicago, float>`. See the section Hacking for how
 to add your own problem formulation to Minus.
 
 ## Commandline programs
@@ -286,7 +286,7 @@ The code:
 ```C
   #include <minus.hxx>
   ...
-  minus<chicago14a>::track(..)
+  minus_core<chicago14a>::track(..)
 ```
 Is shorthand for 
 ```C
@@ -342,7 +342,7 @@ the beginning of `minus.h`. This is the table of problem tags of Minus.
     vector initialization format
     - in your app, say `cmd/minus-chicago.cxx` for chicago problems,
       for now you have to selectively include this. Ongoing work will remove
-      this need, being only needed to do minus<chicago6a>.
+      this need, being only needed to do solver<chicago6a>.
 - Optional: place a define to simplify your solver name: 
     this is a `using` clause towards the end of `minus.h`.
 - Optional: If you are using Minus header-only, you are done! But for faster compile times 

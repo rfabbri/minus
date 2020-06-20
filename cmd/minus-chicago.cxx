@@ -10,6 +10,7 @@
 #include <minus/minus.h>
 #include <minus/chicago14a-default.h>
 
+using namespace minus;
 #define Float double
 typedef minus_core<chicago> M;
 static constexpr Float tol = 1e-3;
@@ -20,7 +21,7 @@ using namespace std::chrono;
 #define  M_VERBOSE 1     // display verbose messages
 // comment this out plus the printouts if you prefer no debug and no dependency
 // on this header
-#include <minus/debug_util.h>
+#include <minus/debug-util.h>
 
 
 //  exit code. Conventions:
