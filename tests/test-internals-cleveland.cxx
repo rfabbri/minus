@@ -12,7 +12,7 @@
 #include <iomanip>
 #include <chrono>
 #include <testlib/testlib_test.h>
-#include <minus/debug_common.h>
+#include <minus/debug-common.h>
 #include <minus/cleveland14a-internals.h>
 
 // Start solutions hardcoded for efficiency.

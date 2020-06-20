@@ -1,7 +1,7 @@
 #ifndef internal_util_hxx_
 #define internal_util_hxx_
 
-#include "internal_util.h"
+#include "internal-util.h"
 #include "minus.h"
 
 namespace minus {

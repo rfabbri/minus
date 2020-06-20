@@ -2,7 +2,7 @@
 #define debug_common_h_
 
 #include <minus/minus.h>
-#include <minus/internal_util.h>
+#include <minus/internal-util.h>
 
 namespace minus {
 
@@ -13,7 +13,7 @@ using namespace std::chrono;
 
 static constexpr Float eps_ = 1e-3;
 
-#include <minus/debug_util.h>
+#include <minus/debug-util.h>
 
 // test if two vectors of the same size are equal up to tolerance
 inline bool

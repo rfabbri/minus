@@ -11,7 +11,7 @@
 #include <cstring>
 #include "Eigen/LU"
 #include "minus.h"
-#include "internal_util.hxx"
+#include "internal-util.hxx"
 
 namespace minus {
 

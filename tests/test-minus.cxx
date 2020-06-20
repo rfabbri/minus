@@ -12,7 +12,7 @@
 #include <thread>
 #include <testlib/testlib_test.h>
 #include <minus/minus.h>
-#include <minus/debug_common.h>
+#include <minus/debug-common.h>
 #include <minus/chicago14a-default.h> 
 // #include <minus/chicago14a-internals.h>
 #include "test_common.h"

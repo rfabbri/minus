@@ -5,7 +5,7 @@
 set(minus_test_all_sources
   test-driver.cxx
   test-minus.cxx
-#   test_minus_cleveland.cxx
+  test-minus-cleveland.cxx
   test-internals.cxx
   test-internals-cleveland.cxx
 )
