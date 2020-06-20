@@ -45,30 +45,30 @@ formulation.  See the full example in `cmd/minus-chicago.cxx` and `tests/test-mi
 efficient *static* code, so no allocations are performed.  
 
 The size and key parameters of the minimal problem are hardcoded as template
-parameters in advance, for efficiency. `solver<>` is a shorthand for a generic
+parameters in advance, for efficiency. `minus<>` is a shorthand for a generic
 template, so you have full control to add your own compiled formulations, or
 change the floating point implementation.  You can easily specify the
-formulation by using, e.g., `solver<chicago14a>` instead of `solver<chicago>`,
+formulation by using, e.g., `minus<chicago14a>` instead of `minus<chicago>`,
 which will use a 14x14 formulation for the Chicago problem.  Other
-available instances are available, e.g. `solver<chicago6a>` to solve a 6x6
+available instances are available, e.g. `minus<chicago6a>` to solve a 6x6
 formulation for the same problem instead. 
 
 To solve another problem, say the `Cleveland` trifocal pose problem from mixed
 points and lines, simply use the problem tag:
 ```C
-  solver<cleveland>::solve(p, tgt, solutions_cameras, &nsols_final);
+  minus<cleveland>::solve(p, tgt, solutions_cameras, &nsols_final);
 ```
 
 If your measurements are in pixels, use `solve_img` and pass your calibration matrix `K`:
 ```C
-  solver<cleveland>::solve_img(K, p, tgt, solutions_cameras, &nsols_final);
+  minus<cleveland>::solve_img(K, p, tgt, solutions_cameras, &nsols_final);
 ```
 
 ### Further control on template parametrs
 
 If you want to have full control on templating, say, to change from `double` to
-`float`, `solver<problem>` is just a shorthand for `solver<problem,double>`.
-So you can use `solver<chicago, float>`. See the section Hacking for how
+`float`, `minus<problem>` is just a shorthand for `minus<problem,double>`.
+So you can use `minus<chicago, float>`. See the section Hacking for how
 to add your own problem formulation to Minus.
 
 ## Commandline programs
