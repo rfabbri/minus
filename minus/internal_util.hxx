@@ -1,8 +1,8 @@
 #ifndef internal_util_hxx_
 #define internal_util_hxx_
 
-#include <minus/internal_util.h>
-#include <minus/minus.h>
+#include "internal_util.h"
+#include "minus.h"
 
 template <typename F>
 std::random_device minus_util<F>::rd;

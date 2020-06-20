@@ -10,8 +10,8 @@
 #include <iomanip>
 #include <cstring>
 #include "Eigen/LU"
-#include <minus/minus.h>
-#include <minus/internal_util.hxx>
+#include "minus.h"
+#include "internal_util.hxx"
 
 // THE MEAT //////////////////////////////////////////////////////////////////////
 // t: tracker settings
