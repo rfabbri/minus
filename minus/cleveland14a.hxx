@@ -2,7 +2,7 @@
 #define cleveland14a_hxx_
 // to be included at the end of minus.hxx
 
-namespace minus {
+namespace MiNuS {
   
 template <typename F>
 struct eval<cleveland14a, F> {
@@ -7022,7 +7022,7 @@ HxH(const C<F>* __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<
 
 #include "cleveland14a-internals.h"
 
-namespace minus {
+namespace MiNuS {
 // For speed, assumes input point implicitly has 3rd homog coordinate is 1
 // 
 template <typename F>

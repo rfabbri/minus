@@ -4,7 +4,7 @@
 
 #include "minus.h"
 
-namespace minus {
+namespace MiNuS {
 
 #define Float double // XXX TODO: make these as part of template, otherwise dup sym when using two pbms
 typedef minus_core<chicago> M;

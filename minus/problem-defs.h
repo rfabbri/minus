@@ -6,7 +6,7 @@
 
 #define P chicago14a
 template <typename F>
-struct solver <P, F> {
+struct minus <P, F> {
   typedef minus_core<P, F> M;
   typedef minus_io_shaping<P, F> io;
   typedef problem_parameters<P> pp;

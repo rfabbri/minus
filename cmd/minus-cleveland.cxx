@@ -10,7 +10,7 @@
 #include <minus/minus.h>
 #include <minus/chicago14a-default.h>
 
-using namespace minus;
+using namespace MiNuS;
 #define Float double
 // XXX typedef minus<cleveland14a> M;
 typedef minus_core<chicago14a> M;

@@ -4,6 +4,6 @@
 // \author Ricardo Fabbri
 // \date Created: Fri Feb  8 17:42:49 EST 2019
 #include <minus/minus.hxx>
-using namespace minus;
+using namespace MiNuS;
 
 template class minus_util<double>;

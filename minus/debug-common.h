@@ -4,7 +4,7 @@
 #include <minus/minus.h>
 #include <minus/internal-util.h>
 
-namespace minus {
+namespace MiNuS {
 
 #define Float double
 typedef minus_util<Float> util;

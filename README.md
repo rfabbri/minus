@@ -33,11 +33,12 @@ For use in your program, we provide a C++ header-only library
 Simply do:
 ```C
 #include <minus.hxx>
+using namespace MiNuS;
 ```
 
-And use `minus::solve<chicago>` like so:
+And use `minus<chicago>` like so:
 ```C
-  minus::solve<chicago>(p, tgt, solutions_cameras, &nsols_final);
+  minus<chicago>::solve(p, tgt, solutions_cameras, &nsols_final); 
 ```
 to solve a trifocal pose problem from lines at points ("Chicago"), using the default
 formulation.  See the full example in `cmd/minus-chicago.cxx` and `tests/test-minus.cxx`.  This is

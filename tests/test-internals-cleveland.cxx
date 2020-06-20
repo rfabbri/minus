@@ -21,7 +21,7 @@
 // but keep this one lean & mean.
 #include <minus/cleveland14a-default.hxx> 
 
-using namespace minus;
+using namespace MiNuS;
 
 static Float plines_m2_[io::pp::nvislines][io::ncoords2d_h] = {
        {.879009, .476806, .0386237},

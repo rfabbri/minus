@@ -10,7 +10,7 @@
 #include <minus/minus.h>
 #include <minus/chicago14a-default.h>
 
-using namespace minus;
+using namespace MiNuS;
 #define Float double
 typedef minus_core<chicago> M;
 static constexpr Float tol = 1e-3;

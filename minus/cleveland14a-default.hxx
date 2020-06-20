@@ -8,7 +8,7 @@
 
 #include <minus/minus.h>
 
-namespace minus {
+namespace MiNuS {
 
 typedef minus_core<cleveland14a> M;
 typedef minus_io<cleveland14a> io;

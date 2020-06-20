@@ -4,7 +4,7 @@
 #include "internal-util.h"
 #include "minus.h"
 
-namespace minus {
+namespace MiNuS {
   
 template <typename F>
 std::random_device minus_util<F>::rd;

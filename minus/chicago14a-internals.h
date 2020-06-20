@@ -1,7 +1,7 @@
 #ifndef chicago14a_internals_h
 #define chicago14a_internals_h
 
-namespace minus {
+namespace MiNuS {
   
 template <typename F>
 struct minus_io_shaping<chicago14a, F> {

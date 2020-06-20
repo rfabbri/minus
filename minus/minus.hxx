@@ -13,7 +13,7 @@
 #include "minus.h"
 #include "internal-util.hxx"
 
-namespace minus {
+namespace MiNuS {
 
 // THE MEAT //////////////////////////////////////////////////////////////////////
 // t: tracker settings

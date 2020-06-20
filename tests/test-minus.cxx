@@ -17,7 +17,7 @@
 // #include <minus/chicago14a-internals.h>
 #include "test-common.h"
 
-using namespace minus;
+using namespace MiNuS;
 #define  M_VERBOSE 1     // display verbose messages
 
 
@@ -151,7 +151,7 @@ test_toplevel_interface()
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   
   /// MAIN INTERFACE //////////////////////////////////////////////////
-  solver<chicago14a>::solve_img(K_, p_, tgt_, cameras, id_sols, &nsols_final);
+  minus<chicago14a>::solve_img(K_, p_, tgt_, cameras, id_sols, &nsols_final);
   /////////////////////////////////////////////////////////////////////
   
   high_resolution_clock::time_point t2 = high_resolution_clock::now();

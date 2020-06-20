@@ -3,7 +3,7 @@
 
 #include <random>
 
-namespace minus {
+namespace MiNuS {
   
 template <typename F>
 using C = std::complex<F>;

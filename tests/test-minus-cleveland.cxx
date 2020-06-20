@@ -26,7 +26,7 @@
 // And in _that_ one, we put these default vectors depending on template tag.
 #include "test-common.h"
 
-using namespace minus;
+using namespace MiNuS;
 #define  M_VERBOSE 1     // display verbose messages
 
 

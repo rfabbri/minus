@@ -8,7 +8,7 @@
 static void
 minus_initialize_gt()
 {
-  using namespace minus;
+  using namespace MiNuS;
   //  R01 = R1 * inv(R0);
   //  T01 = R1 * (C0 - C1);
   //  R12 = R2 * inv(R1);

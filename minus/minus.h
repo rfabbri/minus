@@ -18,7 +18,7 @@
 
 #include <complex>
 
-namespace minus {
+namespace MiNuS {
   
 template <typename F>
 using C = std::complex<F>;
@@ -301,7 +301,7 @@ struct minus_io_shaping {
 
 // Highlevel API ---------------------------------------------------------------
 template <problem P, typename F=double>
-struct solver {
+struct minus {
   // all specializations provide a solve() function
   // each with its own I/O parameters
 };
