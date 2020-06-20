@@ -20,8 +20,8 @@
 // And in _that_ one, we put these default vectors depending on template tag.
 
 
-#include <minus/minus.h>
-#include <minus/chicago14a-default.h>
+#include "minus.h"
+#include "chicago14a-default.h"
 
 // 
 // Internal note: m2: script t, variable sols
