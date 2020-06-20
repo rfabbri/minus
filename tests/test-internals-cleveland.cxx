@@ -13,7 +13,6 @@
 #include <chrono>
 #include <testlib/testlib_test.h>
 #include <minus/debug_common.h>
-using namespace minus;
 #include <minus/cleveland14a-internals.h>
 
 // Start solutions hardcoded for efficiency.
@@ -21,6 +20,8 @@ using namespace minus;
 // write another program that accepts start sols in runtime,
 // but keep this one lean & mean.
 #include <minus/cleveland14a-default.hxx> 
+
+using namespace minus;
 
 static Float plines_m2_[io::pp::nvislines][io::ncoords2d_h] = {
        {.879009, .476806, .0386237},

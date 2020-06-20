@@ -17,6 +17,8 @@
 // #include <minus/chicago14a-internals.h>
 #include "test_common.h"
 
+using namespace minus;
+
 
 #define  M_VERBOSE 1     // display verbose messages
 

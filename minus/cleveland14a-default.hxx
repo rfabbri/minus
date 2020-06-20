@@ -8,6 +8,8 @@
 
 #include <minus/minus.h>
 
+namespace minus {
+
 typedef minus_core<cleveland14a> M;
 typedef minus_io<cleveland14a> io;
 
@@ -5103,5 +5105,5 @@ const double line_complex[5][9] =
 0 0 0 0 0 0 0 0 0]
  * */
 
-
+} // namespace minus
 #endif   // cleveland14a_default_hxx_
