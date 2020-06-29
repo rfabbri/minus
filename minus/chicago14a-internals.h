@@ -4,7 +4,7 @@
 namespace MiNuS {
   
 template <typename F>
-struct minus_io_shaping<chicago14a, F> {
+struct minus_io_shaping<chicago14a, F> : public minus_io_base<F> {
   typedef minus_core<chicago14a, F> M;
   typedef struct M::solution solution;
 

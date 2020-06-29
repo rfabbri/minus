@@ -193,6 +193,11 @@ void minus_core<P, F>::evaluate_HxH(const C<F> * __restrict__ x /*x, t*/, const 
   eval<P,F>::HxH(x, params, y);
 }
 
+// Generic I/O routines and defs common to all problems
+template <typename F=double>
+struct minus_io_base {
+};
+
 // IO shaping: not used in tracker, but only for shaping user data
 // The user specializes this to their problem inside problem.hxx
 // This is a base template class for zero and first-order problems (points,
@@ -207,18 +212,10 @@ void minus_core<P, F>::evaluate_HxH(const C<F> * __restrict__ x /*x, t*/, const 
 // problems that may not involve points, tangents nor lines, eg., problems
 // involving only conics or higher-order features.
 // 
-// Note: Needed to create this class since functions do not always support partial
-// specialization
-// https://stackoverflow.com/questions/1501357/template-specialization-of-particular-members
-// 
-// TODO: leave this class empty.
-// Just use a mold / inherictance to reuse basic structure
-// useful for all problems. Right now, this is somewhat specific to certain
-// types of problems (points and lines) and formulations (minors-based /
-// visible-line based). Feel free to ignore this in the specialization to your
-// problem, except the constants and typedefs.
+// Feel free to ignore anything in this generic template in the specialization
+// to your problem.
 template <problem P, typename F=double>
-struct minus_io_shaping {
+struct minus_io_shaping : public minus_io_base<F> {
   typedef minus_core<P, F> M;
   typedef struct M::solution solution;
 
