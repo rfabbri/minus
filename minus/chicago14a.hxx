@@ -7031,7 +7031,7 @@ namespace MiNuS {
 template <typename F>
 inline void 
 minus_io<chicago14a, F>::
-lines2params(const F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+lines2params(const F plines[pp::nvislines][io::ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   typedef minus_util<F> util;
   typedef minus_3d<F> vec;
@@ -7201,7 +7201,7 @@ gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
 template <typename F>
 inline void 
 minus_io<chicago14a, F>::
-point_tangents2lines(const F p[pp::nviews][pp::npoints][ncoords2d], const F t[pp::nviews][pp::npoints][ncoords2d], unsigned i0, unsigned i1, F plines[pp::nvislines][ncoords2d_h])
+point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F t[pp::nviews][pp::npoints][io::ncoords2d], unsigned i0, unsigned i1, F plines[pp::nvislines][io::ncoords2d_h])
 {
   typedef minus_3d<F> vec;
   
@@ -7237,7 +7237,7 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][ncoords2d], const F t[pp
 template <typename F>
 inline void
 minus_io<chicago14a, F>::
-get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+get_params_start_target(F plines[/*15 for chicago*/][io::ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   // the user provides the start params in the first half of params.
   // we fill the second half and gammify both.
@@ -7257,11 +7257,11 @@ get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __rest
 template <typename F>
 inline void 
 minus_io<chicago14a, F>::
-point_tangents2params(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+point_tangents2params(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F tgt[pp::nviews][pp::npoints][io::ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   // the user provides the start params in the first half of params.
   // we fill the second half and gammify both.
-  F plines[pp::nvislines][ncoords2d_h];
+  F plines[pp::nvislines][io::ncoords2d_h];
   point_tangents2lines(p, tgt, id_tgt0, id_tgt1, plines);
   get_params_start_target(plines, params);
 }
@@ -7270,10 +7270,10 @@ point_tangents2params(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt
 template <typename F>
 inline void 
 minus_io<chicago14a, F>::
-point_tangents2params_img(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, const F K[/*3 or 2*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+point_tangents2params_img(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F tgt[pp::nviews][pp::npoints][io::ncoords2d], unsigned id_tgt0, unsigned id_tgt1, const F K[/*3 or 2*/][io::ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
-  F pn[pp::nviews][pp::npoints][ncoords2d];
-  F tn[pp::nviews][pp::npoints][ncoords2d];
+  F pn[pp::nviews][pp::npoints][io::ncoords2d];
+  F tn[pp::nviews][pp::npoints][io::ncoords2d];
   
   // see if uno minus  default_gammas_m2 is less than 1
   invert_intrinsics(K, p[0], pn[0], pp::npoints);
