@@ -213,6 +213,8 @@ struct minus_io_common {
 
 // Basic I/O function common to formulations that use
 // 14 variables = 2* (quaternion + translation)
+// This is not specialized to a problem in the implementation,
+// but contains common implementations to all problems using 14a formulation
 template <problem P, typename F=double>
 struct minus_io_14a : public minus_io_common<F> {
   typedef minus_core<P, F> M;
