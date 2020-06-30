@@ -8,7 +8,7 @@
 template <typename F>
 struct minus <P, F> {
   typedef minus_core<P, F> M;
-  typedef minus_io_shaping<P, F> io;
+  typedef minus_io<P, F> io;
   typedef problem_parameters<P> pp;
 
   // documentation in P.hxx

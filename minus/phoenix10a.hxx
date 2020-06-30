@@ -7015,7 +7015,7 @@ constexpr unsigned formulation_parameters<chicago14a>::nve;      // size of the 
 constexpr unsigned formulation_parameters<chicago14a>::nparams;  // number of parameters
 
 template <typename F>
-struct minus_io_shaping<chicago14a, F> {
+struct minus_io<chicago14a, F> {
   typedef minus_core<chicago14a, F> M;
   typedef struct M::solution solution;
   static constexpr unsigned ncoords2d = 2;  // just a documented name for the number of inhomog coordinates
@@ -7067,7 +7067,7 @@ struct minus_io_shaping<chicago14a, F> {
 // to gammify/randomize
 template <typename F>
 inline void 
-minus_io_shaping<chicago14a, F>::
+minus_io<chicago14a, F>::
 lines2params(F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   typedef minus_util<F> util;
@@ -7156,7 +7156,7 @@ lines2params(F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ params/*[
 //
 template <typename F>
 inline void 
-minus_io_shaping<chicago14a, F>::
+minus_io<chicago14a, F>::
 gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
 {
   typedef minus_util<F> util;
@@ -7229,7 +7229,7 @@ gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
 // if you intend to reuse it 
 template <typename F>
 inline void 
-minus_io_shaping<chicago14a, F>::
+minus_io<chicago14a, F>::
 point_tangents2lines(F p[pp::nviews][pp::npoints][ncoords2d], F t[pp::nviews][pp::npoints][ncoords2d], unsigned i0, unsigned i1, F plines[pp::nvislines][ncoords2d_h])
 {
   typedef minus_3d<F> vec;
@@ -7272,7 +7272,7 @@ point_tangents2lines(F p[pp::nviews][pp::npoints][ncoords2d], F t[pp::nviews][pp
 // 
 template <typename F>
 inline void 
-minus_io_shaping<chicago14a, F>::
+minus_io<chicago14a, F>::
 point_tangents2params(F p[pp::nviews][pp::npoints][ncoords2d], F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   F plines[pp::nvislines][ncoords2d_h];
@@ -7284,7 +7284,7 @@ point_tangents2params(F p[pp::nviews][pp::npoints][ncoords2d], F tgt[pp::nviews]
 
 template <typename F>
 inline void
-minus_io_shaping<chicago14a, F>::
+minus_io<chicago14a, F>::
 get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   lines2params(plines, params);
@@ -7307,7 +7307,7 @@ get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __rest
 // array with that minimum.
 template <typename F>
 inline void 
-minus_io_shaping<chicago14a, F>::
+minus_io<chicago14a, F>::
 all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], 
                    unsigned id_sols[M::nsols], unsigned *nsols_final)
 {
@@ -7325,7 +7325,7 @@ all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3
 
 template <typename F>
 inline void 
-minus_io_shaping<chicago14a, F>::
+minus_io<chicago14a, F>::
 solution2cams(/*const but use as scratch*/ F rs[M::nve], F cameras[2/*2nd and 3rd cams relative to 1st*/][4][3])
 {
   typedef minus_util<F> u;

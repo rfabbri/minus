@@ -7030,7 +7030,7 @@ namespace MiNuS {
 // to gammify/randomize
 template <typename F>
 inline void 
-minus_io_shaping<chicago14a, F>::
+minus_io<chicago14a, F>::
 lines2params(const F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   typedef minus_util<F> util;
@@ -7125,7 +7125,7 @@ lines2params(const F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ par
 //
 template <typename F>
 inline void 
-minus_io_shaping<chicago14a, F>::
+minus_io<chicago14a, F>::
 gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
 {
   typedef minus_util<F> util;
@@ -7200,7 +7200,7 @@ gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
 // Input points and tangents in normalized image coordinates.
 template <typename F>
 inline void 
-minus_io_shaping<chicago14a, F>::
+minus_io<chicago14a, F>::
 point_tangents2lines(const F p[pp::nviews][pp::npoints][ncoords2d], const F t[pp::nviews][pp::npoints][ncoords2d], unsigned i0, unsigned i1, F plines[pp::nvislines][ncoords2d_h])
 {
   typedef minus_3d<F> vec;
@@ -7236,7 +7236,7 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][ncoords2d], const F t[pp
 
 template <typename F>
 inline void
-minus_io_shaping<chicago14a, F>::
+minus_io<chicago14a, F>::
 get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   // the user provides the start params in the first half of params.
@@ -7256,7 +7256,7 @@ get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __rest
 // 
 template <typename F>
 inline void 
-minus_io_shaping<chicago14a, F>::
+minus_io<chicago14a, F>::
 point_tangents2params(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   // the user provides the start params in the first half of params.
@@ -7269,7 +7269,7 @@ point_tangents2params(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt
 // Same but for pixel input
 template <typename F>
 inline void 
-minus_io_shaping<chicago14a, F>::
+minus_io<chicago14a, F>::
 point_tangents2params_img(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, const F K[/*3 or 2*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   F pn[pp::nviews][pp::npoints][ncoords2d];
@@ -7383,6 +7383,453 @@ minus<chicago14a, F>::solve_img(
   io::invert_intrinsics_tgt(K, tgt[2], tn[2], pp::npoints);
 
   solve(pn, tn, solutions_cams, id_sols, nsols_final);
+}
+
+
+//
+// Performs tests to see if there are potentially valid solutions,
+// without making use of ground truth. 
+// 
+template <typename F>
+inline bool 
+minus_io<chicago14a, F>::
+has_valid_solutions(const typename M::solution solutions[M::nsols])
+{
+  typedef minus_array<M::nve,F> v; typedef minus_util<F> u;
+  static constexpr F eps = 1e-3;
+  F real_solution[M::nve];
+  for (unsigned sol = 0; sol < M::nsols; ++sol) 
+    if (solutions[sol].status == M::REGULAR && v::get_real(solutions[sol].x, real_solution))
+      return true;
+  return false;
+}
+// RC: same format as cameras_gt_ and synthcurves dataset
+// QT: same format as solution_shape
+template <typename F>
+inline void 
+minus_io_14a<chicago14a, F>::
+RC_to_QT_format(const F rc[pp::nviews][4][3], F qt[M::nve])
+{
+  typedef minus_util<F> u;
+  F q0[4], q1[4], q2[4];
+
+  u::rotm2quat((F *) rc[0], q0);
+  u::rotm2quat((F *) rc[1], q1);
+  u::rotm2quat((F *) rc[2], q2);
+
+  // gt = q1 * conj(q0);
+  // gt + 4 = q2 * conj(q0);
+  u::dquat(q1, q0, qt);
+  u::dquat(q2, q0, qt + 4);
+
+  // gt + 8 = q1*(c0-c1)*q1.conj();
+  // gt + 8 = quat_transform(q1,c0-c1);
+  // gt + 8 + 3 = quat_transform(q2,c0-c2);
+  F dc[3];
+  dc[0] = rc[0][3][0] - rc[1][3][0];
+  dc[1] = rc[0][3][1] - rc[1][3][1];
+  dc[2] = rc[0][3][2] - rc[1][3][2];
+  u::quat_transform(q1,dc, qt + 8);
+
+  dc[0] = rc[0][3][0] - rc[2][3][0];
+  dc[1] = rc[0][3][1] - rc[2][3][1];
+  dc[2] = rc[0][3][2] - rc[2][3][2];
+  u::quat_transform(q2,dc, qt + 8 + 3);
+}
+
+template <typename F>
+inline void 
+minus_io_14a<chicago14a, F>::
+solution2cams(/*const but use as scratch*/ F rs[M::nve], F cameras[2/*2nd and 3rd cams relative to 1st*/][4][3])
+{
+  typedef minus_util<F> u;
+  // camera 0 (2nd camera relative to 1st)
+  u::quat2rotm(rs, (F *) cameras[0]);
+  cameras[0][3][0] = rs[8];
+  cameras[0][3][1] = rs[9];
+  cameras[0][3][2] = rs[10];
+  
+  // camera 1 (3rd camera relative to 1st)
+  u::quat2rotm(rs+4, (F *) cameras[1]);
+  cameras[1][3][0] = rs[11];
+  cameras[1][3][1] = rs[12];
+  cameras[1][3][2] = rs[13];
+
+  // quat12 rs(0:3), quat12 rs(4:7)
+  //  T12 = solutions(9:11);
+  //  T13 = solutions(12:14);
+  //  R12 = quat2rotm(transpose(quat12));
+  //  R13 = quat2rotm(transpose(quat13));
+}
+
+//
+// returns cameras[0:nsols_final][2][4][3]
+//
+// where the camera matrix P^t = [R|T]^t is cameras[sol_number][view_id][:][:]
+// where view_id is 0 or 1 for second and third camera relative to the first,
+// resp.
+//
+// This design is for cache speed. Translation in the camera matrix is stored
+// such that its coordinates are memory contiguous.
+// 
+// The cameras array is fixed in size to NSOLS which is the max
+// number of solutions, which perfectly fits in memory. The caller must pass an
+// array with that minimum.
+template <typename F>
+inline void 
+minus_io_14a<chicago14a, F>::
+all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], 
+                   unsigned id_sols[M::nsols], unsigned *nsols_final)
+{
+  typedef minus_array<M::nve,F> v;
+  *nsols_final = 0;
+  for (unsigned sol=0; sol < M::nsols; ++sol) {
+    F real_solution[M::nve];
+    if (v::get_real(raw_solutions[sol].x, real_solution)) {
+      id_sols[(*nsols_final)++] = sol;
+      // build cams by using quat2rotm
+      solution2cams(real_solution, (F (*)[4][3] ) (cameras + sol));
+    }
+  }
+}
+
+// The camera parameter is cameras[img] which is a [4][3] array,
+// where the first 3x3 block is R, and the 4th row is T. img is img 0 or 1,
+// for 2nd and 3rd cams relative to 1st, resp.
+// 
+template <typename F>
+inline bool 
+minus_io_14a<chicago14a, F>::
+probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *probe_cameras,
+    unsigned *solution_index)
+{
+  typedef minus_array<M::nve,F> v; typedef minus_util<F> u;
+  static constexpr F eps = 1e-3;
+  unsigned &sol=*solution_index;
+  F real_solution[M::nve];
+  for (sol = 0; sol < M::nsols; ++sol) 
+    if (v::get_real(solutions[sol].x, real_solution)) {
+      u::normalize_quat(real_solution);
+      if (u::rotation_error(real_solution, probe_cameras->q01) < eps)
+        return true;
+    }
+  return false;
+}
+
+// #undef NDEBUG
+
+#ifndef NDEBUG
+#include "debug-util.h"
+#endif
+
+// like probe_solutions but tests all M::nsols in case more than one is close to
+// the probe. Use this for debugging / investigation
+template <typename F>
+inline bool 
+minus_io_14a<chicago14a, F>::
+probe_all_solutions(const typename M::solution solutions[M::nsols], solution_shape *probe_cameras,
+    unsigned *solution_index)
+{
+  typedef minus_array<M::nve,F> v; typedef minus_util<F> u;
+  static constexpr F eps = 1e-3;
+  F real_solution[M::nve];
+  bool found=false;
+  F min_rerror;
+  for (unsigned sol = 0; sol < M::nsols; ++sol)  {
+    if (!v::get_real(solutions[sol].x, real_solution))
+      continue;
+    u::normalize_quat(real_solution);
+    F rerror = u::rotation_error(real_solution, probe_cameras->q01);
+    if (rerror < eps) {
+      if (found == true) {
+#ifndef NDEBUG
+        std::cerr << "Found another similar solution at " << sol << std::endl;
+        std::cerr << "Error: " << rerror << std::endl;
+#endif
+        if (rerror < min_rerror) {
+          min_rerror = rerror;
+          *solution_index = sol;
+        }
+        
+      } else {
+#ifndef NDEBUG
+        std::cerr << "Found a solution at " << sol << std::endl;
+        std::cerr << "Error: " << rerror << std::endl;
+#endif
+        min_rerror = rerror;
+        *solution_index = sol;
+      }
+      found = true;
+    } else {
+#ifndef NDEBUG
+        std::cerr << "Solution is real but not close (sol,isvalid)" << sol << "," << solutions[sol].status << std::endl;
+#endif
+    }
+  }
+
+  if (!found)
+    return false;
+
+  // check the remaining parts of the solutions also match, not just rot
+  v::get_real(solutions[*solution_index].x, real_solution);
+  u::normalize_quat(real_solution+4);
+  F rerror = u::rotation_error(real_solution+4, probe_cameras->q02);
+  if (rerror < eps) {
+#ifndef NDEBUG
+    std::cerr << "probe: Rotation 02 also match\n";
+#endif
+    found = true;
+  } else
+    found = false;
+  
+  if (!found)
+    return false;
+
+  solution_shape *s = (solution_shape *) real_solution;
+
+  F scale = std::sqrt(minus_3d<F>::dot(s->t01, s->t01));
+  F scale_probe = std::sqrt(minus_3d<F>::dot(probe_cameras->t01, probe_cameras->t01));
+  
+  { // t01
+  s->t01[0] /= scale; s->t01[1] /= scale; s->t01[2] /= scale;
+  F dt[3];
+  dt[0] = s->t01[0] - probe_cameras->t01[0]/scale_probe;
+  dt[1] = s->t01[1] - probe_cameras->t01[1]/scale_probe;
+  dt[2] = s->t01[2] - probe_cameras->t01[2]/scale_probe;
+  
+  if (minus_3d<F>::dot(dt, dt) < eps*eps) {
+#ifndef NDEBUG
+    std::cerr << "probe: translation 01 also match\n";
+#endif
+    found = true;
+  } else {
+    dt[0] = s->t01[0] + probe_cameras->t01[0]/scale_probe;
+    dt[1] = s->t01[1] + probe_cameras->t01[1]/scale_probe;
+    dt[2] = s->t01[2] + probe_cameras->t01[2]/scale_probe;
+    if (minus_3d<F>::dot(dt, dt) < eps*eps) {
+#ifndef NDEBUG
+      std::cerr << "probe: translation 01 also match\n";
+#endif
+      found = true;
+    } else {
+      found = false;
+#ifndef NDEBUG
+      std::cerr << "probe: translation 01 DO NOT match\n";
+#endif
+    }
+  }
+  }
+  
+  if (!found)
+    return false;
+  
+  { // t02
+  s->t02[0] /= scale; s->t02[1] /= scale; s->t02[2] /= scale;
+  F dt[3];
+  dt[0] = s->t02[0] - probe_cameras->t02[0]/scale_probe;
+  dt[1] = s->t02[1] - probe_cameras->t02[1]/scale_probe;
+  dt[2] = s->t02[2] - probe_cameras->t02[2]/scale_probe;
+  
+  if (minus_3d<F>::dot(dt, dt) < eps*eps) {
+#ifndef NDEBUG
+    std::cerr << "probe: translation 02 also match\n";
+#endif
+    found = true;
+  } else {
+    //    std::cerr << "dt fail atttempt 1 " << std::endl;
+    //    print(dt,3);
+    //    std::cerr << "t02 fail atttempt 1 " << std::endl;
+    //    print(s->t02,3);
+    //    std::cerr << "probe t02 fail atttempt 1 " << std::endl;
+    // print(probe_cameras->t02,3);
+    
+    dt[0] = s->t02[0] + probe_cameras->t02[0]/scale_probe;
+    dt[1] = s->t02[1] + probe_cameras->t02[1]/scale_probe;
+    dt[2] = s->t02[2] + probe_cameras->t02[2]/scale_probe;
+    if (minus_3d<F>::dot(dt, dt) < eps*eps) {
+#ifndef NDEBUG
+      std::cerr << "probe: translation 02 also match\n";
+#endif
+      found = true;
+    } else {
+      found = false;
+#ifndef NDEBUG
+      std::cerr << "probe: translation 02 DO NOT match\n";
+      std::cerr << "dt" << std::endl;
+      print(dt,3);
+#endif
+    }
+  }
+  }
+  return found;
+}
+
+// like probe_all_solutions but both solutions and ground truth probe are in
+// quaternion-translation format (solution_shape)
+template <typename F>
+inline bool 
+minus_io_14a<chicago14a, F>::
+probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], solution_shape *probe_cameras,
+    unsigned nsols, unsigned *solution_index)
+{
+#ifndef NDEBUG
+  std::cerr << "Test xxxxxxxxxxx" << std::endl;
+  std::cerr << "Nsols" <<  nsols << std::endl;
+#endif
+  typedef minus_array<M::nve,F> v; typedef minus_util<F> u;
+  static constexpr F eps = 1e-3;
+  F real_solution[M::nve];
+  bool found=false;
+  F min_rerror;
+  for (unsigned sol = 0; sol < nsols; ++sol)  {
+    memcpy(real_solution, solutions_cameras[sol], M::nve*sizeof(F));
+    u::normalize_quat(real_solution);
+    F rerror = u::rotation_error(real_solution, probe_cameras->q01);
+    if (rerror < eps) {
+      if (found == true) {
+#ifndef NDEBUG
+        std::cerr << "Found another similar solution at " << sol << std::endl;
+        std::cerr << "Error: " << rerror << std::endl;
+#endif
+        if (rerror < min_rerror) {
+          min_rerror = rerror;
+          *solution_index = sol;
+        }
+        
+      } else {
+#ifndef NDEBUG
+        std::cerr << "Found a solution at " << sol << std::endl;
+        std::cerr << "Error: " << rerror << std::endl;
+#endif
+        min_rerror = rerror;
+        *solution_index = sol;
+      }
+      found = true;
+    } 
+  }
+
+  if (!found)
+    return false;
+
+  // check the remaining parts of the solutions also match, not just rot
+  memcpy(real_solution, solutions_cameras[*solution_index], M::nve*sizeof(F));
+  u::normalize_quat(real_solution+4);
+  F rerror = u::rotation_error(real_solution+4, probe_cameras->q02);
+  if (rerror < eps) {
+#ifndef NDEBUG
+    std::cerr << "probe: Rotation 02 also match\n";
+#endif
+    found = true;
+  } else
+    found = false;
+  
+  if (!found)
+    return false;
+
+  solution_shape *s = (solution_shape *) real_solution;
+
+  F scale = std::sqrt(minus_3d<F>::dot(s->t01, s->t01));
+  F scale_probe = std::sqrt(minus_3d<F>::dot(probe_cameras->t01, probe_cameras->t01));
+  
+  { // t01
+  s->t01[0] /= scale; s->t01[1] /= scale; s->t01[2] /= scale;
+  F dt[3];
+  dt[0] = s->t01[0] - probe_cameras->t01[0]/scale_probe;
+  dt[1] = s->t01[1] - probe_cameras->t01[1]/scale_probe;
+  dt[2] = s->t01[2] - probe_cameras->t01[2]/scale_probe;
+  
+  if (minus_3d<F>::dot(dt, dt) < eps*eps) {
+#ifndef NDEBUG
+    std::cerr << "probe: translation 01 also match\n";
+#endif
+    found = true;
+  } else {
+    dt[0] = s->t01[0] + probe_cameras->t01[0]/scale_probe;
+    dt[1] = s->t01[1] + probe_cameras->t01[1]/scale_probe;
+    dt[2] = s->t01[2] + probe_cameras->t01[2]/scale_probe;
+    if (minus_3d<F>::dot(dt, dt) < eps*eps) {
+#ifndef NDEBUG
+      std::cerr << "probe: translation 01 also match\n";
+#endif
+      found = true;
+    } else {
+      found = false;
+#ifndef NDEBUG
+      std::cerr << "probe: translation 01 DO NOT match\n";
+#endif
+    }
+  }
+  }
+  
+  if (!found)
+    return false;
+  
+  { // t02
+  s->t02[0] /= scale; s->t02[1] /= scale; s->t02[2] /= scale;
+  F dt[3];
+  dt[0] = s->t02[0] - probe_cameras->t02[0]/scale_probe;
+  dt[1] = s->t02[1] - probe_cameras->t02[1]/scale_probe;
+  dt[2] = s->t02[2] - probe_cameras->t02[2]/scale_probe;
+  
+  if (minus_3d<F>::dot(dt, dt) < eps*eps) {
+#ifndef NDEBUG
+    std::cerr << "probe: translation 02 also match\n";
+#endif
+    found = true;
+  } else {
+    //    std::cerr << "dt fail atttempt 1 " << std::endl;
+    //    print(dt,3);
+    //    std::cerr << "t02 fail atttempt 1 " << std::endl;
+    //    print(s->t02,3);
+    //    std::cerr << "probe t02 fail atttempt 1 " << std::endl;
+    // print(probe_cameras->t02,3);
+    
+    dt[0] = s->t02[0] + probe_cameras->t02[0]/scale_probe;
+    dt[1] = s->t02[1] + probe_cameras->t02[1]/scale_probe;
+    dt[2] = s->t02[2] + probe_cameras->t02[2]/scale_probe;
+    if (minus_3d<F>::dot(dt, dt) < eps*eps) {
+#ifndef NDEBUG
+      std::cerr << "probe: translation 02 also match\n";
+#endif
+      found = true;
+    } else {
+      found = false;
+#ifndef NDEBUG
+      std::cerr << "probe: translation 02 DO NOT match\n";
+      // std::cerr << "dt" << std::endl;
+      // print(dt,3);
+#endif
+    }
+  }
+  }
+  return found;
+}
+
+template <typename F>
+inline bool
+minus_io_14a<chicago14a, F>::
+probe_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
+    unsigned *solution_index)
+{
+  return probe_solutions(solutions, (solution_shape *) probe_cameras, solution_index);
+}
+
+template <typename F>
+inline bool
+minus_io_14a<chicago14a, F>::
+probe_all_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
+    unsigned *solution_index)
+{
+  return probe_all_solutions(solutions, (solution_shape *) probe_cameras, solution_index);
+}
+
+template <typename F>
+inline bool
+minus_io_14a<chicago14a, F>::
+probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], F probe_cameras[M::nve],
+    unsigned nsols, unsigned *solution_index)
+{
+  return probe_all_solutions_quat(solutions_cameras, (solution_shape *) probe_cameras, nsols, solution_index);
 }
 
 } // namespace minus

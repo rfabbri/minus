@@ -7030,7 +7030,7 @@ namespace MiNuS {
 // to gammify/randomize
 template <typename F>
 inline void 
-minus_io_shaping<cleveland14a, F>::
+minus_io<cleveland14a, F>::
 lines2params(const F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   typedef minus_util<F> util;
@@ -7125,7 +7125,7 @@ lines2params(const F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ par
 //
 template <typename F>
 inline void 
-minus_io_shaping<cleveland14a, F>::
+minus_io<cleveland14a, F>::
 gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
 {
   typedef minus_util<F> util;
@@ -7166,7 +7166,7 @@ gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
 // QT: same format as solution_shape
 template <typename F>
 inline void 
-minus_io_shaping<cleveland14a, F>::
+minus_io<cleveland14a, F>::
 RC_to_QT_format(const F rc[pp::nviews][4][3], F qt[M::nve])
 {
   typedef minus_util<F> u;
@@ -7234,7 +7234,7 @@ RC_to_QT_format(const F rc[pp::nviews][4][3], F qt[M::nve])
 // Input points and tangents in normalized image coordinates.
 template <typename F>
 inline void 
-minus_io_shaping<cleveland14a, F>::
+minus_io<cleveland14a, F>::
 point_tangents2lines(const F p[pp::nviews][pp::npoints][ncoords2d], const F t[pp::nviews][pp::npoints][ncoords2d], unsigned i0, unsigned i1, F plines[pp::nvislines][ncoords2d_h])
 {
   typedef minus_3d<F> vec;
@@ -7270,7 +7270,7 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][ncoords2d], const F t[pp
 
 template <typename F>
 inline void
-minus_io_shaping<cleveland14a, F>::
+minus_io<cleveland14a, F>::
 get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   // the user provides the start params in the first half of params.
@@ -7290,7 +7290,7 @@ get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __rest
 // 
 template <typename F>
 inline void 
-minus_io_shaping<cleveland14a, F>::
+minus_io<cleveland14a, F>::
 point_tangents2params(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   // the user provides the start params in the first half of params.
@@ -7303,7 +7303,7 @@ point_tangents2params(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt
 // Same but for pixel input
 template <typename F>
 inline void 
-minus_io_shaping<cleveland14a, F>::
+minus_io<cleveland14a, F>::
 point_tangents2params_img(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, const F K[/*3 or 2*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   F pn[pp::nviews][pp::npoints][ncoords2d];
