@@ -20,6 +20,8 @@
 using namespace MiNuS;
 #define  M_VERBOSE 1     // display verbose messages
 
+typedef minus_core<chicago14a> M;
+typedef minus_data<chicago14a, Float> data;
 
 static void
 test_against_ground_truth(const M::solution solutions[])
@@ -51,10 +53,10 @@ test_full_solve()
     std::cerr << "LOG \033[0;33mUsing 4 threads by default\e[m\n" << std::endl;
     #endif 
     std::thread t[4];
-    t[0] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 0, 78);
-    t[1] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 78, 78*2);
-    t[2] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 78*2, 78*3);
-    t[3] = std::thread(M::track, M::DEFAULT, start_sols_, params_, solutions, 78*3, 78*4);
+    t[0] = std::thread(M::track, M::DEFAULT, data::start_sols_, data::params_, solutions, 0, 78);
+    t[1] = std::thread(M::track, M::DEFAULT, data::start_sols_, data::params_, solutions, 78, 78*2);
+    t[2] = std::thread(M::track, M::DEFAULT, data::start_sols_, data::params_, solutions, 78*2, 78*3);
+    t[3] = std::thread(M::track, M::DEFAULT, data::start_sols_, data::params_, solutions, 78*3, 78*4);
     t[0].join(); t[1].join(); t[2].join(); t[3].join();
   }
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
@@ -183,7 +185,7 @@ test_toplevel_interface()
 void
 test_minus()
 {
-  minus_initialize_gt();
+  data::minus_initialize_gt();
 //  test_full_solve();
 //  test_end_user_interface();
   test_toplevel_interface();

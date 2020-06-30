@@ -7288,10 +7288,10 @@ point_tangents2params_img(const F p[pp::nviews][pp::npoints][io::ncoords2d], con
 
 } // namespace minus
 
-// Higlevel solver interface - Class minus ------------------------------------
+// Highlevel solver interface - Class minus ------------------------------------
 
 #include <thread>
-#include "cleveland14a-default.h"
+#include "cleveland14a-default-data.h"
 
 namespace MiNuS {
 

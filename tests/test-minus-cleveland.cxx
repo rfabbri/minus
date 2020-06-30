@@ -151,7 +151,7 @@ test_end_user_interface()
 void
 test_minus_cleveland()
 {
-  minus_initialize_gt();
+  data::initialize_gt();
   test_full_solve();
   // test_end_user_interface();
 }

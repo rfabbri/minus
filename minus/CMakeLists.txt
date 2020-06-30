@@ -2,7 +2,12 @@
 # library is useful when the function will be used in many places
 # to avoid having to include Minus many times and slowdown the compiler
 set (minus_sources
-  minus.hxx minus.h chicago14a.hxx chicago14a-default.hxx cleveland14a.hxx
+  minus.hxx minus.h 
+  chicago14a.hxx chicago-default.hxx chicago14a-default-data.hxx 
+  chicago14a.h chicago-default.h chicago14a-default-data.h chicago14a-internals.h
+  cleveland14a.hxx cleveland-default.hxx cleveland14a-default-data.hxx
+  cleveland14a.h cleveland-default.h cleveland14a-default-data.h cleveland14a-internals.h
+  problem-defs.h
 )
 aux_source_directory(Templates minus_sources)
 

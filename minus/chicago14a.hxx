@@ -7288,10 +7288,10 @@ point_tangents2params_img(const F p[pp::nviews][pp::npoints][io::ncoords2d], con
 
 } // namespace minus
 
-// Higlevel solver interface - Class minus ------------------------------------
+// Highlevel solver interface - Class minus ------------------------------------
 
 #include <thread>
-#include "chicago14a-default.h"
+#include "chicago14a-default-data.h"
 
 namespace MiNuS {
 
@@ -7330,7 +7330,7 @@ minus<chicago14a, F>::solve(
     unsigned *nsols_final
     ) 
 {
-  typedef minus_data<chicago14a,F> data;
+  typedef minus_data<chicago14a,F> ;
   C<F> params[2*M::f::nparams];
   memcpy(params, data::params_start_target_, M::f::nparams*sizeof(C<F>));
   

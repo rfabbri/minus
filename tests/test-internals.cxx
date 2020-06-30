@@ -14,14 +14,13 @@
 #include <testlib/testlib_test.h>
 #include <minus/debug-common.h>
 #include <minus/chicago14a-internals.h>
-
-// Start solutions hardcoded for efficiency.
-// If you want to play with different start sols,
-// write another program that accepts start sols in runtime,
-// but keep this one lean & mean.
-#include <minus/chicago14a-default.hxx> 
+#include <minus/chicago-default.h> 
 
 using namespace MiNuS;
+typedef minus_core<chicago14a> M;
+typedef minus_io<chicago14a> io;
+typedef minus_io_14a<chicago14a> io14;
+typedef minus_data<chicago14a, Float> data;
 
 static Float plines_m2_[io::pp::nvislines][io::ncoords2d_h] = {
        {.879009, .476806, .0386237},
@@ -246,7 +245,7 @@ test_quat()
 
   {
     std::cout << "\n--------------------------------------------------------------\n";
-    io::RC_to_QT_format(cameras_gt_, cameras_gt_quat_);
+    io::RC_to_QT_format(data::cameras_gt_, data::cameras_gt_quat_);
     
     Float t01_gt[3] = {
       -016.0671554493513,  -772.4304156395458,   304.2333869269318
@@ -260,13 +259,13 @@ test_quat()
     
     Float r01_computed[9] = {};
     
-    util::quat2rotm(cameras_gt_quat_, r01_computed);
+    util::quat2rotm(data::cameras_gt_quat_, r01_computed);
     
     TEST("RC_to_QT: relative rotation", same_matrices(r01_computed, r01_gt, 3, 3), true);
-    TEST("RC_to_QT: relative translation", same_vectors(cameras_gt_quat_ + 8, t01_gt, 3), true);
+    TEST("RC_to_QT: relative translation", same_vectors(data::cameras_gt_quat_ + 8, t01_gt, 3), true);
     
     std::cout << "gt_quat:" << std::endl;
-    print(cameras_gt_quat_,M::nve);
+    print(data::cameras_gt_quat_,M::nve);
     
     std::cout << "--------------------------------------------------------------\n";
   }
@@ -275,14 +274,14 @@ test_quat()
     Float r0_computed[9] = {};
     Float q0[4];
     
-    util::rotm2quat((Float *) cameras_gt_[0], q0);
+    util::rotm2quat((Float *) data::cameras_gt_[0], q0);
 
     std::cout << "q0" << std::endl;
     print(q0,4);
     
     util::quat2rotm(q0, r0_computed);
     
-    TEST("rotm2quat -> quat2rotm", same_matrices(r0_computed, (Float*) cameras_gt_[0], 3, 3), true);
+    TEST("rotm2quat -> quat2rotm", same_matrices(r0_computed, (Float*) data::cameras_gt_[0], 3, 3), true);
   }
     
   {
@@ -295,8 +294,8 @@ test_quat()
     };
     Float r01_computed[9] = {};
 
-    util::rotm2quat((Float *) cameras_gt_[0], q0);
-    util::rotm2quat((Float *) cameras_gt_[1], q1);
+    util::rotm2quat((Float *) data::cameras_gt_[0], q0);
+    util::rotm2quat((Float *) data::cameras_gt_[1], q1);
 
     std::cout << "q0: " << std::endl;
     print(q0, 4);
@@ -431,13 +430,13 @@ test_gamma()
     Float tn[io::pp::nviews][io::pp::npoints][io::ncoords2d];
     
     // see if uno minus  default_gammas_m2 is less than 1
-    io::invert_intrinsics(K_, p_[0], pn[0], io::pp::npoints);
-    io::invert_intrinsics(K_, p_[1], pn[1], io::pp::npoints);
-    io::invert_intrinsics(K_, p_[2], pn[2], io::pp::npoints);
+    io::invert_intrinsics(data::K_, data::p_[0], pn[0], io::pp::npoints);
+    io::invert_intrinsics(data::K_, data::p_[1], pn[1], io::pp::npoints);
+    io::invert_intrinsics(data::K_, data::p_[2], pn[2], io::pp::npoints);
     // don't use all three, but just invert all anyways.
-    io::invert_intrinsics_tgt(K_, tgt_[0], tn[0], io::pp::npoints);
-    io::invert_intrinsics_tgt(K_, tgt_[1], tn[1], io::pp::npoints);
-    io::invert_intrinsics_tgt(K_, tgt_[2], tn[2], io::pp::npoints);
+    io::invert_intrinsics_tgt(data::K_, data::tgt_[0], tn[0], io::pp::npoints);
+    io::invert_intrinsics_tgt(data::K_, data::tgt_[1], tn[1], io::pp::npoints);
+    io::invert_intrinsics_tgt(data::K_, data::tgt_[2], tn[2], io::pp::npoints);
     
     // 1 
     complex params[M::f::nparams] = {};
@@ -445,7 +444,7 @@ test_gamma()
     io::lines2params(plines, params); // ungammified target params
     
     for (unsigned i=0; i < M::f::nparams; ++i)
-      params[i] = default_params_start_target_gammified_[i+M::f::nparams] / params[i];
+      params[i] = data::default_params_start_target_gammified_[i+M::f::nparams] / params[i];
 
     std::cout << "Default test gammas: " << std::endl;
     print(params, M::f::nparams - 17/*pChart are random*/, true);
@@ -512,9 +511,9 @@ test_point_tangents2lines()
     Float pn[io::pp::nviews][io::pp::npoints][io::ncoords2d];
     Float tn[io::pp::nviews][io::pp::npoints][io::ncoords2d];
     
-    io::invert_intrinsics(K_, p_[0], pn[0], io::pp::npoints);
-    io::invert_intrinsics(K_, p_[1], pn[1], io::pp::npoints);
-    io::invert_intrinsics(K_, p_[2], pn[2], io::pp::npoints);
+    io::invert_intrinsics(data::K_, data::p_[0], pn[0], io::pp::npoints);
+    io::invert_intrinsics(data::K_, data::p_[1], pn[1], io::pp::npoints);
+    io::invert_intrinsics(data::K_, data::p_[2], pn[2], io::pp::npoints);
 
     std::cout << "first normalized point" << std::endl;
     print(pn[0][0], 2);
@@ -522,9 +521,9 @@ test_point_tangents2lines()
     print(pn[0][1], 2);
     
     // don't use all three, but just invert all anyways.
-    io::invert_intrinsics_tgt(K_, tgt_[0], tn[0], io::pp::npoints);
-    io::invert_intrinsics_tgt(K_, tgt_[1], tn[1], io::pp::npoints);
-    io::invert_intrinsics_tgt(K_, tgt_[2], tn[2], io::pp::npoints);
+    io::invert_intrinsics_tgt(data::K_, data::tgt_[0], tn[0], io::pp::npoints);
+    io::invert_intrinsics_tgt(data::K_, data::tgt_[1], tn[1], io::pp::npoints);
+    io::invert_intrinsics_tgt(data::K_, data::tgt_[2], tn[2], io::pp::npoints);
       
     io::point_tangents2lines(pn, tn, 0, 1, plines);
     

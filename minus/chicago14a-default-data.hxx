@@ -1,5 +1,5 @@
-#ifndef cleveland14a_default_hxx_
-#define cleveland14a_default_hxx_
+#ifndef chicago14a_default_data_hxx_
+#define chicago14a_default_data_hxx_
 //
 // Default start solutions and gammified system parameters
 // for inclusion in minus app for default
@@ -21,13 +21,13 @@
 
 
 #include "minus.h"
-#include "cleveland14a-default.h"
+#include "chicago14a-default.h"
 
 namespace MiNuS {
 
 // Internal note: m2: script t, variable sols
 template <typename F>
-const complex minus_data<cleveland14a,F>::
+const std::complex<F> minus_data<chicago14a,F>::
 start_sols_[M::nve*M::nsols] = {
   {-.59336028545681196,-.11013183013512155},
   {.11944671140724233,-.13633687755694085},
@@ -4713,7 +4713,7 @@ start_sols_[M::nve*M::nsols] = {
 // Non-gammified (non-randomized)
 // Start - target system parameters
 //
-// In solve cleveland this is
+// In solve chicago this is
 // P0 || trash
 //
 // Where P0 are the system parameters associated with the start solution
@@ -4728,7 +4728,7 @@ start_sols_[M::nve*M::nsols] = {
 //                                  to store target system params
 //                                  the latter M::nparams are trash
 template <typename F>
-complex minus_data<cleveland14a,F>::
+std::complex<F> minus_data<chicago14a,F>::
 params_start_target_[2*M::f::nparams] = {
   {.13016671344237549,-.36891394723672405},
   {.2649393534275909,-.23418132862391827},
@@ -4793,14 +4793,14 @@ params_start_target_[2*M::f::nparams] = {
 // Used for testing.
 // Gammified (randomized)
 //
-// Internal note: in m2, function solveclevelandM2
+// Internal note: in m2, function solveChicagoM2
 // 
 //  P01 := (gammify P0)||(gammify P1); 
 //
 // The point-tangent inputs giving rise to this are given below
 template <typename F>
-const complex minus_data<cleveland14a,F>::
-default_params_start_target_gammified_[2*M::f::nparams] = { // start-target param pairs, P01 in cleveland.m2
+const std::complex<F> minus_data<chicago14a,F>::
+default_params_start_target_gammified_[2*M::f::nparams] = { // start-target param pairs, P01 in chicago.m2
   {.391195550619826,-.00262962533857666},
   {.310140709227333,+.169842562835882},
   {-.725705624433656,+.441901252816163},
@@ -4915,8 +4915,8 @@ default_params_start_target_gammified_[2*M::f::nparams] = { // start-target para
   {.0663667102234161,-.308643825789244}
 };
 template <typename F>
-const complex * minus_data<cleveland14a,F>::
-params_= default_params_start_target_gammified_; // start-target param pairs, P01 in cleveland.m2
+const std::complex<F> * minus_data<chicago14a,F>::
+params_= default_params_start_target_gammified_; // start-target param pairs, P01 in chicago.m2
 
 
 // Input points and tangents corresponding to the above gammified homotopy parameters,
@@ -4945,7 +4945,7 @@ params_= default_params_start_target_gammified_; // start-target param pairs, P0
 //
 // This is in pixel image coordinates
 template <typename F>
-Float minus_data<cleveland14a,F>::
+F minus_data<chicago14a,F>::
 p_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
   // points for frame 42 frame_0042-pts-2d.txt lines 3011 3389 620  (in order)
   {
@@ -4969,7 +4969,7 @@ p_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
 
 // If correct indexing were used, this would be the default run
 template <typename F>
-const Float minus_data<cleveland14a,F>::
+const F minus_data<chicago14a,F>::
 p_correct_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
   // points for frame 42
   // + sed -n '3012p;3390p;621p' frame_0042-pts-2d.txt
@@ -5005,7 +5005,7 @@ p_correct_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
 // | - |
 // | C'|
 template <typename F>
-Float minus_data<cleveland14a,F>::
+F minus_data<chicago14a,F>::
 cameras_gt_[io::pp::nviews][4][3] = {
   { // camera for frame 42
     {-0.097305153950172085242, -0.22322794404612877894, -0.96989741313794208821},
@@ -5031,7 +5031,7 @@ cameras_gt_[io::pp::nviews][4][3] = {
 // ie, minus_io_shapping::solution_shape,
 // for each other view relative to the first
 template <typename F>
-Float minus_data<cleveland14a,F>::
+F minus_data<chicago14a,F>::
 cameras_gt_quat_[M::nve];
 
 // The tgt_ array is the same size as the p_ array.
@@ -5044,7 +5044,7 @@ cameras_gt_quat_[M::nve];
 // 2D tangents for frame 62
 
 template <typename F>
-Float minus_data<cleveland14a,F>::
+F minus_data<chicago14a,F>::
 tgt_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
   // tangents for frame 42
   // + sed -n '3012p;3390p' frame_0042-tgts-2d.txt
@@ -5070,7 +5070,7 @@ tgt_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
 };
 
 template <typename F>
-const Float minus_data<cleveland14a,F>::
+const F minus_data<chicago14a,F>::
 tgt_correct_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
   // tangents for frame 42
   // + sed -n '3012p;3390p' frame_0042-tgts-2d.txt
@@ -5101,7 +5101,7 @@ tgt_correct_[io::pp::nviews][io::pp::npoints][io::ncoords2d] = {
 //
 // This matrix is calib.intrinsic for the synthcurves spherical dataset
 template <typename F>
-Float minus_data<cleveland14a,F>::
+F minus_data<chicago14a,F>::
 K_[io::ncoords2d][io::ncoords2d_h] = {
   {2584.9325098195013197, 0, 249.77137587221417903},
   {0, 2584.7918606057692159, 278.31267937919352562}
@@ -5138,4 +5138,4 @@ const double line_complex[5][9] =
 
 } // namespace minus
 
-#endif   // cleveland14a_default_hxx_
+#endif   // chicago14a_default_data_hxx_
