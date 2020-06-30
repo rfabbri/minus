@@ -7331,7 +7331,7 @@ minus<chicago14a, F>::solve(
     ) 
 {
   C<F> params[2*M::f::nparams];
-  memcpy(params, params_start_target_, M::f::nparams*sizeof(C<F>));
+  memcpy(params, data::params_start_target_, M::f::nparams*sizeof(C<F>));
   
   constexpr int id_tgt0 = 0; constexpr int id_tgt1 = 1; // TODO: select the best / least degenerate directions
   io::point_tangents2params(p, tgt, id_tgt0, id_tgt1, params);
@@ -7340,17 +7340,17 @@ minus<chicago14a, F>::solve(
   typename M::track_settings settings = M::DEFAULT;
   std::thread t[4];
   { // TODO: smarter way to select start solutions
-    t[0] = std::thread(M::track, settings, start_sols_, params, solutions, 0, 78);
-    t[1] = std::thread(M::track, settings, start_sols_, params, solutions, 78, 78*2);
-    t[2] = std::thread(M::track, settings, start_sols_, params, solutions, 78*2, 78*3);
-    t[3] = std::thread(M::track, settings, start_sols_, params, solutions, 78*3, 78*4);
+    t[0] = std::thread(M::track, settings, data::start_sols_, params, solutions, 0, 78);
+    t[1] = std::thread(M::track, settings, data::start_sols_, params, solutions, 78, 78*2);
+    t[2] = std::thread(M::track, settings, data::start_sols_, params, solutions, 78*2, 78*3);
+    t[3] = std::thread(M::track, settings, data::start_sols_, params, solutions, 78*3, 78*4);
     t[0].join(); t[1].join(); t[2].join(); t[3].join();
   }
   if (!io::has_valid_solutions(solutions)) { // rerun once in the rare case the solutions are not valid
-    t[0] = std::thread(M::track, settings, start_sols_, params, solutions, 0, 78);
-    t[1] = std::thread(M::track, settings, start_sols_, params, solutions, 78, 78*2);
-    t[2] = std::thread(M::track, settings, start_sols_, params, solutions, 78*2, 78*3);
-    t[3] = std::thread(M::track, settings, start_sols_, params, solutions, 78*3, 78*4);
+    t[0] = std::thread(M::track, settings, data::start_sols_, params, solutions, 0, 78);
+    t[1] = std::thread(M::track, settings, data::start_sols_, params, solutions, 78, 78*2);
+    t[2] = std::thread(M::track, settings, data::start_sols_, params, solutions, 78*2, 78*3);
+    t[3] = std::thread(M::track, settings, data::start_sols_, params, solutions, 78*3, 78*4);
     t[0].join(); t[1].join(); t[2].join(); t[3].join();
   }
   // decode solutions into 3x4 cams (actually 4x3 in mem)

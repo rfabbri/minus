@@ -192,7 +192,13 @@ void minus_core<P, F>::evaluate_HxH(const C<F> * __restrict__ x /*x, t*/, const 
 {
   eval<P,F>::HxH(x, params, y);
 }
+// Internal data ---------------------------------------------------------------
+// Data every problem has to declare by specializing this template
+template <problem P, typename F=double>
+struct minus_data {
+};
 
+// I/O -------------------------------------------------------------------------
 // Generic I/O routines and defs common to all problems
 template <typename F=double>
 struct minus_io_common {
@@ -284,6 +290,7 @@ struct minus {
   // all specializations provide a solve() function
   // each with its own I/O parameters
 };
+
 
 #include "problem-defs.h"
 

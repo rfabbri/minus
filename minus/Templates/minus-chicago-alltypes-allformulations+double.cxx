@@ -10,4 +10,3 @@ using namespace MiNuS;
 template class minus_core<chicago14a, double>;
 template class minus_io<chicago14a, double>;
 template class minus<chicago14a, double>;
-

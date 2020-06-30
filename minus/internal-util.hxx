@@ -2,7 +2,6 @@
 #define internal_util_hxx_
 
 #include "internal-util.h"
-#include "minus.h"
 
 namespace MiNuS {
   
