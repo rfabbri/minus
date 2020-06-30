@@ -7,4 +7,4 @@
 using namespace MiNuS;
 
 template class minus_core<cleveland14a, double>;
-template class minus_io_shaping<cleveland14a, double>;
+template class minus_io<cleveland14a, double>;

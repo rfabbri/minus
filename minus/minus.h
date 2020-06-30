@@ -7,7 +7,7 @@
 //
 // \verbatim
 // Modifications
-//    Leykin Feb82019: Initial sketch as simplified code from Macaulay e/NAG.*
+//    Leykin Feb82019: Initial sketch as simplified code from Macaulay2/NAG.*
 //    Tim    Feb2019:  Chicago-specific prototype in Macaulay2
 //    Fabbri Mar162019: fully templated and optimized code
 // \endverbatim
@@ -268,6 +268,7 @@ struct minus_io : public minus_io_common<F> {
   // template specialization defined in problem-internals.h
   typedef problem_parameters<P> pp;
   typedef minus_core<P, F> M;
+  typedef minus_io_common<F> io;
   // shortcuts to the problem parameters
   static constexpr unsigned  nviews = pp::nviews;
   static constexpr unsigned  npoints = pp::npoints;

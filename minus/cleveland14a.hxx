@@ -7031,7 +7031,7 @@ namespace MiNuS {
 template <typename F>
 inline void 
 minus_io<cleveland14a, F>::
-lines2params(const F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+lines2params(const F plines[pp::nvislines][io::ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   typedef minus_util<F> util;
   typedef minus_3d<F> vec;
@@ -7162,40 +7162,6 @@ gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
   assert(i == 56);
 }
 
-// RC: same format as cameras_gt_ and synthcurves dataset
-// QT: same format as solution_shape
-template <typename F>
-inline void 
-minus_io<cleveland14a, F>::
-RC_to_QT_format(const F rc[pp::nviews][4][3], F qt[M::nve])
-{
-  typedef minus_util<F> u;
-  F q0[4], q1[4], q2[4];
-
-  u::rotm2quat((F *) rc[0], q0);
-  u::rotm2quat((F *) rc[1], q1);
-  u::rotm2quat((F *) rc[2], q2);
-
-  // gt = q1 * conj(q0);
-  // gt + 4 = q2 * conj(q0);
-  u::dquat(q1, q0, qt);
-  u::dquat(q2, q0, qt + 4);
-
-  // gt + 8 = q1*(c0-c1)*q1.conj();
-  // gt + 8 = quat_transform(q1,c0-c1);
-  // gt + 8 + 3 = quat_transform(q2,c0-c2);
-  F dc[3];
-  dc[0] = rc[0][3][0] - rc[1][3][0];
-  dc[1] = rc[0][3][1] - rc[1][3][1];
-  dc[2] = rc[0][3][2] - rc[1][3][2];
-  u::quat_transform(q1,dc, qt + 8);
-
-  dc[0] = rc[0][3][0] - rc[2][3][0];
-  dc[1] = rc[0][3][1] - rc[2][3][1];
-  dc[2] = rc[0][3][2] - rc[2][3][2];
-  u::quat_transform(q2,dc, qt + 8 + 3);
-}
-
 // Generate "visible" line representation from input point-tangents
 // 
 // The points that have tangents are indicated by the indices id_tgt0  < id_tgt0 < 3
@@ -7235,7 +7201,7 @@ RC_to_QT_format(const F rc[pp::nviews][4][3], F qt[M::nve])
 template <typename F>
 inline void 
 minus_io<cleveland14a, F>::
-point_tangents2lines(const F p[pp::nviews][pp::npoints][ncoords2d], const F t[pp::nviews][pp::npoints][ncoords2d], unsigned i0, unsigned i1, F plines[pp::nvislines][ncoords2d_h])
+point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F t[pp::nviews][pp::npoints][io::ncoords2d], unsigned i0, unsigned i1, F plines[pp::nvislines][io::ncoords2d_h])
 {
   typedef minus_3d<F> vec;
   
@@ -7265,13 +7231,13 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][ncoords2d], const F t[pp
   minus_3d<F>::point_tangent2line(p[2][i1], t[2][i1], plines[14]);
   // TODO: test normalize to unit vectors for better numerics
   
-  normalize_lines(plines, pp::nvislines);
+  io::normalize_lines(plines, pp::nvislines);
 }
 
 template <typename F>
 inline void
 minus_io<cleveland14a, F>::
-get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+get_params_start_target(F plines[/*15 for chicago*/][io::ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   // the user provides the start params in the first half of params.
   // we fill the second half and gammify both.
@@ -7291,11 +7257,11 @@ get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __rest
 template <typename F>
 inline void 
 minus_io<cleveland14a, F>::
-point_tangents2params(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+point_tangents2params(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F tgt[pp::nviews][pp::npoints][io::ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   // the user provides the start params in the first half of params.
   // we fill the second half and gammify both.
-  F plines[pp::nvislines][ncoords2d_h];
+  F plines[pp::nvislines][io::ncoords2d_h];
   point_tangents2lines(p, tgt, id_tgt0, id_tgt1, plines);
   get_params_start_target(plines, params);
 }
@@ -7304,20 +7270,137 @@ point_tangents2params(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt
 template <typename F>
 inline void 
 minus_io<cleveland14a, F>::
-point_tangents2params_img(const F p[pp::nviews][pp::npoints][ncoords2d], const F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, const F K[/*3 or 2*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+point_tangents2params_img(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F tgt[pp::nviews][pp::npoints][io::ncoords2d], unsigned id_tgt0, unsigned id_tgt1, const F K[/*3 or 2*/][io::ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
-  F pn[pp::nviews][pp::npoints][ncoords2d];
-  F tn[pp::nviews][pp::npoints][ncoords2d];
+  F pn[pp::nviews][pp::npoints][io::ncoords2d];
+  F tn[pp::nviews][pp::npoints][io::ncoords2d];
   
   // see if uno minus  default_gammas_m2 is less than 1
-  invert_intrinsics(K, p[0], pn[0], pp::npoints);
-  invert_intrinsics(K, p[1], pn[1], pp::npoints);
-  invert_intrinsics(K, p[2], pn[2], pp::npoints);
+  io::invert_intrinsics(K, p[0], pn[0], pp::npoints);
+  io::invert_intrinsics(K, p[1], pn[1], pp::npoints);
+  io::invert_intrinsics(K, p[2], pn[2], pp::npoints);
   // don't use all three, but just invert all anyways.
-  invert_intrinsics_tgt(K, tgt[0], tn[0], pp::npoints);
-  invert_intrinsics_tgt(K, tgt[1], tn[1], pp::npoints);
-  invert_intrinsics_tgt(K, tgt[2], tn[2], pp::npoints);
+  io::invert_intrinsics_tgt(K, tgt[0], tn[0], pp::npoints);
+  io::invert_intrinsics_tgt(K, tgt[1], tn[1], pp::npoints);
+  io::invert_intrinsics_tgt(K, tgt[2], tn[2], pp::npoints);
   point_tangents2params(pn, tn, id_tgt0, id_tgt1, params/*[static 2*M::nparams]*/);
+}
+
+} // namespace minus
+
+// Higlevel solver interface - Class minus ------------------------------------
+
+#include <thread>
+#include "cleveland14a-default.h"
+
+namespace MiNuS {
+
+// Intrinsics already inverted 
+// (inside RANSAC one will alredy have pre-inverted K)
+//
+// Input: points in pp:nviews views
+// Input: tangents in pp:nviews views (e.g., SIFT orientations)
+// Input: how to pick the tangent. For now, for Chicago we only consider
+// the tangents on the first two points on each view.
+// 
+// Output: solutions_cams
+// where the camera matrix P^t = [R|T]^t is cameras[sol_number][view_id][:][:]
+// where view_id is 0 or 1 for second and third camera relative to the first,
+// resp.
+//
+// Output: nsols, the number of solutions
+// Output: id_sols
+// a vector of the ids of the points that lead to each solution:
+// So each solution is actually cameras[id_sols[i]][view_id][:][:], for i=1 to
+// nsols.
+//
+// This design is for cache speed. Translation in the camera matrix is stored
+// such that its coordinates are memory contiguous.
+// 
+// The cameras array is fixed in size to NSOLS which is the max
+// number of solutions, which perfectly fits in memory. The caller must pass an
+// array with that minimum.
+template <typename F>
+inline void 
+minus<cleveland14a, F>::solve(
+    const F p[pp::nviews][pp::npoints][io::ncoords2d], 
+    const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
+    F solutions_cams[M::nsols][pp::nviews-1][4][3],  // first camera is always [I | 0]
+    unsigned id_sols[M::nsols],
+    unsigned *nsols_final
+    ) 
+{
+  C<F> params[2*M::f::nparams];
+  memcpy(params, params_start_target_, M::f::nparams*sizeof(C<F>));
+  
+  constexpr int id_tgt0 = 0; constexpr int id_tgt1 = 1; // TODO: select the best / least degenerate directions
+  io::point_tangents2params(p, tgt, id_tgt0, id_tgt1, params);
+
+  typename M::solution solutions[M::nsols];
+  typename M::track_settings settings = M::DEFAULT;
+  std::thread t[4];
+  { // TODO: smarter way to select start solutions
+    t[0] = std::thread(M::track, settings, start_sols_, params, solutions, 0, 78);
+    t[1] = std::thread(M::track, settings, start_sols_, params, solutions, 78, 78*2);
+    t[2] = std::thread(M::track, settings, start_sols_, params, solutions, 78*2, 78*3);
+    t[3] = std::thread(M::track, settings, start_sols_, params, solutions, 78*3, 78*4);
+    t[0].join(); t[1].join(); t[2].join(); t[3].join();
+  }
+  if (!io::has_valid_solutions(solutions)) { // rerun once in the rare case the solutions are not valid
+    t[0] = std::thread(M::track, settings, start_sols_, params, solutions, 0, 78);
+    t[1] = std::thread(M::track, settings, start_sols_, params, solutions, 78, 78*2);
+    t[2] = std::thread(M::track, settings, start_sols_, params, solutions, 78*2, 78*3);
+    t[3] = std::thread(M::track, settings, start_sols_, params, solutions, 78*3, 78*4);
+    t[0].join(); t[1].join(); t[2].join(); t[3].join();
+  }
+  // decode solutions into 3x4 cams (actually 4x3 in mem)
+  io::all_solutions2cams(solutions, solutions_cams, id_sols, nsols_final);
+
+  // filter solutions that have no positive >1 depth for all three views
+}
+
+// same as solve() but intrinsics not inverted (input is in actual pixel units)
+template <typename F>
+inline void 
+minus<cleveland14a, F>::solve_img(
+    const F K[/*3 or 2 ignoring last line*/][io::ncoords2d_h],
+    const F p[pp::nviews][pp::npoints][io::ncoords2d], 
+    const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
+    F solutions_cams[M::nsols][pp::nviews-1][4][3],  // first camera is always [I | 0]
+    unsigned id_sols[M::nsols],
+    unsigned *nsols_final)
+{
+  F pn[pp::nviews][pp::npoints][io::ncoords2d];
+  F tn[pp::nviews][pp::npoints][io::ncoords2d];
+  
+  // see if uno minus  default_gammas_m2 is less than 1
+  io::invert_intrinsics(K, p[0], pn[0], pp::npoints);
+  io::invert_intrinsics(K, p[1], pn[1], pp::npoints);
+  io::invert_intrinsics(K, p[2], pn[2], pp::npoints);
+  // don't use all three, but just invert all anyways.
+  io::invert_intrinsics_tgt(K, tgt[0], tn[0], pp::npoints);
+  io::invert_intrinsics_tgt(K, tgt[1], tn[1], pp::npoints);
+  io::invert_intrinsics_tgt(K, tgt[2], tn[2], pp::npoints);
+
+  solve(pn, tn, solutions_cams, id_sols, nsols_final);
+}
+
+//
+// Performs tests to see if there are potentially valid solutions,
+// without making use of ground truth. 
+// 
+template <typename F>
+inline bool 
+minus_io<cleveland14a, F>::
+has_valid_solutions(const typename M::solution solutions[M::nsols])
+{
+  typedef minus_array<M::nve,F> v; typedef minus_util<F> u;
+  static constexpr F eps = 1e-3;
+  F real_solution[M::nve];
+  for (unsigned sol = 0; sol < M::nsols; ++sol) 
+    if (solutions[sol].status == M::REGULAR && v::get_real(solutions[sol].x, real_solution))
+      return true;
+  return false;
 }
 
 } // namespace minus

@@ -7231,7 +7231,7 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F 
   minus_3d<F>::point_tangent2line(p[2][i1], t[2][i1], plines[14]);
   // TODO: test normalize to unit vectors for better numerics
   
-  normalize_lines(plines, pp::nvislines);
+  io::normalize_lines(plines, pp::nvislines);
 }
 
 template <typename F>
@@ -7276,13 +7276,13 @@ point_tangents2params_img(const F p[pp::nviews][pp::npoints][io::ncoords2d], con
   F tn[pp::nviews][pp::npoints][io::ncoords2d];
   
   // see if uno minus  default_gammas_m2 is less than 1
-  invert_intrinsics(K, p[0], pn[0], pp::npoints);
-  invert_intrinsics(K, p[1], pn[1], pp::npoints);
-  invert_intrinsics(K, p[2], pn[2], pp::npoints);
+  io::invert_intrinsics(K, p[0], pn[0], pp::npoints);
+  io::invert_intrinsics(K, p[1], pn[1], pp::npoints);
+  io::invert_intrinsics(K, p[2], pn[2], pp::npoints);
   // don't use all three, but just invert all anyways.
-  invert_intrinsics_tgt(K, tgt[0], tn[0], pp::npoints);
-  invert_intrinsics_tgt(K, tgt[1], tn[1], pp::npoints);
-  invert_intrinsics_tgt(K, tgt[2], tn[2], pp::npoints);
+  io::invert_intrinsics_tgt(K, tgt[0], tn[0], pp::npoints);
+  io::invert_intrinsics_tgt(K, tgt[1], tn[1], pp::npoints);
+  io::invert_intrinsics_tgt(K, tgt[2], tn[2], pp::npoints);
   point_tangents2params(pn, tn, id_tgt0, id_tgt1, params/*[static 2*M::nparams]*/);
 }
 
