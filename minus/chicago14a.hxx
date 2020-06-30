@@ -7330,6 +7330,7 @@ minus<chicago14a, F>::solve(
     unsigned *nsols_final
     ) 
 {
+  typedef minus_data<chicago14a,F> data;
   C<F> params[2*M::f::nparams];
   memcpy(params, data::params_start_target_, M::f::nparams*sizeof(C<F>));
   
