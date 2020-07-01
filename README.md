@@ -50,7 +50,7 @@ template, so you have full control to add your own compiled formulations, or
 change the floating point implementation.  You can easily specify the
 formulation by using, e.g., `minus<chicago14a>` instead of `minus<chicago>`,
 which will use a 14x14 formulation for the Chicago problem.  Other
-available instances are available, e.g. `minus<chicago6a>` to solve a 6x6
+instances are available, e.g. `minus<chicago6a>` to solve a 6x6
 formulation for the same problem instead. 
 
 To solve another problem, say the `Cleveland` trifocal pose problem from mixed
