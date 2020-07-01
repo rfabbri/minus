@@ -17,10 +17,6 @@
 #include <minus/chicago-default.h> 
 
 using namespace MiNuS;
-typedef minus_core<chicago14a> M;
-typedef minus_io<chicago14a> io;
-typedef minus_io_14a<chicago14a> io14;
-typedef minus_data<chicago14a, Float> data;
 
 static Float plines_m2_[io::pp::nvislines][io::ncoords2d_h] = {
        {.879009, .476806, .0386237},

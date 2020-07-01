@@ -14,18 +14,9 @@
 #include <testlib/testlib_test.h>
 #include <minus/debug-common.h>
 #include <minus/cleveland14a-internals.h>
-
-// Start solutions hardcoded for efficiency.
-// If you want to play with different start sols,
-// write another program that accepts start sols in runtime,
-// but keep this one lean & mean.
-#include <minus/cleveland14a-default.hxx> 
+#include <minus/cleveland-default.h> 
 
 using namespace MiNuS;
-typedef minus_core<cleveland14a> M;
-typedef minus_io<cleveland14a> io;
-typedef minus_io_14a<cleveland14a> io14;
-typedef minus_data<cleveland14a, Float> data;
 
 static Float plines_m2_[io::pp::nvislines][io::ncoords2d_h] = {
        {.879009, .476806, .0386237},

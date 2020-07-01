@@ -11,6 +11,7 @@ struct minus_data<cleveland14a,F> {
   typedef std::complex<F> complex;
   typedef minus_core<cleveland14a> M;
   typedef minus_io<cleveland14a> io;
+  typedef minus_io_14a<cleveland14a> io14;
   static const complex start_sols_[M::nve*M::nsols];
   static complex params_start_target_[2*M::f::nparams];
   static const complex default_params_start_target_gammified_[2*M::f::nparams];
@@ -35,7 +36,7 @@ struct minus_data<cleveland14a,F> {
     // rotation-center format (used in synthcurves dataset)
     // relative to the world, to internal quaternion-translation format relative
     // to first camera
-    io::RC_to_QT_format(cameras_gt_, cameras_gt_quat_);
+    io14::RC_to_QT_format(cameras_gt_, cameras_gt_quat_);
   }
 };
 

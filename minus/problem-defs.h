@@ -54,5 +54,4 @@ struct minus <P, F> {
       unsigned *nsols_final);
 };
 #undef P
-#undef P
 #endif  // problem_defs_h_

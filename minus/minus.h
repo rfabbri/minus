@@ -291,7 +291,6 @@ struct minus {
   // each with its own I/O parameters
 };
 
-
 #include "problem-defs.h"
 
 } // namespace minus

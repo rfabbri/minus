@@ -8,5 +8,7 @@
 using namespace MiNuS;
 
 template class minus_core<cleveland14a, double>;
+template class minus_io_14a<cleveland14a, double>;
 template class minus_io<cleveland14a, double>;
 template class minus<cleveland14a, double>;
+template class minus_data<cleveland14a, double>;

@@ -1,5 +1,6 @@
 #ifndef chicago14a_internals_h
 #define chicago14a_internals_h
+// TODO: rename to io
 
 namespace MiNuS {
 
@@ -10,8 +11,8 @@ struct minus_io<chicago14a, F> : public minus_io_14a<chicago14a, F> {
   typedef minus_core<chicago14a, F> M;
   typedef minus_io_common<F> io;
   // shortcuts to the problem parameters
-  static constexpr unsigned  nviews = pp::nviews;
-  static constexpr unsigned  npoints = pp::npoints;
+  static constexpr unsigned nviews  = pp::nviews;
+  static constexpr unsigned npoints = pp::npoints;
   // Input ---------------------------------------------------------------------
   static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
   // Chicago-specific input 
