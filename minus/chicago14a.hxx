@@ -7020,7 +7020,7 @@ HxH(const C<F>* __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<
 
 } // namespace minus
 
-#include "chicago14a-internals.h"
+#include "chicago14a-io.h"
 
 namespace MiNuS {
 

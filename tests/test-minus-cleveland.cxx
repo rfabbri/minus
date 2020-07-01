@@ -12,7 +12,7 @@
 #include <testlib/testlib_test.h>
 #include <minus/minus.h>
 #include <minus/debug-common.h>
-#include <minus/cleveland14a-internals.h>
+#include <minus/cleveland14a-io.h>
 #include <minus/cleveland-default.h> 
 #include "test-common.h"
 

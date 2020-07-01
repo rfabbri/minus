@@ -8,7 +8,7 @@
 #include <chrono>
 #include <thread>
 #include <minus/minus.h>
-#include <minus/chicago14a-internals.h>
+#include <minus/chicago14a-io.h>
 #include <minus/chicago-default.h>
 
 using namespace MiNuS;

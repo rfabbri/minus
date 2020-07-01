@@ -8,7 +8,7 @@
 #include <chrono>
 #include <thread>
 #include <minus/minus.h>
-#include <minus/cleveland14a-internals.h>
+#include <minus/cleveland14a-io.h>
 #include <minus/cleveland-default.h>
 
 using namespace MiNuS;
