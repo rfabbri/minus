@@ -369,8 +369,8 @@ You can build release with it, no need for slow debug. This is very fast.
 Highly recommended for developing efficient code using vectors, pointers and buffers
 
 Add this to `MINUS_EXTRA_CMAKE_CXX_FLAGS`:
-```-fsanitize=address -fno-omit-frame-pointer```
-
+```-fsanitize=address -fno-omit-frame-pointer
+```
 Now recompile minus and simply run it.  If nothing happens, you're golden. In
 the event of any memleak, there will be a colorful output showing where it came
 from, specially under Linux.
@@ -404,7 +404,7 @@ then you might have to confirm:
 For gcc 5, this returns broadwell, when my arch is kabylake which is compatible
 to skylake, so gcc should be detecting as skylake ideally. Using newer GCC
 guarantees that for me. You can also try
-```
+```bash
 gcc-8 -march=native -E -v - </dev/null 2>&1 | grep cc1
 ```
 To inspect the flags that are implied. I got good perf with gcc5, but it was
@@ -413,13 +413,33 @@ further.
 
 To see command-line flags implied by eg `-march=native`, use:
 
-```
+```bash
 gcc -march=native -E -v - </dev/null 2>&1 | grep cc1
 ```
 If you want to see the compiler/precompiler defines set by certain parameters, do this:
-```
+```bash
 echo | gcc -dM -E - -march=native
 ```
+#### Selecting a compiler
+
+Simply set the CC and CXX flags on the cmake step. Example:
+```bash
+CC=gcc CXX=g++ ccmake .
+```
+or, e.g., 
+```bash
+CC=gcc-7 CXX=g++-7 ccmake .
+```
+and so on.
+
+Press 't' in ccmake to make sure all compiler-related paths are to the desired
+compiler. If you have too many compilers around, you might want to force PATH
+like so:
+
+```bash
+CC=/usr/bin/cc CXX=/usr/bin/c++ PATH=/usr/bin:$PATH ccmake .
+```
+Assuming you want to use the compiler at `/usr/bin`.
 
 ### Intel ICC compiler + MKL
 Some tests were carried out with Intel ICC, but the gains were not significant
