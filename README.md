@@ -29,7 +29,7 @@ The theory and practice associated to Minus is described in
 For datasets and curve-based SfM code, see the [website](http://multiview-3d-drawings.sourceforge.net).
 
 ## Usage in C++ programs
-For use in your program, we provide a C++ header-only library 
+For use in your program, we provide a C++ header-only library.
 Simply do:
 ```C
 #include <minus.hxx>
@@ -467,4 +467,4 @@ Benjamin Kimia.
 Minus was born out of Brown University/ICERM's 2018 Nonlinear Algebra Program (Computer Vision
 Working group) and the 2019 Algebraic Vision research cluster, the former co-organized by
 the authors Leykin, Hauenstein and the latter by Fabbri. Minus received an [NSF research
-highlight](https://mathinstitutes.org/highlights/algebraic-computer-vision-advances-the-3d-reconstruction-of-curves-and-surfaces-from-multiple-views/)
+highlight](https://mathinstitutes.org/highlights/algebraic-computer-vision-advances-the-3d-reconstruction-of-curves-and-surfaces-from-multiple-views/).
