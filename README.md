@@ -148,7 +148,7 @@ synthdata | minus-chicago -i              # synthdata is in minus/scripts/synthd
 ```
 or
 ```bash
-minus-chicago -i  < input > output            # synthdata is in minus/scripts/synthdata
+minus-chicago -i  < input > output
 ```
 The input to `minus-chicago -i` is as follows:
 Input format (notation is `_view_points_coords`. any number of spaces and newlines optional. Can be in
