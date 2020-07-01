@@ -8,12 +8,12 @@
 #include <chrono>
 #include <thread>
 #include <minus/minus.h>
-#include <minus/chicago14a-default.h>
+#include <minus/cleveland14a-internals.h>
+#include <minus/cleveland-default.h>
 
 using namespace MiNuS;
 #define Float double
 // XXX typedef minus<cleveland14a> M;
-typedef minus_core<chicago14a> M;
 static constexpr Float tol = 1e-3;
 typedef std::complex<Float> complex;
 using namespace std::chrono;
@@ -239,23 +239,23 @@ iread(const char *fname)
   in.exceptions(std::istream::failbit | std::istream::badbit);
 
   LOG("reading p_");
-  if (!read_block(in, (F *)p_, io::pp::nviews*io::pp::npoints*io::ncoords2d))
+  if (!read_block(in, (F *)data::p_, io::pp::nviews*io::pp::npoints*io::ncoords2d))
     return false;
   LOG("reading tgt_");
-  if (!read_block(in, (F *)tgt_, io::pp::nviews*io::pp::npoints*io::ncoords2d))
+  if (!read_block(in, (F *)data::tgt_, io::pp::nviews*io::pp::npoints*io::ncoords2d))
     return false;
   unsigned tgt_ids[2];
   LOG("reading tgt_ids");
   if (!read_block<unsigned>(in, tgt_ids, 2))
     return false;
   LOG("reading K_");
-  if (!read_block(in, (F *) K_, io::ncoords2d*io::ncoords2d_h))
+  if (!read_block(in, (F *) data::K_, io::ncoords2d*io::ncoords2d_h))
     return false;
   LOG("reading ground truth cams");
-  if (ground_truth_ && !read_block(in, (F *) cameras_gt_, io::pp::nviews*4*3))
+  if (ground_truth_ && !read_block(in, (F *) data::cameras_gt_, io::pp::nviews*4*3))
     return false;
   
-  io::point_tangents2params_img(p_, tgt_, tgt_ids[0], tgt_ids[1], K_, params_start_target_);
+  io::point_tangents2params_img(data::p_, data::tgt_, tgt_ids[0], tgt_ids[1], data::K_, data::params_start_target_);
 
   return true;
 }
@@ -302,8 +302,8 @@ mread(const char *fname)
   
   std::istream &in = *inp;
   in.exceptions(std::istream::failbit | std::istream::badbit);
-  F *dparams = (F *)params_;
-  while (!in.eof() && dparams != (F *)params_+2*2*M::f::nparams) {
+  F *dparams = (F *)data::params_;
+  while (!in.eof() && dparams != (F *)data::params_+2*2*M::f::nparams) {
       try {
       in >> *dparams++;
       // std::cerr << "reading " <<  *(dparams-1) << std::endl;;
@@ -317,7 +317,7 @@ mread(const char *fname)
         return false;
       }
   }
-  if (dparams != (F *)params_+2*2*M::f::nparams)
+  if (dparams != (F *)data::params_+2*2*M::f::nparams)
     std::cerr << "I/O Premature input termination\n";
 //  for (unsigned i=0; i < 2*NPARAMS; ++i)
 //    std::cerr << "D " << params_[i] << std::endl;
@@ -469,7 +469,7 @@ main(int argc, char **argv)
     if (image_data) {  // read image pixel-based I/O parameters
       if (!iread<Float>(input))
         return 1;
-       params_ = params_start_target_;
+      data::params_ = data::params_start_target_;
     } else {  // read raw I/O homotopy parameters (to be used as engine)
       if (!mread<Float>(input))  // reads into global params_
         return 1;
@@ -487,19 +487,19 @@ main(int argc, char **argv)
   //  unsigned retval = 
   //  ptrack(&MINUS_DEFAULT, start_sols_, params_, solutions);
   {
-    t[0] = std::thread(M::track, settings, start_sols_, params_, solutions, 0, 78);
-    t[1] = std::thread(M::track, settings, start_sols_, params_, solutions, 78, 78*2);
-    t[2] = std::thread(M::track, settings, start_sols_, params_, solutions, 78*2, 78*3);
-    t[3] = std::thread(M::track, settings, start_sols_, params_, solutions, 78*3, 78*4);
+    t[0] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 0, 78);
+    t[1] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78, 78*2);
+    t[2] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*2, 78*3);
+    t[3] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*3, 78*4);
     t[0].join(); t[1].join(); t[2].join(); t[3].join();
   }
   if (!io::has_valid_solutions(solutions)) {
     failing=true;
     // rerun once if solutions are not valid
-    t[0] = std::thread(M::track, settings, start_sols_, params_, solutions, 0, 78);
-    t[1] = std::thread(M::track, settings, start_sols_, params_, solutions, 78, 78*2);
-    t[2] = std::thread(M::track, settings, start_sols_, params_, solutions, 78*2, 78*3);
-    t[3] = std::thread(M::track, settings, start_sols_, params_, solutions, 78*3, 78*4);
+    t[0] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 0, 78);
+    t[1] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78, 78*2);
+    t[2] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*2, 78*3);
+    t[3] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*3, 78*4);
     t[0].join(); t[1].join(); t[2].join(); t[3].join();
   }
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
@@ -533,9 +533,9 @@ main(int argc, char **argv)
   // test_final_solve_against_ground_truth(solutions);
   // optional: filter solutions using positive depth, etc.
   if (ground_truth_ || profile) {
-    io::RC_to_QT_format(cameras_gt_, cameras_gt_quat_);
+    io::RC_to_QT_format(data::cameras_gt_, data::cameras_gt_quat_);
     unsigned sol_id;
-    bool found = io::probe_all_solutions(solutions, cameras_gt_quat_, &sol_id);
+    bool found = io::probe_all_solutions(solutions, data::cameras_gt_quat_, &sol_id);
     if (found) {
       LOG("found solution at index: " << sol_id);
       if (solutions[sol_id].status != M::REGULAR)

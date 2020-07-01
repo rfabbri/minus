@@ -9,6 +9,6 @@
 typedef MiNuS::minus_core<MiNuS::cleveland> M;
 typedef MiNuS::minus_io<MiNuS::cleveland> io;
 typedef MiNuS::minus_io_14a<MiNuS::cleveland> io14;
-typedef MiNuS::minus_data<MiNuS::cleveland, Float> data;
+typedef MiNuS::minus_data<MiNuS::cleveland, double> data;
 
 #endif   // cleveland_default_h_
