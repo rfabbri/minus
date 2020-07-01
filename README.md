@@ -222,7 +222,7 @@ instance.
 
 (I've tried running at the cluster at Brown but it seems each Xeon is far less
 strong than a i7 for a single run, though for parallel tasks it may overcome
-that. I recommend running on a couple of machines you now minus runs fast)
+that. I recommend running on a couple of machines you know minus runs fast)
 
 Their format are as follows
 ```
