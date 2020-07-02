@@ -95,6 +95,7 @@ static complex params_target_m2_[M::f::nparams] = {
  {.657926}
 };
 
+# if 0
 static void
 test_gamma()
 {
@@ -166,6 +167,7 @@ test_gamma()
     //       {.606663-.794959*ii}, {.606663-.794959*ii}, {.606663-.794959*ii}})
   }
 }
+#endif
 
 static void
 test_lines2params()
@@ -196,6 +198,7 @@ test_lines2params()
   }
 }
 
+#if 0
 static void
 test_get_params_start_target()
 {
@@ -217,13 +220,14 @@ test_get_params_start_target()
     log << params[i] << std::endl;;
   }
 }
+#endif
 
 static void
 test_io_shaping()
 {
-  test_gamma();
+  // test_gamma();
   test_lines2params();
-  test_get_params_start_target();
+  // test_get_params_start_target();
 }
 
 void
