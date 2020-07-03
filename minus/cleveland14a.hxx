@@ -7162,14 +7162,13 @@ gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
   assert(i == 56);
 }
 
-// Generate "visible" line representation from input point-tangents
+// Generate "visible" line representation from input points
 // 
-// The points that have tangents are indicated by the indices id_tgt0  < id_tgt0 < 3
-// 
-// pLines is a 15x3 matrix of line coefs  (we use view-line-point index, this
-// is inverted to match Hongyi)
+// pLines is a 9x3 matrix of line coefs: p::nviews*p::npoints + 3*p::nfreelines= 9
+//
+// we use view-line-point index, this is inverted here to match Hongyi
 //    1    -- l_1_1 --
-//    2    -- l_1_2 --
+//    2    -- l_1_2 -- // line 1 in view 2
 //    3    -- l_1_3 --
 //    4    -- l_2_1 --
 //    5    -- l_2_2 --
@@ -7177,59 +7176,43 @@ gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
 //    7    -- l_3_1 --
 //    8    -- l_3_2 --
 //    9    -- l_3_3 --
-//    10   -- l_4_1 --
+//    10   -- l_4_1 -- // free line
 //    11   -- l_4_2 --
 //    12   -- l_4_3 --
-//    13   -- l_5_1 --
-//    14   -- l_5_2 --
-//    15   -- l_5_3 --
 //    
 //    l_line_view
 //    
-//    These lines are:
+//    These lines are: TODO: confirm with Macaulay2 code
 //
 //    l_1: Point 1&2  (A, B)
 //    l_2: Point 1&3  (A, C)
 //    l_3: Point 2&3  (B, C)
-//    l_4: Tangent at Point 1 (A)
-//    l_5: Tangent at Point 2 (B)
+//    l_4: Free line 
 //
-// NOTE: the input tangent vector will be used as scratch so make a copy
-// if you intend to reuse it 
-//
-// Input points and tangents in normalized image coordinates.
+// Input points in normalized image coordinates (inverted K matrix).
 template <typename F>
 inline void 
 minus_io<cleveland14a, F>::
-point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F t[pp::nviews][pp::npoints][io::ncoords2d], unsigned i0, unsigned i1, F plines[pp::nvislines][io::ncoords2d_h])
+points_lines2lines(
+    const F p[pp::nviews][pp::npoints][io::ncoords2d], 
+    const F l[pp::nviews][io::ncoords2d_h],  // specific to nfreelines = 1
+    F plines[pp::nvislines][io::ncoords2d_h])
 {
   typedef minus_3d<F> vec;
   
-  assert (i0 < i1 && i1 < 3);
-  unsigned i2 = (i0 == 0) ? ((i1 == 1) ? 2 : 1) : 0;
+  vec::cross2(p[0][0], p[0][1], plines[0]);
+  vec::cross2(p[1][0], p[1][1], plines[1]);
+  vec::cross2(p[2][0], p[2][1], plines[2]);
   
-  vec::cross2(p[0][i0], p[0][i1], plines[0]);
-  vec::cross2(p[1][i0], p[1][i1], plines[1]);
-  vec::cross2(p[2][i0], p[2][i1], plines[2]);
+  vec::cross2(p[0][0], p[0][2], plines[3]);
+  vec::cross2(p[1][0], p[1][2], plines[4]);
+  vec::cross2(p[2][0], p[2][2], plines[5]);
   
-  vec::cross2(p[0][i0], p[0][i2], plines[3]);
-  vec::cross2(p[1][i0], p[1][i2], plines[4]);
-  vec::cross2(p[2][i0], p[2][i2], plines[5]);
-  
-  vec::cross2(p[0][i1], p[0][i2], plines[6]);
-  vec::cross2(p[1][i1], p[1][i2], plines[7]);
-  vec::cross2(p[2][i1], p[2][i2], plines[8]);
+  vec::cross2(p[0][1], p[0][2], plines[6]);
+  vec::cross2(p[1][1], p[1][2], plines[7]);
+  vec::cross2(p[2][1], p[2][2], plines[8]);
 
-  // tangent at point p[i0]
-  minus_3d<F>::point_tangent2line(p[0][i0], t[0][i0], plines[9]);
-  minus_3d<F>::point_tangent2line(p[1][i0], t[1][i0], plines[10]);
-  minus_3d<F>::point_tangent2line(p[2][i0], t[2][i0], plines[11]);
- 
-  // tangent at point p[i1]
-  minus_3d<F>::point_tangent2line(p[0][i1], t[0][i1], plines[12]);
-  minus_3d<F>::point_tangent2line(p[1][i1], t[1][i1], plines[13]);
-  minus_3d<F>::point_tangent2line(p[2][i1], t[2][i1], plines[14]);
-  // TODO: test normalize to unit vectors for better numerics
+  memcpy(plines[9], l, pp::nviews*io::ncoords2d_h*sizeof(F));
   
   io::normalize_lines(plines, pp::nvislines);
 }
@@ -7246,23 +7229,24 @@ get_params_start_target(F plines[/*15 for chicago*/][io::ncoords2d_h], C<F> * __
   gammify(params+M::f::nparams);
 }
 
-// \param[in] tgts: three tangents, one at each point, in normalized coordinates
-// (inverted intrinsics).  Only two tangents will actually be used. If one of
-// the points in each image has no reliable or well-defined tangents, you can
-// pass anything (zeros or unallocated memory); it will be ignored. 
-// only tgt[view][id_tgt0][:] and tgt[view][id_tgt1][:] will be used.
+// \param[in] 
+// p: three points (pp::npoints) per view in inhomogeous coordinates
+// l: a free line per view in homogeous coordinates
 //
-// id_tgt0  < id_tgt0 < 3
-// 
+// \param[out] homotopy params
+//
 template <typename F>
 inline void 
 minus_io<cleveland14a, F>::
-point_tangents2params(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F tgt[pp::nviews][pp::npoints][io::ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+points_lines2params(
+    const F p[pp::nviews][pp::npoints][io::ncoords2d], 
+    const F l[pp::nviews][io::ncoords2d_h], 
+    C<F> * __restrict__ params/*[static 2*M::nparams]*/)
 {
   // the user provides the start params in the first half of params.
   // we fill the second half and gammify both.
   F plines[pp::nvislines][io::ncoords2d_h];
-  point_tangents2lines(p, tgt, id_tgt0, id_tgt1, plines);
+  points_lines2lines(p, l, plines);
   get_params_start_target(plines, params);
 }
 
@@ -7324,7 +7308,7 @@ template <typename F>
 inline void 
 minus<cleveland14a, F>::solve(
     const F p[pp::nviews][pp::npoints][io::ncoords2d], 
-    const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
+    const F l[pp::nviews][io::ncoords2d_h], 
     F solutions_cams[M::nsols][pp::nviews-1][4][3],  // first camera is always [I | 0]
     unsigned id_sols[M::nsols],
     unsigned *nsols_final
@@ -7332,10 +7316,9 @@ minus<cleveland14a, F>::solve(
 {
   typedef minus_data<chicago14a,F> data;
   C<F> params[2*M::f::nparams];
-  memcpy(params, data::params_start_target_, M::f::nparams*sizeof(C<F>));
   
-  constexpr int id_tgt0 = 0; constexpr int id_tgt1 = 1; // TODO: select the best / least degenerate directions
-  io::point_tangents2params(p, tgt, id_tgt0, id_tgt1, params);
+  memcpy(params, data::params_start_target_, M::f::nparams*sizeof(C<F>));
+  io::points_lines2params(p, l, params);
 
   typename M::solution solutions[M::nsols];
   typename M::track_settings settings = M::DEFAULT;
@@ -7347,7 +7330,8 @@ minus<cleveland14a, F>::solve(
     t[3] = std::thread(M::track, settings, data::start_sols_, params, solutions, 78*3, 78*4);
     t[0].join(); t[1].join(); t[2].join(); t[3].join();
   }
-  if (!io::has_valid_solutions(solutions)) { // rerun once in the rare case the solutions are not valid
+  if (!io::has_valid_solutions(solutions)) { 
+    // rerun once in the rare case the solutions are not valid
     t[0] = std::thread(M::track, settings, data::start_sols_, params, solutions, 0, 78);
     t[1] = std::thread(M::track, settings, data::start_sols_, params, solutions, 78, 78*2);
     t[2] = std::thread(M::track, settings, data::start_sols_, params, solutions, 78*2, 78*3);
@@ -7366,7 +7350,7 @@ inline void
 minus<cleveland14a, F>::solve_img(
     const F K[/*3 or 2 ignoring last line*/][io::ncoords2d_h],
     const F p[pp::nviews][pp::npoints][io::ncoords2d], 
-    const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
+    const F l[pp::nviews][io::ncoords2d_h], 
     F solutions_cams[M::nsols][pp::nviews-1][4][3],  // first camera is always [I | 0]
     unsigned id_sols[M::nsols],
     unsigned *nsols_final)
