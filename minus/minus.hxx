@@ -583,7 +583,6 @@ probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], F probe_ca
   return probe_all_solutions_quat(solutions_cameras, (solution_shape *) probe_cameras, nsols, solution_index);
 }
 
-
 // For speed, assumes input point implicitly has 3rd homog coordinate is 1
 // 
 template <typename F>
@@ -612,6 +611,18 @@ invert_intrinsics_tgt(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], con
     t[1] = tp[1]/K[1][1];
     t[0] = (tp[0] - K[0][1]*tp[1])/K[0][0];
   }
+}
+
+template <typename F>
+inline void 
+minus_io_common<F>::
+invert_intrinsics_line(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const double pix_line_coords[ncoords2d_h], double normalized_line_coords[ncoords2d_h])
+{
+  // (K^-1 p)^transpose * (K^transpose * l) = 0
+  normalized_line_coords[0] = K[0][0]*pix_line_coords[0];
+  normalized_line_coords[1] = K[0][1]*pix_line_coords[0] + K[1][1]*pix_line_coords[1];
+  normalized_line_coords[2] = 
+    K[0][2]*pix_line_coords[0] + K[1][2]*pix_line_coords[1] + pix_line_coords[2];
 }
 
 // Not sure if really necessary.

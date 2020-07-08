@@ -210,6 +210,10 @@ struct minus_io_common {
   // Functions -----------------------------------------------------------------
   static void invert_intrinsics(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const double pix_coords[][ncoords2d], double normalized_coords[][ncoords2d], unsigned npts);
   static void invert_intrinsics_tgt(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const double pix_tgt_coords[][ncoords2d], double normalized_tgt_coords[][ncoords2d], unsigned npts);
+  static void invert_intrinsics_line(
+      const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], 
+      const double pix_line_coords[ncoords2d_h], 
+      double normalized_line_coords[ncoords2d_h]);
   static void normalize_line(F l[ncoords2d_h]) {
     const F nrm = std::hypot(l[0], l[1]);
     l[0] /= nrm; l[1] /= nrm; l[2] /= nrm;

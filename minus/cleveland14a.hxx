@@ -7178,6 +7178,10 @@ points_lines2lines(
 
   memcpy(plines[9], l, pp::nviews*io::ncoords2d_h*sizeof(F));
   
+  // TODO: PLMP code, differently than the original code randomizes the image
+  // lines by multiplying by a random complex 
+  // number, before normalizing to unit
+  // See if this improves timing stats. Also do for chicago.
   io::normalize_lines(plines, pp::nvislines);
 }
 
@@ -7212,26 +7216,6 @@ points_lines2params(
   F plines[pp::nvislines][io::ncoords2d_h];
   points_lines2lines(p, l, plines);
   get_params_start_target(plines, params);
-}
-
-// Same but for pixel input
-template <typename F>
-inline void 
-minus_io<cleveland14a, F>::
-point_tangents2params_img(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F tgt[pp::nviews][pp::npoints][io::ncoords2d], unsigned id_tgt0, unsigned id_tgt1, const F K[/*3 or 2*/][io::ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
-{
-  F pn[pp::nviews][pp::npoints][io::ncoords2d];
-  F tn[pp::nviews][pp::npoints][io::ncoords2d];
-  
-  // see if uno minus  default_gammas_m2 is less than 1
-  io::invert_intrinsics(K, p[0], pn[0], pp::npoints);
-  io::invert_intrinsics(K, p[1], pn[1], pp::npoints);
-  io::invert_intrinsics(K, p[2], pn[2], pp::npoints);
-  // don't use all three, but just invert all anyways.
-  io::invert_intrinsics_tgt(K, tgt[0], tn[0], pp::npoints);
-  io::invert_intrinsics_tgt(K, tgt[1], tn[1], pp::npoints);
-  io::invert_intrinsics_tgt(K, tgt[2], tn[2], pp::npoints);
-  point_tangents2params(pn, tn, id_tgt0, id_tgt1, params/*[static 2*M::nparams]*/);
 }
 
 } // namespace minus
@@ -7320,18 +7304,17 @@ minus<cleveland14a, F>::solve_img(
     unsigned *nsols_final)
 {
   F pn[pp::nviews][pp::npoints][io::ncoords2d];
-  F tn[pp::nviews][pp::npoints][io::ncoords2d];
+  F ln[pp::nviews][io::ncoords2d];
   
   // see if uno minus  default_gammas_m2 is less than 1
   io::invert_intrinsics(K, p[0], pn[0], pp::npoints);
   io::invert_intrinsics(K, p[1], pn[1], pp::npoints);
   io::invert_intrinsics(K, p[2], pn[2], pp::npoints);
-  // don't use all three, but just invert all anyways.
-  io::invert_intrinsics_tgt(K, tgt[0], tn[0], pp::npoints);
-  io::invert_intrinsics_tgt(K, tgt[1], tn[1], pp::npoints);
-  io::invert_intrinsics_tgt(K, tgt[2], tn[2], pp::npoints);
+  io::invert_intrinsics_line(K, l[0], ln[0]);
+  io::invert_intrinsics_line(K, l[1], ln[1]);
+  io::invert_intrinsics_line(K, l[2], ln[2]);
 
-  solve(pn, tn, solutions_cams, id_sols, nsols_final);
+  solve(pn, ln, solutions_cams, id_sols, nsols_final);
 }
 
 //

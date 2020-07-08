@@ -24,6 +24,10 @@ struct minus_io<cleveland14a, F> : public minus_io_14a<cleveland14a, F> {
       const F l[pp::nviews][io::ncoords2d_h], 
       F plines[pp::nvislines][io::ncoords2d_h]);
   static void lines2params(const F plines[pp::nvislines][io::ncoords2d_h], C<F> * __restrict__ params/*[static M::n//params]*/);
+  static void points_lines2params(
+      const F p[pp::nviews][pp::npoints][io::ncoords2d], 
+      const F l[pp::nviews][io::ncoords2d_h], 
+      C<F> * __restrict__ params/*[static 2*M::nparams]*/);
   // Output --------------------------------------------------------------------
   static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
 };
