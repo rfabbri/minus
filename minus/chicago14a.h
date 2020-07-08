@@ -37,7 +37,6 @@ struct problem_parameters<chicago14a> {
   // along curves.
   static constexpr unsigned nvislines = ( (npoints*(npoints-1) >> 1) + ntangents + nfreelines ) * nviews; 
   // nvislines = 15 for Chicago.
-  // unsigned NVIEWS, unsigned NPOINTS /* per view*/, unsigned NFREELINES, unsigned NTANGENTS, 
 };
 
 #endif // chicago14a_h_
