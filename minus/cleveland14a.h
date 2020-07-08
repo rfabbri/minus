@@ -13,8 +13,8 @@ struct formulation_parameters<cleveland14a> {
   //    size       27     9          17 = 53
   //    pF: lines between points: 3lines*3views*3coordinates = 27
   //    pFreeLine: free line  1line*3views*3coordinates = 9
-  //    pChart: 2xquaternions + 2translations + 1 homg coord per quat + 1 homg
-  //    coord per [t01 t02] pair = 2*4+2*3+2+1 = 17
+  //    pChart: 2xquaternions + 2translations + 1 homg coord per quat 
+  //            + 1 homg coord per [t01 t02] pair = 2*4+2*3+2+1 = 17
   //    internal note: see inGates in chicago.m2
 };
 
@@ -23,10 +23,6 @@ struct problem_parameters<cleveland14a> {
   static constexpr unsigned nviews = 3; 
   static constexpr unsigned npoints = 3;
   static constexpr unsigned nfreelines = 1;
-  // even though cleveland needs only 2 tangents, api assumes 3 tangents are given,
-  // out of which two are selected by indexing. This is the most common use
-  // case, where all features naturally have tangents. If strictly 2 tangents
-  // are to be passed, you can leave the unused one as zeros throughout the API.
   static constexpr unsigned ntangents = 0;
   // number of lines connecting each pair of points plus going through points
   // plus the number of free lines in the first order problem.
@@ -37,7 +33,7 @@ struct problem_parameters<cleveland14a> {
   // mattering at first, and then propagating these to neighboring features
   // along curves.
   static constexpr unsigned nvislines = ( (npoints*(npoints-1) >> 1) + ntangents + nfreelines ) * nviews; 
-  // nvislines = ?? for cleveland. TODO: compute by hand, double check
+  // nvislines = 12 for cleveland.
   // unsigned NVIEWS, unsigned NPOINTS /* per view*/, unsigned NFREELINES, unsigned NTANGENTS, 
 };
 #endif

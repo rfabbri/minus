@@ -7035,57 +7035,21 @@ lines2params(const F plines[pp::nvislines][io::ncoords2d_h], C<F> * __restrict__
 {
   typedef minus_util<F> util;
   typedef minus_3d<F> vec;
-  //    params (P1) is pF||pTriple||pChart  //  Hongyi: [pF; tripleChart; XR'; XT1'; XT2'];
-  //    size           27     12      17 = 56
+  //    params (P1) is pF||pChart  //  Hongyi: [pF; XR'; XT1'; XT2'];
+  //    size           27   17 = 56
 
   // pF ----------------------------------------
-  // converts 1st 9 lines to C<F> (imaginary part zero)
-  // remembering: 1st 9 lines are the ones between the points (no tangents)
-  // 
-  // 9x3 out of the 15x3 of the pairsiwe lines, linearized as 27x1
-  // Tim: pF is matrix(targetLines^{0..8},27,1);
-  // Order: row-major
+  // converts the 12 = 4linesx3views lines to C<F> (imaginary part zero)
+  //               (PLMP code uses random imaginary part here)
   const F *pl = (const F *)plines;
-  for (unsigned i=0; i < 27; ++i) params[i] = pl[i];
-
-  // pTriple ----------------------------------------
-  // At points that have tangents, there are 3 lines (triple intersects)
-  static unsigned constexpr triple_intersections[6][3] = 
-    {{0,3,9},{0+1,3+1,9+1},{0+2,3+2,9+2},{0,6,12},{0+1,6+1,12+1},{0+2,6+2,12+2}};
-
-  C<F> (*params_lines)[2] = (C<F> (*)[2]) (params+27);
-  // express each of the 6 tangents in the basis of the other pairwise lines
-  // intersecting at the same point
-  for (unsigned l=0; l < 6; ++l) {
-    const F *l0 = plines[triple_intersections[l][0]];
-    const F *l1 = plines[triple_intersections[l][1]];
-    const F *l2 = plines[triple_intersections[l][2]];
-    double l0l0 = vec::dot(l0,l0), l0l1 = vec::dot(l0,l1), l1l1 = vec::dot(l1,l1),
-    l2l0 = vec::dot(l2,l0), l2l1 = vec::dot(l2,l1);
-    // cross([l0l0 l1l0 l2l0], [l0l1 l1l1 l2l1], l2_l0l1);
-    double l2_l0l1[3]; 
-    {
-      F v1[3], v2[3];
-      v1[0] = l0l0; v1[1] = l0l1; v1[2] = l2l0;
-      v2[0] = l0l1; v2[1] = l1l1; v2[2] = l2l1;
-      vec::cross(v1, v2, l2_l0l1);
-    }
-    params_lines[l][0] = l2_l0l1[0]/l2_l0l1[2]; // divide by the last coord (see cross prod formula, plug direct)
-    params_lines[l][1] = l2_l0l1[1]/l2_l0l1[2];
-  }
-  //        
+  for (unsigned i=0; i < pp::nvislines*io::ncoords2d_h; ++i) 
+    params[i] = pl[i];
   //    pChart: just unit rands 17x1
   //        sphere(7,1)|sphere(5,1)|sphere(5,1)
-  //
-  util::rand_sphere(params+27+12,7);
-  util::rand_sphere(params+27+12+7,5);
-  util::rand_sphere(params+27+12+7+5,5);
-//  F c1[7] = {0.356520517738511 ,  0.450534892837314 ,  0.497658671520414 ,  0.530494023592847 ,0.350361054584548 ,  0.040309061260114 ,  0.128240708712460};
-//  memcpy(params+27+12,c1,7*sizeof(F));
-
-//  F c2[5] =  { 0.608716490477115 ,  0.290014694962129 ,  0.462945690541627 ,  0.548557032724055 ,0.173557426764642};
-//  memcpy(params+27+12+7,c2,5*sizeof(F));
-//  memcpy(params+27+12+7+5,c2,5*sizeof(F));
+  params += pp::nvislines*io::ncoords2d_h;
+  util::rand_sphere(params,7);      // translation pair homog coords (3*2+1)
+  util::rand_sphere(params+7,5);    // quaternion 1 + 1 homg coord (4+1)
+  util::rand_sphere(params+7+5,5);  // quaternion 2 + 1 homg coord (4+1)
 }
 
 // --- gammify -----------------------------------------------------------------
@@ -7167,6 +7131,8 @@ gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
 // pLines is a 9x3 matrix of line coefs: p::nviews*p::npoints + 3*p::nfreelines= 9
 //
 // we use view-line-point index, this is inverted here to match Hongyi
+//    l_line_view
+//    
 //    1    -- l_1_1 --
 //    2    -- l_1_2 -- // line 1 in view 2
 //    3    -- l_1_3 --
@@ -7180,9 +7146,7 @@ gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
 //    11   -- l_4_2 --
 //    12   -- l_4_3 --
 //    
-//    l_line_view
-//    
-//    These lines are: TODO: confirm with Macaulay2 code
+//    These lines are:
 //
 //    l_1: Point 1&2  (A, B)
 //    l_2: Point 1&3  (A, C)
