@@ -84,10 +84,10 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   struct solution
   {
     C<F> x[f::nve];    // array of n coordinates
-    F t;            // last value of parameter t used
+    F t;               // last value of parameter t used
     solution_status status;
-    //  unsigned num_steps;  // number of steps taken along the path
-    solution() : status(UNDETERMINED) { }
+    unsigned num_steps;  // number of steps taken along the path
+    solution() : status(UNDETERMINED), num_steps(0) { }
   };
 
   static const track_settings DEFAULT;
@@ -125,7 +125,8 @@ struct minus_core<P, F>::track_settings {
     infinity_threshold_(1e7), // m2 InfinityThreshold
     infinity_threshold2_(infinity_threshold_ * infinity_threshold_),
     max_corr_steps_(4),  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
-    num_successes_before_increase_(20) // m2 numberSuccessesBeforeIncrease
+    num_successes_before_increase_(20), // m2 numberSuccessesBeforeIncrease
+    max_num_steps_(1000)
   { }
   
   F init_dt_;   // m2 tStep, t_step, raw interface code initDt
@@ -139,6 +140,8 @@ struct minus_core<P, F>::track_settings {
   F infinity_threshold2_;
   unsigned max_corr_steps_;  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
   unsigned num_successes_before_increase_; // m2 numberSuccessesBeforeIncrease
+  unsigned max_num_steps_; // maximum number of steps per track. 
+                       // Each step takes roughly 1 microseconds (tops)
 };
 // Original settings from Tim: Fri Feb 22 12:00:06 -03 2019 Git 0ec3340
 // o9 = MutableHashTable{AffinePatches => DynamicPatch     }
