@@ -1,7 +1,7 @@
 "toExternalString in M2,
 "then put in bla, let it beign with point { {..
 "then join all lines into a single one bf running this 
-%s/point { {//g
+%s/point { {//ge
 %s/} }//g
 %s/toCC\s*(\([^(]*\))/{\1}/g
 %s/,/,/g
