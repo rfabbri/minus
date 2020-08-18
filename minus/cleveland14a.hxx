@@ -7304,7 +7304,7 @@ minus<cleveland14a, F>::solve_img(
     unsigned *nsols_final)
 {
   F pn[pp::nviews][pp::npoints][io::ncoords2d];
-  F ln[pp::nviews][io::ncoords2d];
+  F ln[pp::nviews][io::ncoords2d_h];
   
   // see if uno minus  default_gammas_m2 is less than 1
   io::invert_intrinsics(K, p[0], pn[0], pp::npoints);
