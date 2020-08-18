@@ -10,6 +10,9 @@ set (minus_sources
   cleveland14a.h cleveland-default.h cleveland14a-default-data.h cleveland14a-io.h
   cleveland14a.hxx cleveland14a-default-data.hxx
 #
+  2v5p9a.h 2v5p-default.h 2v5p9a-default-data.h 2v5p9a-io.h
+  2v5p9a.hxx 2v5p9a-default-data.hxx 
+#
   problem-defs.h
 )
 aux_source_directory(Templates minus_sources)
