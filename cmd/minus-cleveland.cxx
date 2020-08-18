@@ -255,7 +255,7 @@ iread(const char *fname)
   if (ground_truth_ && !read_block(in, (F *) data::cameras_gt_, io::pp::nviews*4*3))
     return false;
   
-  io::point_tangents2params_img(data::p_, data::tgt_, tgt_ids[0], tgt_ids[1], data::K_, data::params_start_target_);
+  // XXX DOING io::point_tangents2params_img(data::p_, data::tgt_, tgt_ids[0], tgt_ids[1], data::K_, data::params_start_target_);
 
   return true;
 }

@@ -22,6 +22,7 @@ using namespace MiNuS;
 // varible yInd from encodey
 // these are line coeffs multiplied by a random unit complex number
 static Float plines_m2_[io::pp::nvislines][io::ncoords2d_h] = {
+  /*
   {-.182283123647345,-.883468673051352},
   {-.138328815643857,+.116151008216494},
   {-.09467158260928,+.380351600587356},
@@ -58,11 +59,13 @@ static Float plines_m2_[io::pp::nvislines][io::ncoords2d_h] = {
   {-.464826396731534,-.40183328869152},
   {.137138074578468,-.0747352726186499},
   {.691416914061394,+.346434506766115}
+  */
 };
 
 // from PLMP/common.m2 with setRandomSeed 0
 // output from encodey
 static complex params_target_m2_[M::f::nparams] = {
+  /*
   {-.16694512367336373, -.48016315075890303},
   {-.99157162029301263e-1, .50854514976583019e-1},
   {.40843596380086816, .74988960076388267},
@@ -116,6 +119,7 @@ static complex params_target_m2_[M::f::nparams] = {
   {.3152899304825087, .68788990969775671e-1},
   {.73625798204387827, .33603459149689929e-1},
   {.18904012029959902, .27838470658931337e-1}
+  */
 };
 
 # if 0
@@ -210,7 +214,7 @@ test_lines2params()
     io::lines2params(plines_m2_, p1);
 
     for (unsigned i=0; i < io::pp::nvislines*io::ncoords2d_h; ++i) 
-      TEST("lines2params complex numbers same norm as m2 default run"
+      TEST_NEAR("lines2params complex numbers same norm as m2 default run",
           std::norm(p1[i]), std::norm(params_target_m2_[i]), eps_);
 
     //    can't do this since the angle of each complex number
