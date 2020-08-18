@@ -24,11 +24,12 @@ template <typename F>
 using C = std::complex<F>;
 
 // The problem solvers that this solver template currently supports
-enum problem {chicago14a, chicago6a, cleveland14a, phoenix10a /*, standard*/};
+enum problem {chicago14a, chicago6a, cleveland14a, phoenix10a, 2v5p9a /*, standard*/};
 
 // The current best formulations for each problem
 constexpr problem chicago = problem::chicago14a;
 constexpr problem cleveland = problem::cleveland14a;
+constexpr problem 2v5p = problem::2v5p9a;
 // You can now use solver<chicago> to default to the best formulation
 
 // Each problem specializes this in their specific .h
