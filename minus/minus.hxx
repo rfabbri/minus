@@ -646,5 +646,6 @@ normalize_lines(F lines[][ncoords2d_h], unsigned nlines)
 #include "cleveland14a.hxx"      // specific implementation of cleveland 14a formulation now in PLMP
 // #include <minus/phoenix10a.hxx>      // specific implementation of chicago 14a formulation
 // #include "chicago6a.hxx"
+#include "2v5p9a.hxx"      // specific implementation of cleveland 14a formulation now in PLMP
 
 #endif // minus_hxx_
