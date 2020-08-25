@@ -304,12 +304,12 @@ problem to MINUS:
 
 How to add a new problem - Part 1 
   https://youtu.be/Yp5n6me04-Y
-[![Add a new problem to MINUS - Part 1](https:/img.youtube.com/vi/Yp5n6me04-Y/maxresdefault.webp)](https://youtu.be/Yp5n6me04-Y)
+[![Add a new problem to MINUS - Part 1](https:/img.youtube.com/vi/Yp5n6me04-Y/hqdefault.webp)](https://youtu.be/Yp5n6me04-Y)
 
 How to add a new problem - Part 2 
   https://youtu.be/KlSxoWQ0SdA
 
-[![Add a new problem to MINUS - Part 2](https://img.youtube.com/vi/KlSxoWQ0SdA/maxresdefault.jpg)](https://youtu.be/KlSxoWQ0SdA)
+[![Add a new problem to MINUS - Part 2](https://img.youtube.com/vi/KlSxoWQ0SdA/hqdefault.jpg)](https://youtu.be/KlSxoWQ0SdA)
 
 Let's say you have a new minimal problem, Chicago 6a, that is, variant
 `a` to the 6x6 formulation of the trifocal pose from points at lines problem.
