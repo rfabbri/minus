@@ -302,8 +302,10 @@ where chicago14a is an enum (int) template parameter.
 These (rather informal) videos provide a walkthrough on how to add a new minimal
 problem to MINUS:
 
-How to add a new problem - Part 1 https://youtu.be/KlSxoWQ0SdA
-How to add a new problem - Part 2 https://youtu.be/Yp5n6me04-Y
+How to add a new problem - Part 1 
+  https://youtu.be/Yp5n6me04-Y
+How to add a new problem - Part 2 
+  https://youtu.be/KlSxoWQ0SdA
 
 Let's say you have a new minimal problem, Chicago 6a, that is, variant
 `a` to the 6x6 formulation of the trifocal pose from points at lines problem.
