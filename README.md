@@ -304,7 +304,7 @@ problem to MINUS:
 
 How to add a new problem - Part 1 
   https://youtu.be/Yp5n6me04-Y
-[![Add a new problem to MINUS - Part 1](https:/img.youtube.com/vi/Yp5n6me04-Y/hqdefault.webp)](https://youtu.be/Yp5n6me04-Y)
+[![Add a new problem to MINUS - Part 1](https:/img.youtube.com/vi/Yp5n6me04-Y/hqdefault.jpg)](https://youtu.be/Yp5n6me04-Y)
 
 How to add a new problem - Part 2 
   https://youtu.be/KlSxoWQ0SdA
