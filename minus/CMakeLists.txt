@@ -1,7 +1,7 @@
 # optional, header-only library can be used without this library
 # library is useful when the function will be used in many places
 # to avoid having to include Minus many times and slowdown the compiler
-set(minus_sources
+set (minus_sources
   minus.hxx minus.h 
 #
   chicago14a.h chicago-default.h chicago14a-default-data.h chicago14a-io.h
