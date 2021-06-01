@@ -161,6 +161,7 @@ mwrite(const M::solution s[M::nsols], const char *fname)
   out << std::setprecision(20);
   out << "[";
   for (unsigned i=0; i <M::nsols; ++i) {
+    LOG("solution status: " << s[i].status);
     for (unsigned var=0; var < M::nve; ++var) {
       out << s[i].x[var].real() << imag << s[i].x[var].imag();
       if (i*var +1 < M::nve * M::nsols) 
