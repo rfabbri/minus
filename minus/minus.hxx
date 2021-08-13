@@ -1,10 +1,10 @@
 #ifndef minus_hxx_
 #define minus_hxx_
-// 
+//
 // \brief MInimal problem NUmerical continuation package
-// \author Ricardo Fabbri based on original code by Anton Leykin 
+// \author Ricardo Fabbri based on original code by Anton Leykin
 // \date Created: Fri Feb  8 17:42:49 EST 2019
-// 
+//
 #include <cstdio>
 #include <iostream>
 #include <iomanip>
@@ -17,23 +17,33 @@ namespace MiNuS {
 
 // THE MEAT //////////////////////////////////////////////////////////////////////
 // t: tracker settings
-// s_sols: start sols      
+// s_sols: start sols
 // params: params of target as specialized homotopy params - P01 in SolveChicago
 // compute solutions sol_min...sol_max-1 within NSOLS
-// 
-template <problem P, typename F> void 
+//
+template <problem P, typename F> void
 minus_core<P, F>::
 track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> params[2*f::nparams], solution raw_solutions[f::nsols], unsigned sol_min, unsigned sol_max)
 {
   assert(sol_min <= sol_max && sol_max <= f::nsols);
-  C<F> Hxt[NVEPLUS1 * f::nve] __attribute__((aligned(16))); 
-  C<F> x0t0xtblock[2*NVEPLUS1] __attribute__((aligned(16)));
-  C<F> dxdt[NVEPLUS1] __attribute__((aligned(16)));
-  C<F> dxi[f::nve] __attribute__((aligned(16)));
+
+  constexpr unsigned int HXT_SIZE         = (NVEPLUS1 * f::nve);
+  constexpr unsigned int X0T0XTBLOCK_SIZE = (2*NVEPLUS1);
+  constexpr unsigned int DXDT_SIZE        = (NVEPLUS1);
+  constexpr unsigned int DXI_SIZE         = (f::nve);
+  constexpr unsigned int BLOCK_SIZE       = (HXT_SIZE + X0T0XTBLOCK_SIZE + DXDT_SIZE + DXI_SIZE);
+
+  C<F> block[BLOCK_SIZE] __attribute__((aligned(16)));
+
+  C<F> *__restrict__ dxi         = block;
+  C<F> *__restrict__ dxdt        = dxi + DXI_SIZE;
+  C<F> *__restrict__ x0t0xtblock = dxdt + DXDT_SIZE;
+  C<F> *__restrict__ Hxt         = x0t0xtblock + X0T0XTBLOCK_SIZE;
+
   C<F> *x0t0 = x0t0xtblock;  // t = real running in [0,1]
   C<F> *x0 = x0t0;
   F    *t0 = (F *) (x0t0 + f::nve);
-  C<F> *xt = x0t0xtblock + NVEPLUS1; 
+  C<F> *xt = x0t0xtblock + NVEPLUS1;
   C<F> *x1t1 = xt;      // reusing xt's space to represent x1t1
   C<F> *const HxH=Hxt;  // HxH is reusing Hxt
   C<F> *const dx = dxdt;
@@ -61,8 +71,8 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
     unsigned predictor_successes = 0;
 
     // track H(x,t) for t in [0,1]
-      
-    while (t_s->status == PROCESSING 
+
+    while (t_s->status == PROCESSING
         && 1 - *t0 > the_smallest_number) {
       if (!end_zone && 1 - *t0 <= s.end_zone_factor_ + the_smallest_number)
         end_zone = true; // TODO: see if this path coincides with any other path on entry to the end zone
@@ -81,7 +91,7 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
       // dx1
       evaluate_Hxt(xt, params, Hxt); // Outputs Hxt
       dx4_eigen = lu.compute(AA).solve(bb);
-      
+
       // dx2
       const C<F> one_half_dt = *dt*0.5;
       v::multiply_scalar_to_self(dx4, one_half_dt);
@@ -115,11 +125,11 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
 
       // "dx1" = .5*dx1*dt, "dx2" = .5*dx2*dt, "dx3" = dx3*dt. Eigen vectorizes this:
       // dx4_eigen = (dx4_eigen* *dt + dx1_eigen*2 + dx2_eigen*4 + dx3_eigen*2)*(1./6.);
-      
+
       // make prediction
       vp::copy(x0t0, x1t1);
       vp::add_to_self(x1t1, dxdt);
-      
+
       /// CORRECTOR ///
       unsigned n_corr_steps = 0;
       bool is_successful;
@@ -130,7 +140,7 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
         v::add_to_self(x1t1, dx);
         is_successful = v::norm2(dx) < s.epsilon2_ * v::norm2(x1t1); // |dx|^2/|x1|^2 < eps2
       } while (!is_successful && n_corr_steps < s.max_corr_steps_);
-      
+
       if (!is_successful) { // predictor failure
         predictor_successes = 0;
         *dt *= s.dt_decrease_factor_;
@@ -160,7 +170,7 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
 // RC: same format as cameras_gt_ and synthcurves dataset
 // QT: same format as solution_shape
 template <problem P, typename F>
-inline void 
+inline void
 minus_io_14a<P, F>::
 RC_to_QT_format(const F rc[pp::nviews][4][3], F qt[M::nve])
 {
@@ -200,14 +210,14 @@ RC_to_QT_format(const F rc[pp::nviews][4][3], F qt[M::nve])
 //
 // This design is for cache speed. Translation in the camera matrix is stored
 // such that its coordinates are memory contiguous.
-// 
+//
 // The cameras array is fixed in size to NSOLS which is the max
 // number of solutions, which perfectly fits in memory. The caller must pass an
 // array with that minimum.
 template <problem P, typename F>
-inline void 
+inline void
 minus_io_14a<P, F>::
-all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], 
+all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3],
                    unsigned id_sols[M::nsols], unsigned *nsols_final)
 {
   typedef minus_array<M::nve,F> v;
@@ -223,7 +233,7 @@ all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3
 }
 
 template <problem P, typename F>
-inline void 
+inline void
 minus_io_14a<P, F>::
 solution2cams(/*const but use as scratch*/ F rs[M::nve], F cameras[2/*2nd and 3rd cams relative to 1st*/][4][3])
 {
@@ -233,7 +243,7 @@ solution2cams(/*const but use as scratch*/ F rs[M::nve], F cameras[2/*2nd and 3r
   cameras[0][3][0] = rs[8];
   cameras[0][3][1] = rs[9];
   cameras[0][3][2] = rs[10];
-  
+
   // camera 1 (3rd camera relative to 1st)
   u::quat2rotm(rs+4, (F *) cameras[1]);
   cameras[1][3][0] = rs[11];
@@ -250,9 +260,9 @@ solution2cams(/*const but use as scratch*/ F rs[M::nve], F cameras[2/*2nd and 3r
 // The camera parameter is cameras[img] which is a [4][3] array,
 // where the first 3x3 block is R, and the 4th row is T. img is img 0 or 1,
 // for 2nd and 3rd cams relative to 1st, resp.
-// 
+//
 template <problem P, typename F>
-inline bool 
+inline bool
 minus_io_14a<P, F>::
 probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *probe_cameras,
     unsigned *solution_index)
@@ -261,7 +271,7 @@ probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *
   static constexpr F eps = 1e-3;
   unsigned &sol=*solution_index;
   F real_solution[M::nve];
-  for (sol = 0; sol < M::nsols; ++sol) 
+  for (sol = 0; sol < M::nsols; ++sol)
     if (v::get_real(solutions[sol].x, real_solution)) {
       u::normalize_quat(real_solution);
       if (u::rotation_error(real_solution, probe_cameras->q01) < eps)
@@ -279,7 +289,7 @@ probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *
 // like probe_solutions but tests all M::nsols in case more than one is close to
 // the probe. Use this for debugging / investigation
 template <problem P, typename F>
-inline bool 
+inline bool
 minus_io_14a<P, F>::
 probe_all_solutions(const typename M::solution solutions[M::nsols], solution_shape *probe_cameras,
     unsigned *solution_index)
@@ -304,7 +314,7 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
           min_rerror = rerror;
           *solution_index = sol;
         }
-        
+
       } else {
 #ifndef NDEBUG
         std::cerr << "Found a solution at " << sol << std::endl;
@@ -335,7 +345,7 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
     found = true;
   } else
     found = false;
-  
+
   if (!found)
     return false;
 
@@ -343,14 +353,14 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
 
   F scale = std::sqrt(minus_3d<F>::dot(s->t01, s->t01));
   F scale_probe = std::sqrt(minus_3d<F>::dot(probe_cameras->t01, probe_cameras->t01));
-  
+
   { // t01
   s->t01[0] /= scale; s->t01[1] /= scale; s->t01[2] /= scale;
   F dt[3];
   dt[0] = s->t01[0] - probe_cameras->t01[0]/scale_probe;
   dt[1] = s->t01[1] - probe_cameras->t01[1]/scale_probe;
   dt[2] = s->t01[2] - probe_cameras->t01[2]/scale_probe;
-  
+
   if (minus_3d<F>::dot(dt, dt) < eps*eps) {
 #ifndef NDEBUG
     std::cerr << "probe: translation 01 also match\n";
@@ -373,17 +383,17 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
     }
   }
   }
-  
+
   if (!found)
     return false;
-  
+
   { // t02
   s->t02[0] /= scale; s->t02[1] /= scale; s->t02[2] /= scale;
   F dt[3];
   dt[0] = s->t02[0] - probe_cameras->t02[0]/scale_probe;
   dt[1] = s->t02[1] - probe_cameras->t02[1]/scale_probe;
   dt[2] = s->t02[2] - probe_cameras->t02[2]/scale_probe;
-  
+
   if (minus_3d<F>::dot(dt, dt) < eps*eps) {
 #ifndef NDEBUG
     std::cerr << "probe: translation 02 also match\n";
@@ -396,7 +406,7 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
     //    print(s->t02,3);
     //    std::cerr << "probe t02 fail atttempt 1 " << std::endl;
     // print(probe_cameras->t02,3);
-    
+
     dt[0] = s->t02[0] + probe_cameras->t02[0]/scale_probe;
     dt[1] = s->t02[1] + probe_cameras->t02[1]/scale_probe;
     dt[2] = s->t02[2] + probe_cameras->t02[2]/scale_probe;
@@ -421,7 +431,7 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
 // like probe_all_solutions but both solutions and ground truth probe are in
 // quaternion-translation format (solution_shape)
 template <problem P, typename F>
-inline bool 
+inline bool
 minus_io_14a<P, F>::
 probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], solution_shape *probe_cameras,
     unsigned nsols, unsigned *solution_index)
@@ -449,7 +459,7 @@ probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], solution_s
           min_rerror = rerror;
           *solution_index = sol;
         }
-        
+
       } else {
 #ifndef NDEBUG
         std::cerr << "Found a solution at " << sol << std::endl;
@@ -459,7 +469,7 @@ probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], solution_s
         *solution_index = sol;
       }
       found = true;
-    } 
+    }
   }
 
   if (!found)
@@ -476,7 +486,7 @@ probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], solution_s
     found = true;
   } else
     found = false;
-  
+
   if (!found)
     return false;
 
@@ -484,14 +494,14 @@ probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], solution_s
 
   F scale = std::sqrt(minus_3d<F>::dot(s->t01, s->t01));
   F scale_probe = std::sqrt(minus_3d<F>::dot(probe_cameras->t01, probe_cameras->t01));
-  
+
   { // t01
   s->t01[0] /= scale; s->t01[1] /= scale; s->t01[2] /= scale;
   F dt[3];
   dt[0] = s->t01[0] - probe_cameras->t01[0]/scale_probe;
   dt[1] = s->t01[1] - probe_cameras->t01[1]/scale_probe;
   dt[2] = s->t01[2] - probe_cameras->t01[2]/scale_probe;
-  
+
   if (minus_3d<F>::dot(dt, dt) < eps*eps) {
 #ifndef NDEBUG
     std::cerr << "probe: translation 01 also match\n";
@@ -514,17 +524,17 @@ probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], solution_s
     }
   }
   }
-  
+
   if (!found)
     return false;
-  
+
   { // t02
   s->t02[0] /= scale; s->t02[1] /= scale; s->t02[2] /= scale;
   F dt[3];
   dt[0] = s->t02[0] - probe_cameras->t02[0]/scale_probe;
   dt[1] = s->t02[1] - probe_cameras->t02[1]/scale_probe;
   dt[2] = s->t02[2] - probe_cameras->t02[2]/scale_probe;
-  
+
   if (minus_3d<F>::dot(dt, dt) < eps*eps) {
 #ifndef NDEBUG
     std::cerr << "probe: translation 02 also match\n";
@@ -537,7 +547,7 @@ probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], solution_s
     //    print(s->t02,3);
     //    std::cerr << "probe t02 fail atttempt 1 " << std::endl;
     // print(probe_cameras->t02,3);
-    
+
     dt[0] = s->t02[0] + probe_cameras->t02[0]/scale_probe;
     dt[1] = s->t02[1] + probe_cameras->t02[1]/scale_probe;
     dt[2] = s->t02[2] + probe_cameras->t02[2]/scale_probe;
@@ -588,9 +598,9 @@ probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], F probe_ca
 
 
 // For speed, assumes input point implicitly has 3rd homog coordinate is 1
-// 
+//
 template <typename F>
-inline void 
+inline void
 minus_io_common<F>::
 invert_intrinsics(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const double pix_coords[][ncoords2d], double normalized_coords[][ncoords2d], unsigned npts)
 {
@@ -603,9 +613,9 @@ invert_intrinsics(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const d
 }
 
 // For speed, assumes input point implicitly has 3rd homog coordinate is 1
-// 
+//
 template <typename F>
-inline void 
+inline void
 minus_io_common<F>::
 invert_intrinsics_tgt(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const double pix_tgt_coords[][ncoords2d], double normalized_tgt_coords[][ncoords2d], unsigned npts)
 {
@@ -621,7 +631,7 @@ invert_intrinsics_tgt(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], con
 // Seemed to be important for numerics / error scales at some point.
 // Normalizes line normals to unit
 template <typename F>
-inline void 
+inline void
 minus_io_common<F>::
 normalize_lines(F lines[][ncoords2d_h], unsigned nlines)
 {
