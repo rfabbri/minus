@@ -18,7 +18,7 @@ echoerr() { printf "LOG %s\n" "$*" >&2; }
 # each frame is 0-99 (number of frames in synthdata is 100)
 
 
-if [ "$#" -e 0 ]; then
+if [ "$#" -eq 0 ]; then
   frames="42 54 62"
   # off by one mistake by hongyi:
   lines="3011 3389 620"  # actual 0-id samples are 1 less this.
