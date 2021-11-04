@@ -1,11 +1,9 @@
-#!/bin/bash
-# runs minus on synthspheres dataset
 # returns 3 if solver failed (no ground truth solution found)
 
 # the env variable minus_args can be used to
 # pass args to minus
 
-minus_chicago=$HOME/cprg/vxlprg/lemsvpe/minus-bin/bin/expminus-chicago
+minus_chicago=$HOME/cprg/vxlprg/lemsvpe/minus-bin/bin/minus-chicago
 synthdata $* | ${minus_chicago} --image_data -gt $minus_args; solver_fail="${PIPESTATUS[1]}"
 
 exit $solver_fail
