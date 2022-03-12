@@ -430,7 +430,7 @@ probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], solution_s
   std::cerr << "Test xxxxxxxxxxx" << std::endl;
   std::cerr << "Nsols" <<  nsols << std::endl;
 #endif
-  typedef minus_array<M::nve,F> v; typedef minus_util<F> u;
+  typedef minus_util<F> u;
   static constexpr F eps = 1e-3;
   F real_solution[M::nve];
   bool found=false;

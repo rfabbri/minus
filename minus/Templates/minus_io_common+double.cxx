@@ -7,6 +7,6 @@
 
 namespace MiNuS {
   
-template class minus_io_common<double>;
+template struct minus_io_common<double>;
 
 }

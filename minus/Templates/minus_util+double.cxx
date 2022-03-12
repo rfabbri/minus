@@ -7,6 +7,6 @@
 
 namespace MiNuS {
   
-template class minus_util<double>;
+template struct minus_util<double>;
 
 }

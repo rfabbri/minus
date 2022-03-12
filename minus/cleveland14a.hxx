@@ -7321,7 +7321,7 @@ namespace MiNuS {
 // number of solutions, which perfectly fits in memory. The caller must pass an
 // array with that minimum.
 template <typename F>
-inline void 
+inline bool 
 minus<cleveland14a, F>::solve(
     const F p[pp::nviews][pp::npoints][io::ncoords2d], 
     const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
@@ -7353,16 +7353,19 @@ minus<cleveland14a, F>::solve(
     t[2] = std::thread(M::track, settings, data::start_sols_, params, solutions, 78*2, 78*3);
     t[3] = std::thread(M::track, settings, data::start_sols_, params, solutions, 78*3, 78*4);
     t[0].join(); t[1].join(); t[2].join(); t[3].join();
+    if (!io::has_valid_solutions(solutions))
+      return false;
   }
   // decode solutions into 3x4 cams (actually 4x3 in mem)
   io::all_solutions2cams(solutions, solutions_cams, id_sols, nsols_final);
 
   // filter solutions that have no positive >1 depth for all three views
+  return true;
 }
 
 // same as solve() but intrinsics not inverted (input is in actual pixel units)
 template <typename F>
-inline void 
+inline bool
 minus<cleveland14a, F>::solve_img(
     const F K[/*3 or 2 ignoring last line*/][io::ncoords2d_h],
     const F p[pp::nviews][pp::npoints][io::ncoords2d], 
@@ -7383,7 +7386,7 @@ minus<cleveland14a, F>::solve_img(
   io::invert_intrinsics_tgt(K, tgt[1], tn[1], pp::npoints);
   io::invert_intrinsics_tgt(K, tgt[2], tn[2], pp::npoints);
 
-  solve(pn, tn, solutions_cams, id_sols, nsols_final);
+  return solve(pn, tn, solutions_cams, id_sols, nsols_final);
 }
 
 //
@@ -7395,7 +7398,7 @@ inline bool
 minus_io<cleveland14a, F>::
 has_valid_solutions(const typename M::solution solutions[M::nsols])
 {
-  typedef minus_array<M::nve,F> v; typedef minus_util<F> u;
+  typedef minus_array<M::nve,F> v;
   static constexpr F eps = 1e-3;
   F real_solution[M::nve];
   for (unsigned sol = 0; sol < M::nsols; ++sol) 
