@@ -65,8 +65,8 @@ print_usage()
   all points, but you specify which one to use in id0 and id1 below. When
   --use_all_tangents is passed (TODO), will try to select the better conditioned / least degenerate tangents 
  
-  p000 p001
-  p010 p011
+  p000 p001        # If continuing from a standard internal problem to a new problem A, this is problem A
+  p010 p011        # If continuing from two problems from A to B, this is also problem A
   p020 p021
   
   p100 p101
@@ -93,21 +93,45 @@ print_usage()
   
   K00 K01 K02       # intrinsic parameters: only these elements
    0  K11 K22
-                    # GROUND TRUTH (optional) if -gt flag provided, pass the ground truth here:
-  r000 r001 r002    # default camera format if synthcurves flag passed: 
-  r010 r011 r012    # just like a 3x4 [R|T] but transposed to better fit row-major:
-  r020 r021 r022    #         | R |
-   c00  c01  c02    # P_4x3 = | - |
-                    #         | C'|
-  r100 r101 r102
-  r110 r111 r112
-  r120 r121 r122
-   c10  c11  c12 
+
+  r000 r001 r002    # GROUND TRUTH (optional) if -gt flag provided, pass the ground truth here:
+  r010 r011 r012    # default camera format if synthcurves flag passed: 
+  r020 r021 r022    # just like a 3x4 [R|T] but transposed to better fit row-major:
+   c00  c01  c02    #         | R |
+                    # P_4x3 = | - |
+  r100 r101 r102    #         | C'|
+  r110 r111 r112    # 
+  r120 r121 r122    #  
+   c10  c11  c12    #                                                                                                                   # If two problems A->B are provided, this is only for problem B below
+                    #
+  r200 r201 r202    # 
+  r210 r211 r212    # 
+  r220 r221 r222    #
+   c20  c21  c22    # 
+
+  p000 p001         # In case two problems are input, this is problem B
+  p010 p011
+  p020 p021
   
-  r200 r201 r202
-  r210 r211 r212
-  r220 r221 r222
-   c20  c21  c22
+  p100 p101
+  p110 p111
+  p120 p121
+  
+  p100 p101
+  p110 p111
+  p120 p121
+ 
+  t000 t001
+  t010 t011
+  t020 t021
+  
+  t100 t101
+  t110 t111
+  t120 t121
+  
+  t100 t101
+  t110 t111
+  t120 t121
 
   One way to use this is 
     synthdata | minus-chicago -i
@@ -464,42 +488,115 @@ main(int argc, char **argv)
   }
   
   static M::solution solutions[M::nsols];
-  bool failing=false;
-  LOG("\033[0;33mUsing 4 threads by default\e[m\n");
-  #ifdef M_VERBOSE
-  std::cerr << "LOG \033[0;33mStarting path tracker\e[m\n" << std::endl;
-  #endif 
-  std::thread t[4];
-  high_resolution_clock::time_point t1 = high_resolution_clock::now();
-  //  unsigned retval = 
-  //  ptrack(&MINUS_DEFAULT, start_sols_, params_, solutions);
   {
-    t[0] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 0, 78);
-    t[1] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78, 78*2);
-    t[2] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*2, 78*3);
-    t[3] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*3, 78*4);
-    t[0].join(); t[1].join(); t[2].join(); t[3].join();
+    bool failing=false;
+    LOG("\033[0;33mUsing 4 threads by default\e[m\n");
+    #ifdef M_VERBOSE
+    std::cerr << "LOG \033[0;33mStarting path tracker from random initial solution to first problem A\e[m\n" << std::endl;
+    #endif 
+    std::thread t[4];
+    high_resolution_clock::time_point t1 = high_resolution_clock::now();
+    //  unsigned retval = 
+    //  ptrack(&MINUS_DEFAULT, start_sols_, params_, solutions);
+    {
+      t[0] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 0, 78);
+      t[1] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78, 78*2);
+      t[2] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*2, 78*3);
+      t[3] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*3, 78*4);
+      t[0].join(); t[1].join(); t[2].join(); t[3].join();
+    }
+    if (!io::has_valid_solutions(solutions)) {
+      failing=true;
+      // rerun once if solutions are not valid
+      t[0] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 0, 78);
+      t[1] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78, 78*2);
+      t[2] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*2, 78*3);
+      t[3] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*3, 78*4);
+      t[0].join(); t[1].join(); t[2].join(); t[3].join();
+    }
+    high_resolution_clock::time_point t2 = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(t2 - t1).count();
+    #ifdef M_VERBOSE
+    std::cerr << "LOG \033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
+    #endif
+    
+    if (failing && io::has_valid_solutions(solutions)) {
+      LOG("WON a failed solution!");
+      failing=false;
+    } else {
+      LOG("There are real and regular solutions");
+    }
   }
-  if (!io::has_valid_solutions(solutions)) {
-    failing=true;
-    // rerun once if solutions are not valid
-    t[0] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 0, 78);
-    t[1] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78, 78*2);
-    t[2] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*2, 78*3);
-    t[3] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*3, 78*4);
-    t[0].join(); t[1].join(); t[2].join(); t[3].join();
-  }
-  high_resolution_clock::time_point t2 = high_resolution_clock::now();
-  auto duration = duration_cast<milliseconds>(t2 - t1).count();
-  #ifdef M_VERBOSE
-  std::cerr << "LOG \033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
-  #endif
-  
-  if (failing && io::has_valid_solutions(solutions)) {
-    LOG("WON a failed solution!");
-    failing=false;
-  } else {
-    LOG("There are real and regular solutions");
+
+
+  if (two_problems_given) {
+
+    // XXX
+    // format solutions (of A) to be similar to data::start_sols_
+    //
+    // generate homotopy params_
+    //
+    //     At this point:
+    //     
+    //     params_start_target_ = [ P0gammified, PAgammified]
+    //    
+    //     We want
+    //     
+    //     params_start_target_ = [ PAgammified, PBbammified]
+    //        
+    //        read problem B & extract parameters into 2nd half of
+    //        params_start_target_
+
+    
+    if (image_data) {  // read image pixel-based I/O parameters
+      if (!iread<Float>(input))
+        return 1;
+      data::params_ = data::params_start_target_;
+    } else {  // read raw I/O homotopy parameters (to be used as engine)
+      std::cerr << "When using minus to continue from A to B, non-pixel input not implemented\n";
+      return 1;
+    }
+
+    // At this point: prams_ = [PB
+    
+    // now continue from first problem A to second problem B
+    bool failing=false;
+    LOG("\033[0;33mUsing 4 threads by default\e[m\n");
+    #ifdef M_VERBOSE
+    std::cerr << "LOG \033[0;33mStarting path tracker from A to B\e[m\n" << std::endl;
+    #endif 
+    std::thread t[4];
+    high_resolution_clock::time_point t1 = high_resolution_clock::now();
+    //  unsigned retval = 
+    //  ptrack(&MINUS_DEFAULT, start_sols_, params_, solutions);
+    {
+      t[0] = std::thread(M::track, settings, solutions, data::params_, solutions, 0, 78);
+//      t[1] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78, 78*2);
+//      t[2] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*2, 78*3);
+//      t[3] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*3, 78*4);
+      t[0].join(); t[1].join(); t[2].join(); t[3].join();
+    }
+    if (!io::has_valid_solutions(solutions)) {
+      failing=true;
+      // rerun once if solutions are not valid
+//      t[0] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 0, 78);
+//      t[1] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78, 78*2);
+//      t[2] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*2, 78*3);
+//      t[3] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*3, 78*4);
+      t[0].join(); t[1].join(); t[2].join(); t[3].join();
+    }
+    high_resolution_clock::time_point t2 = high_resolution_clock::now();
+    auto duration = duration_cast<milliseconds>(t2 - t1).count();
+    #ifdef M_VERBOSE
+    std::cerr << "LOG \033[1;32mTime of solver A -> B: " << duration << "ms\e[m" << std::endl;
+    #endif
+    
+    if (failing && io::has_valid_solutions(solutions)) {
+      LOG("WON a failed solution!");
+      failing=false;
+    } else {
+      LOG("There are real and regular solutions");
+    }
   }
   
   if (profile) {
