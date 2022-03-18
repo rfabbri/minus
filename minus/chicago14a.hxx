@@ -7234,6 +7234,8 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F 
   io::normalize_lines(plines, pp::nvislines);
 }
 
+// gammify_start_params: set to false if your start parameters are already
+// gammified. 
 template <typename F>
 inline void
 minus_io<chicago14a, F>::
@@ -7261,20 +7263,31 @@ get_params_start_target(
 template <typename F>
 inline void 
 minus_io<chicago14a, F>::
-point_tangents2params(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F tgt[pp::nviews][pp::npoints][io::ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+point_tangents2params(
+    const F p[pp::nviews][pp::npoints][io::ncoords2d], 
+    const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
+    unsigned id_tgt0, unsigned id_tgt1, 
+    C<F> * __restrict__ params/*[static 2*M::nparams]*/, 
+    bool gammify_start_params)
 {
   // the user provides the start params in the first half of params.
   // we fill the second half and gammify both.
   F plines[pp::nvislines][io::ncoords2d_h];
   point_tangents2lines(p, tgt, id_tgt0, id_tgt1, plines);
-  get_params_start_target(plines, params);
+  get_params_start_target(plines, params, gammify_start_params);
 }
 
 // Same but for pixel input
 template <typename F>
 inline void 
 minus_io<chicago14a, F>::
-point_tangents2params_img(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F tgt[pp::nviews][pp::npoints][io::ncoords2d], unsigned id_tgt0, unsigned id_tgt1, const F K[/*3 or 2*/][io::ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+point_tangents2params_img(
+    const F p[pp::nviews][pp::npoints][io::ncoords2d], 
+    const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
+    unsigned id_tgt0, unsigned id_tgt1, 
+    const F K[/*3 or 2*/][io::ncoords2d_h], 
+    C<F> * __restrict__ params/*[static 2*M::nparams]*/,
+    bool gammify_start_params)
 {
   F pn[pp::nviews][pp::npoints][io::ncoords2d];
   F tn[pp::nviews][pp::npoints][io::ncoords2d];
@@ -7287,7 +7300,7 @@ point_tangents2params_img(const F p[pp::nviews][pp::npoints][io::ncoords2d], con
   io::invert_intrinsics_tgt(K, tgt[0], tn[0], pp::npoints);
   io::invert_intrinsics_tgt(K, tgt[1], tn[1], pp::npoints);
   io::invert_intrinsics_tgt(K, tgt[2], tn[2], pp::npoints);
-  point_tangents2params(pn, tn, id_tgt0, id_tgt1, params/*[static 2*M::nparams]*/);
+  point_tangents2params(pn, tn, id_tgt0, id_tgt1, params/*[static 2*M::nparams]*/, gammify_start_params);
 }
 
 } // namespace minus

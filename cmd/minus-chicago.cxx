@@ -56,7 +56,7 @@ print_usage()
                "  minus -g       # (or --profile) : performs a default solve for profiling\n"
                "  minus -i       # (or --image_data) : reads point-tangents from stdin\n"
                "  minus -h       # (or --help) : print this help message\n"
-               "  minus -r       # (or --real)  :  outputs only real solutions\n"
+               // "  minus -r       # (or --real)  :  outputs only real solutions\n"
                "  minus -AB      # (or --two_problems) : continue between 2 given problems\n"
             <<
   R"(-i | --image_data usage:
@@ -143,6 +143,7 @@ print_usage()
 
 bool stdio_=true;  // by default read/write from stdio
 bool ground_truth_=false;
+bool two_problems_given_=false;
 
 // Output solutions in ASCII matlab format
 //
@@ -271,10 +272,11 @@ iread(const char *fname)
   if (ground_truth_ && !read_block(in, (F *) data::cameras_gt_, io::pp::nviews*4*3))
     return false;
   
-  if (two_problems_given)
-    gammify_target_problem = false;
-  io::point_tangents2params_img(data::p_, data::tgt_, tgt_ids[0], tgt_ids[1], data::K_, data::params_start_target_,
-      gamify_target_problem);
+  if (two_problems_given_) {
+    static constexpr bool gammify_target_problem = false;
+    io::point_tangents2params_img(data::p_, data::tgt_, tgt_ids[0], tgt_ids[1],
+        data::K_, data::params_start_target_, gamify_target_problem);
+  }
 
   return true;
 }
@@ -423,9 +425,16 @@ main(int argc, char **argv)
         if (arg == "-gt") {
           ground_truth_ = true;
           --argc; ++argv;
-          argstate = AFTER_INITIAL_ARGS;
+          argstate = IMAGE_DATA;
           continue;
         }
+        if (arg == "-AB") {
+          two_problems_given_ = true;
+          --argc; ++argv;
+          argstate = IMAGE_DATA;
+          continue;
+        }
+        argstate = AFTER_INITIAL_ARGS;
       }
       
       if (argstate == MAX_CORR_STEPS) {
@@ -537,13 +546,17 @@ main(int argc, char **argv)
   }
 
 
-  if (two_problems_given) { // XXX make -AB flag
-
+  if (two_problems_given_) { 
+    // 
+    // Continue between two problems A and B by continuing from an internal
+    // problem R to A (to discover all solutions of A), then from A to B.
+    //
     // format solutions (of A) to be similar to data::start_sols_
-    std::complex<F> sols_a[M::nve*M::nsols];
+    std::complex<F> sols_A[M::nve*M::nsols];
+    
     for (unsigned s=0; s < M::nsols; ++s)
       for (unsigned var=0; var < M::nve; ++var)
-        sols_a[s*M::nve+var] = solutions[i].x[var];
+        sols_A[s*M::nve+var] = solutions[i].x[var];
 
     // generate homotopy params_ -----------------------------------------------
     //
@@ -579,19 +592,19 @@ main(int argc, char **argv)
     //  unsigned retval = 
     //  ptrack(&MINUS_DEFAULT, start_sols_, params_, solutions);
     {
-      t[0] = std::thread(M::track, settings, solutions, data::params_, solutions, 0, 78);
-//      t[1] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78, 78*2);
-//      t[2] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*2, 78*3);
-//      t[3] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*3, 78*4);
+      t[0] = std::thread(M::track, settings, sols_A, data::params_, solutions, 0, 78);
+      t[1] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78, 78*2);
+      t[2] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78*2, 78*3);
+      t[3] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78*3, 78*4);
       t[0].join(); t[1].join(); t[2].join(); t[3].join();
     }
     if (!io::has_valid_solutions(solutions)) {
       failing=true;
       // rerun once if solutions are not valid
-//      t[0] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 0, 78);
-//      t[1] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78, 78*2);
-//      t[2] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*2, 78*3);
-//      t[3] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*3, 78*4);
+      t[0] = std::thread(M::track, settings, sols_A, data::params_, solutions, 0, 78);
+      t[1] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78, 78*2);
+      t[2] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78*2, 78*3);
+      t[3] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78*3, 78*4);
       t[0].join(); t[1].join(); t[2].join(); t[3].join();
     }
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
