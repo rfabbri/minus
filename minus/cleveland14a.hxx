@@ -7399,7 +7399,7 @@ minus_io<cleveland14a, F>::
 has_valid_solutions(const typename M::solution solutions[M::nsols])
 {
   typedef minus_array<M::nve,F> v;
-  static constexpr F eps = 1e-3;
+  // static constexpr F eps = 1e-3;
   F real_solution[M::nve];
   for (unsigned sol = 0; sol < M::nsols; ++sol) 
     if (solutions[sol].status == M::REGULAR && v::get_real(solutions[sol].x, real_solution))
