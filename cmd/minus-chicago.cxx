@@ -259,14 +259,21 @@ iread(const char *fname)
   LOG("reading tgt_ids");
   if (!read_block<unsigned>(in, tgt_ids, 2))
     return false;
-  LOG("reading K_");
-  if (!read_block(in, (F *) data::K_, io::ncoords2d*io::ncoords2d_h))
-    return false;
+  if (!have_read_k) {
+    LOG("reading K_");
+    // XXX initialize have_read_k
+    if (!read_block(in, (F *) data::K_, io::ncoords2d*io::ncoords2d_h))
+      return false;
+    have_read_k = true;
+  }
   LOG("reading ground truth cams");
   if (ground_truth_ && !read_block(in, (F *) data::cameras_gt_, io::pp::nviews*4*3))
     return false;
   
-  io::point_tangents2params_img(data::p_, data::tgt_, tgt_ids[0], tgt_ids[1], data::K_, data::params_start_target_);
+  if (two_problems_given)
+    gammify_target_problem = false;
+  io::point_tangents2params_img(data::p_, data::tgt_, tgt_ids[0], tgt_ids[1], data::K_, data::params_start_target_,
+      gamify_target_problem);
 
   return true;
 }
@@ -529,7 +536,7 @@ main(int argc, char **argv)
   }
 
 
-  if (two_problems_given) {
+  if (two_problems_given) { // XXX make -AB flag
 
     // XXX
     // format solutions (of A) to be similar to data::start_sols_
@@ -557,7 +564,7 @@ main(int argc, char **argv)
       return 1;
     }
 
-    // At this point: prams_ = [PB
+    // At this point: params_ = [PA PB]
     
     // now continue from first problem A to second problem B
     bool failing=false;

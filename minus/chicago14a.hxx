@@ -7237,12 +7237,16 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F 
 template <typename F>
 inline void
 minus_io<chicago14a, F>::
-get_params_start_target(F plines[/*15 for chicago*/][io::ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+get_params_start_target(
+    F plines[/*15 for chicago*/][io::ncoords2d_h], 
+    C<F> * __restrict__ params/*[static 2*M::nparams]*/,
+    bool gammify_start_params)
 {
   // the user provides the start params in the first half of params.
   // we fill the second half and gammify both.
   lines2params(plines, params+M::f::nparams);
-  gammify(params);
+  if (gammify_start_params)
+    gammify(params);
   gammify(params+M::f::nparams);
 }
 
