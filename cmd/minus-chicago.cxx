@@ -144,6 +144,7 @@ print_usage()
 bool stdio_=true;  // by default read/write from stdio
 bool ground_truth_=false;
 bool two_problems_given_=false;
+bool have_read_k_=false;
 
 // Output solutions in ASCII matlab format
 //
@@ -261,12 +262,12 @@ iread(const char *fname)
   LOG("reading tgt_ids");
   if (!read_block<unsigned>(in, tgt_ids, 2))
     return false;
-  if (!have_read_k) {
+  if (!have_read_k_) {
     LOG("reading K_");
     // XXX initialize have_read_k
     if (!read_block(in, (F *) data::K_, io::ncoords2d*io::ncoords2d_h))
       return false;
-    have_read_k = true;
+    have_read_k_ = true;
   }
   LOG("reading ground truth cams");
   if (ground_truth_ && !read_block(in, (F *) data::cameras_gt_, io::pp::nviews*4*3))
@@ -275,7 +276,7 @@ iread(const char *fname)
   if (two_problems_given_) {
     static constexpr bool gammify_target_problem = false;
     io::point_tangents2params_img(data::p_, data::tgt_, tgt_ids[0], tgt_ids[1],
-        data::K_, data::params_start_target_, gamify_target_problem);
+        data::K_, data::params_start_target_, gammify_target_problem);
   }
 
   return true;
@@ -386,7 +387,6 @@ main(int argc, char **argv)
   --argc;++argv;
   bool profile = false;   // run some default solves for profiling
   bool image_data = false;
-  bool image_data_state = false;
   std::string arg;
   enum {INITIAL_ARGS, AFTER_INITIAL_ARGS, IMAGE_DATA, MAX_CORR_STEPS, EPSILON} argstate = INITIAL_ARGS;
   bool incomplete = false;
@@ -552,11 +552,11 @@ main(int argc, char **argv)
     // problem R to A (to discover all solutions of A), then from A to B.
     //
     // format solutions (of A) to be similar to data::start_sols_
-    std::complex<F> sols_A[M::nve*M::nsols];
+    complex sols_A[M::nve*M::nsols];
     
     for (unsigned s=0; s < M::nsols; ++s)
       for (unsigned var=0; var < M::nve; ++var)
-        sols_A[s*M::nve+var] = solutions[i].x[var];
+        sols_A[s*M::nve+var] = solutions[s].x[var];
 
     // generate homotopy params_ -----------------------------------------------
     //
@@ -567,7 +567,8 @@ main(int argc, char **argv)
     // params_start_target_ = [ PAgammified, PBbammified]
     //
     // First we do params_start_target  = [ PAgammified, PAgammified]
-    memcpy(params_start_target_, params_start_target_+M::f::nparams, N*sizeof(C<F>));
+    memcpy(data::params_start_target_, 
+           data::params_start_target_+M::f::nparams, M::f::nparams*sizeof(complex));
     
     // Now read problem B & extract parameters into 2nd half of
     // params_start_target_
