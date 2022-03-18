@@ -56,7 +56,8 @@ print_usage()
                "  minus -g       # (or --profile) : performs a default solve for profiling\n"
                "  minus -i       # (or --image_data) : reads point-tangents from stdin\n"
                "  minus -h       # (or --help) : print this help message\n"
-               " -r or --real : outputs only real solutions\n"
+               "  minus -r       # (or --real)  :  outputs only real solutions\n"
+               "  minus -AB      # (or --two_problems) : continue between 2 given problems\n"
             <<
   R"(-i | --image_data usage:
  
@@ -66,7 +67,7 @@ print_usage()
   --use_all_tangents is passed (TODO), will try to select the better conditioned / least degenerate tangents 
  
   p000 p001        # If continuing from a standard internal problem to a new problem A, this is problem A
-  p010 p011        # If continuing from two problems from A to B, this is also problem A
+  p010 p011        # If continuing from two problems from A to B (flag -AB), this is also problem A
   p020 p021
   
   p100 p101
@@ -102,14 +103,14 @@ print_usage()
   r100 r101 r102    #         | C'|
   r110 r111 r112    # 
   r120 r121 r122    #  
-   c10  c11  c12    #                                                                                                                   # If two problems A->B are provided, this is only for problem B below
+   c10  c11  c12    #                                                                                                                   # If two problems A->B are provided (flag -AB), this is only for problem B below
                     #
   r200 r201 r202    # 
   r210 r211 r212    # 
   r220 r221 r222    #
    c20  c21  c22    # 
 
-  p000 p001         # In case two problems are input, this is problem B
+  p000 p001         # If two problems A->B are provided (flag -AB), this is problem B
   p010 p011
   p020 p021
   
@@ -133,10 +134,10 @@ print_usage()
   t110 t111
   t120 t121
 
-  One way to use this is 
-    synthdata | minus-chicago -i
-  where synthdata is provided in minus/scripts)";
-            
+  # One way to use this is 
+  #     synthdata | minus-chicago -i
+  #  where synthdata is provided in minus/scripts)";
+             
   exit(1);
 }
 
@@ -538,35 +539,36 @@ main(int argc, char **argv)
 
   if (two_problems_given) { // XXX make -AB flag
 
-    // XXX
     // format solutions (of A) to be similar to data::start_sols_
-    //
-    // generate homotopy params_
-    //
-    //     At this point:
-    //     
-    //     params_start_target_ = [ P0gammified, PAgammified]
-    //    
-    //     We want
-    //     
-    //     params_start_target_ = [ PAgammified, PBbammified]
-    //        
-    //        read problem B & extract parameters into 2nd half of
-    //        params_start_target_
+    std::complex<F> sols_a[M::nve*M::nsols];
+    for (unsigned s=0; s < M::nsols; ++s)
+      for (unsigned var=0; var < M::nve; ++var)
+        sols_a[s*M::nve+var] = solutions[i].x[var];
 
+    // generate homotopy params_ -----------------------------------------------
+    //
+    // At this point:
+    // params_start_target_ = [ P0gammified, PAgammified]
+    //    
+    // We want
+    // params_start_target_ = [ PAgammified, PBbammified]
+    //
+    // First we do params_start_target  = [ PAgammified, PAgammified]
+    memcpy(params_start_target_, params_start_target_+M::f::nparams, N*sizeof(C<F>));
     
+    // Now read problem B & extract parameters into 2nd half of
+    // params_start_target_
     if (image_data) {  // read image pixel-based I/O parameters
       if (!iread<Float>(input))
         return 1;
       data::params_ = data::params_start_target_;
     } else {  // read raw I/O homotopy parameters (to be used as engine)
-      std::cerr << "When using minus to continue from A to B, non-pixel input not implemented\n";
+      std::cerr << "When continuing from A to B, non-pixel input not implemented\n";
       return 1;
     }
-
-    // At this point: params_ = [PA PB]
+    // At this point: params_ = [PAgammified PBgammified]
     
-    // now continue from first problem A to second problem B
+    // Homotopy-continue from A to B ---------------------------------------
     bool failing=false;
     LOG("\033[0;33mUsing 4 threads by default\e[m\n");
     #ifdef M_VERBOSE

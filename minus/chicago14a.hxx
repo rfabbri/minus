@@ -7335,7 +7335,7 @@ minus<chicago14a, F>::solve(
     F solutions_cams[M::nsols][pp::nviews-1][4][3],  // first camera is always [I | 0]
     unsigned id_sols[M::nsols],
     unsigned *nsols_final
-    ) 
+    )
 {
   typedef minus_data<chicago14a,F> data;
   C<F> params[2*M::f::nparams];
