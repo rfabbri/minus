@@ -264,7 +264,6 @@ iread(const char *fname)
     return false;
   if (!have_read_k_) {
     LOG("reading K_");
-    // XXX initialize have_read_k
     if (!read_block(in, (F *) data::K_, io::ncoords2d*io::ncoords2d_h))
       return false;
     have_read_k_ = true;
