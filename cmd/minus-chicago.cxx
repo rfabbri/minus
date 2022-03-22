@@ -136,7 +136,7 @@ print_usage()
 
   # One way to use this is 
   #     synthdata | minus-chicago -i
-  #  where synthdata is provided in minus/scripts)";
+  # where synthdata is provided in minus/scripts)";
              
   exit(1);
 }
