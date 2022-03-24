@@ -512,33 +512,17 @@ main(int argc, char **argv)
     //  unsigned retval = 
     //  ptrack(&MINUS_DEFAULT, start_sols_, params_, solutions);
     {
-//      t[0] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 0, 78);
-//      t[1] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78, 78*2);
-//      t[2] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*2, 78*3);
-//      t[3] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*3, 78*4);
-//      t[0].join(); t[1].join(); t[2].join(); t[3].join();
-    }
-    if (!io::has_valid_solutions(solutions)) {
-      failing=true;
-      // rerun once if solutions are not valid
-//      t[0] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 0, 78);
-//      t[1] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78, 78*2);
-//      t[2] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*2, 78*3);
-//      t[3] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*3, 78*4);
-//      t[0].join(); t[1].join(); t[2].join(); t[3].join();
+      t[0] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 0, 78);
+      t[1] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78, 78*2);
+      t[2] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*2, 78*3);
+      t[3] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*3, 78*4);
+      t[0].join(); t[1].join(); t[2].join(); t[3].join();
     }
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(t2 - t1).count();
     #ifdef M_VERBOSE
     std::cerr << "LOG \033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
     #endif
-    
-    if (failing && io::has_valid_solutions(solutions)) {
-      LOG("WON a failed solution!");
-      failing=false;
-    } else {
-      LOG("There are real and regular solutions");
-    }
   }
 
 
@@ -590,33 +574,17 @@ main(int argc, char **argv)
     //  unsigned retval = 
     //  ptrack(&MINUS_DEFAULT, start_sols_, params_, solutions);
     {
-//      t[0] = std::thread(M::track, settings, sols_A, data::params_, solutions, 0, 78);
-//      t[1] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78, 78*2);
-//      t[2] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78*2, 78*3);
-//      t[3] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78*3, 78*4);
-//      t[0].join(); t[1].join(); t[2].join(); t[3].join();
-    }
-    if (!io::has_valid_solutions(solutions)) {
-      failing=true;
-      // rerun once if solutions are not valid
-//      t[0] = std::thread(M::track, settings, sols_A, data::params_, solutions, 0, 78);
-//      t[1] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78, 78*2);
-//      t[2] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78*2, 78*3);
-//      t[3] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78*3, 78*4);
-//      t[0].join(); t[1].join(); t[2].join(); t[3].join();
+      t[0] = std::thread(M::track, settings, sols_A, data::params_, solutions, 0, 78);
+      t[1] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78, 78*2);
+      t[2] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78*2, 78*3);
+      t[3] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78*3, 78*4);
+      t[0].join(); t[1].join(); t[2].join(); t[3].join();
     }
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(t2 - t1).count();
     #ifdef M_VERBOSE
     std::cerr << "LOG \033[1;32mTime of solver A -> B: " << duration << "ms\e[m" << std::endl;
     #endif
-    
-    if (failing && io::has_valid_solutions(solutions)) {
-      LOG("WON a failed solution!");
-      failing=false;
-    } else {
-      LOG("There are real and regular solutions");
-    }
   }
   
   if (profile) {
@@ -631,6 +599,7 @@ main(int argc, char **argv)
           << std::abs(solutions[M::nsols-2].x[2] - complex(.7318330016224166, .10129116603501138)) << std::endl;
     }
   }
+  
   if (!mwrite<Float>(solutions, output)) return 2;
 
   // ---------------------------------------------------------------------------
