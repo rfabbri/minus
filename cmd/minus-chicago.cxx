@@ -147,6 +147,7 @@ bool stdio_=true;  // by default read/write from stdio
 bool ground_truth_=false;
 bool two_problems_given_=false;
 bool reading_first_point_=false;
+std::ifstream infp_;
 
 // Output solutions in ASCII matlab format
 //
@@ -233,16 +234,13 @@ read_block(std::istream &in, F *p, unsigned n)
 static bool
 init_input(const char *fname, std::istream *inp)
 {
-  std::ifstream infp;
-  *inp = &std::cin;
-  
   if (!stdio_) {
-    infp.open(fname, std::ios::in);
-    if (!infp) {
+    infp_.open(fname, std::ios::in);
+    if (!infp_) {
       std::cerr << "I/O Error opening input " << fname << std::endl;
       return false;
     }
-    inp = &infp;
+    inp = &infp_;
   }
   inp->exceptions(std::istream::failbit | std::istream::badbit);
   return true;
@@ -371,16 +369,16 @@ print_settings(const M::track_settings &settings)
 int
 main(int argc, char **argv)
 {
-  const char *input="stdin";
-  const char *output="stdout";
-  --argc;++argv;
+  const char *input = "stdin";
+  const char *output = "stdout";
+  --argc; ++argv;
   bool profile = false;   // run some default solves for profiling
   bool image_data = false;
   std::string arg;
   enum {INITIAL_ARGS, AFTER_INITIAL_ARGS, IMAGE_DATA, MAX_CORR_STEPS, EPSILON} argstate = INITIAL_ARGS;
   bool incomplete = false;
   M::track_settings settings = M::DEFAULT;
-  std::istream *inp;
+  std::istream *inp = &std::cin;
   
   // switches that can show up only in 1st position
   if (argc) {
