@@ -95,15 +95,16 @@ head -n 2 calib.intrinsic
 
 
 if [ "$#" -eq 16 ]; then
-  for i in $framesB; do
-    echoerr "extrinsics for frame $i"
-    cat frame_$i.extrinsic
-  done
   frame_id=""
   for i in $framesB; do
     frame_id="$frame_id"\ $(printf "%04d" $i)
   done
   framesB="$frame_id"
+  
+  for i in $framesB; do
+    echoerr "extrinsics for frame $i"
+    cat frame_$i.extrinsic
+  done
 
   lines0id=""
   for l in $linesB; do

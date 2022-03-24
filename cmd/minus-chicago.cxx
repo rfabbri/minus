@@ -541,9 +541,6 @@ main(int argc, char **argv)
       for (unsigned var=0; var < M::nve; ++var)
         sols_A[s*M::nve+var] = solutions[s].x[var];
     
-    std::cout << "Before:\n";
-    if (!mwrite<Float>(solutions, output_)) return 2;
-
     // reset solutions
     static const M::solution s0;
     for (unsigned s=0; s < M::nsols; ++s)
