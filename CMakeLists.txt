@@ -7,6 +7,7 @@ if(NOT CMAKE_CXX_STANDARD_REQUIRED)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
+#------------------------------------------------------------------------------
 # This command must be the last command in this file
 #if(NOT MINUS_NO_EXPORT)
 #  include(${CMAKE_CURRENT_LIST_DIR}/config/cmake/export/MINUSCreateProject.cmake)
@@ -43,7 +44,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffast-math" CACHE STRIN
 # -fno-signed-zeros, which is also what breaks GCC8 build
 #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-signed-zeros -fno-trapping-math -fassociative-math -freciprocal-math")
 #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Ofast")
-
+#------------------------------------------------------------------------------
 project(MINUS #Project name must be all caps to have properly generated MINUS_VERSION_* variables
     VERSION 1
     DESCRIPTION "Continuation-based Minimal Problem Solver"
@@ -221,6 +222,7 @@ TEST_BIG_ENDIAN(MY_BIG_ENDIAN)
 # For use in client projects that use CMake and not installed version
 set(MINUS_LIBRARY_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} CACHE STATIC "Where all the minus libraries are, for clients to use." )
 
+#-------------------------------------------------------------------------------
 # main lib
 add_subdirectory(minus)
 # commands / executables
