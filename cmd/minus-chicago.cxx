@@ -146,7 +146,7 @@ print_usage()
 bool stdio_=true;  // by default read/write from stdio
 bool ground_truth_=false;
 bool two_problems_given_=false;
-bool have_read_k_=false;
+bool have_read_k_gt_=false;
 
 // Output solutions in ASCII matlab format
 //
@@ -264,15 +264,15 @@ iread(const char *fname)
   LOG("reading tgt_ids");
   if (!read_block<unsigned>(in, tgt_ids, 2))
     return false;
-  if (!have_read_k_) {
+  if (!have_read_k_gt_) {
+    have_read_k_gt_ = true;
     LOG("reading K_");
     if (!read_block(in, (F *) data::K_, io::ncoords2d*io::ncoords2d_h))
       return false;
-    have_read_k_ = true;
+    LOG("reading ground truth cams");
+    if (ground_truth_ && !read_block(in, (F *) data::cameras_gt_, io::pp::nviews*4*3))
+      return false;
   }
-  LOG("reading ground truth cams");
-  if (ground_truth_ && !read_block(in, (F *) data::cameras_gt_, io::pp::nviews*4*3))
-    return false;
   
   if (two_problems_given_) {
     static constexpr bool gammify_target_problem = false;
