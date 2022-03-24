@@ -146,7 +146,7 @@ print_usage()
 bool stdio_ = true;  // by default read/write from stdio
 bool ground_truth_ = false;
 bool two_problems_given_ = false;
-bool reading_first_point_ = false;
+bool reading_first_point_ = true;
 std::ifstream infp_;
 
 // Output solutions in ASCII matlab format
