@@ -218,7 +218,7 @@ read_block(std::istream &in, F *p, unsigned n)
   while (!in.eof() && p != end) {
       try {
         in >> *p++;
-        std::cerr << *(p-1) << std::endl;
+//        std::cerr << *(p-1) << std::endl;
         if (in.eof()) {
           std::cerr << "I/O Error: Premature input termination\n";
           return false;
@@ -505,8 +505,8 @@ main(int argc, char **argv)
     #ifdef M_VERBOSE
     if (two_problems_given_)
       std::cerr 
-        << "LOG \033[0;33mContinuing between two problems A -> B\e[m\n" 
-        << "LOG \033[0;33mStarting path tracker from random initial solution to first problem A\e[m\n" 
+        << "LOG \033[0;33mContinuing between two problems A -> B by internal 0->A then A->B\e[m\n" 
+        << "LOG \033[0;33mStarting path tracker from random initial solution to first problem 0->A\e[m\n" 
         << std::endl;
     else
       std::cerr << "LOG \033[0;33mStarting path tracker from random initial solution to given problem\e[m\n" << std::endl;
@@ -541,6 +541,14 @@ main(int argc, char **argv)
       for (unsigned var=0; var < M::nve; ++var)
         sols_A[s*M::nve+var] = solutions[s].x[var];
     
+    std::cout << "Before:\n";
+    if (!mwrite<Float>(solutions, output_)) return 2;
+
+    // reset solutions
+    static const M::solution s0;
+    for (unsigned s=0; s < M::nsols; ++s)
+      solutions[s] = s0;
+
     // generate homotopy params_ -----------------------------------------------
     //
     // At this point:
@@ -564,7 +572,6 @@ main(int argc, char **argv)
       std::cerr << "When continuing from A to B, non-pixel input not implemented\n";
       return 1;
     }
-    // At this point: params_ = [PAgammified PBgammified]
     
     // Homotopy-continue from A to B ---------------------------------------
     LOG("\033[0;33mUsing 4 threads by default\e[m\n");
@@ -573,6 +580,7 @@ main(int argc, char **argv)
     #endif 
     std::thread t[4];
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
     //  unsigned retval = 
     //  ptrack(&MINUS_DEFAULT, start_sols_, params_, solutions);
     {
