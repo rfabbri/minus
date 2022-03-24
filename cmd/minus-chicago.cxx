@@ -146,7 +146,7 @@ print_usage()
 bool stdio_=true;  // by default read/write from stdio
 bool ground_truth_=false;
 bool two_problems_given_=false;
-bool have_read_k_gt_=false;
+bool reading_first_point_=false;
 
 // Output solutions in ASCII matlab format
 //
@@ -229,18 +229,12 @@ read_block(std::istream &in, F *p, unsigned n)
   }
   return true;
 }
-  
-//
-// Reads the format specified in the print_usage() for the -i flag
-// 
-// This is processed into the global params_start_target_
-// 
-template <typename F=double>
+
 static bool
-iread(const char *fname)
+init_input(const char *fname, std::istream *inp)
 {
   std::ifstream infp;
-  std::istream *inp = &std::cin;
+  *inp = &std::cin;
   
   if (!stdio_) {
     infp.open(fname, std::ios::in);
@@ -250,10 +244,19 @@ iread(const char *fname)
     }
     inp = &infp;
   }
+  inp->exceptions(std::istream::failbit | std::istream::badbit);
+  return true;
+}
   
-  std::istream &in = *inp;
-  in.exceptions(std::istream::failbit | std::istream::badbit);
-
+//
+// Reads the format specified in the print_usage() for the -i flag
+// 
+// This is processed into the global params_start_target_
+// 
+template <typename F=double>
+static bool
+iread(std::istream &in)
+{
   LOG("reading p_");
   if (!read_block(in, (F *)data::p_, io::pp::nviews*io::pp::npoints*io::ncoords2d))
     return false;
@@ -264,22 +267,21 @@ iread(const char *fname)
   LOG("reading tgt_ids");
   if (!read_block<unsigned>(in, tgt_ids, 2))
     return false;
-  if (!have_read_k_gt_) {
-    have_read_k_gt_ = true;
+  if (reading_first_point_) {
     LOG("reading K_");
     if (!read_block(in, (F *) data::K_, io::ncoords2d*io::ncoords2d_h))
       return false;
     LOG("reading ground truth cams");
     if (ground_truth_ && !read_block(in, (F *) data::cameras_gt_, io::pp::nviews*4*3))
       return false;
-  }
-  
-  if (two_problems_given_) {
+    io::point_tangents2params_img(data::p_, data::tgt_, tgt_ids[0], tgt_ids[1],
+        data::K_, data::params_start_target_);
+    reading_first_point_ = false;
+  } else { // when reading second point B, do not gammify A again
     static constexpr bool gammify_target_problem = false;
     io::point_tangents2params_img(data::p_, data::tgt_, tgt_ids[0], tgt_ids[1],
         data::K_, data::params_start_target_, gammify_target_problem);
   }
-
   return true;
 }
 
@@ -309,22 +311,8 @@ iread(const char *fname)
 // This format is generic enough to be adapted to M2 or matlab
 template <typename F=double>
 static bool
-mread(const char *fname)
+mread(std::istream &in)
 {
-  std::ifstream infp;
-  std::istream *inp = &std::cin;
-  
-  if (!stdio_) {
-    infp.open(fname, std::ios::in);
-    if (!infp) {
-      std::cerr << "I/O Error opening input " << fname << std::endl;
-      return false;
-    }
-    inp = &infp;
-  }
-  
-  std::istream &in = *inp;
-  in.exceptions(std::istream::failbit | std::istream::badbit);
   F *dparams = (F *)data::params_;
   while (!in.eof() && dparams != (F *)data::params_+2*2*M::f::nparams) {
       try {
@@ -392,6 +380,7 @@ main(int argc, char **argv)
   enum {INITIAL_ARGS, AFTER_INITIAL_ARGS, IMAGE_DATA, MAX_CORR_STEPS, EPSILON} argstate = INITIAL_ARGS;
   bool incomplete = false;
   M::track_settings settings = M::DEFAULT;
+  std::istream *inp;
   
   // switches that can show up only in 1st position
   if (argc) {
@@ -496,12 +485,13 @@ main(int argc, char **argv)
   print_settings(settings);
 
   if (!profile) { // read files: either stdio or physical
+    init_input(input, inp);
     if (image_data) {  // read image pixel-based I/O parameters
-      if (!iread<Float>(input))
+      if (!iread<Float>(*inp))
         return 1;
       data::params_ = data::params_start_target_;
     } else {  // read raw I/O homotopy parameters (to be used as engine)
-      if (!mread<Float>(input))  // reads into global params_
+      if (!mread<Float>(*inp))  // reads into global params_
         return 1;
     }
   }
@@ -524,20 +514,20 @@ main(int argc, char **argv)
     //  unsigned retval = 
     //  ptrack(&MINUS_DEFAULT, start_sols_, params_, solutions);
     {
-      t[0] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 0, 78);
-      t[1] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78, 78*2);
-      t[2] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*2, 78*3);
-      t[3] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*3, 78*4);
-      t[0].join(); t[1].join(); t[2].join(); t[3].join();
+//      t[0] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 0, 78);
+//      t[1] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78, 78*2);
+//      t[2] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*2, 78*3);
+//      t[3] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*3, 78*4);
+//      t[0].join(); t[1].join(); t[2].join(); t[3].join();
     }
     if (!io::has_valid_solutions(solutions)) {
       failing=true;
       // rerun once if solutions are not valid
-      t[0] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 0, 78);
-      t[1] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78, 78*2);
-      t[2] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*2, 78*3);
-      t[3] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*3, 78*4);
-      t[0].join(); t[1].join(); t[2].join(); t[3].join();
+//      t[0] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 0, 78);
+//      t[1] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78, 78*2);
+//      t[2] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*2, 78*3);
+//      t[3] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*3, 78*4);
+//      t[0].join(); t[1].join(); t[2].join(); t[3].join();
     }
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(t2 - t1).count();
@@ -578,10 +568,11 @@ main(int argc, char **argv)
     memcpy(data::params_start_target_, 
            data::params_start_target_+M::f::nparams, M::f::nparams*sizeof(complex));
     
+    LOG("\033[0;33mReading second problem B\e[m\n");
     // Now read problem B & extract parameters into 2nd half of
     // params_start_target_
     if (image_data) {  // read image pixel-based I/O parameters
-      if (!iread<Float>(input))
+      if (!iread<Float>(*inp))
         return 1;
       data::params_ = data::params_start_target_;
     } else {  // read raw I/O homotopy parameters (to be used as engine)
@@ -601,20 +592,20 @@ main(int argc, char **argv)
     //  unsigned retval = 
     //  ptrack(&MINUS_DEFAULT, start_sols_, params_, solutions);
     {
-      t[0] = std::thread(M::track, settings, sols_A, data::params_, solutions, 0, 78);
-      t[1] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78, 78*2);
-      t[2] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78*2, 78*3);
-      t[3] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78*3, 78*4);
-      t[0].join(); t[1].join(); t[2].join(); t[3].join();
+//      t[0] = std::thread(M::track, settings, sols_A, data::params_, solutions, 0, 78);
+//      t[1] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78, 78*2);
+//      t[2] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78*2, 78*3);
+//      t[3] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78*3, 78*4);
+//      t[0].join(); t[1].join(); t[2].join(); t[3].join();
     }
     if (!io::has_valid_solutions(solutions)) {
       failing=true;
       // rerun once if solutions are not valid
-      t[0] = std::thread(M::track, settings, sols_A, data::params_, solutions, 0, 78);
-      t[1] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78, 78*2);
-      t[2] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78*2, 78*3);
-      t[3] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78*3, 78*4);
-      t[0].join(); t[1].join(); t[2].join(); t[3].join();
+//      t[0] = std::thread(M::track, settings, sols_A, data::params_, solutions, 0, 78);
+//      t[1] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78, 78*2);
+//      t[2] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78*2, 78*3);
+//      t[3] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78*3, 78*4);
+//      t[0].join(); t[1].join(); t[2].join(); t[3].join();
     }
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(t2 - t1).count();
