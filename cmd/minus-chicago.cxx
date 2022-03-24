@@ -530,6 +530,12 @@ main(int argc, char **argv)
   }
 
   if (two_problems_given_) {
+    // First, lets make sure problem A was properly solved
+    if (!io::has_valid_solutions(solutions)) { // if no ground-truth is provided, it will return error
+      LOG("\033[1;91mFAIL:\e[m  no valid solutions in problem A");
+      return SOLVER_FAILURE;                    // if it can detect that the solver failed by generic tests
+    }
+    
     // 
     // Continue between two problems A and B by continuing from an internal
     // problem R to A (to discover all solutions of A), then from A to B.
