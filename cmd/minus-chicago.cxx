@@ -133,6 +133,8 @@ print_usage()
   t100 t101
   t110 t111
   t120 t121
+  
+  id0 id1           # id \in {0,1,2} of the point to consider the tangent
 
   # One way to use this is 
   #     synthdata | minus-chicago -i
@@ -434,6 +436,7 @@ main(int argc, char **argv)
           continue;
         }
         argstate = AFTER_INITIAL_ARGS;
+        continue;
       }
       
       if (argstate == MAX_CORR_STEPS) {
@@ -466,7 +469,7 @@ main(int argc, char **argv)
         incomplete = true;
         continue;
       }
-      std::cerr << "minus: \033[1;91m error\e[m\n - unrecognized argument" << arg << std::endl;;
+      std::cerr << "minus: \033[1;91m error\e[m\n - unrecognized argument " << arg << std::endl;;
       print_usage();
     }
 
@@ -508,7 +511,13 @@ main(int argc, char **argv)
     bool failing=false;
     LOG("\033[0;33mUsing 4 threads by default\e[m\n");
     #ifdef M_VERBOSE
-    std::cerr << "LOG \033[0;33mStarting path tracker from random initial solution to first problem A\e[m\n" << std::endl;
+    if (two_problems_given_)
+      std::cerr 
+        << "LOG \033[0;33mContinuing between two problems A -> B\e[m\n" 
+        << "LOG \033[0;33mStarting path tracker from random initial solution to first problem A\e[m\n" 
+        << std::endl;
+    else
+      std::cerr << "LOG \033[0;33mStarting path tracker from random initial solution to given problem\e[m\n" << std::endl;
     #endif 
     std::thread t[4];
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
