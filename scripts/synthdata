@@ -17,13 +17,13 @@ echoerr() { printf "LOG %s\n" "$*" >&2; }
 # each line is 0-5116 (number of points in synthdata is 5117)
 # each frame is 0-99 (number of frames in synthdata is 100)
 
+id0=0 # ids of the points with tangents
+id1=1
 
 if [ "$#" -eq 0 ]; then
   frames="42 54 62"
   # off by one mistake by hongyi:
   lines="3011 3389 620"  # actual 0-id samples are 1 less this.
-  id0=0 # ids of the points with tangents
-  id1=1
 elif [ "$#" -ge 6 ]; then
   frames="$1 $2 $3"
   echoerr "frames: $frames"

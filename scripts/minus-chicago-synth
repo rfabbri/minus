@@ -3,6 +3,7 @@
 # the env variable minus_args can be used to
 # pass args to minus
 
+set -x
 minus_chicago=$HOME/cprg/vxlprg/lemsvpe/minus-bin/bin/minus-chicago
 synthdata $* | ${minus_chicago} --image_data -gt $minus_args; solver_fail="${PIPESTATUS[1]}"
 
