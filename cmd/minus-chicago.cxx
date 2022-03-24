@@ -496,7 +496,6 @@ main(int argc, char **argv)
   
   static M::solution solutions[M::nsols];
   {
-    bool failing=false;
     LOG("\033[0;33mUsing 4 threads by default\e[m\n");
     #ifdef M_VERBOSE
     if (two_problems_given_)
@@ -524,7 +523,6 @@ main(int argc, char **argv)
     std::cerr << "LOG \033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
     #endif
   }
-
 
   if (two_problems_given_) { 
     // 
@@ -564,7 +562,6 @@ main(int argc, char **argv)
     // At this point: params_ = [PAgammified PBgammified]
     
     // Homotopy-continue from A to B ---------------------------------------
-    bool failing=false;
     LOG("\033[0;33mUsing 4 threads by default\e[m\n");
     #ifdef M_VERBOSE
     std::cerr << "LOG \033[0;33mStarting path tracker from A to B\e[m\n" << std::endl;
