@@ -617,7 +617,9 @@ main(int argc, char **argv)
       // if you use shell, see:
       // https://www.thegeekstuff.com/2010/03/bash-shell-exit-status
     }
-  } else if (!io::has_valid_solutions(solutions)) // if no ground-truth is provided, it will return error
+  } else if (!io::has_valid_solutions(solutions)) { // if no ground-truth is provided, it will return error
+    LOG("\033[1;91mFAIL:\e[m  no valid solutions");
     return SOLVER_FAILURE;                    // if it can detect that the solver failed by generic tests
+  }
   return 0;
 }
