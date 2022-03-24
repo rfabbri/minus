@@ -208,7 +208,6 @@ mwrite(const M::solution s[M::nsols], const char *fname)
   if (!stdio_) fsols.close();
   return true;
 }
-
 // Try to read n elements, filling in p in row-major order.
 template <typename F=double>
 static bool
@@ -541,7 +540,7 @@ main(int argc, char **argv)
     for (unsigned s=0; s < M::nsols; ++s)
       for (unsigned var=0; var < M::nve; ++var)
         sols_A[s*M::nve+var] = solutions[s].x[var];
-
+    
     // generate homotopy params_ -----------------------------------------------
     //
     // At this point:
