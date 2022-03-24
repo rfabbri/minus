@@ -148,6 +148,11 @@ bool ground_truth_ = false;
 bool two_problems_given_ = false;
 bool reading_first_point_ = true;
 std::ifstream infp_;
+bool image_data_ = false;
+bool profile_ = false;   // run some default solves for profiling
+const char *input_ = "stdin";
+const char *output_ = "stdout";
+M::track_settings settings_ = M::DEFAULT;
 
 // Output solutions in ASCII matlab format
 //
@@ -360,43 +365,32 @@ print_settings(const M::track_settings &settings)
   #endif 
 }
 
-// Simplest possible command to compute the Chicago problem
-// for estimating calibrated trifocal geometry from points and lines at points
-//
-// This is to be kept very simple C with only minimal C++ with Templates.
-// If you want to complicate this, please create another executable.
-// 
-int
-main(int argc, char **argv)
+
+void
+process_args(int argc, char **argv)
 {
-  const char *input = "stdin";
-  const char *output = "stdout";
   --argc; ++argv;
-  bool profile = false;   // run some default solves for profiling
-  bool image_data = false;
-  std::string arg;
+  // switches that can show up only in 1st position
+  
   enum {INITIAL_ARGS, AFTER_INITIAL_ARGS, IMAGE_DATA, MAX_CORR_STEPS, EPSILON} argstate = INITIAL_ARGS;
   bool incomplete = false;
-  M::track_settings settings = M::DEFAULT;
-  std::istream *inp = &std::cin;
-  
-  // switches that can show up only in 1st position
+  std::string arg;
   if (argc) {
     arg = std::string(*argv);
     if (arg == "-h" || arg == "--help")
       print_usage();
     if (arg == "-g" || arg == "--profile") {
-      profile = true;
+      profile_ = true;
       argstate = AFTER_INITIAL_ARGS;
       --argc; ++argv;
     } else if (arg == "-i" || arg == "--image_data") {
-      image_data = true; 
+      image_data_ = true; 
       argstate = IMAGE_DATA;
       --argc; ++argv;
     } else if (arg[0] != '-') {
       if (argc == 2) {
-          input = argv[1];
-          output = argv[2];
+          input_ = argv[1];
+          output_ = argv[2];
           stdio_ = false;
       } else {
           std::cerr << "minus: \033[1;91m error\e[m\n";
@@ -427,7 +421,7 @@ main(int argc, char **argv)
       }
       
       if (argstate == MAX_CORR_STEPS) {
-        settings.max_corr_steps_ = std::stoi(arg);
+        settings_.max_corr_steps_ = std::stoi(arg);
         --argc; ++argv;
         argstate = AFTER_INITIAL_ARGS;
         incomplete = false;
@@ -435,8 +429,8 @@ main(int argc, char **argv)
       }
       
       if (argstate == EPSILON) {
-        settings.epsilon_ = std::stod(arg);
-        settings.epsilon2_ = settings.epsilon_*settings.epsilon_;
+        settings_.epsilon_ = std::stod(arg);
+        settings_.epsilon2_ = settings_.epsilon_*settings_.epsilon_;
         --argc; ++argv;
         argstate = AFTER_INITIAL_ARGS;
         incomplete = false;
@@ -465,26 +459,38 @@ main(int argc, char **argv)
       print_usage();
     }
   }
+}
 
-  if (image_data) {
+// Simplest possible command to compute the Chicago problem
+// for estimating calibrated trifocal geometry from points and lines at points
+//
+// This is to be kept very simple C with only minimal C++ with Templates.
+// If you want to complicate this, please create another executable.
+// 
+int
+main(int argc, char **argv)
+{
+  std::istream *inp = &std::cin;
+  
+  process_args(argc, argv);
+
+  if (image_data_) {
     LOG("param: input is image pixel data");
     if (ground_truth_)
       LOG("param: reading ground truth appended to input pixel data");
   }
-  
-  if (profile)
+  if (profile_)
     LOG("Running default solve for profiling");
-
   if (stdio_)
     LOG("reading from stdio");
   else
-    LOG("reading from " << input << " writing to " << output);
+    LOG("reading from " << input_ << " writing to " << output_);
 
-  print_settings(settings);
+  print_settings(settings_);
 
-  if (!profile) { // read files: either stdio or physical
-    init_input(input, inp);
-    if (image_data) {  // read image pixel-based I/O parameters
+  if (!profile_) { // read files: either stdio or physical
+    init_input(input_, inp);
+    if (image_data_) {  // read image pixel-based I/O parameters
       if (!iread<Float>(*inp))
         return 1;
       data::params_ = data::params_start_target_;
@@ -511,10 +517,10 @@ main(int argc, char **argv)
     //  unsigned retval = 
     //  ptrack(&MINUS_DEFAULT, start_sols_, params_, solutions);
     {
-      t[0] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 0, 78);
-      t[1] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78, 78*2);
-      t[2] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*2, 78*3);
-      t[3] = std::thread(M::track, settings, data::start_sols_, data::params_, solutions, 78*3, 78*4);
+      t[0] = std::thread(M::track, settings_, data::start_sols_, data::params_, solutions, 0, 78);
+      t[1] = std::thread(M::track, settings_, data::start_sols_, data::params_, solutions, 78, 78*2);
+      t[2] = std::thread(M::track, settings_, data::start_sols_, data::params_, solutions, 78*2, 78*3);
+      t[3] = std::thread(M::track, settings_, data::start_sols_, data::params_, solutions, 78*3, 78*4);
       t[0].join(); t[1].join(); t[2].join(); t[3].join();
     }
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
@@ -524,7 +530,7 @@ main(int argc, char **argv)
     #endif
   }
 
-  if (two_problems_given_) { 
+  if (two_problems_given_) {
     // 
     // Continue between two problems A and B by continuing from an internal
     // problem R to A (to discover all solutions of A), then from A to B.
@@ -551,7 +557,7 @@ main(int argc, char **argv)
     LOG("\033[0;33mReading second problem B\e[m\n");
     // Now read problem B & extract parameters into 2nd half of
     // params_start_target_
-    if (image_data) {  // read image pixel-based I/O parameters
+    if (image_data_) {  // read image pixel-based I/O parameters
       if (!iread<Float>(*inp))
         return 1;
       data::params_ = data::params_start_target_;
@@ -571,10 +577,10 @@ main(int argc, char **argv)
     //  unsigned retval = 
     //  ptrack(&MINUS_DEFAULT, start_sols_, params_, solutions);
     {
-      t[0] = std::thread(M::track, settings, sols_A, data::params_, solutions, 0, 78);
-      t[1] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78, 78*2);
-      t[2] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78*2, 78*3);
-      t[3] = std::thread(M::track, settings, sols_A, data::params_, solutions, 78*3, 78*4);
+      t[0] = std::thread(M::track, settings_, sols_A, data::params_, solutions, 0, 78);
+      t[1] = std::thread(M::track, settings_, sols_A, data::params_, solutions, 78, 78*2);
+      t[2] = std::thread(M::track, settings_, sols_A, data::params_, solutions, 78*2, 78*3);
+      t[3] = std::thread(M::track, settings_, sols_A, data::params_, solutions, 78*3, 78*4);
       t[0].join(); t[1].join(); t[2].join(); t[3].join();
     }
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
@@ -584,7 +590,7 @@ main(int argc, char **argv)
     #endif
   }
   
-  if (profile) {
+  if (profile_) {
     // compare solutions to certain values from M2
     // two random entries
     if (std::abs(solutions[1].x[1] - complex(-.25177177692982444e1, -.84845195030295639)) <= tol &&
@@ -597,12 +603,12 @@ main(int argc, char **argv)
     }
   }
   
-  if (!mwrite<Float>(solutions, output)) return 2;
+  if (!mwrite<Float>(solutions, output_)) return 2;
 
   // ---------------------------------------------------------------------------
   // test_final_solve_against_ground_truth(solutions);
   // optional: filter solutions using positive depth, etc.
-  if (ground_truth_ || profile) {
+  if (ground_truth_ || profile_) {
     io::RC_to_QT_format(data::cameras_gt_, data::cameras_gt_quat_);
     unsigned sol_id;
     bool found = io::probe_all_solutions(solutions, data::cameras_gt_quat_, &sol_id);
