@@ -152,7 +152,7 @@ bool image_data_ = false;
 bool profile_ = false;   // run some default solves for profiling
 const char *input_ = "stdin";
 const char *output_ = "stdout";
-M::track_settings settings_ = M::DEFAULT;
+M::track_settings settings_;
 
 // Output solutions in ASCII matlab format
 //
@@ -365,10 +365,10 @@ print_settings(const M::track_settings &settings)
   #endif 
 }
 
-
 void
 process_args(int argc, char **argv)
 {
+  settings_ = M::DEFAULT;
   --argc; ++argv;
   // switches that can show up only in 1st position
   
