@@ -254,6 +254,13 @@ struct minus_io_14a : public minus_io_common<F> {
     unsigned nsols, unsigned *solution_index);
   static bool probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], F probe_cameras[M::nve],
     unsigned nsols, unsigned *solution_index);
+  // TODO: move this to generic minus_io - useful for all problems
+  static void solutions_struct2vector(const typename M::solution solutions[M::nsols], C<F> sols_v[M::nsols][M::nve])
+  {
+    for (unsigned s=0; s < M::nsols; ++s)
+      for (unsigned var=0; var < M::nve; ++var)
+        sols_v[s][var] = solutions[s].x[var];
+  }
 };
 
 // IO shaping: not used in tracker, but only for shaping user data
