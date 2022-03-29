@@ -276,6 +276,31 @@ probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *
 #include "debug-util.h"
 #endif
 
+// XXX put hxx or h
+template <problem P, typename F>
+inline bool 
+minus_io_14a<P, F>::
+solutions_struct2vector(const typename M::solution solutions[M::nsols][M::nve], complex sols_v[M::nve][M::nsols])
+{
+  for (unsigned s=0; s < M::nsols; ++s)
+    for (unsigned var=0; var < M::nve; ++var)
+      sols_v[s][var] = solutions[s].x[var];
+}
+
+template <problem P, typename F>
+inline bool 
+minus_io_14a<P, F>::
+probe_all_solutions(const typename M::solution solutions[M::nsols], solution_shape *probe_cameras,
+    unsigned *solution_index)
+{
+  complex vsolutions[M::nve][M::nsols];
+  
+  // populate standard format solutions_v from solutions (path info)
+  solutions_struct2vector(solutions, vsolutions);
+    
+  return probe_all_solutions(vsolutions, probe_cameras, solution_index);
+}
+
 // like probe_solutions but tests all M::nsols in case more than one is close to
 // the probe. Use this for debugging / investigation
 template <problem P, typename F>
@@ -420,6 +445,9 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
 
 // like probe_all_solutions but both solutions and ground truth probe are in
 // quaternion-translation format (solution_shape)
+//
+// This uses real cameras as input, such as in the output of solve_img.
+// 
 template <problem P, typename F>
 inline bool 
 minus_io_14a<P, F>::

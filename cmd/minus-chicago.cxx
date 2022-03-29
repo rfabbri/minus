@@ -542,11 +542,9 @@ main(int argc, char **argv)
     // problem R to A (to discover all solutions of A), then from A to B.
     //
     // format solutions (of A) to be similar to data::start_sols_
-    complex sols_A[M::nve*M::nsols];
-    
-    for (unsigned s=0; s < M::nsols; ++s)
-      for (unsigned var=0; var < M::nve; ++var)
-        sols_A[s*M::nve+var] = solutions[s].x[var];
+    complex sols_A_matrix[M::nve][M::nsols];
+    io::solutions_struct2vector(solutions, sols_A_matrix);
+    const complex * const sols_A = (complex *) sols_A_matrix;
     
     // reset solutions
     static const M::solution s0;
