@@ -276,7 +276,7 @@ probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *
 #include "debug-util.h"
 #endif
 
-// XXX put hxx or h
+/*
 template <problem P, typename F>
 inline bool 
 minus_io_14a<P, F>::
@@ -300,6 +300,7 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
     
   return probe_all_solutions(vsolutions, probe_cameras, solution_index);
 }
+*/
 
 // like probe_solutions but tests all M::nsols in case more than one is close to
 // the probe. Use this for debugging / investigation
