@@ -10,5 +10,6 @@ typedef MiNuS::minus_core<MiNuS::chicago> M;
 typedef MiNuS::minus_io<MiNuS::chicago> io;
 typedef MiNuS::minus_io_14a<MiNuS::chicago> io14;
 typedef MiNuS::minus_data<MiNuS::chicago, double> data;
+extern template struct MiNuS::minus_data<MiNuS::chicago, double>;
 
 #endif   // chicago_default_h_
