@@ -31,19 +31,20 @@ same_vectors(const Float *v, const Float *w, unsigned n, Float tol=eps_)
   return true;
 }
 
+#define RC(a,i,j) a[(j) + (i)*ncols]
+
 // test if two vectors of the same size are equal up to tolerance
 inline bool
-same_matrices(const Float *vp, const Float *wp, unsigned nrows, unsigned ncols, Float tol=eps_)
+same_matrices(const Float *v, const Float *w, unsigned nrows, unsigned ncols, Float tol=eps_)
 {
-  const Float (*v)[ncols] = (Float (*)[ncols]) vp, (*w)[ncols] = (Float (*)[ncols]) wp;
   for (unsigned i=0; i < nrows; ++i)
     for (unsigned j=0; j < ncols; ++j)
-      if (std::fabs(v[i][j] - w[i][j]) > eps_) {
+      if (std::fabs(RC(v,i,j) - RC(w,i,j)) > eps_) {
         std::cout << "v: \n";
         print((Float *) v, nrows, ncols);
         std::cout << "w: \n";
         print((Float *) w, nrows, ncols); 
-        printf("offending element [i][j] v[i][j], w[i,j] = [%d][%d], %g, %g\n", i, j, v[i][j], w[i][j]);
+        printf("offending element [i][j] v[i][j], w[i,j] = [%d][%d], %g, %g\n", i, j, RC(v,i,j), RC(w,i,j));
         return false;
       }
   return true;
@@ -51,24 +52,23 @@ same_matrices(const Float *vp, const Float *wp, unsigned nrows, unsigned ncols, 
 
 // test if two vectors of the same size are equal up to tolerance
 inline bool
-same_matrices_up_to_row_scale(const Float *vp, const Float *wp, unsigned nrows, unsigned ncols, Float tol=eps_)
+same_matrices_up_to_row_scale(const Float *v, const Float *w, unsigned nrows, unsigned ncols, Float tol=eps_)
 {
-  const Float (*v)[ncols] = (Float (*)[ncols]) vp, (*w)[ncols] = (Float (*)[ncols]) wp;
   for (unsigned i=0; i < nrows; ++i) {
     bool match = true;
     for (unsigned j=0; j < ncols; ++j) 
-      if (std::fabs(v[i][j] - w[i][j]) > eps_)  {
+      if (std::fabs(RC(v,i,j) - RC(w,i,j)) > eps_)  {
         match = false;
         break;
       }
     if (!match) {
       for (unsigned j=0; j < ncols; ++j) 
-        if (std::fabs(v[i][j] + w[i][j]) > eps_ && std::fabs(v[i][j] - w[i][j]) > eps_)  {
+        if (std::fabs(RC(v,i,j) + RC(w,i,j)) > eps_ && std::fabs(RC(v,i,j) - RC(w,i,j)) > eps_)  {
             std::cout << "v: \n";
             print((Float *) v, nrows, ncols);
             std::cout << "w: \n";
             print((Float *) w, nrows, ncols); 
-            printf("offending element [i][j] v[i][j], w[i][j] = [%d][%d], %g, %g\n", i, j, v[i][j], w[i][j]);
+            printf("offending element [i][j] v[i][j], w[i][j] = [%d][%d], %g, %g\n", i, j, RC(v,i,j), RC(w,i,j));
             return false;
         }
     }
