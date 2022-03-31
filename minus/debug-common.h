@@ -3,6 +3,7 @@
 
 #include <minus/minus.h>
 #include <minus/internal-util.h>
+#include <chrono>
 
 namespace MiNuS {
 
