@@ -632,7 +632,7 @@ invert_intrinsics_tgt(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], con
     const F *tp = pix_tgt_coords[p];
     F *t = normalized_tgt_coords[p];
     t[1] = tp[1]/K[1][1];
-    t[0] = (tp[0] - K[0][1]*tp[1])/K[0][0];
+    t[0] = (tp[0] - K[0][1]*t[1])/K[0][0];
   }
 }
 
