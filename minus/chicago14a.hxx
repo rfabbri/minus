@@ -7367,15 +7367,9 @@ minus<chicago14a, F>::solve(
     t[3] = std::thread(M::track, settings, data::start_sols_, params, solutions, 78*3, 78*4);
     t[0].join(); t[1].join(); t[2].join(); t[3].join();
   }
-  if (!io::has_valid_solutions(solutions)) { // rerun once in the rare case the solutions are not valid
-    t[0] = std::thread(M::track, settings, data::start_sols_, params, solutions, 0, 78);
-    t[1] = std::thread(M::track, settings, data::start_sols_, params, solutions, 78, 78*2);
-    t[2] = std::thread(M::track, settings, data::start_sols_, params, solutions, 78*2, 78*3);
-    t[3] = std::thread(M::track, settings, data::start_sols_, params, solutions, 78*3, 78*4);
-    t[0].join(); t[1].join(); t[2].join(); t[3].join();
-    if (!io::has_valid_solutions(solutions))
-      return false;
-  }
+  if (!io::has_valid_solutions(solutions))
+    return false;
+ 
   // decode solutions into 3x4 cams (actually 4x3 in mem)
   io::all_solutions2cams(solutions, solutions_cams, id_sols, nsols_final);
 
