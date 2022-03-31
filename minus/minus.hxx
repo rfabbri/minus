@@ -61,9 +61,13 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
     unsigned predictor_successes = 0;
 
     // track H(x,t) for t in [0,1]
-      
     while (t_s->status == PROCESSING 
         && 1 - *t0 > the_smallest_number) {
+      if (t_s->num_steps == s.max_num_steps_) {
+        t_s->status = MAX_NUM_STEPS_FAIL; // failed to reach solution in the available step budget
+        break;
+      }
+      
       if (!end_zone && 1 - *t0 <= s.end_zone_factor_ + the_smallest_number)
         end_zone = true; // TODO: see if this path coincides with any other path on entry to the end zone
       if (end_zone) {
@@ -146,7 +150,7 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
       }
       if (v::norm2(x0) > s.infinity_threshold2_)
         t_s->status = INFINITY_FAILED;
-      if (++t_s->num_steps > s.max_num_steps_) break;
+      ++t_s->num_steps;
     } // while (t loop)
     v::copy(x0, t_s->x); // record the solution
     t_s->t = *t0; // TODO try to include this in the previous memcpy

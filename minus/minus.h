@@ -78,7 +78,8 @@ class minus_core { // fully static, not to be instantiated - just used for templ
     MIN_STEP_FAILED,    // 5
     ORIGIN_FAILED,      // 6 unused
     INCREASE_PRECISION, // 7 unused
-    DECREASE_PRECISION  // 8 unused
+    DECREASE_PRECISION, // 8 unused
+    MAX_NUM_STEPS_FAIL, // 9 failed to converge in less than solution::num_steps 
   };
   
   struct solution
