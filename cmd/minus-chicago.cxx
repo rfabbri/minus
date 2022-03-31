@@ -155,6 +155,18 @@ const char *input_ = "stdin";
 const char *output_ = "stdout";
 M::track_settings settings_;
 
+void
+print_num_steps(M::solution solutions[M::nsols])
+{
+  LOG("solution id x num steps:");
+  unsigned sum=0;
+  for (unsigned s=0; s < M::nsols; ++s) {
+    LOG(s << " " << solutions[s].num_steps);
+    sum += solutions[s].num_steps;
+  }
+  LOG("total number of steps: " << sum);
+}
+
 // Output solutions in ASCII matlab format
 //
 // ---------------------------------------------------------
@@ -527,6 +539,7 @@ main(int argc, char **argv)
     auto duration = duration_cast<milliseconds>(t2 - t1).count();
     #ifdef M_VERBOSE
     std::cerr << "LOG \033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
+    print_num_steps(solutions);
     #endif
   }
 
@@ -596,6 +609,7 @@ main(int argc, char **argv)
     auto duration = duration_cast<milliseconds>(t2 - t1).count();
     #ifdef M_VERBOSE
     std::cerr << "LOG \033[1;32mTime of solver A -> B: " << duration << "ms\e[m" << std::endl;
+    print_num_steps(solutions);
     #endif
   }
   
@@ -618,6 +632,7 @@ main(int argc, char **argv)
   // test_final_solve_against_ground_truth(solutions);
   // optional: filter solutions using positive depth, etc.
   if (ground_truth_ || profile_) {
+    // TODO(juliana) should we has_valid_solutions here? 
     io::RC_to_QT_format(data::cameras_gt_, data::cameras_gt_quat_);
     unsigned sol_id;
     bool found = io::probe_all_solutions(solutions, data::cameras_gt_quat_, &sol_id);
