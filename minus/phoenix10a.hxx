@@ -4,8 +4,8 @@
 
 template <typename F>
 struct eval<chicago14a, F> {
-  static void Hxt(const C<F> * __restrict__ x /*x, t*/,    const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
-  static void HxH(const C<F> * __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
+  static void Hxt(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
+  static void HxH(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
 };
 
 // Evaluates Hx and Ht at the same time, reusing expressions.
@@ -18,7 +18,7 @@ struct eval<chicago14a, F> {
 template <typename F>
 inline void 
 eval<chicago14a, F>::
-Hxt(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/) 
+Hxt(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/) 
 {
   const C<F> &X0 = x[0];
   const C<F> &X1 = x[1];
@@ -3823,7 +3823,7 @@ Hxt(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F>
 template <typename F>
 inline void 
 eval<chicago14a, F>::
-HxH(const C<F>* __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F>* __restrict__ y /*HxH*/) 
+HxH(const C<F>* __restrict x /*x and t*/, const C<F> * __restrict params, C<F>* __restrict y /*HxH*/) 
 {
   const C<F> &X0 = x[0];
   const C<F> &X1 = x[1];
@@ -7049,12 +7049,12 @@ struct minus_io<chicago14a, F> {
   
   // nvislines = 15 for Chicago.
   // INPUT ---------------------------------------------------------------------
-  static void point_tangents2params(F p[pp::nviews][pp::npoints][ncoords2d], F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/);
+  static void point_tangents2params(F p[pp::nviews][pp::npoints][ncoords2d], F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict params/*[static 2*M::nparams]*/);
   // this function is the same for all problems
-  static void get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/);
-  static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
+  static void get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __restrict params/*[static 2*M::nparams]*/);
+  static void gammify(C<F> * __restrict params/*[ chicago: M::nparams]*/);
   static void point_tangents2lines(F p[pp::nviews][pp::npoints][ncoords2d], F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, F plines[pp::nvislines][ncoords2d_h]);
-  static void lines2params(F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ params/*[static M::n//params]*/);
+  static void lines2params(F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict params/*[static M::n//params]*/);
 
   // OUTPUT --------------------------------------------------------------------
   static void all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], unsigned id_sols[M::nsols], unsigned *nsols_final);
@@ -7068,7 +7068,7 @@ struct minus_io<chicago14a, F> {
 template <typename F>
 inline void 
 minus_io<chicago14a, F>::
-lines2params(F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+lines2params(F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict params/*[static 2*M::nparams]*/)
 {
   typedef minus_util<F> util;
   typedef minus_3d<F> vec;
@@ -7079,7 +7079,7 @@ lines2params(F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ params/*[
   // converts 1st 9 lines to C<F> (imaginary part zero)
   // remembering: 1st 9 lines are the ones between the points (no tangents)
   // 
-  // 9x3 out of the 15x3 of the pairsiwe lines, linearized as 27x1
+  // 9x3 out of the 15x3 of the pairwise lines, linearized as 27x1
   // Tim: pF is matrix(targetLines^{0..8},27,1);
   // Order: row-major
   const F *pl = (const F *)plines;
@@ -7127,7 +7127,7 @@ lines2params(F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ params/*[
 //
 // gamma1 .. gamma9
 // 
-// diag0 Generate a 3*9 = 27 entry thing by duplicationg gammas
+// diag0 Generate a 3*9 = 27 entry thing by duplicating gammas
 // gamma1
 // gamma1
 // gamma1
@@ -7157,7 +7157,7 @@ lines2params(F plines[pp::nvislines][ncoords2d_h], C<F> * __restrict__ params/*[
 template <typename F>
 inline void 
 minus_io<chicago14a, F>::
-gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
+gammify(C<F> * __restrict params /*[ chicago: M::nparams]*/)
 {
   typedef minus_util<F> util;
   //  params = (diag0|diag1|diag2|diag3|diag4).*params;
@@ -7197,7 +7197,7 @@ gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
 // 
 // The points that have tangents are indicated by the indices id_tgt0  < id_tgt0 < 3
 // 
-// pLines is a 15x3 matrix of line coefs  (we use view-line-point index, this
+// pLines is a 15x3 matrix of line coeffs  (we use view-line-point index, this
 // is inverted to match Hongyi)
 //    1    -- l_1_1 --
 //    2    -- l_1_2 --
@@ -7273,7 +7273,7 @@ point_tangents2lines(F p[pp::nviews][pp::npoints][ncoords2d], F t[pp::nviews][pp
 template <typename F>
 inline void 
 minus_io<chicago14a, F>::
-point_tangents2params(F p[pp::nviews][pp::npoints][ncoords2d], F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+point_tangents2params(F p[pp::nviews][pp::npoints][ncoords2d], F tgt[pp::nviews][pp::npoints][ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict params/*[static 2*M::nparams]*/)
 {
   F plines[pp::nvislines][ncoords2d_h];
   point_tangents2lines(p, tgt, id_tgt0, id_tgt1, plines);
@@ -7285,7 +7285,7 @@ point_tangents2params(F p[pp::nviews][pp::npoints][ncoords2d], F tgt[pp::nviews]
 template <typename F>
 inline void
 minus_io<chicago14a, F>::
-get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+get_params_start_target(F plines[/*15 for chicago*/][ncoords2d_h], C<F> * __restrict params/*[static 2*M::nparams]*/)
 {
   lines2params(plines, params);
   gammify(params);

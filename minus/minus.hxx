@@ -52,7 +52,7 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
   PartialPivLU<Matrix<C<F>, f::nve, f::nve> > lu;
 
   solution *t_s = raw_solutions + sol_min;  // current target solution
-  const C<F>* __restrict__ s_s = s_sols + sol_min*f::nve;    // current start solution
+  const C<F>* __restrict s_s = s_sols + sol_min*f::nve;    // current start solution
   for (unsigned sol_n = sol_min; sol_n < sol_max; ++sol_n) { // solution loop
     t_s->status = PROCESSING;
     bool end_zone = false;
@@ -226,30 +226,30 @@ all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3
   }
 }
 
-template <problem P, typename F>
-inline void 
-minus_io_14a<P, F>::
-solution2cams(/*const but use as scratch*/ F rs[M::nve], F cameras[2/*2nd and 3rd cams relative to 1st*/][4][3])
-{
-  typedef minus_util<F> u;
-  // camera 0 (2nd camera relative to 1st)
-  u::quat2rotm(rs, (F *) cameras[0]);
-  cameras[0][3][0] = rs[8];
-  cameras[0][3][1] = rs[9];
-  cameras[0][3][2] = rs[10];
+// template <problem P, typename F>
+// inline void 
+// minus_io_14a<P, F>::
+// solution2cams(/*const but use as scratch*/ F rs[M::nve], F cameras[2/*2nd and 3rd cams relative to 1st*/][4][3])
+// {
+//   typedef minus_util<F> u;
+//   // camera 0 (2nd camera relative to 1st)
+//   u::quat2rotm(rs, (F *) cameras[0]);
+//   cameras[0][3][0] = rs[8];
+//   cameras[0][3][1] = rs[9];
+//   cameras[0][3][2] = rs[10];
   
-  // camera 1 (3rd camera relative to 1st)
-  u::quat2rotm(rs+4, (F *) cameras[1]);
-  cameras[1][3][0] = rs[11];
-  cameras[1][3][1] = rs[12];
-  cameras[1][3][2] = rs[13];
+//   // camera 1 (3rd camera relative to 1st)
+//   u::quat2rotm(rs+4, (F *) cameras[1]);
+//   cameras[1][3][0] = rs[11];
+//   cameras[1][3][1] = rs[12];
+//   cameras[1][3][2] = rs[13];
 
-  // quat12 rs(0:3), quat12 rs(4:7)
-  //  T12 = solutions(9:11);
-  //  T13 = solutions(12:14);
-  //  R12 = quat2rotm(transpose(quat12));
-  //  R13 = quat2rotm(transpose(quat13));
-}
+//   // quat12 rs(0:3), quat12 rs(4:7)
+//   //  T12 = solutions(9:11);
+//   //  T13 = solutions(12:14);
+//   //  R12 = quat2rotm(transpose(quat12));
+//   //  R13 = quat2rotm(transpose(quat13));
+// }
 
 // The camera parameter is cameras[img] which is a [4][3] array,
 // where the first 3x3 block is R, and the 4th row is T. img is img 0 or 1,

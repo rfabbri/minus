@@ -6,8 +6,8 @@ namespace MiNuS {
   
 template <typename F>
 struct eval<cleveland14a, F> {
-  static void Hxt(const C<F> * __restrict__ x /*x, t*/,    const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
-  static void HxH(const C<F> * __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
+  static void Hxt(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
+  static void HxH(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
 };
 
 // Evaluates Hx and Ht at the same time, reusing expressions.
@@ -26,7 +26,7 @@ struct eval<cleveland14a, F> {
 template <typename F>
 inline void 
 eval<cleveland14a, F>::
-Hxt(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/) 
+Hxt(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/) 
 {
   const C<F> &X0 = x[0];
   const C<F> &X1 = x[1];
@@ -3831,7 +3831,7 @@ Hxt(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F>
 template <typename F>
 inline void 
 eval<cleveland14a, F>::
-HxH(const C<F>* __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F>* __restrict__ y /*HxH*/) 
+HxH(const C<F>* __restrict x /*x and t*/, const C<F> * __restrict params, C<F>* __restrict y /*HxH*/) 
 {
   const C<F> &X0 = x[0];
   const C<F> &X1 = x[1];
@@ -7031,7 +7031,7 @@ namespace MiNuS {
 template <typename F>
 inline void 
 minus_io<cleveland14a, F>::
-lines2params(const F plines[pp::nvislines][io::ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+lines2params(const F plines[pp::nvislines][io::ncoords2d_h], C<F> * __restrict params/*[static 2*M::nparams]*/)
 {
   typedef minus_util<F> util;
   typedef minus_3d<F> vec;
@@ -7126,7 +7126,7 @@ lines2params(const F plines[pp::nvislines][io::ncoords2d_h], C<F> * __restrict__
 template <typename F>
 inline void 
 minus_io<cleveland14a, F>::
-gammify(C<F> * __restrict__ params /*[ chicago: M::nparams]*/)
+gammify(C<F> * __restrict params /*[ chicago: M::nparams]*/)
 {
   typedef minus_util<F> util;
   //  params = (diag0|diag1|diag2|diag3|diag4).*params;
@@ -7237,7 +7237,7 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F 
 template <typename F>
 inline void
 minus_io<cleveland14a, F>::
-get_params_start_target(F plines[/*15 for chicago*/][io::ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+get_params_start_target(F plines[/*15 for chicago*/][io::ncoords2d_h], C<F> * __restrict params/*[static 2*M::nparams]*/)
 {
   // the user provides the start params in the first half of params.
   // we fill the second half and gammify both.
@@ -7257,7 +7257,7 @@ get_params_start_target(F plines[/*15 for chicago*/][io::ncoords2d_h], C<F> * __
 template <typename F>
 inline void 
 minus_io<cleveland14a, F>::
-point_tangents2params(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F tgt[pp::nviews][pp::npoints][io::ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+point_tangents2params(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F tgt[pp::nviews][pp::npoints][io::ncoords2d], unsigned id_tgt0, unsigned id_tgt1, C<F> * __restrict params/*[static 2*M::nparams]*/)
 {
   // the user provides the start params in the first half of params.
   // we fill the second half and gammify both.
@@ -7270,7 +7270,7 @@ point_tangents2params(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F
 template <typename F>
 inline void 
 minus_io<cleveland14a, F>::
-point_tangents2params_img(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F tgt[pp::nviews][pp::npoints][io::ncoords2d], unsigned id_tgt0, unsigned id_tgt1, const F K[/*3 or 2*/][io::ncoords2d_h], C<F> * __restrict__ params/*[static 2*M::nparams]*/)
+point_tangents2params_img(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F tgt[pp::nviews][pp::npoints][io::ncoords2d], unsigned id_tgt0, unsigned id_tgt1, const F K[/*3 or 2*/][io::ncoords2d_h], C<F> * __restrict params/*[static 2*M::nparams]*/)
 {
   F pn[pp::nviews][pp::npoints][io::ncoords2d];
   F tn[pp::nviews][pp::npoints][io::ncoords2d];

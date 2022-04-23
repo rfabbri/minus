@@ -67,8 +67,8 @@ class expminus_core { // fully static, not to be instantiated - just used for te
   static constexpr unsigned NVEPLUS1 = f::nve+1;
   static constexpr unsigned NVEPLUS2 = f::nve+2;
   static constexpr unsigned NVE2 = f::nve*f::nve;
-  static void evaluate_Hxt(const C<F> * __restrict__ x /*x, t*/,    const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
-  static void evaluate_HxH(const C<F> * __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
+  static void evaluate_Hxt(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
+  static void evaluate_HxH(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
 };
 
 // TODO: make these static
@@ -133,13 +133,13 @@ struct expminus_core<P, F>::track_settings {
 //                      tStepMin => 1e-7
 
 template <problem P, typename F>
-void expminus_core<P, F>::evaluate_Hxt(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/)
+void expminus_core<P, F>::evaluate_Hxt(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/)
 {
   eval<P,F>::Hxt(x, params, y);
 }
 
 template <problem P, typename F>
-void expminus_core<P, F>::evaluate_HxH(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/)
+void expminus_core<P, F>::evaluate_HxH(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/)
 {
   eval<P,F>::HxH(x, params, y);
 }

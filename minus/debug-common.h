@@ -80,46 +80,46 @@ same_matrices_up_to_row_scale(const Float *v, const Float *w, unsigned nrows, un
 template <unsigned N, typename F /* no complex number, only float types */>
 struct minus_array_util { // Not speed critical -----------------------------------------
   static inline void 
-  multiply_scalar_to_self(F *__restrict__ a, F b)
+  multiply_scalar_to_self(F *__restrict a, F b)
   {
     for (unsigned i = 0; i < N; ++i, ++a) *a = *a * b;
   }
 
   static inline void
-  negate_self(F * __restrict__ a)
+  negate_self(F * __restrict a)
   {
     for (unsigned i = 0; i < N; ++i, ++a) *a = -*a;
   }
 
   static inline void 
-  multiply_self(F * __restrict__ a, const F * __restrict__ b)
+  multiply_self(F * __restrict a, const F * __restrict b)
   {
     for (unsigned int i=0; i < N; ++i,++a,++b) *a *= *b;
   }
 
   static inline void 
-  add_to_self(F * __restrict__ a, const F * __restrict__ b)
+  add_to_self(F * __restrict a, const F * __restrict b)
   {
     for (unsigned int i=0; i < N; ++i,++a,++b) *a += *b;
   }
 
   static inline void 
-  add_scalar_to_self(F * __restrict__ a, F b)
+  add_scalar_to_self(F * __restrict a, F b)
   {
     for (unsigned int i=0; i < N; ++i,++a) *a += b;
   }
 
   static inline void 
-  copy(const F * __restrict__ a, F * __restrict__ b)
+  copy(const F * __restrict a, F * __restrict b)
   {
     memcpy(b, a, N*sizeof(F));
   }
 
   static inline F
-  norm2(const F *__restrict__ a)
+  norm2(const F *__restrict a)
   {
     F val = 0;
-    F const* __restrict__ end = a+N;
+    F const* __restrict end = a+N;
     while (a != end) val += std::abs(*a++);
     return val;
   }
