@@ -16,8 +16,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest,  macOS-latest, windows-latest]
+    env:
+      CTEST_OUTPUT_ON_FAILURE: 1
     steps:
       - uses: actions/checkout@v2
+
+      - name: Init build dir
+        run: |
+          mkdir ./build
 
       - name: Configure CMake
         working-directory: ./build
