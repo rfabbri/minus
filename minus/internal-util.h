@@ -6,51 +6,51 @@
 namespace MiNuS {
   
 template <typename F>
-using C = std::complex<F>;
+using C = typename std::complex<F>;
 
 template <unsigned N, typename F>
 struct minus_array { // Speed critical -----------------------------------------
   static inline void 
-  multiply_scalar_to_self(C<F> *__restrict__ a, C<F> b)
+  multiply_scalar_to_self(C<F> *__restrict a, C<F> b)
   {
     for (unsigned i = 0; i < N; ++i, ++a) *a = *a * b;
   }
 
   static inline void
-  negate_self(C<F> * __restrict__ a)
+  negate_self(C<F> * __restrict a)
   {
     for (unsigned i = 0; i < N; ++i, ++a) *a = -*a;
   }
 
   static inline void 
-  multiply_self(C<F> * __restrict__ a, const C<F> * __restrict__ b)
+  multiply_self(C<F> * __restrict a, const C<F> * __restrict b)
   {
     for (unsigned int i=0; i < N; ++i,++a,++b) *a *= *b;
   }
 
   static inline void 
-  add_to_self(C<F> * __restrict__ a, const C<F> * __restrict__ b)
+  add_to_self(C<F> * __restrict a, const C<F> * __restrict b)
   {
     for (unsigned int i=0; i < N; ++i,++a,++b) *a += *b;
   }
 
   static inline void 
-  add_scalar_to_self(C<F> * __restrict__ a, C<F> b)
+  add_scalar_to_self(C<F> * __restrict a, C<F> b)
   {
     for (unsigned int i=0; i < N; ++i,++a) *a += b;
   }
 
   static inline void 
-  copy(const C<F> * __restrict__ a, C<F> * __restrict__ b)
+  copy(const C<F> * __restrict a, C<F> * __restrict b)
   {
     memcpy(b, a, N*sizeof(C<F>));
   }
 
   static inline F
-  norm2(const C<F> *__restrict__ a)
+  norm2(const C<F> *__restrict a)
   {
     F val = 0;
-    C<F> const* __restrict__ end = a+N;
+    C<F> const* __restrict end = a+N;
     while (a != end) val += std::norm(*a++);
     return val;
   }
@@ -165,7 +165,7 @@ struct minus_util {
   }
 
   // random complex
-  static void randc(C<F> * __restrict__ z) { *z = C<F>{gauss(rnd), gauss(rnd)}; *z /= std::abs(*z); }
+  static void randc(C<F> * __restrict z) { *z = C<F>{gauss(rnd), gauss(rnd)}; *z /= std::abs(*z); }
   static std::random_device rd;
   static std::mt19937 rnd;
   static std::normal_distribution<F> gauss;

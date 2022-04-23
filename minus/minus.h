@@ -18,10 +18,14 @@
 
 #include <complex>
 
+#if defined(_MSC_VER)
+#define __attribute__(x) /* blank - should simply ignore thanks to C preprocessor */
+#endif
+
 namespace MiNuS {
   
 template <typename F>
-using C = std::complex<F>;
+using C = typename std::complex<F>;
 
 // The problem solvers that this solver template currently supports
 enum problem {chicago14a, chicago6a, cleveland14a, phoenix10a /*, standard*/};
@@ -108,8 +112,8 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   static constexpr unsigned NVEPLUS1 = f::nve+1;
   static constexpr unsigned NVEPLUS2 = f::nve+2;
   static constexpr unsigned NVE2 = f::nve*f::nve;
-  static void evaluate_Hxt(const C<F> * __restrict__ x /*x, t*/,    const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
-  static void evaluate_HxH(const C<F> * __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
+  static void evaluate_Hxt(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
+  static void evaluate_HxH(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
 };
 
 // TODO: make these static
@@ -181,18 +185,18 @@ struct minus_core<P, F>::track_settings {
 // specialization
 template <problem P, typename F>
 struct eval {
-  static void Hxt(const C<F> * __restrict__ x /*x, t*/,    const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
-  static void HxH(const C<F> * __restrict__ x /*x and t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/);
+  static void Hxt(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
+  static void HxH(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
 };
 
 template <problem P, typename F>
-void minus_core<P, F>::evaluate_Hxt(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/)
+void minus_core<P, F>::evaluate_Hxt(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/)
 {
   eval<P,F>::Hxt(x, params, y);
 }
 
 template <problem P, typename F>
-void minus_core<P, F>::evaluate_HxH(const C<F> * __restrict__ x /*x, t*/, const C<F> * __restrict__ params, C<F> * __restrict__ y /*HxH*/)
+void minus_core<P, F>::evaluate_HxH(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/)
 {
   eval<P,F>::HxH(x, params, y);
 }
@@ -242,7 +246,28 @@ struct minus_io_14a : public minus_io_common<F> {
   // Output --------------------------------------------------------------------
   static void RC_to_QT_format(const F rc[pp::nviews][4][3], F qt[M::nve]);
   static void all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], unsigned id_sols[M::nsols], unsigned *nsols_final);
-  static void solution2cams(F rs[M::f::nve], F cameras[2][4][3]);
+  static void solution2cams(F rs[M::f::nve], F cameras[2][4][3])
+  {
+  typedef minus_util<F> u;
+  // camera 0 (2nd camera relative to 1st)
+  u::quat2rotm(rs, (F *) cameras[0]);
+  cameras[0][3][0] = rs[8];
+  cameras[0][3][1] = rs[9];
+  cameras[0][3][2] = rs[10];
+  
+  // camera 1 (3rd camera relative to 1st)
+  u::quat2rotm(rs+4, (F *) cameras[1]);
+  cameras[1][3][0] = rs[11];
+  cameras[1][3][1] = rs[12];
+  cameras[1][3][2] = rs[13];
+
+  // quat12 rs(0:3), quat12 rs(4:7)
+  //  T12 = solutions(9:11);
+  //  T13 = solutions(12:14);
+  //  R12 = quat2rotm(transpose(quat12));
+  //  R13 = quat2rotm(transpose(quat13));
+}
+
   static bool probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *probe_cameras,
       unsigned *solution_index);
   static bool probe_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
@@ -290,7 +315,7 @@ struct minus_io : public minus_io_common<F> {
   static constexpr unsigned  nviews = pp::nviews;
   static constexpr unsigned  npoints = pp::npoints;
   // Input ---------------------------------------------------------------------
-  static void gammify(C<F> * __restrict__ params/*[ chicago: M::nparams]*/);
+  static void gammify(C<F> * __restrict params/*[ chicago: M::nparams]*/);
   // Output --------------------------------------------------------------------
   static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
 };
