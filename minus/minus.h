@@ -21,6 +21,7 @@
 #if defined(_MSC_VER)
 #define __attribute__(x) /* blank - should simply ignore thanks to C preprocessor */
 #endif
+#include "internal-util.h"
 
 namespace MiNuS {
   
@@ -248,25 +249,25 @@ struct minus_io_14a : public minus_io_common<F> {
   static void all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], unsigned id_sols[M::nsols], unsigned *nsols_final);
   static void solution2cams(F rs[M::f::nve], F cameras[2][4][3])
   {
-  typedef minus_util<F> u;
-  // camera 0 (2nd camera relative to 1st)
-  u::quat2rotm(rs, (F *) cameras[0]);
-  cameras[0][3][0] = rs[8];
-  cameras[0][3][1] = rs[9];
-  cameras[0][3][2] = rs[10];
-  
-  // camera 1 (3rd camera relative to 1st)
-  u::quat2rotm(rs+4, (F *) cameras[1]);
-  cameras[1][3][0] = rs[11];
-  cameras[1][3][1] = rs[12];
-  cameras[1][3][2] = rs[13];
+    typedef minus_util<F> u;
+    // camera 0 (2nd camera relative to 1st)
+    u::quat2rotm(rs, (F *) cameras[0]);
+    cameras[0][3][0] = rs[8];
+    cameras[0][3][1] = rs[9];
+    cameras[0][3][2] = rs[10];
+    
+    // camera 1 (3rd camera relative to 1st)
+    u::quat2rotm(rs+4, (F *) cameras[1]);
+    cameras[1][3][0] = rs[11];
+    cameras[1][3][1] = rs[12];
+    cameras[1][3][2] = rs[13];
 
-  // quat12 rs(0:3), quat12 rs(4:7)
-  //  T12 = solutions(9:11);
-  //  T13 = solutions(12:14);
-  //  R12 = quat2rotm(transpose(quat12));
-  //  R13 = quat2rotm(transpose(quat13));
-}
+    // quat12 rs(0:3), quat12 rs(4:7)
+    //  T12 = solutions(9:11);
+    //  T13 = solutions(12:14);
+    //  R12 = quat2rotm(transpose(quat12));
+    //  R13 = quat2rotm(transpose(quat13));
+  }
 
   static bool probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *probe_cameras,
       unsigned *solution_index);
