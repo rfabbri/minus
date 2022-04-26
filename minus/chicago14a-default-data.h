@@ -18,7 +18,7 @@ struct minus_data<chicago14a,F> {
   static const complex *params_;
   static F p_[io::pp::nviews][io::pp::npoints][io::ncoords2d];
   static const F p_correct_[io::pp::nviews][io::pp::npoints][io::ncoords2d];
-  static F cameras_gt_[io::pp::nviews][4][3];;
+  static F cameras_gt_[io::pp::nviews][4][3];
   static F cameras_gt_quat_[M::nve];
   static F tgt_[io::pp::nviews][io::pp::npoints][io::ncoords2d];
   static const F tgt_correct_[io::pp::nviews][io::pp::npoints][io::ncoords2d];
