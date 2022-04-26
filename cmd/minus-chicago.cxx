@@ -354,7 +354,7 @@ void
 print_settings(const M::track_settings &settings)
 {
   #ifdef M_VERBOSE
-  std::cerr << " track settings -----------------------------------------------\n";
+  std::cerr << "Track settings ------------------------------------------------\n";
   const char *names[11] = {
     "init_dt_",
     "min_dt_",
@@ -538,8 +538,8 @@ main(int argc, char **argv)
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(t2 - t1).count();
     #ifdef M_VERBOSE
-    std::cerr << "LOG \033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
     print_num_steps(solutions);
+    std::cerr << "LOG \033[1;32mTime of solver: " << duration << "ms\e[m" << std::endl;
     #endif
   }
 
@@ -608,8 +608,8 @@ main(int argc, char **argv)
     high_resolution_clock::time_point t2 = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(t2 - t1).count();
     #ifdef M_VERBOSE
-    std::cerr << "LOG \033[1;32mTime of solver A -> B: " << duration << "ms\e[m" << std::endl;
     print_num_steps(solutions);
+    std::cerr << "LOG \033[1;32mTime of solver A -> B: " << duration << "ms\e[m" << std::endl;
     #endif
   }
   
