@@ -7,10 +7,6 @@ if(NOT CMAKE_CXX_STANDARD_REQUIRED)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose Release or Debug" FORCE)
-endif()
-
 #------------------------------------------------------------------------------
 # This command must be the last command in this file
 #if(NOT MINUS_NO_EXPORT)
