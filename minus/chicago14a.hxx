@@ -7080,6 +7080,8 @@ lines2params(const F plines[pp::nvislines][io::ncoords2d_h], C<F> * __restrict p
   util::rand_sphere(params+27+12,7);
   util::rand_sphere(params+27+12+7,5);
   util::rand_sphere(params+27+12+7+5,5);
+  // XXX juliana: print out params[27+12+i] para i = 0 a 7+5+5
+
 //  F c1[7] = {0.356520517738511 ,  0.450534892837314 ,  0.497658671520414 ,  0.530494023592847 ,0.350361054584548 ,  0.040309061260114 ,  0.128240708712460};
 //  memcpy(params+27+12,c1,7*sizeof(F));
 
@@ -7161,6 +7163,86 @@ gammify(C<F> * __restrict params /*[ chicago: M::nparams]*/)
   //  total  27   12    7      5    5 = 56
   assert(i == 56);
 }
+
+// --- gammify -----------------------------------------------------------------
+//
+// 9 random complex numbers (rand x + i rand y), non unit, seemingly uniform
+// Corresponding to the 9 pairwise lines. Seems unit is a better idea
+// numerically.
+//
+// gamma1 .. gamma9
+// 
+// diag0 Generate a 3*9 = 27 entry thing by duplicationg gammas
+// gamma1
+// gamma1
+// gamma1
+// gamma2
+// gamma2
+// gamma2
+// ...
+// gamma9
+// gamma9
+// gamma9
+//
+//  tripleIntersections := {{0,3,9},{0+1,3+1,9+1},{0+2,3+2,9+2},
+//  {0,6,12},{0+1,6+1,12+1},{0+2,6+2,12+2}};
+//
+//  for each triple intersection i
+//    Get the first two (point-point) lines
+//    
+//    diag1(i) = conjugate(gammas(tripleIntersection(i)(0)))
+//    diag1(i+1) = conjugate(gammas(tripleIntersection(i)(1)))
+//    
+//  diag2 := 7 times a fixed random(); -- t chart gamma
+//  diag3 := 5 times a fixed random(); -- q chart, cam 2, gamma
+//  diag4 := 5 times ...               -- q chart, cam 3, gamma
+//  p' := (diag0|diag1|diag2|diag3|diag4).*p;
+//  total    27   12    7      5    5 = 56
+//
+template <typename F>
+inline void 
+minus_io<chicago14a, F>::
+gammify(C<F> * __restrict params /*[ chicago: M::nparams]*/)
+{
+  typedef minus_util<F> util;
+  //  params = (diag0|diag1|diag2|diag3|diag4).*params;
+  // diag0 --> pF in params ----------------------------------------------------
+  C<F> (*p)[3] = (C<F> (*)[3]) params;
+  C<F> gammas[9]; 
+  for (unsigned l=0; l < 9; ++l) {
+    util::randc(gammas+l);
+    const C<F> &g = gammas[l];
+    std::cout << g << std::endl;
+    p[l][0] *= g; p[l][1] *= g; p[l][2] *= g;
+  }
+  
+  // ids of two point-point lines at tangents
+  static unsigned constexpr triple_intersect[6][2] = {{0,3},{0+1,3+1},{0+2,3+2},{0,6},{0+1,6+1},{0+2,6+2}};
+
+  // diag1 --> pTriple in params -----------------------------------------------
+  unsigned i = 9*3;
+  for (unsigned tl=0; tl < 6; ++tl) {  // for each tangent line
+    params[i++] *= std::conj(gammas[triple_intersect[tl][0]]);
+    params[i++] *= std::conj(gammas[triple_intersect[tl][1]]);
+  }
+  
+  // pChart gammas -------------------------------------------------------------
+  C<F> g;
+  // diag2 -- tchart gamma
+  util::randc(&g); for (unsigned k=0; k < 7; ++k) params[i++] *= g;
+  std::cout << g << std::endl;
+  // diag3 -- qchart, cam 2, gamma
+  util::randc(&g); for (unsigned k=0; k < 5; ++k) params[i++] *= g;
+  std::cout << g << std::endl;
+  // diag4 -- qchart, cam 3, gamma
+  util::randc(&g); for (unsigned k=0; k < 5; ++k) params[i++] *= g;
+  std::cout << g << std::endl;
+  //  p = (diag0|diag1|diag2|diag3|diag4).*p;
+  //  total  27   12    7      5    5 = 56
+  assert(i == 56);
+}
+
+
 
 // Generate "visible" line representation from input point-tangents
 // 
