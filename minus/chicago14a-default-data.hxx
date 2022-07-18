@@ -4800,7 +4800,7 @@ params_start_target_[2*M::f::nparams] = {
 //
 // The point-tangent inputs giving rise to this are given below
 template <typename F>
-const std::complex<F> minus_data<chicago14a,F>::
+std::complex<F> minus_data<chicago14a,F>::
 default_params_start_target_gammified_[2*M::f::nparams] = { // start-target param pairs, P01 in chicago.m2
   {.391195550619826,-.00262962533857666},
   {.310140709227333,+.169842562835882},
