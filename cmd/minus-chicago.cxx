@@ -638,6 +638,7 @@ main(int argc, char **argv)
     bool found = io::probe_all_solutions(solutions, data::cameras_gt_quat_, &sol_id);
     if (found) {
       LOG("found solution at index: " << sol_id);
+      LOG("number of iterations of solution: " << solutions[sol_id].num_steps);
       if (solutions[sol_id].status != M::REGULAR)
         LOG("PROBLEM found ground truth but it is not REGULAR: " << sol_id);
     } else {
