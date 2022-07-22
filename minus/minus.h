@@ -132,7 +132,7 @@ struct minus_core<P, F>::track_settings {
     infinity_threshold2_(infinity_threshold_ * infinity_threshold_),
     max_corr_steps_(4),  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
     num_successes_before_increase_(20), // m2 numberSuccessesBeforeIncrease
-    max_num_steps_(1000)
+    max_num_steps_(650)
   { }
   
   F init_dt_;   // m2 tStep, t_step, raw interface code initDt

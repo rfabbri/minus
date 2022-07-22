@@ -7164,7 +7164,7 @@ gammify(C<F> * __restrict params /*[ chicago: M::nparams]*/)
 
 // Generate "visible" line representation from input point-tangents
 // 
-// The points that have tangents are indicated by the indices id_tgt0  < id_tgt0 < 3
+// The points that have tangents are indicated by the indices i0  < i1 < 3
 // 
 // pLines is a 15x3 matrix of line coefs  (we use view-line-point index, this
 // is inverted to match Hongyi)
