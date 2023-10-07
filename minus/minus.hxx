@@ -218,7 +218,7 @@ all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3
   *nsols_final = 0;
   for (unsigned sol=0; sol < M::nsols; ++sol) {
     F real_solution[M::nve];
-    if (v::get_real(raw_solutions[sol].x, real_solution)) {
+    if (raw_solutions[sol].status == M::REGULAR && v::get_real(raw_solutions[sol].x, real_solution)) {
       id_sols[(*nsols_final)++] = sol;
       // build cams by using quat2rotm
       solution2cams(real_solution, (F (*)[4][3] ) (cameras + sol));
