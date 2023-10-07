@@ -7214,8 +7214,14 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F 
 
   if (v::area2(p[0][i0],p[0][i1],p[0][i2])  < eps || 
       v::area2(p[1][i0],p[1][i1],p[1][i2])  < eps || 
-      v::area2(p[2][i0],p[2][i1],p[2][i2])  < eps)
+      v::area2(p[2][i0],p[2][i1],p[2][i2])  < eps) {
+//    std::cerr << "MINUS: area error ----XXXXXXXXXXXXX-------\n";
+//    std::cerr << "Areas: " << 
+//      v::area2(p[0][i0],p[0][i1],p[0][i2]) << " "  << 
+//      v::area2(p[1][i0],p[1][i1],p[1][i2]) << " " << 
+//      v::area2(p[2][i0],p[2][i1],p[2][i2]) << std::endl;
     return false;
+  }
 
   
   vec::cross2(p[0][i0], p[0][i1], plines[0]);
@@ -7241,22 +7247,22 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F 
   minus_3d<F>::point_tangent2line(p[2][i1], t[2][i1], plines[14]);
   // TODO: test normalize to unit vectors for better numerics
 
-  if (v::abs_angle_between_lines(plines[0], plines[9])  < eps || 
-      v::abs_angle_between_lines(plines[1], plines[10]) < eps ||
-      v::abs_angle_between_lines(plines[2], plines[11]) < eps ||
+//  if (v::abs_angle_between_lines(plines[0], plines[9])  < eps || 
+//      v::abs_angle_between_lines(plines[1], plines[10]) < eps ||
+//      v::abs_angle_between_lines(plines[2], plines[11]) < eps ||
 
-      v::abs_angle_between_lines(plines[3], plines[9])  < eps ||
-      v::abs_angle_between_lines(plines[4], plines[10]) < eps ||
-      v::abs_angle_between_lines(plines[5], plines[11]) < eps ||
-      
-      v::abs_angle_between_lines(plines[6], plines[12]) < eps ||
-      v::abs_angle_between_lines(plines[7], plines[13]) < eps ||
-      v::abs_angle_between_lines(plines[8], plines[14]) < eps ||
-      
-      v::abs_angle_between_lines(plines[0], plines[12]) < eps ||
-      v::abs_angle_between_lines(plines[1], plines[13]) < eps ||
-      v::abs_angle_between_lines(plines[2], plines[14]) < eps)
-    return false;
+//      v::abs_angle_between_lines(plines[3], plines[9])  < eps ||
+//      v::abs_angle_between_lines(plines[4], plines[10]) < eps ||
+//      v::abs_angle_between_lines(plines[5], plines[11]) < eps ||
+//      
+//      v::abs_angle_between_lines(plines[6], plines[12]) < eps ||
+//      v::abs_angle_between_lines(plines[7], plines[13]) < eps ||
+//      v::abs_angle_between_lines(plines[8], plines[14]) < eps ||
+//      
+//      v::abs_angle_between_lines(plines[0], plines[12]) < eps ||
+//      v::abs_angle_between_lines(plines[1], plines[13]) < eps ||
+//      v::abs_angle_between_lines(plines[2], plines[14]) < eps)
+//    return false;
   
   io::normalize_lines(plines, pp::nvislines);
   return true;

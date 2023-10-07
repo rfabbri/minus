@@ -62,7 +62,7 @@ struct minus_array { // Speed critical -----------------------------------------
   static inline F
   area2(const F p0[2], const F p1[2], const F p2[2])
   {
-    return std::fabs((p1[0]-p0[0])*(p2[1]-p0[1]))-((p2[0]-p0[0])*(p1[1]-p0[1]));
+    return std::fabs((p1[0]-p0[0])*(p2[1]-p0[1]) - (p2[0]-p0[0])*(p1[1]-p0[1]));
   }
 
   // From vgl
