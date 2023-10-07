@@ -7198,15 +7198,25 @@ gammify(C<F> * __restrict params /*[ chicago: M::nparams]*/)
 // if you intend to reuse it 
 //
 // Input points and tangents in normalized image coordinates.
+
 template <typename F>
-inline void 
+bool 
 minus_io<chicago14a, F>::
 point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F t[pp::nviews][pp::npoints][io::ncoords2d], unsigned i0, unsigned i1, F plines[pp::nvislines][io::ncoords2d_h])
 {
   typedef minus_3d<F> vec;
+  typedef minus_array<M::nve,F> v;
   
   assert (i0 < i1 && i1 < 3);
   unsigned i2 = (i0 == 0) ? ((i1 == 1) ? 2 : 1) : 0;
+
+  static constexpr double eps = 1e-4;
+
+  if (v::area2(p[0][i0],p[0][i1],p[0][i2])  < eps || 
+      v::area2(p[1][i0],p[1][i1],p[1][i2])  < eps || 
+      v::area2(p[2][i0],p[2][i1],p[2][i2])  < eps)
+    return false;
+
   
   vec::cross2(p[0][i0], p[0][i1], plines[0]);
   vec::cross2(p[1][i0], p[1][i1], plines[1]);
@@ -7230,8 +7240,26 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F 
   minus_3d<F>::point_tangent2line(p[1][i1], t[1][i1], plines[13]);
   minus_3d<F>::point_tangent2line(p[2][i1], t[2][i1], plines[14]);
   // TODO: test normalize to unit vectors for better numerics
+
+  if (v::abs_angle_between_lines(plines[0], plines[9])  < eps || 
+      v::abs_angle_between_lines(plines[1], plines[10]) < eps ||
+      v::abs_angle_between_lines(plines[2], plines[11]) < eps ||
+
+      v::abs_angle_between_lines(plines[3], plines[9])  < eps ||
+      v::abs_angle_between_lines(plines[4], plines[10]) < eps ||
+      v::abs_angle_between_lines(plines[5], plines[11]) < eps ||
+      
+      v::abs_angle_between_lines(plines[6], plines[12]) < eps ||
+      v::abs_angle_between_lines(plines[7], plines[13]) < eps ||
+      v::abs_angle_between_lines(plines[8], plines[14]) < eps ||
+      
+      v::abs_angle_between_lines(plines[0], plines[12]) < eps ||
+      v::abs_angle_between_lines(plines[1], plines[13]) < eps ||
+      v::abs_angle_between_lines(plines[2], plines[14]) < eps)
+    return false;
   
   io::normalize_lines(plines, pp::nvislines);
+  return true;
 }
 
 // gammify_start_params: set to false if your start parameters are already
@@ -7261,7 +7289,7 @@ get_params_start_target(
 // id_tgt0  < id_tgt0 < 3
 // 
 template <typename F>
-inline void 
+bool 
 minus_io<chicago14a, F>::
 point_tangents2params(
     const F p[pp::nviews][pp::npoints][io::ncoords2d], 
@@ -7273,13 +7301,15 @@ point_tangents2params(
   // the user provides the start params in the first half of params.
   // we fill the second half and gammify both.
   F plines[pp::nvislines][io::ncoords2d_h];
-  point_tangents2lines(p, tgt, id_tgt0, id_tgt1, plines);
+  if (!point_tangents2lines(p, tgt, id_tgt0, id_tgt1, plines))
+    return false;
   get_params_start_target(plines, params, gammify_start_params);
+  return true;
 }
 
 // Same but for pixel input
 template <typename F>
-inline void 
+inline bool
 minus_io<chicago14a, F>::
 point_tangents2params_img(
     const F p[pp::nviews][pp::npoints][io::ncoords2d], 
@@ -7300,7 +7330,7 @@ point_tangents2params_img(
   io::invert_intrinsics_tgt(K, tgt[0], tn[0], pp::npoints);
   io::invert_intrinsics_tgt(K, tgt[1], tn[1], pp::npoints);
   io::invert_intrinsics_tgt(K, tgt[2], tn[2], pp::npoints);
-  point_tangents2params(pn, tn, id_tgt0, id_tgt1, params/*[static 2*M::nparams]*/, gammify_start_params);
+  return point_tangents2params(pn, tn, id_tgt0, id_tgt1, params/*[static 2*M::nparams]*/, gammify_start_params);
 }
 
 } // namespace minus
@@ -7355,7 +7385,8 @@ minus<chicago14a, F>::solve(
   memcpy(params, data::params_start_target_, M::f::nparams*sizeof(C<F>));
   
   constexpr int id_tgt0 = 0; constexpr int id_tgt1 = 1; // TODO: select the best / least degenerate directions
-  io::point_tangents2params(p, tgt, id_tgt0, id_tgt1, params);
+  if (!io::point_tangents2params(p, tgt, id_tgt0, id_tgt1, params))
+    return false;
 
   typename M::solution solutions[M::nsols];
   typename M::track_settings settings = M::DEFAULT;

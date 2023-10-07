@@ -54,6 +54,36 @@ struct minus_array { // Speed critical -----------------------------------------
     while (a != end) val += std::norm(*a++);
     return val;
   }
+
+  // Area of 2D triangle with three vertices
+  // https://stackoverflow.com/questions/55601927/correct-way-to-calculate-triangle-area-from-3-vertices
+  //
+  // Value is doubled, for speed, actual area is 0.5*area2
+  static inline F
+  area2(const F p0[2], const F p1[2], const F p2[2])
+  {
+    return std::fabs((p1[0]-p0[0])*(p2[1]-p0[1]))-((p2[0]-p0[0])*(p1[1]-p0[1]));
+  }
+
+  // From vgl
+  // Get the anticlockwise angle between a line and the x axis.
+  static inline F
+  line_angle(F l[3])
+  {
+    return std::atan2 (l[1], l[0]);
+  }
+
+  // Angle between lines in homogeneous coordinates
+  // From vgl
+  static inline F
+  abs_angle_between_lines(F l0[3], F l1[3])
+  {
+    double diff = line_angle(l1) - line_angle(l0);
+    if (diff >  M_PI_2) diff -= M_PI;
+    if (diff < -M_PI_2) diff += M_PI;
+
+    return std::fabs(diff);
+  }
   
   // Get the real part of the solution vector s (e.g., member x of struct
   // solution).
