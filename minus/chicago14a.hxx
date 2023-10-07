@@ -7414,13 +7414,17 @@ minus<chicago14a, F>::solve(
 
   typename M::solution solutions[M::nsols];
   typename M::track_settings settings = M::DEFAULT;
-  std::thread t[4];
+
+  constexpr unsigned nthreads = 56; // make sure to use a multiple of M::nsols
+  constexpr unsigned npaths_per_thread = M::nsols/nthreads;
+  std::thread t[nthreads];
   { // TODO: smarter way to select start solutions
-    t[0] = std::thread(M::track, settings, data::start_sols_, params, solutions, 0, 78);
-    t[1] = std::thread(M::track, settings, data::start_sols_, params, solutions, 78, 78*2);
-    t[2] = std::thread(M::track, settings, data::start_sols_, params, solutions, 78*2, 78*3);
-    t[3] = std::thread(M::track, settings, data::start_sols_, params, solutions, 78*3, 78*4);
-    t[0].join(); t[1].join(); t[2].join(); t[3].join();
+    for (unsigned i = 0; i < nthreads; ++i)
+      t[i] = std::thread(M::track, settings, data::start_sols_, params, solutions, 
+          npaths_per_thread*i, npaths_per_thread*(i+1));
+
+    for (unsigned i = 0; i < nthreads; ++i)
+      t[i].join();
   }
   if (!io::has_valid_solutions(solutions))
     return false;
