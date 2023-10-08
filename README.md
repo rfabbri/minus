@@ -1,8 +1,7 @@
 <!--<img src="vxd-logo.gif" width="215" height="84" /> -->
 
 
-## MINUS: MInimial problem NUmerical continuation Solver 
-[![Build Status](https://github.com/rfabbri/minus/actions/workflows/compile_and_run_test.yml/badge.svg?branch=master)]
+## MINUS: MInimial problem NUmerical continuation Solver ![Build Status](https://github.com/rfabbri/minus/actions/workflows/compile_and_run_test.yml/badge.svg?branch=master)
 
 This package originated in solving medium-sized  (eg, degree > 100) square problems
 (ie, exactly-determined, 0-dimensional), notably in computer vision where
