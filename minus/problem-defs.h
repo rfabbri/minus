@@ -17,7 +17,8 @@ struct minus <P, F> {
       const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
       F solutions_cams[M::nsols][pp::nviews-1][4][3],  // first camera is always [I | 0]^t
       unsigned id_sols[M::nsols],
-      unsigned *nsols_final);
+      unsigned *nsols_final,
+      unsigned nthreads=4);
  
   // documentation in P.hxx
   static bool solve_img(
@@ -26,7 +27,8 @@ struct minus <P, F> {
       const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
       F solutions_cams[M::nsols][pp::nviews-1][4][3],  // first camera is always [I | 0]^t
       unsigned id_sols[M::nsols],
-      unsigned *nsols_final);
+      unsigned *nsols_final,
+      unsigned nthreads=4);
 };
 #undef P
 #define P cleveland14a

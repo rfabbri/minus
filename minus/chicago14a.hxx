@@ -7401,7 +7401,8 @@ minus<chicago14a, F>::solve(
     const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
     F solutions_cams[M::nsols][pp::nviews-1][4][3],  // first camera is always [I | 0]
     unsigned id_sols[M::nsols],
-    unsigned *nsols_final
+    unsigned *nsols_final,
+    unsigned nthreads
     )
 {
   typedef minus_data<chicago14a,F> data;
@@ -7415,8 +7416,8 @@ minus<chicago14a, F>::solve(
   typename M::solution solutions[M::nsols];
   typename M::track_settings settings = M::DEFAULT;
 
-  constexpr unsigned nthreads = 56; // make sure to use a multiple of M::nsols
-  constexpr unsigned npaths_per_thread = M::nsols/nthreads;
+  unsigned npaths_per_thread = M::nsols/nthreads;
+  assert(M::nsols % nthreads == 0);
   std::thread t[nthreads];
   { // TODO: smarter way to select start solutions
     for (unsigned i = 0; i < nthreads; ++i)
@@ -7448,7 +7449,8 @@ minus<chicago14a, F>::solve_img(
     const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
     F solutions_cams[M::nsols][pp::nviews-1][4][3],  // first camera is always [I | 0]
     unsigned id_sols[M::nsols],
-    unsigned *nsols_final)
+    unsigned *nsols_final,
+    unsigned nthreads)
 {
   F pn[pp::nviews][pp::npoints][io::ncoords2d];
   F tn[pp::nviews][pp::npoints][io::ncoords2d];
@@ -7462,7 +7464,7 @@ minus<chicago14a, F>::solve_img(
   io::invert_intrinsics_tgt(K, tgt[1], tn[1], pp::npoints);
   io::invert_intrinsics_tgt(K, tgt[2], tn[2], pp::npoints);
 
-  return solve(pn, tn, solutions_cams, id_sols, nsols_final);
+  return solve(pn, tn, solutions_cams, id_sols, nsols_final, nthreads);
 }
 
 //
