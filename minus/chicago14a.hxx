@@ -7366,6 +7366,7 @@ point_tangents2params_img(
 
 namespace MiNuS {
 
+
 // Intrinsics already inverted 
 // (inside RANSAC one will alredy have pre-inverted K)
 //
@@ -7418,14 +7419,18 @@ minus<chicago14a, F>::solve(
 
   unsigned npaths_per_thread = M::nsols/nthreads;
   assert(M::nsols % nthreads == 0);
-  std::thread t[nthreads];
+  
+
+  // TODO: improve https://stackoverflow.com/questions/55908791/creating-100-threads-in-c
+  std::vector<std::thread> t; 
+  t.reserve(nthreads);
   { // TODO: smarter way to select start solutions
     for (unsigned i = 0; i < nthreads; ++i)
-      t[i] = std::thread(M::track, settings, data::start_sols_, params, solutions, 
+      t.emplace_back(M::track, settings, data::start_sols_, params, solutions, 
           npaths_per_thread*i, npaths_per_thread*(i+1));
 
-    for (unsigned i = 0; i < nthreads; ++i)
-      t[i].join();
+     for (auto &thr : t)
+          thr.join();
   }
   if (!io::has_valid_solutions(solutions))
     return false;
