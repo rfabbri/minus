@@ -1,6 +1,7 @@
 #ifndef internal_util_h_
 #define internal_util_h_
 
+#include <cmath>
 #include <random>
 
 namespace MiNuS {
