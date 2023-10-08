@@ -7210,18 +7210,18 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F 
   assert (i0 < i1 && i1 < 3);
   unsigned i2 = (i0 == 0) ? ((i1 == 1) ? 2 : 1) : 0;
 
-//  static constexpr double eps = 1e-4;
+  static constexpr double eps = 1e-4;
 
-//  if (v::area2(p[0][i0],p[0][i1],p[0][i2])  < eps || 
-//      v::area2(p[1][i0],p[1][i1],p[1][i2])  < eps || 
-//      v::area2(p[2][i0],p[2][i1],p[2][i2])  < eps) {
+  if (v::area2(p[0][i0],p[0][i1],p[0][i2])  < eps || 
+      v::area2(p[1][i0],p[1][i1],p[1][i2])  < eps || 
+      v::area2(p[2][i0],p[2][i1],p[2][i2])  < eps) {
 //    std::cerr << "MINUS: area error ----XXXXXXXXXXXXX-------\n";
 //    std::cerr << "Areas: " << 
 //      v::area2(p[0][i0],p[0][i1],p[0][i2]) << " "  << 
 //      v::area2(p[1][i0],p[1][i1],p[1][i2]) << " " << 
 //      v::area2(p[2][i0],p[2][i1],p[2][i2]) << std::endl;
-//    return false;
-//  }
+    return false;
+  }
 
   
   vec::cross2(p[0][i0], p[0][i1], plines[0]);
