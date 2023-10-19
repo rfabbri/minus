@@ -47,7 +47,7 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
   Map<Matrix<C<F>, f::nve, 1>,Aligned> &dx_eigen = dx4_eigen;
   Map<const Matrix<C<F>, f::nve, f::nve>,Aligned> AA((C<F> *)Hxt,f::nve,f::nve);  // accessors for the data
   Map<const Matrix<C<F>, f::nve, 1>, Aligned > bb(RHS);
-  static constexpr F the_smallest_number = 1e-13;
+  static constexpr F the_smallest_number = 1e-13; // XXX BENCHMARK THIS
   typedef minus_array<f::nve,F> v; typedef minus_array<NVEPLUS1,F> vp;
   PartialPivLU<Matrix<C<F>, f::nve, f::nve> > lu;
 
