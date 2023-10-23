@@ -117,7 +117,6 @@ template<typename _MatrixType> class PartialPivLU
       */
     inline const PermutationType& permutationP() const
     {
-      eigen_assert(m_isInitialized && "PartialPivLU is not initialized.");
       return m_p;
     }
 
@@ -182,7 +181,6 @@ template<typename _MatrixType> class PartialPivLU
     PermutationType m_p;
     TranspositionType m_rowsTranspositions;
     RealScalar m_l1_norm;
-    bool m_isInitialized;
 };
 
 template<typename MatrixType>
@@ -190,8 +188,7 @@ PartialPivLU<MatrixType>::PartialPivLU()
   : m_lu(),
     m_p(),
     m_rowsTranspositions(),
-    m_l1_norm(0),
-    m_isInitialized(false)
+    m_l1_norm(0)
 {
 }
 
@@ -325,7 +322,6 @@ void inline __attribute__((always_inline)) PartialPivLU<MatrixType>::compute()
 
   m_p = m_rowsTranspositions;
 
-  m_isInitialized = true;
 }
 
 } // end namespace Eigen
