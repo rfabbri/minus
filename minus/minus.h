@@ -18,9 +18,6 @@
 
 #include <complex>
 
-#if defined(_MSC_VER)
-#define __attribute__(x) /* blank - should simply ignore thanks to C preprocessor */
-#endif
 #include "internal-util.h"
 
 namespace MiNuS {
@@ -46,7 +43,6 @@ struct problem_parameters;
 
 // Problem specific definitions that must be available before anything, at compile time
 #include "parameters.h"
-
 // Lowlevel API ----------------------------------------------------------------
 template <problem P, typename F=double>
 class minus_core { // fully static, not to be instantiated - just used for templating

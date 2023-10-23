@@ -26,10 +26,10 @@ minus_core<P, F>::
 track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> params[2*f::nparams], solution raw_solutions[f::nsols], unsigned sol_min, unsigned sol_max)
 {
   assert(sol_min <= sol_max && sol_max <= f::nsols);
-  C<F> Hxt[NVEPLUS1 * f::nve] __attribute__((aligned(16))); 
-  C<F> x0t0xtblock[2*NVEPLUS1] __attribute__((aligned(16)));
-  C<F> dxdt[NVEPLUS1] __attribute__((aligned(16)));
-  C<F> dxi[f::nve] __attribute__((aligned(16)));
+  alignas(16) C<F> Hxt[NVEPLUS1 * f::nve]; 
+  alignas(16) C<F> x0t0xtblock[2*NVEPLUS1];
+  alignas(16) C<F> dxdt[NVEPLUS1];
+  alignas(16) C<F> dxi[f::nve];
   C<F> *x0t0 = x0t0xtblock;  // t = real running in [0,1]
   C<F> *x0 = x0t0;
   F    *t0 = (F *) (x0t0 + f::nve);
