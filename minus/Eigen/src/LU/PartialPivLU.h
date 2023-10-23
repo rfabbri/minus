@@ -113,6 +113,13 @@ template<typename _MatrixType> class PartialPivLU
       return *this;
     }
 
+    /** \returns the permutation matrix P.
+      */
+    inline const PermutationType& permutationP() const
+    {
+      return m_p;
+    }
+
     #ifdef EIGEN_PARSED_BY_DOXYGEN
     /** This method returns the solution x to the equation Ax=b, where A is the matrix of which
       * *this is the LU decomposition.
@@ -151,7 +158,7 @@ template<typename _MatrixType> class PartialPivLU
       */
 
       // Step 1
-      dst = m_rowsTranspositions * rhs;
+      dst = permutationP() * rhs;
 
       // Step 2
       m_lu.template triangularView<UnitLower>().solveInPlace(dst);
@@ -166,13 +173,13 @@ template<typename _MatrixType> class PartialPivLU
     __attribute__((always_inline)) inline void compute();
 
     MatrixType m_lu;
-    TranspositionType m_rowsTranspositions;
+    PermutationType m_p;
 };
 
 template<typename MatrixType>
 PartialPivLU<MatrixType>::PartialPivLU()
   : m_lu(),
-    m_rowsTranspositions()
+    m_p()
 {
 }
 
@@ -298,7 +305,10 @@ template<typename MatrixType>
 void inline __attribute__((always_inline)) PartialPivLU<MatrixType>::compute()
 {
   typename TranspositionType::StorageIndex nb_transpositions;
+  TranspositionType m_rowsTranspositions;
   internal::partial_lu_inplace(m_lu, m_rowsTranspositions, nb_transpositions);
+
+  m_p = m_rowsTranspositions;
 }
 
 } // end namespace Eigen
