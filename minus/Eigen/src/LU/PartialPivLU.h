@@ -170,25 +170,18 @@ template<typename _MatrixType> class PartialPivLU
 
   protected:
 
-    static void check_template_parameters()
-    {
-      EIGEN_STATIC_ASSERT_NON_INTEGER(Scalar);
-    }
-
     __attribute__((always_inline)) inline void compute();
 
     MatrixType m_lu;
     PermutationType m_p;
     TranspositionType m_rowsTranspositions;
-    RealScalar m_l1_norm;
 };
 
 template<typename MatrixType>
 PartialPivLU<MatrixType>::PartialPivLU()
   : m_lu(),
     m_p(),
-    m_rowsTranspositions(),
-    m_l1_norm(0)
+    m_rowsTranspositions()
 {
 }
 
@@ -313,8 +306,6 @@ __attribute__((always_inline)) void partial_lu_inplace(MatrixType& lu, Transposi
 template<typename MatrixType>
 void inline __attribute__((always_inline)) PartialPivLU<MatrixType>::compute()
 {
-  check_template_parameters();
-
   // m_rowsTranspositions.resize(14);
 
   typename TranspositionType::StorageIndex nb_transpositions;
