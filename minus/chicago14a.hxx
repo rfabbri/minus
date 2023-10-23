@@ -24,7 +24,7 @@ struct eval<chicago14a, F> {
 // 
 // (Ask Tim for the way to use cCode so that the input orders are like this.
 template <typename F>
-inline void 
+inline __attribute__((always_inline)) void 
 eval<chicago14a, F>::
 Hxt(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/) 
 {
@@ -3829,7 +3829,7 @@ Hxt(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * _
 // cCode(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H",gateMatrix{cameraVars})
 // (Ask Tim for the way to use cCode so that the input orders are like this.
 template <typename F>
-inline void 
+inline __attribute__((always_inline)) void 
 eval<chicago14a, F>::
 HxH(const C<F>* __restrict x /*x and t*/, const C<F> * __restrict params, C<F>* __restrict y /*HxH*/) 
 {
