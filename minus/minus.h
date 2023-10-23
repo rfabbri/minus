@@ -18,9 +18,6 @@
 
 #include <complex>
 
-#if defined(_MSC_VER)
-#define __attribute__(x) /* blank - should simply ignore thanks to C preprocessor */
-#endif
 #include "internal-util.h"
 
 namespace MiNuS {
