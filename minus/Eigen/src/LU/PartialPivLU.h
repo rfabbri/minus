@@ -127,7 +127,7 @@ template<typename _MatrixType> class PartialPivLU
     template<typename InputType>
     explicit PartialPivLU(EigenBase<InputType>& matrix);
 
-    template<typename InputType>
+    template<typename InputType> inline __attribute__((always_inline)) 
     PartialPivLU& compute(const EigenBase<InputType>& matrix) {
       m_lu = matrix.derived();
       compute();
@@ -248,7 +248,7 @@ template<typename _MatrixType> class PartialPivLU
       EIGEN_STATIC_ASSERT_NON_INTEGER(Scalar);
     }
 
-    void compute();
+    __attribute__((always_inline)) inline void compute();
 
     MatrixType m_lu;
     PermutationType m_p;

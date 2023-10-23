@@ -21,43 +21,43 @@ using C = typename std::complex<F>;
 
 template <unsigned N, typename F>
 struct minus_array { // Speed critical -----------------------------------------
-  static inline void 
+  static inline __attribute__((always_inline)) void 
   multiply_scalar_to_self(C<F> *__restrict a, C<F> b)
   {
     for (unsigned i = 0; i < N; ++i, ++a) *a = *a * b;
   }
 
-  static inline void
+  static inline __attribute__((always_inline)) void
   negate_self(C<F> * __restrict a)
   {
     for (unsigned i = 0; i < N; ++i, ++a) *a = -*a;
   }
 
-  static inline void 
+  static inline __attribute__((always_inline)) void 
   multiply_self(C<F> * __restrict a, const C<F> * __restrict b)
   {
     for (unsigned int i=0; i < N; ++i,++a,++b) *a *= *b;
   }
 
-  static inline void 
+  static inline __attribute__((always_inline)) void 
   add_to_self(C<F> * __restrict a, const C<F> * __restrict b)
   {
     for (unsigned int i=0; i < N; ++i,++a,++b) *a += *b;
   }
 
-  static inline void 
+  static inline __attribute__((always_inline)) void 
   add_scalar_to_self(C<F> * __restrict a, C<F> b)
   {
     for (unsigned int i=0; i < N; ++i,++a) *a += b;
   }
 
-  static inline void 
+  static inline __attribute__((always_inline)) void 
   copy(const C<F> * __restrict a, C<F> * __restrict b)
   {
     memcpy(b, a, N*sizeof(C<F>));
   }
 
-  static inline F
+  static inline __attribute__((always_inline)) F
   norm2(const C<F> *__restrict a)
   {
     F val = 0;
@@ -70,7 +70,7 @@ struct minus_array { // Speed critical -----------------------------------------
   // https://stackoverflow.com/questions/55601927/correct-way-to-calculate-triangle-area-from-3-vertices
   //
   // Value is doubled, for speed, actual area is 0.5*area2
-  static inline F
+  static inline __attribute__((always_inline)) F
   area2(const F p0[2], const F p1[2], const F p2[2])
   {
     return std::fabs((p1[0]-p0[0])*(p2[1]-p0[1]) - (p2[0]-p0[0])*(p1[1]-p0[1]));
@@ -78,7 +78,7 @@ struct minus_array { // Speed critical -----------------------------------------
 
   // From vgl
   // Get the anticlockwise angle between a line and the x axis.
-  static inline F
+  static inline __attribute__((always_inline)) F
   line_angle(F l[3])
   {
     return std::atan2 (l[1], l[0]);
@@ -86,7 +86,7 @@ struct minus_array { // Speed critical -----------------------------------------
 
   // Angle between lines in homogeneous coordinates
   // From vgl
-  static inline F
+  static inline __attribute__((always_inline)) F
   abs_angle_between_lines(F l0[3], F l1[3])
   {
     double diff = line_angle(l1) - line_angle(l0);
@@ -104,7 +104,7 @@ struct minus_array { // Speed critical -----------------------------------------
   // \returns true if the solution is nearly real, false otherwise
   //
   // Not speed critical.
-  static inline bool
+  static inline __attribute__((always_inline)) bool
   get_real(const C<F> s[N], F rs[N])
   {
     // Hongyi function realSolutions = parseSolutionString(output)
@@ -142,7 +142,7 @@ struct minus_array { // Speed critical -----------------------------------------
 // Functions over 3 dimensions
 template <typename F>
 struct minus_3d {
-  static inline void
+  static inline __attribute__((always_inline)) void
   cross(const C<F> v1[3], const C<F> v2[3], C<F> r[3])
   {
     r[0] = v1[1] * v2[2] - v1[2] * v2[1];
@@ -150,10 +150,10 @@ struct minus_3d {
     r[2] = v1[0] * v2[1] - v1[1] * v2[0];
   }
   
-  static inline C<F>
+  static inline __attribute__((always_inline)) C<F>
   dot(const C<F> v1[3], const C<F> v2[3]) { return v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2]; }
   
-  static inline void
+  static inline __attribute__((always_inline)) void
   cross(const F v1[3], const F v2[3], F r[3])
   {
     r[0] = v1[1] * v2[2] - v1[2] * v2[1];
@@ -161,12 +161,12 @@ struct minus_3d {
     r[2] = v1[0] * v2[1] - v1[1] * v2[0];
   }
   
-  static inline F
+  static inline __attribute__((always_inline)) F
   dot(const F v1[3], const F v2[3]) { return v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2]; }
   
   // same as cross but assumes points given in inhomogoeneous coordinates
   // as if v[2] = 1
-  static inline void
+  static inline __attribute__((always_inline)) void
   cross2(const F v1[2], const F v2[2], F r[3])
   {
     r[0] = v1[1] - v2[1];
@@ -175,7 +175,7 @@ struct minus_3d {
   }
 
   // inhomogeneous points with associated tangents to homogeneous line coefficients
-  static inline void 
+  static inline __attribute__((always_inline)) void 
   point_tangent2line(const F p[2], const F tgt[2], F r[3])
   {
     r[0] = -tgt[1]; // normal vector
@@ -191,7 +191,7 @@ struct minus_util {
   // only on real coordinates, with 0 complex ones
   // we are guaranteeing unifom sampling on the sphere,
   // but simpler rand() on each dimension then normalization also works
-  static inline void 
+  static inline __attribute__((always_inline)) void 
   rand_sphere(C<F> *v/*[chicago14a: 5 minimum, can be 7]*/, unsigned n) {
     F m=0;
     for (unsigned i=0; i < n; ++i) {
@@ -221,7 +221,7 @@ struct minus_util {
   // mattering the memory order
   struct quat_shape { F w; F x; F y; F z; };
   
-  static inline void normalize_quat(F q[4])
+  static inline __attribute__((always_inline)) void normalize_quat(F q[4])
   {
     const F norm = sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3]);
     q[0] /= norm; q[1] /= norm; q[2] /= norm; q[3] /= norm;
@@ -230,7 +230,7 @@ struct minus_util {
   // arbitrary quaternion to rotation matrix.
   // will normalize the quaternion in-place.
   // based on VXL/VNL
-  static inline void quat2rotm(F qq[4], F r[9])
+  static inline __attribute__((always_inline)) void quat2rotm(F qq[4], F r[9])
   {
     normalize_quat(qq);
     quat_shape *q = (quat_shape *) qq;
@@ -253,7 +253,7 @@ struct minus_util {
   
   // always row-major
   // originally based on Eigen
-  static inline void rotm2quat(const F rr[9], F qq[4])
+  static inline __attribute__((always_inline)) void rotm2quat(const F rr[9], F qq[4])
   {
     // use a struct to reinterpret q
     quat_shape *q = (quat_shape *) qq;
@@ -289,7 +289,7 @@ struct minus_util {
   // computes the relative unit quaternion between two unit quaternions
   // based on Eigen quat_product
   // a*conj(b)
-  static inline void dquat(const F aa[4], const F bb[4], F d[4])
+  static inline __attribute__((always_inline)) void dquat(const F aa[4], const F bb[4], F d[4])
   {
     const quat_shape *a = (quat_shape *) aa, 
                      *b = (quat_shape *) bb;
@@ -301,7 +301,7 @@ struct minus_util {
   }
 
   // based on Eigen
-  static inline void quat_transform(const F q[4], const F v[3], F vrot[3])
+  static inline __attribute__((always_inline)) void quat_transform(const F q[4], const F v[3], F vrot[3])
   {
     // q*v*q.conj();
     // Note that this algorithm comes from the optimization by hand
@@ -334,7 +334,7 @@ struct minus_util {
   //    dR = norm(skew2v(Rots{n}*R_tilde'));
   //}
   // Based on Eigen
-  static inline F rotation_error(const F p[4], const F q[4])
+  static inline __attribute__((always_inline)) F rotation_error(const F p[4], const F q[4])
   {
     // normalize_quat(p); normalize_quat(q);
     F d[4];

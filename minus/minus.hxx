@@ -36,8 +36,7 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
   C<F> *xt = x0t0xtblock + NVEPLUS1; 
   C<F> *x1t1 = xt;      // reusing xt's space to represent x1t1
   C<F> *const HxH=Hxt;  // HxH is reusing Hxt
-  C<F> *const dx = dxdt;
-  const C<F> *const RHS = Hxt + NVE2;  // Hx or Ht, same storage //// UNUSED:  C<F> *const LHS = Hxt;
+  C<F> *const dx = dxdt; const C<F> *const RHS = Hxt + NVE2;  // Hx or Ht, same storage //// UNUSED:  C<F> *const LHS = Hxt;
   C<F> *const dx4 = dx;   // reuse dx for dx4
   F    *const dt = (F *)(dxdt + f::nve);
   const F &t_step = s.init_dt_;  // initial step
