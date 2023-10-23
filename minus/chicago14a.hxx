@@ -7407,7 +7407,7 @@ minus<chicago14a, F>::solve(
     )
 {
   typedef minus_data<chicago14a,F> data;
-  C<F> params[2*M::f::nparams];
+  alignas(16) C<F> params[2*M::f::nparams];
   memcpy(params, data::params_start_target_, M::f::nparams*sizeof(C<F>));
   
   constexpr int id_tgt0 = 0; constexpr int id_tgt1 = 1; // TODO: select the best / least degenerate directions
