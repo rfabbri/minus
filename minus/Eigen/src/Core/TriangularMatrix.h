@@ -516,11 +516,11 @@ template<typename _MatrixType, unsigned int _Mode> class TriangularViewImpl<_Mat
       */
     template<int Side, typename OtherDerived>
     EIGEN_DEVICE_FUNC
-    void solveInPlace(const MatrixBase<OtherDerived>& other) const;
+    inline __attribute__((always_inline)) void solveInPlace(const MatrixBase<OtherDerived>& other) const;
 
     template<typename OtherDerived>
     EIGEN_DEVICE_FUNC
-    void solveInPlace(const MatrixBase<OtherDerived>& other) const
+    inline __attribute__((always_inline)) void solveInPlace(const MatrixBase<OtherDerived>& other) const
     { return solveInPlace<OnTheLeft>(other); }
 
     /** Swaps the coefficients of the common triangular parts of two matrices */
