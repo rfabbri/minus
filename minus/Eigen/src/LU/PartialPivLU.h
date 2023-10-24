@@ -122,7 +122,7 @@ template<typename _MatrixType> class PartialPivLU
 
     typedef Block<MapLU, Dynamic, Dynamic> MatrixType2;
     // XXX modified by Fabbri to suit Chicago problem
-    static __attribute__((always_inline)) Index unblocked_lu(
+    static __attribute__((always_inline)) void unblocked_lu(
         MatrixType2& lu, 
         typename TranspositionType::StorageIndex* row_transpositions, 
         typename TranspositionType::StorageIndex& nb_transpositions)
@@ -171,7 +171,6 @@ template<typename _MatrixType> class PartialPivLU
         if (k < rows-1)
           lu.bottomRightCorner(rrows,rcols).noalias() -= lu.col(k).tail(rrows) * lu.row(k).tail(rcols);
       }
-      return first_zero_pivot;
     }
 
     template<typename InputType> inline __attribute__((always_inline)) 
