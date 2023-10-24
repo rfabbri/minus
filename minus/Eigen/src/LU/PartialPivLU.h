@@ -112,54 +112,53 @@ template<typename _MatrixType> class PartialPivLU
       * \returns The index of the first pivot which is exactly zero if any, or a negative number otherwise.
       */
 
-    // XXX modified by Fabbri to suit Chicago problem
-    static __attribute__((always_inline)) void unblocked_lu(
-        MatrixType &lu, 
-        typename TranspositionType::StorageIndex* row_transpositions)
-    {
-      typedef internal::scalar_score_coeff_op<Scalar> Scoring;
-      typedef typename Scoring::result_type Score;
-      static constexpr Index rows = 14;
-      static constexpr Index cols = 14;
-      //Index first_zero_pivot = -1;
-      for(Index k = 0; k < 14; ++k) {
-        Index rrows = rows-k-1;
-        Index rcols = cols-k-1;
-
-        Index row_of_biggest_in_col(k);
-        Score biggest_in_corner = std::norm(lu(k,k));// std::norm(lu.coeff(k,k));
-        for (unsigned j=rows-1; j != k; --j) {
-          Score tmp;
-          if ((tmp = std::norm(lu(j,k))) > biggest_in_corner*1000) {
-              biggest_in_corner = tmp;
-              row_of_biggest_in_col = j;
-              break;
-          }
-        }
-
-        row_transpositions[k] = typename TranspositionType::StorageIndex(row_of_biggest_in_col);
-
-        //if (biggest_in_corner != Score(0)) {
-        if (k != row_of_biggest_in_col) {
-          lu.row(k).swap(lu.row(row_of_biggest_in_col));
-        }
-
-        lu.col(k).tail(rrows) /= lu(k,k);
-        // } else if (first_zero_pivot==-1)
-          // the pivot is exactly zero, we record the index of the first pivot which is exactly 0,
-          // and continue the factorization such we still have A = PLU
-        //  first_zero_pivot = k;
-
-        if (k < rows-1)
-          lu.bottomRightCorner(rrows,rcols).noalias() -= lu.col(k).tail(rrows) * lu.row(k).tail(rcols);
-      }
-    }
 
     template<typename InputType> inline __attribute__((always_inline)) 
     PartialPivLU& compute(const EigenBase<InputType>& matrix) {
       m = matrix.derived();
       TranspositionType m_rowsTranspositions;
-      unblocked_lu(m, &m_rowsTranspositions.coeffRef(0));
+      {
+        // XXX modified by Fabbri to suit Chicago problem
+        // static __attribute__((always_inline)) void unblocked_lu(
+        //     MatrixType &m, 
+        typename TranspositionType::StorageIndex* row_transpositions = &m_rowsTranspositions.coeffRef(0);
+        typedef internal::scalar_score_coeff_op<Scalar> Scoring;
+        typedef typename Scoring::result_type Score;
+        static constexpr Index rows = 14;
+        static constexpr Index cols = 14;
+        //Index first_zero_pivot = -1;
+        for(Index k = 0; k < 14; ++k) {
+          Index rrows = rows-k-1;
+          Index rcols = cols-k-1;
+
+          Index row_of_biggest_in_col(k);
+          Score biggest_in_corner = std::norm(m(k,k));// std::norm(m.coeff(k,k));
+          for (unsigned j=rows-1; j != k; --j) {
+            Score tmp;
+            if ((tmp = std::norm(m(j,k))) > biggest_in_corner*1000) {
+                biggest_in_corner = tmp;
+                row_of_biggest_in_col = j;
+                break;
+            }
+          }
+
+          row_transpositions[k] = typename TranspositionType::StorageIndex(row_of_biggest_in_col);
+
+          //if (biggest_in_corner != Score(0)) {
+          if (k != row_of_biggest_in_col) {
+            m.row(k).swap(m.row(row_of_biggest_in_col));
+          }
+
+          m.col(k).tail(rrows) /= m(k,k);
+          // } else if (first_zero_pivot==-1)
+            // the pivot is exactly zero, we record the index of the first pivot which is exactly 0,
+            // and continue the factorization such we still have A = PLU
+          //  first_zero_pivot = k;
+
+          if (k < rows-1)
+            m.bottomRightCorner(rrows,rcols).noalias() -= m.col(k).tail(rrows) * m.row(k).tail(rcols);
+        }
+      }
 
       m_p = m_rowsTranspositions;
       return *this;
