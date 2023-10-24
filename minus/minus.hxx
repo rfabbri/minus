@@ -12,6 +12,8 @@
 #include "minus.h"
 #include "internal-util.hxx"
 
+#include "Eigen/LU"
+
 namespace MiNuS {
 
 using namespace Eigen; // only used for linear solve
@@ -19,20 +21,20 @@ using namespace Eigen; // only used for linear solve
 // Specific to Chicago
 template <problem P, typename F>
 __attribute__((always_inline)) inline void
-minus_core<P, F>::
 lsolve(
-    Map<Matrix<C<F>, f::nve, f::nve>,Aligned> & __restrict m, 
-    Map<const Matrix<C<F>, f::nve, 1>, Aligned > & __restrict b,
-    Map<Matrix<C<F>, f::nve, 1>,Aligned> & __restrict x) 
+    Map<Matrix<C<F>, minus_core<P,F>::f::nve, minus_core<P,F>::f::nve>,Aligned> & __restrict m, 
+    Map<const Matrix<C<F>, minus_core<P,F>::f::nve, 1>, Aligned > & __restrict b,
+    Map<Matrix<C<F>, minus_core<P,F>::f::nve, 1>,Aligned> & __restrict x)
 {
-  typedef Matrix<C<F>, f::nve, f::nve>  MatrixType;
-  typedef PermutationMatrix<f::nve, f::nve> PermutationType;
-  typedef Transpositions<f::nve, f::nve> TranspositionType;
+  typedef minus_core<P, F> M;
+  typedef Matrix<C<F>, M::f::nve, M::f::nve>  MatrixType;
+  typedef PermutationMatrix<M::f::nve, M::f::nve> PermutationType;
+  typedef Transpositions<M::f::nve, M::f::nve> TranspositionType;
   PermutationType m_p;
   TranspositionType m_rowsTranspositions;
   typename TranspositionType::StorageIndex* row_transpositions = &m_rowsTranspositions.coeffRef(0);
-  static constexpr Index rows = f::nve;
-  for(Index k = 0; k < f::nve; ++k) {
+  static constexpr Index rows = M::f::nve;
+  for(Index k = 0; k < M::f::nve; ++k) {
     Index rrows = rows-k-1;
 
     Index row_of_biggest_in_col(k);
@@ -166,7 +168,7 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
       // dx1
       evaluate_Hxt(xt, params, Hxt); // Outputs Hxt
       // dx4_eigen = lu.compute(AA).solve(bb);
-      lsolve(AA, bb, dx4_eigen);
+      lsolve<P,F>(AA, bb, dx4_eigen);
       
       // dx2
       const C<F> one_half_dt = *dt*0.5;
@@ -175,7 +177,7 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
       v::multiply_scalar_to_self(dx4, 2.);
       xt[f::nve] += one_half_dt;  // t0+.5dt
       evaluate_Hxt(xt, params, Hxt);
-      lsolve(AA, bb, dxi_eigen);
+      lsolve<P,F>(AA, bb, dxi_eigen);
 
       // dx3
       v::multiply_scalar_to_self(dxi, one_half_dt);
@@ -184,7 +186,7 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
       v::multiply_scalar_to_self(dxi, 4);
       v::add_to_self(dx4, dxi);
       evaluate_Hxt(xt, params, Hxt);
-      lsolve(AA, bb, dxi_eigen);
+      lsolve<P,F>(AA, bb, dxi_eigen);
 
       // dx4
       v::multiply_scalar_to_self(dxi, *dt);
@@ -194,7 +196,7 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
       v::add_to_self(dx4, dxi);
       xt[f::nve] = *t0 + *dt;               // t0+dt
       evaluate_Hxt(xt, params, Hxt);
-      lsolve(AA, bb, dxi_eigen);
+      lsolve<P,F>(AA, bb, dxi_eigen);
       v::multiply_scalar_to_self(dxi, *dt);
       v::add_to_self(dx4, dxi);
       v::multiply_scalar_to_self(dx4, 1./6.);
@@ -212,7 +214,7 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
       do {
         ++n_corr_steps;
         evaluate_HxH(x1t1, params, HxH);
-        lsolve(AA, bb, dx_eigen);
+        lsolve<P,F>(AA, bb, dx_eigen);
         v::add_to_self(x1t1, dx);
         is_successful = v::norm2(dx) < s.epsilon2_ * v::norm2(x1t1); // |dx|^2/|x1|^2 < eps2
       } while (!is_successful && n_corr_steps < s.max_corr_steps_);
