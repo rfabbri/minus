@@ -133,8 +133,7 @@ template<typename _MatrixType> class PartialPivLU
       static constexpr Index cols = 14;
       nb_transpositions = 0;
       Index first_zero_pivot = -1;
-      for(Index k = 0; k < 14; ++k)
-      {
+      for(Index k = 0; k < 14; ++k) {
         Index rrows = rows-k-1;
         Index rcols = cols-k-1;
 
@@ -142,26 +141,24 @@ template<typename _MatrixType> class PartialPivLU
   //        = lu.col(k).tail(rows-k).unaryExpr(Scoring()).maxCoeff(&row_of_biggest_in_col);
         
         Index row_of_biggest_in_col(k);
-        Score biggest_in_corner = std::norm(lu.coeff(k,k));
-        
+        Score biggest_in_corner = std::norm(lu.coeff(k,k));// std::norm(lu.coeff(k,k));
         for (unsigned j=rows-1; j != k; --j) {
-          if (std::norm(lu.coeff(j,k)) > biggest_in_corner*1000) {
+          Score tmp;
+          if ((tmp = std::norm(lu.coeff(j,k))) > biggest_in_corner*1000) {
+              biggest_in_corner = tmp;
               row_of_biggest_in_col = j;
-              biggest_in_corner = std::norm(lu.coeff(j,k));
               break;
           }
         }
 
         row_transpositions[k] = typename TranspositionType::StorageIndex(row_of_biggest_in_col);
 
-        if(biggest_in_corner != Score(0)) {
-          if(k != row_of_biggest_in_col) {
+        if (biggest_in_corner != Score(0)) {
+          if (k != row_of_biggest_in_col) {
             lu.row(k).swap(lu.row(row_of_biggest_in_col));
             ++nb_transpositions;
           }
 
-          // FIXME shall we introduce a safe quotient expression in cas 1/lu.coeff(k,k)
-          // overflow but not the actual quotient?
           lu.col(k).tail(rrows) /= lu.coeff(k,k);
         } else if(first_zero_pivot==-1)
           // the pivot is exactly zero, we record the index of the first pivot which is exactly 0,
