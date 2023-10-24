@@ -18,12 +18,12 @@ using namespace Eigen; // only used for linear solve
 
 // TODO: parameters restrict
 template <problem P, typename F>
-__attribute__((always_inline)) void
+__attribute__((always_inline)) inline void
 minus_core<P, F>::
 lsolve(
-    Map<const Matrix<C<F>, f::nve, f::nve>,Aligned> &matrix, 
-    Map<const Matrix<C<F>, f::nve, 1>, Aligned > &b,
-    Map<Matrix<C<F>, f::nve, 1>,Aligned> &x) 
+    Map<const Matrix<C<F>, f::nve, f::nve>,Aligned> & __restrict matrix, 
+    Map<const Matrix<C<F>, f::nve, 1>, Aligned > & __restrict b,
+    Map<Matrix<C<F>, f::nve, 1>,Aligned> & __restrict x) 
 {
    typedef Matrix<C<F>, f::nve, f::nve>  MatrixType;
    typedef PermutationMatrix<f::nve, f::nve> PermutationType;
