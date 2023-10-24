@@ -115,7 +115,7 @@ template<typename _MatrixType> class PartialPivLU
 
     template<typename InputType> inline __attribute__((always_inline)) 
     PartialPivLU& compute(const EigenBase<InputType>& matrix) {
-      m = matrix.derived();
+      m = matrix.derived(); // TODO: in-place
       TranspositionType m_rowsTranspositions;
       {
         // XXX modified by Fabbri to suit Chicago problem

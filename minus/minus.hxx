@@ -16,17 +16,20 @@ namespace MiNuS {
 
 using namespace Eigen; // only used for linear solve
 
+// TODO: parameters restrict
 template <problem P, typename F>
 __attribute__((always_inline)) void
 minus_core<P, F>::
-lsolve(Map<const Matrix<C<F>, f::nve, f::nve>,Aligned> &matrix, Map<const Matrix<C<F>, f::nve, 1>, Aligned > &b,
-Map<Matrix<C<F>, f::nve, 1>,Aligned> &x) 
+lsolve(
+    Map<const Matrix<C<F>, f::nve, f::nve>,Aligned> &matrix, 
+    Map<const Matrix<C<F>, f::nve, 1>, Aligned > &b,
+    Map<Matrix<C<F>, f::nve, 1>,Aligned> &x) 
 {
    typedef Matrix<C<F>, f::nve, f::nve>  MatrixType;
    typedef PermutationMatrix<f::nve, f::nve> PermutationType;
    typedef Transpositions<f::nve, f::nve> TranspositionType;
 
-   MatrixType m; // matrix holding LU together
+   MatrixType m(matrix); // matrix holding LU together TODO: in-place
    PermutationType m_p;
 
    TranspositionType m_rowsTranspositions;
@@ -175,7 +178,8 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
 
       // dx1
       evaluate_Hxt(xt, params, Hxt); // Outputs Hxt
-      dx4_eigen = lu.compute(AA).solve(bb);
+      // dx4_eigen = lu.compute(AA).solve(bb);
+      lsolve(AA, bb, dx4_eigen);
       
       // dx2
       const C<F> one_half_dt = *dt*0.5;
@@ -184,7 +188,7 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
       v::multiply_scalar_to_self(dx4, 2.);
       xt[f::nve] += one_half_dt;  // t0+.5dt
       evaluate_Hxt(xt, params, Hxt);
-      dxi_eigen = lu.compute(AA).solve(bb);  // TODO: reuse pivots
+      lsolve(AA, bb, dxi_eigen);
 
       // dx3
       v::multiply_scalar_to_self(dxi, one_half_dt);
@@ -193,7 +197,7 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
       v::multiply_scalar_to_self(dxi, 4);
       v::add_to_self(dx4, dxi);
       evaluate_Hxt(xt, params, Hxt);
-      dxi_eigen = lu.compute(AA).solve(bb);
+      lsolve(AA, bb, dxi_eigen);
 
       // dx4
       v::multiply_scalar_to_self(dxi, *dt);
@@ -203,7 +207,7 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
       v::add_to_self(dx4, dxi);
       xt[f::nve] = *t0 + *dt;               // t0+dt
       evaluate_Hxt(xt, params, Hxt);
-      dxi_eigen = lu.compute(AA).solve(bb);
+      lsolve(AA, bb, dxi_eigen);
       v::multiply_scalar_to_self(dxi, *dt);
       v::add_to_self(dx4, dxi);
       v::multiply_scalar_to_self(dx4, 1./6.);
@@ -221,7 +225,7 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
       do {
         ++n_corr_steps;
         evaluate_HxH(x1t1, params, HxH);
-        dx_eigen = lu.compute(AA).solve(bb);
+        lsolve(AA, bb, dx_eigen); // TODO: always same AA, do not redo LU
         v::add_to_self(x1t1, dx);
         is_successful = v::norm2(dx) < s.epsilon2_ * v::norm2(x1t1); // |dx|^2/|x1|^2 < eps2
       } while (!is_successful && n_corr_steps < s.max_corr_steps_);
