@@ -96,7 +96,7 @@ template<typename _MatrixType> class PartialPivLU
       * The default constructor is useful in cases in which the user intends to
       * perform decompositions via PartialPivLU::compute(const MatrixType&).
       */
-    PartialPivLU() : m_lu(), m_p() { }
+    PartialPivLU() : m(), m_p() { }
 
     template<typename InputType>
     explicit PartialPivLU(EigenBase<InputType>& matrix);
@@ -163,10 +163,10 @@ template<typename _MatrixType> class PartialPivLU
 
     template<typename InputType> inline __attribute__((always_inline)) 
     PartialPivLU& compute(const EigenBase<InputType>& matrix) {
-      m_lu = matrix.derived();
+      m = matrix.derived();
       typename TranspositionType::StorageIndex nb_transpositions;
       TranspositionType m_rowsTranspositions;
-      unblocked_lu(m_lu, &m_rowsTranspositions.coeffRef(0), nb_transpositions);
+      unblocked_lu(m, &m_rowsTranspositions.coeffRef(0), nb_transpositions);
 
       m_p = m_rowsTranspositions;
       return *this;
@@ -195,13 +195,13 @@ template<typename _MatrixType> class PartialPivLU
     solve(const MatrixBase<Rhs>& b) const;
     #endif
 
-    inline Index rows() const { return m_lu.rows(); }
-    inline Index cols() const { return m_lu.cols(); }
+    inline Index rows() const { return m.rows(); }
+    inline Index cols() const { return m.cols(); }
 
     #ifndef EIGEN_PARSED_BY_DOXYGEN
     template<typename RhsType, typename DstType>
     EIGEN_DEVICE_FUNC
-    __attribute__((always_inline)) void _solve_impl(const RhsType &rhs, DstType &dst) const {
+    __attribute__((always_inline)) void _solve_impl(const RhsType &rhs, DstType &d) const {
      /* The decomposition PA = LU can be rewritten as A = P^{-1} L U.
       * So we proceed as follows:
       * Step 1: compute c = Pb.
@@ -210,19 +210,37 @@ template<typename _MatrixType> class PartialPivLU
       */
 
       // Step 1
-      dst = m_p * rhs;
+      d = m_p * rhs;
 
+//      d(1)  -= m(1,0)*d(0);
+//      d(2)  -= m(2,0)*d(0)+ m(2,1)*d(1);
+//      d(3)  -= m(3,0)*d(0)+ m(3,1)*d(1)+ m(3,2)*d(2);
+//      d(4)  -= m(4,0)*d(0)+ m(4,1)*d(1)+ m(4,2)*d(2)+ m(4,3)*d(3);
+//      d(5)  -= m(5,0)*d(0)+ m(5,1)*d(1)+ m(5,2)*d(2)+ m(5,3)*d(3)+ m(5,4)*d(4);
+//      d(6)  -= m(6,0)*d(0)+ m(6,1)*d(1)+ m(6,2)*d(2)+ m(6,3)*d(3)+ m(6,4)*d(4)+ m(6,5)*d(5);
+//      d(7)  -= m(7,0)*d(0)+ m(7,1)*d(1)+ m(7,2)*d(2)+ m(7,3)*d(3)+ m(7,4)*d(4)+ m(7,5)*d(5)+ m(7,6)*d(6);
+//      d(8)  -= m(8,0)*d(0)+ m(8,1)*d(1)+ m(8,2)*d(2)+ m(8,3)*d(3)+ m(8,4)*d(4)+ m(8,5)*d(5)+ m(8,6)*d(6)+ m(8,7)*d(7);
+//      d(9)  -= m(9,0)*d(0)+ m(9,1)*d(1)+ m(9,2)*d(2)+ m(9,3)*d(3)+ m(9,4)*d(4)+ m(9,5)*d(5)+ m(9,6)*d(6)+ m(9,7)*d(7)+ m(9,8)*d(8);
+//      d(10) -= m(10,0)*d(0)+ m(10,1)*d(1)+ m(10,2)*d(2)+ m(10,3)*d(3)+ m(10,4)*d(4)+ m(10,5)*d(5)+ m(10,6)*d(6)+ m(10,7)*d(7)+ m(10,8)*d(8)+ m(10,9)*d(9);
+//      d(11) -= m(11,0)*d(0)+ m(11,1)*d(1)+ m(11,2)*d(2)+ m(11,3)*d(3)+ m(11,4)*d(4)+ m(11,5)*d(5)+ m(11,6)*d(6)+ m(11,7)*d(7)+ m(11,8)*d(8)+ m(11,9)*d(9)+ m(11,10)*d(10);
+//      d(12) -= m(12,0)*d(0)+ m(12,1)*d(1)+ m(12,2)*d(2)+ m(12,3)*d(3)+ m(12,4)*d(4)+ m(12,5)*d(5)+ m(12,6)*d(6)+ m(12,7)*d(7)+ m(12,8)*d(8)+ m(12,9)*d(9)+ m(12,10)*d(10)+ m(12,11)*d(11);
+//      d(13) -= m(13,0)*d(0)+ m(13,1)*d(1)+ m(13,2)*d(2)+ m(13,3)*d(3)+ m(13,4)*d(4)+ m(13,5)*d(5)+ m(13,6)*d(6)+ m(13,7)*d(7)+ m(13,8)*d(8)+ m(13,9)*d(9)+ m(13,10)*d(10)+ m(13,11)*d(11)+ m(13,12)*d(12);
+//      d(14) -= m(14,0)*d(0)+ m(14,1)*d(1)+ m(14,2)*d(2)+ m(14,3)*d(3)+ m(14,4)*d(4)+ m(14,5)*d(5)+ m(14,6)*d(6)+ m(14,7)*d(7)+ m(14,8)*d(8)+ m(14,9)*d(9)+ m(14,10)*d(10)+ m(14,11)*d(11)+ m(14,12)*d(12)+ m(14,13)*d(13);
+
+      
       // Step 2
-      m_lu.template triangularView<UnitLower>().solveInPlace(dst);
+      m.template triangularView<UnitLower>().solveInPlace(d);
+
+      
 
       // Step 3
-      m_lu.template triangularView<Upper>().solveInPlace(dst);
+      m.template triangularView<Upper>().solveInPlace(d);
     }
     #endif
 
   protected:
 
-    MatrixType m_lu;
+    MatrixType m; // matrix holding LU together
     PermutationType m_p;
 };
 
