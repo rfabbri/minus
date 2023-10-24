@@ -42,82 +42,6 @@ struct enable_if_ref<Ref<T>,Derived> {
   typedef Derived type;
 };
 
-/** \internal This is the blocked version of fullpivlu_unblocked() */
-template<typename Scalar, int StorageOrder, typename PivIndex>
-struct partial_lu_impl
-{
-  // FIXME add a stride to Map, so that the following mapping becomes easier,
-  // another option would be to create an expression being able to automatically
-  // warp any Map, Matrix, and Block expressions as a unique type, but since that's exactly
-  // a Map + stride, why not adding a stride to Map, and convenient ctors from a Matrix,
-  // and Block.
-  typedef Map<Matrix<Scalar, Dynamic, Dynamic, StorageOrder> > MapLU;
-  typedef Block<MapLU, Dynamic, Dynamic> MatrixType;
-  typedef Block<MatrixType,Dynamic,Dynamic> BlockType;
-  typedef typename MatrixType::RealScalar RealScalar;
-
-  /** \internal performs the LU decomposition in-place of the matrix \a lu
-    * using an unblocked algorithm.
-    *
-    * In addition, this function returns the row transpositions in the
-    * vector \a row_transpositions which must have a size equal to the number
-    * of columns of the matrix \a lu, and an integer \a nb_transpositions
-    * which returns the actual number of transpositions.
-    *
-    * \returns The index of the first pivot which is exactly zero if any, or a negative number otherwise.
-    */
-  // XXX modified by Fabbri to suit Chicago problem
-  static __attribute__((always_inline)) Index unblocked_lu(MatrixType& lu, PivIndex* row_transpositions, PivIndex& nb_transpositions)
-  {
-    typedef scalar_score_coeff_op<Scalar> Scoring;
-    typedef typename Scoring::result_type Score;
-    static constexpr Index rows = 14;
-    static constexpr Index cols = 14;
-    nb_transpositions = 0;
-    Index first_zero_pivot = -1;
-    for(Index k = 0; k < 14; ++k)
-    {
-      Index rrows = rows-k-1;
-      Index rcols = cols-k-1;
-
-//      Score biggest_in_corner
-//        = lu.col(k).tail(rows-k).unaryExpr(Scoring()).maxCoeff(&row_of_biggest_in_col);
-      
-      Index row_of_biggest_in_col(k);
-      Score biggest_in_corner = std::norm(lu.coeff(k,k));
-      
-      for (unsigned j=rows-1; j != k; --j) {
-        if (std::norm(lu.coeff(j,k)) > biggest_in_corner*1000) {
-            row_of_biggest_in_col = j;
-            biggest_in_corner = std::norm(lu.coeff(j,k));
-            break;
-        }
-      }
-
-      row_transpositions[k] = PivIndex(row_of_biggest_in_col);
-
-      if(biggest_in_corner != Score(0)) {
-        if(k != row_of_biggest_in_col) {
-          lu.row(k).swap(lu.row(row_of_biggest_in_col));
-          ++nb_transpositions;
-        }
-
-        // FIXME shall we introduce a safe quotient expression in cas 1/lu.coeff(k,k)
-        // overflow but not the actual quotient?
-        lu.col(k).tail(rrows) /= lu.coeff(k,k);
-      } else if(first_zero_pivot==-1)
-        // the pivot is exactly zero, we record the index of the first pivot which is exactly 0,
-        // and continue the factorization such we still have A = PLU
-        first_zero_pivot = k;
-
-      if (k < rows-1)
-        lu.bottomRightCorner(rrows,rcols).noalias() -= lu.col(k).tail(rrows) * lu.row(k).tail(rcols);
-    }
-    return first_zero_pivot;
-  }
-
-};
-
 } // end namespace internal
 
 /** \ingroup LU_Module
@@ -183,26 +107,86 @@ template<typename _MatrixType> class PartialPivLU
     explicit PartialPivLU(EigenBase<InputType>& matrix);
     
     typedef Map<Matrix<Scalar, Dynamic, Dynamic, 0> > MapLU;
+
     
+    /** \internal performs the LU decomposition in-place of the matrix \a lu
+      * using an unblocked algorithm.
+      *
+      * In addition, this function returns the row transpositions in the
+      * vector \a row_transpositions which must have a size equal to the number
+      * of columns of the matrix \a lu, and an integer \a nb_transpositions
+      * which returns the actual number of transpositions.
+      *
+      * \returns The index of the first pivot which is exactly zero if any, or a negative number otherwise.
+      */
+
+    typedef Block<MapLU, Dynamic, Dynamic> MatrixType2;
+    // XXX modified by Fabbri to suit Chicago problem
+    static __attribute__((always_inline)) Index unblocked_lu(
+        MatrixType2& lu, 
+        typename TranspositionType::StorageIndex* row_transpositions, 
+        typename TranspositionType::StorageIndex& nb_transpositions)
+    {
+      typedef internal::scalar_score_coeff_op<Scalar> Scoring;
+      typedef typename Scoring::result_type Score;
+      static constexpr Index rows = 14;
+      static constexpr Index cols = 14;
+      nb_transpositions = 0;
+      Index first_zero_pivot = -1;
+      for(Index k = 0; k < 14; ++k)
+      {
+        Index rrows = rows-k-1;
+        Index rcols = cols-k-1;
+
+  //      Score biggest_in_corner
+  //        = lu.col(k).tail(rows-k).unaryExpr(Scoring()).maxCoeff(&row_of_biggest_in_col);
+        
+        Index row_of_biggest_in_col(k);
+        Score biggest_in_corner = std::norm(lu.coeff(k,k));
+        
+        for (unsigned j=rows-1; j != k; --j) {
+          if (std::norm(lu.coeff(j,k)) > biggest_in_corner*1000) {
+              row_of_biggest_in_col = j;
+              biggest_in_corner = std::norm(lu.coeff(j,k));
+              break;
+          }
+        }
+
+        row_transpositions[k] = typename TranspositionType::StorageIndex(row_of_biggest_in_col);
+
+        if(biggest_in_corner != Score(0)) {
+          if(k != row_of_biggest_in_col) {
+            lu.row(k).swap(lu.row(row_of_biggest_in_col));
+            ++nb_transpositions;
+          }
+
+          // FIXME shall we introduce a safe quotient expression in cas 1/lu.coeff(k,k)
+          // overflow but not the actual quotient?
+          lu.col(k).tail(rrows) /= lu.coeff(k,k);
+        } else if(first_zero_pivot==-1)
+          // the pivot is exactly zero, we record the index of the first pivot which is exactly 0,
+          // and continue the factorization such we still have A = PLU
+          first_zero_pivot = k;
+
+        if (k < rows-1)
+          lu.bottomRightCorner(rrows,rcols).noalias() -= lu.col(k).tail(rrows) * lu.row(k).tail(rcols);
+      }
+      return first_zero_pivot;
+    }
 
     template<typename InputType> inline __attribute__((always_inline)) 
     PartialPivLU& compute(const EigenBase<InputType>& matrix) {
       m_lu = matrix.derived();
-      // compute();
 
       typename TranspositionType::StorageIndex nb_transpositions;
       TranspositionType m_rowsTranspositions;
-
-      //internal::partial_lu_impl<typename MatrixType::Scalar, MatrixType::Flags&RowMajorBit?RowMajor:ColMajor, typename TranspositionType::StorageIndex>
-      //  ::blocked_lu(, , &m_rowsTranspositions.coeffRef(0), );
-      // static Index __attribute__((always_inline)) blocked_lu(Scalar* lu_data, Index luStride, PivIndex* row_transpositions, PivIndex& nb_transpositions)
       {
-        
         MapLU lu1(&m_lu.coeffRef(0,0),m_lu.outerStride(),14);
         Block<MapLU, Dynamic, Dynamic> lu(lu1,0,0,14,14);
 
         // if the matrix is too small, no blocking:
-        internal::partial_lu_impl<typename MatrixType::Scalar, 0, typename TranspositionType::StorageIndex>::unblocked_lu(lu, &m_rowsTranspositions.coeffRef(0), nb_transpositions);
+        unblocked_lu(lu, &m_rowsTranspositions.coeffRef(0), nb_transpositions);
+        // template<typename Scalar, int StorageOrder, typename PivIndex>
       }
 
       m_p = m_rowsTranspositions;
