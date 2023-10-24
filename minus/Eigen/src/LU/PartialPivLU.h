@@ -87,13 +87,8 @@ template<typename _MatrixType> class PartialPivLU
     friend class SolverBase<PartialPivLU>;
 
     EIGEN_GENERIC_PUBLIC_INTERFACE(PartialPivLU)
-    enum {
-      MaxRowsAtCompileTime = MatrixType::MaxRowsAtCompileTime,
-      MaxColsAtCompileTime = MatrixType::MaxColsAtCompileTime
-    };
     typedef PermutationMatrix<14, 14> PermutationType;
     typedef Transpositions<14, 14> TranspositionType;
-    typedef typename MatrixType::PlainObject PlainObject;
 
     /**
       * \brief Default Constructor.
@@ -101,14 +96,11 @@ template<typename _MatrixType> class PartialPivLU
       * The default constructor is useful in cases in which the user intends to
       * perform decompositions via PartialPivLU::compute(const MatrixType&).
       */
-    PartialPivLU();
+    PartialPivLU() : m_lu(), m_p() { }
 
     template<typename InputType>
     explicit PartialPivLU(EigenBase<InputType>& matrix);
-    
-    typedef Map<Matrix<Scalar, Dynamic, Dynamic, 0> > MapLU;
 
-    
     /** \internal performs the LU decomposition in-place of the matrix \a lu
       * using an unblocked algorithm.
       *
@@ -233,13 +225,6 @@ template<typename _MatrixType> class PartialPivLU
     MatrixType m_lu;
     PermutationType m_p;
 };
-
-template<typename MatrixType>
-PartialPivLU<MatrixType>::PartialPivLU()
-  : m_lu(),
-    m_p()
-{
-}
 
 
 } // end namespace Eigen

@@ -85,7 +85,7 @@ struct triangular_solver_selector<Lhs,Rhs,Side,Mode,NoUnrolling,Dynamic>
   typedef blas_traits<Lhs> LhsProductTraits;
   typedef typename LhsProductTraits::DirectLinearAccessType ActualLhsType;
 
-  static void run(const Lhs& lhs, Rhs& rhs)
+  static __attribute__((always_inline)) void run(const Lhs& lhs, Rhs& rhs)
   {
     typename internal::add_const_on_value_type<ActualLhsType>::type actualLhs = LhsProductTraits::extract(lhs);
 
@@ -164,14 +164,14 @@ struct triangular_solver_selector<Lhs,Rhs,OnTheRight,Mode,CompleteUnrolling,1> {
 #ifndef EIGEN_PARSED_BY_DOXYGEN
 template<typename MatrixType, unsigned int Mode>
 template<int Side, typename OtherDerived>
-__attribute__((always_inline)) EIGEN_DEVICE_FUNC inline void TriangularViewImpl<MatrixType,Mode,Dense>::solveInPlace(const MatrixBase<OtherDerived>& _other) const
+EIGEN_DEVICE_FUNC __attribute__((always_inline)) void TriangularViewImpl<MatrixType,Mode,Dense>::solveInPlace(const MatrixBase<OtherDerived>& _other) const
 {
   OtherDerived& other = _other.const_cast_derived();
   eigen_assert( derived().cols() == derived().rows() && ((Side==OnTheLeft && derived().cols() == other.rows()) || (Side==OnTheRight && derived().cols() == other.cols())) );
   eigen_assert((!(Mode & ZeroDiag)) && bool(Mode & (Upper|Lower)));
   // If solving for a 0x0 matrix, nothing to do, simply return.
-  if (derived().cols() == 0)
-    return;
+  // if (derived().cols() == 0)
+  //  return;
 
   enum { copy = (internal::traits<OtherDerived>::Flags & RowMajorBit)  && OtherDerived::IsVectorAtCompileTime && OtherDerived::SizeAtCompileTime!=1};
   typedef typename internal::conditional<copy,
