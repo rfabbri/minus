@@ -9,15 +9,17 @@
 #include <iostream>
 #include <iomanip>
 #include <cstring>
-#include "Eigen/LU"
 #include "minus.h"
 #include "internal-util.hxx"
 
 namespace MiNuS {
 
+using namespace Eigen; // only used for linear solve
 
+template <problem P, typename F>
 __attribute__((always_inline)) void
-solve(Map<const Matrix<C<F>, f::nve, f::nve>,Aligned> &matrix, Map<const Matrix<C<F>, f::nve, 1>, Aligned > &b,
+minus_core<P, F>::
+lsolve(Map<const Matrix<C<F>, f::nve, f::nve>,Aligned> &matrix, Map<const Matrix<C<F>, f::nve, 1>, Aligned > &b,
 Map<Matrix<C<F>, f::nve, 1>,Aligned> &x) 
 {
    typedef Matrix<C<F>, f::nve, f::nve>  MatrixType;
@@ -32,17 +34,15 @@ Map<Matrix<C<F>, f::nve, 1>,Aligned> &x)
    // static __attribute__((always_inline)) void unblocked_lu(
    //     MatrixType &m, 
    typename TranspositionType::StorageIndex* row_transpositions = &m_rowsTranspositions.coeffRef(0);
-   typedef internal::scalar_score_coeff_op<Scalar> Scoring;
-   typedef typename Scoring::result_type Score;
    static constexpr Index rows = f::nve;
    //Index first_zero_pivot = -1;
    for(Index k = 0; k < 14; ++k) {
      Index rrows = rows-k-1;
 
      Index row_of_biggest_in_col(k);
-     Score biggest_in_corner = std::norm(m(k,k));// std::norm(m.coeff(k,k));
+     F biggest_in_corner = std::norm(m(k,k));// std::norm(m.coeff(k,k));
      for (unsigned j=rows-1; j != k; --j) {
-       Score tmp;
+       F tmp;
        if ((tmp = std::norm(m(j,k))) > biggest_in_corner*1000) {
            biggest_in_corner = tmp;
            row_of_biggest_in_col = j;
@@ -133,7 +133,6 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
   C<F> *const dx4 = dx;   // reuse dx for dx4
   F    *const dt = (F *)(dxdt + f::nve);
   const F &t_step = s.init_dt_;  // initial step
-  using namespace Eigen; // only used for linear solve
   Map<Matrix<C<F>, f::nve, 1>,Aligned> dxi_eigen(dxi);
   Map<Matrix<C<F>, f::nve, 1>,Aligned> dx4_eigen(dx4);
   Map<Matrix<C<F>, f::nve, 1>,Aligned> &dx_eigen = dx4_eigen;

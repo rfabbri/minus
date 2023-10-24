@@ -19,6 +19,7 @@
 #include <complex>
 
 #include "internal-util.h"
+#include "Eigen/LU"
 
 namespace MiNuS {
   
@@ -104,13 +105,14 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   static void track_all(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], 
       const C<F> params[2*f::nparams], solution raw_solutions[f::nsols])
   { track(s, s_sols, params, raw_solutions, 0, f::nsols); }
-  
+
   private: // -----------------------------------------------------------------
   static constexpr unsigned NVEPLUS1 = f::nve+1;
   static constexpr unsigned NVEPLUS2 = f::nve+2;
   static constexpr unsigned NVE2 = f::nve*f::nve;
   static void evaluate_Hxt(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
   static void evaluate_HxH(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
+  static void lsolve(Eigen::Map<const Eigen::Matrix<C<F>, f::nve, f::nve>,Eigen::Aligned> &matrix, Eigen::Map<const Eigen::Matrix<C<F>, f::nve, 1>, Eigen::Aligned > &b, Eigen::Map<Eigen::Matrix<C<F>, f::nve, 1>,Eigen::Aligned> &x);
 };
 
 // TODO: make these static
