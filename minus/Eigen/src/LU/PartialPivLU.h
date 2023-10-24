@@ -115,22 +115,17 @@ template<typename _MatrixType> class PartialPivLU
     // XXX modified by Fabbri to suit Chicago problem
     static __attribute__((always_inline)) void unblocked_lu(
         MatrixType &lu, 
-        typename TranspositionType::StorageIndex* row_transpositions, 
-        typename TranspositionType::StorageIndex& nb_transpositions)
+        typename TranspositionType::StorageIndex* row_transpositions)
     {
       typedef internal::scalar_score_coeff_op<Scalar> Scoring;
       typedef typename Scoring::result_type Score;
       static constexpr Index rows = 14;
       static constexpr Index cols = 14;
-      nb_transpositions = 0;
-      Index first_zero_pivot = -1;
+      //Index first_zero_pivot = -1;
       for(Index k = 0; k < 14; ++k) {
         Index rrows = rows-k-1;
         Index rcols = cols-k-1;
 
-  //      Score biggest_in_corner
-  //        = lu.col(k).tail(rows-k).unaryExpr(Scoring()).maxCoeff(&row_of_biggest_in_col);
-        
         Index row_of_biggest_in_col(k);
         Score biggest_in_corner = std::norm(lu(k,k));// std::norm(lu.coeff(k,k));
         for (unsigned j=rows-1; j != k; --j) {
@@ -144,17 +139,16 @@ template<typename _MatrixType> class PartialPivLU
 
         row_transpositions[k] = typename TranspositionType::StorageIndex(row_of_biggest_in_col);
 
-        if (biggest_in_corner != Score(0)) {
-          if (k != row_of_biggest_in_col) {
-            lu.row(k).swap(lu.row(row_of_biggest_in_col));
-            ++nb_transpositions;
-          }
+        //if (biggest_in_corner != Score(0)) {
+        if (k != row_of_biggest_in_col) {
+          lu.row(k).swap(lu.row(row_of_biggest_in_col));
+        }
 
-          lu.col(k).tail(rrows) /= lu(k,k);
-        } else if (first_zero_pivot==-1)
+        lu.col(k).tail(rrows) /= lu(k,k);
+        // } else if (first_zero_pivot==-1)
           // the pivot is exactly zero, we record the index of the first pivot which is exactly 0,
           // and continue the factorization such we still have A = PLU
-          first_zero_pivot = k;
+        //  first_zero_pivot = k;
 
         if (k < rows-1)
           lu.bottomRightCorner(rrows,rcols).noalias() -= lu.col(k).tail(rrows) * lu.row(k).tail(rcols);
@@ -164,9 +158,8 @@ template<typename _MatrixType> class PartialPivLU
     template<typename InputType> inline __attribute__((always_inline)) 
     PartialPivLU& compute(const EigenBase<InputType>& matrix) {
       m = matrix.derived();
-      typename TranspositionType::StorageIndex nb_transpositions;
       TranspositionType m_rowsTranspositions;
-      unblocked_lu(m, &m_rowsTranspositions.coeffRef(0), nb_transpositions);
+      unblocked_lu(m, &m_rowsTranspositions.coeffRef(0));
 
       m_p = m_rowsTranspositions;
       return *this;
@@ -225,39 +218,25 @@ template<typename _MatrixType> class PartialPivLU
       d(10) -= m(10,0)*d(0)+ m(10,1)*d(1)+ m(10,2)*d(2)+ m(10,3)*d(3)+ m(10,4)*d(4)+ m(10,5)*d(5)+ m(10,6)*d(6)+ m(10,7)*d(7)+ m(10,8)*d(8)+ m(10,9)*d(9);
       d(11) -= m(11,0)*d(0)+ m(11,1)*d(1)+ m(11,2)*d(2)+ m(11,3)*d(3)+ m(11,4)*d(4)+ m(11,5)*d(5)+ m(11,6)*d(6)+ m(11,7)*d(7)+ m(11,8)*d(8)+ m(11,9)*d(9)+ m(11,10)*d(10);
       d(12) -= m(12,0)*d(0)+ m(12,1)*d(1)+ m(12,2)*d(2)+ m(12,3)*d(3)+ m(12,4)*d(4)+ m(12,5)*d(5)+ m(12,6)*d(6)+ m(12,7)*d(7)+ m(12,8)*d(8)+ m(12,9)*d(9)+ m(12,10)*d(10)+ m(12,11)*d(11);
-      d(13) -= m(13,0)*d(0)+ m(13,1)*d(1)+ m(13,2)*d(2)+ m(13,3)*d(3)+ m(13,4)*d(4)+ m(13,5)*d(5)+ m(13,6)*d(6)+ m(13,7)*d(7)+ m(13,8)*d(8)+ m(13,9)*d(9)+ m(13,10)*d(10)+ m(13,11)*d(11)+ m(13,12)*d(12);
+      d(13) -= (m(13,0)*d(0)+ m(13,1)*d(1)+ m(13,2)*d(2)+ m(13,3)*d(3)+ m(13,4)*d(4)+ m(13,5)*d(5)+ m(13,6)*d(6)+ m(13,7)*d(7)+ m(13,8)*d(8)+ m(13,9)*d(9)+ m(13,10)*d(10)+ m(13,11)*d(11)+ m(13,12)*d(12));
 
-      
       // Step 2
       //m.template triangularView<UnitLower>().solveInPlace(d);
 
       d(13) /= m(13,13);
-      d(12) -= m(12,13)*d(13);
-      d(12) /= m(12,12);
-      d(11) -= (m(11,12)*d(12)+ m(11,13)*d(13));
-      d(11) /= m(11,11);
-      d(10) -= (m(10,11)*d(11)+ m(10,12)*d(12)+ m(10,13)*d(13));
-      d(10) /= m(10,10);
-      d(9)  -= (m(9,10)*d(10)+ m(9,11)*d(11)+ m(9,12)*d(12)+ m(9,13)*d(13));
-      d(9) /= m(9,9);
-      d(8)  -= (m(8,9)*d(9)+ m(8,10)*d(10)+ m(8,11)*d(11)+ m(8,12)*d(12)+ m(8,13)*d(13));
-      d(8) /= m(8,8);
-      d(7)  -= (m(7,8)*d(8)+ m(7,9)*d(9)+ m(7,10)*d(10)+ m(7,11)*d(11)+ m(7,12)*d(12)+ m(7,13)*d(13));
-      d(7) /= m(7,7);
-      d(6)  -= (m(6,7)*d(7)+ m(6,8)*d(8)+ m(6,9)*d(9)+ m(6,10)*d(10)+ m(6,11)*d(11)+ m(6,12)*d(12)+ m(6,13)*d(13));
-      d(6) /= m(6,6);
-      d(5)  -= (m(5,6)*d(6)+ m(5,7)*d(7)+ m(5,8)*d(8)+ m(5,9)*d(9)+ m(5,10)*d(10)+ m(5,11)*d(11)+ m(5,12)*d(12)+ m(5,13)*d(13));
-      d(5) /= m(5,5);
-      d(4)  -= (m(4,5)*d(5)+ m(4,6)*d(6)+ m(4,7)*d(7)+ m(4,8)*d(8)+ m(4,9)*d(9)+ m(4,10)*d(10)+ m(4,11)*d(11)+ m(4,12)*d(12)+ m(4,13)*d(13));
-      d(4) /= m(4,4);
-      d(3)  -= (m(3,4)*d(4)+ m(3,5)*d(5)+ m(3,6)*d(6)+ m(3,7)*d(7)+ m(3,8)*d(8)+ m(3,9)*d(9)+ m(3,10)*d(10)+ m(3,11)*d(11)+ m(3,12)*d(12)+ m(3,13)*d(13));
-      d(3) /= m(3,3);
-      d(2)  -= (m(2,3)*d(3)+ m(2,4)*d(4)+ m(2,5)*d(5)+ m(2,6)*d(6)+ m(2,7)*d(7)+ m(2,8)*d(8)+ m(2,9)*d(9)+ m(2,10)*d(10)+ m(2,11)*d(11)+ m(2,12)*d(12)+ m(2,13)*d(13));
-      d(2) /= m(2,2);
-      d(1)  -= (m(1,2)*d(2)+ m(1,3)*d(3)+ m(1,4)*d(4)+ m(1,5)*d(5)+ m(1,6)*d(6)+ m(1,7)*d(7)+ m(1,8)*d(8)+ m(1,9)*d(9)+ m(1,10)*d(10)+ m(1,11)*d(11)+ m(1,12)*d(12)+ m(1,13)*d(13));
-      d(1) /= m(1,1);
-      d(0)  -= (m(0,1)*d(1)+ m(0,2)*d(2)+ m(0,3)*d(3)+ m(0,4)*d(4)+ m(0,5)*d(5)+ m(0,6)*d(6)+ m(0,7)*d(7)+ m(0,8)*d(8)+ m(0,9)*d(9)+ m(0,10)*d(10)+ m(0,11)*d(11)+ m(0,12)*d(12)+ m(0,13)*d(13));
-      d(0) /= m(0,0);
+      d(12) -= m(12,13)*d(13); d(12) /= m(12,12);
+      d(11) -= (m(11,12)*d(12)+ m(11,13)*d(13)); d(11) /= m(11,11);
+      d(10) -= (m(10,11)*d(11)+ m(10,12)*d(12)+ m(10,13)*d(13)); d(10) /= m(10,10);
+      d(9)  -= (m(9,10)*d(10)+ m(9,11)*d(11)+ m(9,12)*d(12)+ m(9,13)*d(13)); d(9) /= m(9,9);
+      d(8)  -= (m(8,9)*d(9)+ m(8,10)*d(10)+ m(8,11)*d(11)+ m(8,12)*d(12)+ m(8,13)*d(13)); d(8) /= m(8,8);
+      d(7)  -= (m(7,8)*d(8)+ m(7,9)*d(9)+ m(7,10)*d(10)+ m(7,11)*d(11)+ m(7,12)*d(12)+ m(7,13)*d(13)); d(7) /= m(7,7);
+      d(6)  -= (m(6,7)*d(7)+ m(6,8)*d(8)+ m(6,9)*d(9)+ m(6,10)*d(10)+ m(6,11)*d(11)+ m(6,12)*d(12)+ m(6,13)*d(13)); d(6) /= m(6,6);
+      d(5)  -= (m(5,6)*d(6)+ m(5,7)*d(7)+ m(5,8)*d(8)+ m(5,9)*d(9)+ m(5,10)*d(10)+ m(5,11)*d(11)+ m(5,12)*d(12)+ m(5,13)*d(13)); d(5) /= m(5,5);
+      d(4)  -= (m(4,5)*d(5)+ m(4,6)*d(6)+ m(4,7)*d(7)+ m(4,8)*d(8)+ m(4,9)*d(9)+ m(4,10)*d(10)+ m(4,11)*d(11)+ m(4,12)*d(12)+ m(4,13)*d(13)); d(4) /= m(4,4);
+      d(3)  -= (m(3,4)*d(4)+ m(3,5)*d(5)+ m(3,6)*d(6)+ m(3,7)*d(7)+ m(3,8)*d(8)+ m(3,9)*d(9)+ m(3,10)*d(10)+ m(3,11)*d(11)+ m(3,12)*d(12)+ m(3,13)*d(13)); d(3) /= m(3,3);
+      d(2)  -= (m(2,3)*d(3)+ m(2,4)*d(4)+ m(2,5)*d(5)+ m(2,6)*d(6)+ m(2,7)*d(7)+ m(2,8)*d(8)+ m(2,9)*d(9)+ m(2,10)*d(10)+ m(2,11)*d(11)+ m(2,12)*d(12)+ m(2,13)*d(13)); d(2) /= m(2,2);
+      d(1)  -= (m(1,2)*d(2)+ m(1,3)*d(3)+ m(1,4)*d(4)+ m(1,5)*d(5)+ m(1,6)*d(6)+ m(1,7)*d(7)+ m(1,8)*d(8)+ m(1,9)*d(9)+ m(1,10)*d(10)+ m(1,11)*d(11)+ m(1,12)*d(12)+ m(1,13)*d(13)); d(1) /= m(1,1);
+      d(0)  -= (m(0,1)*d(1)+ m(0,2)*d(2)+ m(0,3)*d(3)+ m(0,4)*d(4)+ m(0,5)*d(5)+ m(0,6)*d(6)+ m(0,7)*d(7)+ m(0,8)*d(8)+ m(0,9)*d(9)+ m(0,10)*d(10)+ m(0,11)*d(11)+ m(0,12)*d(12)+ m(0,13)*d(13)); d(0) /= m(0,0);
       
       // d(0)  = d(0) - (m.row(0).tail(12) * d.tail(12).transpose());
 
