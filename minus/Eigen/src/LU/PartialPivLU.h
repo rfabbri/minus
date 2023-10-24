@@ -259,6 +259,7 @@ template<typename _MatrixType> class PartialPivLU
       d(0)  -= (m(0,1)*d(1)+ m(0,2)*d(2)+ m(0,3)*d(3)+ m(0,4)*d(4)+ m(0,5)*d(5)+ m(0,6)*d(6)+ m(0,7)*d(7)+ m(0,8)*d(8)+ m(0,9)*d(9)+ m(0,10)*d(10)+ m(0,11)*d(11)+ m(0,12)*d(12)+ m(0,13)*d(13));
       d(0) /= m(0,0);
       
+      // d(0)  = d(0) - (m.row(0).tail(12) * d.tail(12).transpose());
 
       // Step 3
       //m.template triangularView<Upper>().solveInPlace(d);
