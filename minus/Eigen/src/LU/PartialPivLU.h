@@ -88,11 +88,11 @@ template<typename _MatrixType> class PartialPivLU
 
     EIGEN_GENERIC_PUBLIC_INTERFACE(PartialPivLU)
     enum {
-      MaxRowsAtCompileTime = MatrixType::MaxRowsAtCompileTime,
-      MaxColsAtCompileTime = MatrixType::MaxColsAtCompileTime
+      MaxRowsAtCompileTime = 14,
+      MaxColsAtCompileTime = 14
     };
-    typedef PermutationMatrix<RowsAtCompileTime, MaxRowsAtCompileTime> PermutationType;
-    typedef Transpositions<RowsAtCompileTime, MaxRowsAtCompileTime> TranspositionType;
+    typedef PermutationMatrix<14, 14> PermutationType;
+    typedef Transpositions<14, 14> TranspositionType;
     typedef typename MatrixType::PlainObject PlainObject;
 
     /**
@@ -159,7 +159,7 @@ template<typename _MatrixType> class PartialPivLU
           }
 
           lu.col(k).tail(rrows) /= lu(k,k);
-        } else if(first_zero_pivot==-1)
+        } else if (first_zero_pivot==-1)
           // the pivot is exactly zero, we record the index of the first pivot which is exactly 0,
           // and continue the factorization such we still have A = PLU
           first_zero_pivot = k;
@@ -172,14 +172,9 @@ template<typename _MatrixType> class PartialPivLU
     template<typename InputType> inline __attribute__((always_inline)) 
     PartialPivLU& compute(const EigenBase<InputType>& matrix) {
       m_lu = matrix.derived();
-
       typename TranspositionType::StorageIndex nb_transpositions;
       TranspositionType m_rowsTranspositions;
-      {
-        // if the matrix is too small, no blocking:
-        unblocked_lu(m_lu, &m_rowsTranspositions.coeffRef(0), nb_transpositions);
-        // template<typename Scalar, int StorageOrder, typename PivIndex>
-      }
+      unblocked_lu(m_lu, &m_rowsTranspositions.coeffRef(0), nb_transpositions);
 
       m_p = m_rowsTranspositions;
       return *this;
