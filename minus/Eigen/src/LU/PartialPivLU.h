@@ -88,8 +88,8 @@ template<typename _MatrixType> class PartialPivLU
 
     EIGEN_GENERIC_PUBLIC_INTERFACE(PartialPivLU)
     enum {
-      MaxRowsAtCompileTime = 14,
-      MaxColsAtCompileTime = 14
+      MaxRowsAtCompileTime = MatrixType::MaxRowsAtCompileTime,
+      MaxColsAtCompileTime = MatrixType::MaxColsAtCompileTime
     };
     typedef PermutationMatrix<14, 14> PermutationType;
     typedef Transpositions<14, 14> TranspositionType;
