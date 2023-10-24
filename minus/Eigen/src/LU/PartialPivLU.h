@@ -105,42 +105,17 @@ struct partial_lu_impl
         // FIXME shall we introduce a safe quotient expression in cas 1/lu.coeff(k,k)
         // overflow but not the actual quotient?
         lu.col(k).tail(rrows) /= lu.coeff(k,k);
-      }
-      else if(first_zero_pivot==-1) {
+      } else if(first_zero_pivot==-1)
         // the pivot is exactly zero, we record the index of the first pivot which is exactly 0,
         // and continue the factorization such we still have A = PLU
         first_zero_pivot = k;
-      }
 
-      if(k<rows-1) {
+      if (k < rows-1)
         lu.bottomRightCorner(rrows,rcols).noalias() -= lu.col(k).tail(rrows) * lu.row(k).tail(rcols);
-      }
     }
     return first_zero_pivot;
   }
 
-  /** \internal performs the LU decomposition in-place of the matrix represented
-    * by the variables \a rows, \a cols, \a lu_data, and \a lu_stride using a
-    * recursive, blocked algorithm.
-    *
-    * In addition, this function returns the row transpositions in the
-    * vector \a row_transpositions which must have a size equal to the number
-    * of columns of the matrix \a lu, and an integer \a nb_transpositions
-    * which returns the actual number of transpositions.
-    *
-    * \returns The index of the first pivot which is exactly zero if any, or a negative number otherwise.
-    *
-    * \note This very low level interface using pointers, etc. is to:
-    *   1 - reduce the number of instantiations to the strict minimum
-    *   2 - avoid infinite recursion of the instantiations with Block<Block<Block<...> > > */
-  static Index __attribute__((always_inline)) blocked_lu(Scalar* lu_data, Index luStride, PivIndex* row_transpositions, PivIndex& nb_transpositions)
-  {
-    MapLU lu1(lu_data,StorageOrder==RowMajor?14:luStride,StorageOrder==RowMajor?luStride:14);
-    MatrixType lu(lu1,0,0,14,14);
-
-    // if the matrix is too small, no blocking:
-    return unblocked_lu(lu, row_transpositions, nb_transpositions);
-  }
 };
 
 } // end namespace internal
@@ -206,6 +181,9 @@ template<typename _MatrixType> class PartialPivLU
 
     template<typename InputType>
     explicit PartialPivLU(EigenBase<InputType>& matrix);
+    
+    typedef Map<Matrix<Scalar, Dynamic, Dynamic, 0> > MapLU;
+    
 
     template<typename InputType> inline __attribute__((always_inline)) 
     PartialPivLU& compute(const EigenBase<InputType>& matrix) {
@@ -215,8 +193,17 @@ template<typename _MatrixType> class PartialPivLU
       typename TranspositionType::StorageIndex nb_transpositions;
       TranspositionType m_rowsTranspositions;
 
-      internal::partial_lu_impl<typename MatrixType::Scalar, MatrixType::Flags&RowMajorBit?RowMajor:ColMajor, typename TranspositionType::StorageIndex>
-        ::blocked_lu(&m_lu.coeffRef(0,0), m_lu.outerStride(), &m_rowsTranspositions.coeffRef(0), nb_transpositions);
+      //internal::partial_lu_impl<typename MatrixType::Scalar, MatrixType::Flags&RowMajorBit?RowMajor:ColMajor, typename TranspositionType::StorageIndex>
+      //  ::blocked_lu(, , &m_rowsTranspositions.coeffRef(0), );
+      // static Index __attribute__((always_inline)) blocked_lu(Scalar* lu_data, Index luStride, PivIndex* row_transpositions, PivIndex& nb_transpositions)
+      {
+        
+        MapLU lu1(&m_lu.coeffRef(0,0),m_lu.outerStride(),14);
+        Block<MapLU, Dynamic, Dynamic> lu(lu1,0,0,14,14);
+
+        // if the matrix is too small, no blocking:
+        internal::partial_lu_impl<typename MatrixType::Scalar, 0, typename TranspositionType::StorageIndex>::unblocked_lu(lu, &m_rowsTranspositions.coeffRef(0), nb_transpositions);
+      }
 
       m_p = m_rowsTranspositions;
       return *this;
