@@ -120,10 +120,9 @@ template<typename _MatrixType> class PartialPivLU
       * \returns The index of the first pivot which is exactly zero if any, or a negative number otherwise.
       */
 
-    typedef Block<MapLU, Dynamic, Dynamic> MatrixType2;
     // XXX modified by Fabbri to suit Chicago problem
     static __attribute__((always_inline)) void unblocked_lu(
-        MatrixType2& lu, 
+        MatrixType &lu, 
         typename TranspositionType::StorageIndex* row_transpositions, 
         typename TranspositionType::StorageIndex& nb_transpositions)
     {
@@ -141,10 +140,10 @@ template<typename _MatrixType> class PartialPivLU
   //        = lu.col(k).tail(rows-k).unaryExpr(Scoring()).maxCoeff(&row_of_biggest_in_col);
         
         Index row_of_biggest_in_col(k);
-        Score biggest_in_corner = std::norm(lu.coeff(k,k));// std::norm(lu.coeff(k,k));
+        Score biggest_in_corner = std::norm(lu(k,k));// std::norm(lu.coeff(k,k));
         for (unsigned j=rows-1; j != k; --j) {
           Score tmp;
-          if ((tmp = std::norm(lu.coeff(j,k))) > biggest_in_corner*1000) {
+          if ((tmp = std::norm(lu(j,k))) > biggest_in_corner*1000) {
               biggest_in_corner = tmp;
               row_of_biggest_in_col = j;
               break;
@@ -159,7 +158,7 @@ template<typename _MatrixType> class PartialPivLU
             ++nb_transpositions;
           }
 
-          lu.col(k).tail(rrows) /= lu.coeff(k,k);
+          lu.col(k).tail(rrows) /= lu(k,k);
         } else if(first_zero_pivot==-1)
           // the pivot is exactly zero, we record the index of the first pivot which is exactly 0,
           // and continue the factorization such we still have A = PLU
@@ -177,11 +176,8 @@ template<typename _MatrixType> class PartialPivLU
       typename TranspositionType::StorageIndex nb_transpositions;
       TranspositionType m_rowsTranspositions;
       {
-        MapLU lu1(&m_lu.coeffRef(0,0),m_lu.outerStride(),14);
-        Block<MapLU, Dynamic, Dynamic> lu(lu1,0,0,14,14);
-
         // if the matrix is too small, no blocking:
-        unblocked_lu(lu, &m_rowsTranspositions.coeffRef(0), nb_transpositions);
+        unblocked_lu(m_lu, &m_rowsTranspositions.coeffRef(0), nb_transpositions);
         // template<typename Scalar, int StorageOrder, typename PivIndex>
       }
 
