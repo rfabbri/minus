@@ -85,10 +85,10 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   
   struct solution
   {
-    C<F> x[f::nve];    // array of n coordinates
+    alignas(16) C<F> x[f::nve];    // array of n coordinates
     F t;               // last value of parameter t used
-    solution_status status;
     unsigned num_steps;  // number of steps taken along the path
+    solution_status status;
     solution() : status(UNDETERMINED), num_steps(0) { }
   };
 
