@@ -28,7 +28,7 @@ namespace MiNuS {
 // Internal note: m2: script t, variable sols
 // You can reinterpret in C as start_sols_[M::nsols][M::nve]
 template <typename F>
-const std::complex<F> minus_data<chicago14a,F>::
+alignas(sizeof(std::complex<F>)) const std::complex<F> minus_data<chicago14a,F>::
 start_sols_[M::nve*M::nsols] = {
   {-.59336028545681196,-.11013183013512155},
   {.11944671140724233,-.13633687755694085},
@@ -4729,7 +4729,7 @@ start_sols_[M::nve*M::nsols] = {
 //                                  to store target system params
 //                                  the latter M::nparams are trash
 template <typename F>
-std::complex<F> minus_data<chicago14a,F>::
+alignas(sizeof(std::complex<F>)) std::complex<F> minus_data<chicago14a,F>::
 params_start_target_[2*M::f::nparams] = {
   {.13016671344237549,-.36891394723672405},
   {.2649393534275909,-.23418132862391827},
@@ -4800,7 +4800,7 @@ params_start_target_[2*M::f::nparams] = {
 //
 // The point-tangent inputs giving rise to this are given below
 template <typename F>
-std::complex<F> minus_data<chicago14a,F>::
+alignas(sizeof(std::complex<F>)) std::complex<F> minus_data<chicago14a,F>::
 default_params_start_target_gammified_[2*M::f::nparams] = { // start-target param pairs, P01 in chicago.m2
   {.391195550619826,-.00262962533857666},
   {.310140709227333,+.169842562835882},
