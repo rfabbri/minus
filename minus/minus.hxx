@@ -141,7 +141,7 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
     bool end_zone = false;
     v::copy(s_s, x0);
     *t0 = 0; *dt = t_step;
-    unsigned predictor_successes = 0;
+    char predictor_successes = 0;
 
     // track H(x,t) for t in [0,1]
     while (t_s->status == PROCESSING 
@@ -209,7 +209,7 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
       vp::add_to_self(x1t1, dxdt);
       
       /// CORRECTOR ///
-      unsigned n_corr_steps = 0;
+      char n_corr_steps = 0;
       bool is_successful;
       do {
         ++n_corr_steps;
