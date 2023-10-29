@@ -30,14 +30,11 @@ lsolve(
   typedef Matrix<C<F>, M::f::nve, M::f::nve>  MatrixType;
   typedef PermutationMatrix<M::f::nve, M::f::nve> PermutationType;
   typedef Transpositions<M::f::nve, M::f::nve> TranspositionType;
-  PermutationType m_p;
-  TranspositionType m_rowsTranspositions;
+  PermutationType m_p; TranspositionType m_rowsTranspositions;
   typename TranspositionType::StorageIndex* row_transpositions = &m_rowsTranspositions.coeffRef(0);
   static constexpr Index rows = M::f::nve;
   for(Index k = 0; k < M::f::nve; ++k) {
-    Index rrows = rows-k-1;
-
-    Index row_of_biggest_in_col(k);
+    Index rrows = rows-k-1, row_of_biggest_in_col(k);
     F biggest_in_corner = std::norm(m(k,k));
     for (unsigned j=rows-1; j != k; --j) {
       F tmp;
@@ -47,18 +44,14 @@ lsolve(
           break;
       }
     }
-
     row_transpositions[k] = typename TranspositionType::StorageIndex(row_of_biggest_in_col);
-
-    if (k != row_of_biggest_in_col)
-      m.row(k).swap(m.row(row_of_biggest_in_col));
+    if (k != row_of_biggest_in_col) m.row(k).swap(m.row(row_of_biggest_in_col));
 
     m.col(k).tail(rrows) /= m(k,k);
 
     if (k < rows-1)
       m.bottomRightCorner(rrows,rrows).noalias() -= m.col(k).tail(rrows) * m.row(k).tail(rrows);
   }
-
   m_p = m_rowsTranspositions;
   x = m_p * b;
 
