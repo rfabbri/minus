@@ -60,8 +60,6 @@ lsolve(
   }
 
   m_p = m_rowsTranspositions;
-
-  // Step 1
   x = m_p * b;
 
   // TODO: use block indexing and std::vector-std::vector multiplication

@@ -247,15 +247,16 @@ struct minus_io_14a : public minus_io_common<F> {
     typedef minus_util<F> u;
     // camera 0 (2nd camera relative to 1st)
     u::quat2rotm(rs, (F *) cameras[0]);
-    cameras[0][3][0] = rs[8];
-    cameras[0][3][1] = rs[9];
-    cameras[0][3][2] = rs[10];
+    F n = sqrt(rs[8]*rs[8] + rs[9]*rs[9] + rs[10]*rs[10]) + sqrt(rs[11]*rs[11] + rs[12]*rs[12] + rs[13]*rs[13]);
+    cameras[0][3][0] = rs[8]/n;
+    cameras[0][3][1] = rs[9]/n;
+    cameras[0][3][2] = rs[10]/n;
     
     // camera 1 (3rd camera relative to 1st)
     u::quat2rotm(rs+4, (F *) cameras[1]);
-    cameras[1][3][0] = rs[11];
-    cameras[1][3][1] = rs[12];
-    cameras[1][3][2] = rs[13];
+    cameras[1][3][0] = rs[11]/n;
+    cameras[1][3][1] = rs[12]/n;
+    cameras[1][3][2] = rs[13]/n;
 
     // quat12 rs(0:3), quat12 rs(4:7)
     //  T12 = solutions(9:11);
