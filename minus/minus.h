@@ -214,8 +214,11 @@ struct minus_io_common {
   // Functions -----------------------------------------------------------------
   static void invert_intrinsics(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const double pix_coords[][ncoords2d], double normalized_coords[][ncoords2d], unsigned npts);
   static void invert_intrinsics_tgt(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const double pix_tgt_coords[][ncoords2d], double normalized_tgt_coords[][ncoords2d], unsigned npts);
-  static void normalize_line(F l[ncoords2d_h]) {
-    const F nrm = std::hypot(l[0], l[1]);
+  static void normalize_line(F l[ncoords2d_h]) { // we were making it unit
+                                                 // normal, but the scale of the
+                                                 // whole line is more important
+                                                 // for certain numerics
+    const F nrm = l[0]*l[0] + l[1]*l[1] + l[2]*l[2];
     l[0] /= nrm; l[1] /= nrm; l[2] /= nrm;
   }
   static void normalize_lines(F lines[][ncoords2d_h], unsigned nlines);
@@ -247,7 +250,7 @@ struct minus_io_14a : public minus_io_common<F> {
     typedef minus_util<F> u;
     // camera 0 (2nd camera relative to 1st)
     u::quat2rotm(rs, (F *) cameras[0]);
-    F n = sqrt(rs[8]*rs[8] + rs[9]*rs[9] + rs[10]*rs[10]) + sqrt(rs[11]*rs[11] + rs[12]*rs[12] + rs[13]*rs[13]);
+    const F n = sqrt(rs[8]*rs[8] + rs[9]*rs[9] + rs[10]*rs[10]) + sqrt(rs[11]*rs[11] + rs[12]*rs[12] + rs[13]*rs[13]);
     cameras[0][3][0] = rs[8]/n;
     cameras[0][3][1] = rs[9]/n;
     cameras[0][3][2] = rs[10]/n;
