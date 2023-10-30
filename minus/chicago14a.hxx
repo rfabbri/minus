@@ -28,21 +28,21 @@ inline __attribute__((always_inline)) void
 eval<chicago14a, F>::
 Hxt(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/) 
 {
-  const C<F> &X0 = x[0];
-  const C<F> &X1 = x[1];
-  const C<F> &X2 = x[2];
-  const C<F> &X3 = x[3];
-  const C<F> &X4 = x[4];
-  const C<F> &X5 = x[5];
-  const C<F> &X6 = x[6];
-  const C<F> &X7 = x[7];
-  const C<F> &X8 = x[8];
-  const C<F> &X9 = x[9];
-  const C<F> &X10 = x[10];
-  const C<F> &X11 = x[11];
-  const C<F> &X12 = x[12];
-  const C<F> &X13 = x[13];
-  const C<F> &X14 = x[14];
+  const C<F> &X0  = x[0];   q0
+  const C<F> &X1  = x[1];   q1
+  const C<F> &X2  = x[2];   q2
+  const C<F> &X3  = x[3];   q3
+  const C<F> &X4  = x[4];   q0
+  const C<F> &X5  = x[5];   q1
+  const C<F> &X6  = x[6];   q2
+  const C<F> &X7  = x[7];   q3
+  const C<F> &X8  = x[8];   transl
+  const C<F> &X9  = x[9];   transl
+  const C<F> &X10 = x[10];  transl
+  const C<F> &X11 = x[11];  transl
+  const C<F> &X12 = x[12];  transl
+  const C<F> &X13 = x[13];  transl
+  const C<F> &X14 = x[14];  t
   
   const C<F> &X15 =  params[0];
   const C<F> &X16 =  params[1];
@@ -161,7 +161,7 @@ Hxt(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * _
   static constexpr C<F> C1 = -1;
   static constexpr C<F> C2 = 2;
   static constexpr C<F> C3 = 0;
-  const C<F> G0 = C1 * X14;
+  const C<F> G0 = -X14;
   const C<F> G1 = C0 + G0;
   // Packet2cd G1G3 = pload(G1G3);
   
@@ -3966,16 +3966,16 @@ HxH(const C<F>* __restrict x /*x and t*/, const C<F> * __restrict params, C<F>* 
   static constexpr C<F> C1 = -1;
   static constexpr C<F> C2 = 2;
   static constexpr C<F> C3 = 0;
-  const C<F> G0 = C1 * X14;
-  const C<F> G1 = C0 + G0;
-  const C<F> G2 = G1 * X15;
-  const C<F> G3 = X14 * X71;
-  const C<F> G4 = G2 + G3;
-  const C<F> G5 = G1 * X21;
-  const C<F> G6 = X14 * X77;
-  const C<F> G7 = G5 + G6;
-  const C<F> G8 = X4 * X4;
-  const C<F> G9 = X5 * X5;
+  const C<F> G0  = C1 * X14;
+  const C<F> G1  = C0 + G0;
+  const C<F> G2  = G1 * X15;
+  const C<F> G3  = X14 * X71;
+  const C<F> G4  = G2 + G3;
+  const C<F> G5  = G1 * X21;
+  const C<F> G6  = X14 * X77;
+  const C<F> G7  = G5 + G6;
+  const C<F> G8  = X4 * X4;
+  const C<F> G9  = X5 * X5;
   const C<F> G10 = G8 + G9;
   const C<F> G11 = X6 * X6;
   const C<F> G12 = G10 + G11;
