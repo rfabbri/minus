@@ -35,28 +35,40 @@ function de = direct_expression(i)
     if isempty(dag_from(i)) 
       de = nodename(i);
     else
-      if isempty(dag_from(dag_from(i)(1)))
-        p1a = ''
-        p1b = ''
-      else
-        p1a = '('
-        p1b = ')'
+      p1a = '', p1b = '';
+      if ~isempty(dag_from(dag_from(i)(1)))
+        if (node_type(dag_from(i)(1)) == '+')
+          p1a = '(', p1b = ')';
+        end
       end
-      if isempty(dag_from(dag_from(i)(2)))
-        p2a = ''
-        p2b = ''
-      else
-        p2a = '('
-        p2b = ')'
+      p2a = '', p2b = '';
+      if ~isempty(dag_from(dag_from(i)(2)))
+        if (node_type(dag_from(i)(2)) == '+')
+          p2a = '(', p2b = ')';
+        end
       end
-      de = p1a + direct_expression(dag_from(i)(1)) + p1b + node_type(i) + p2a + direct_expression(dag_from(i)(2)) + p2b 
+      de = p1a + direct_expression(dag_from(i)(1)) + p1b + node_type(i) ..
+         + p2a + direct_expression(dag_from(i)(2)) + p2b;
+      if length(dag_from(i)) == 3 // up to 3 sums per gate are supported
+        p3a = '', p3b = '';
+        if ~isempty(dag_from(dag_from(i)(3)))
+          if (node_type(dag_from(i)(3)) == '+')
+            p3a = '(', p3b = ')';
+          end
+        end
+        de = de + node_type(i) + p3a + direct_expression(dag_from(i)(3)) + p3b 
+      end
     end
   end
 endfunction
 
 disp roots:
 l = get_roots()
+nr = size(l,'*');
 
-//for i=1:size(l,'*')
-//  direct_expression(l(i))
-//end
+de = '';
+de(max_n_nodes) = '';
+for i=1:size(l,'*')
+  de(l(i)) = nodename(l(i)) + ' = ' + direct_expression(l(i));
+end
+//  "(C0+(C1*X14))*X15"

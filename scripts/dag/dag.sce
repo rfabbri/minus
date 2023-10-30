@@ -13,9 +13,10 @@ exec chicago_bare_new.sce;
 //exec dag_input.sce;
 //txt=mgetl('chicago.bare');
 txtc = strcat(txt,"",'r');
-n_Xs = evstr(unix_g("echo " + "''"+ txtc + "''" + "|sed ''s/;/;\n/g'' | egrep -o X[0-9]+ |sort|tail -n 1|grep -o [0-9]*")(:))+1
-n_Cs = evstr(unix_g("echo " + "''"+ txtc + "''" + "|sed ''s/;/;\n/g'' | egrep -o C[0-9]+ |sort|tail -n 1|grep -o [0-9]*")(:))+1
-n_Gs = evstr(unix_g("echo " + "''"+ txtc + "''" + "|sed ''s/;/;\n/g'' | egrep -o G[0-9]+ |sort|tail -n 1|grep -o [0-9]*")(:))+1
+n_Xs = evstr(unix_g("echo " + "''"+ txtc + "''" + "|sed ''s/;/;\n/g'' | egrep -o X[0-9]+ |grep -o [0-9]*|sort -n|tail -n 1")(:))+1
+n_Cs = evstr(unix_g("echo " + "''"+ txtc + "''" + "|sed ''s/;/;\n/g'' | egrep -o C[0-9]+ |grep -o [0-9]*|sort -n|tail -n 1")(:))+1
+n_Gs = evstr(unix_g("echo " + "''"+ txtc + "''" + "|sed ''s/;/;\n/g'' | egrep -o G[0-9]+ |grep -o [0-9]*|sort -n|tail -n 1")(:))+1
+
 //n_Xs = evstr(unix_g("echo " + "''"+ txtc + "''" + "|sed ''s/;/;\n/g'' | egrep -o X[0-9]+ |sort|wc -l")(:));
 //n_Cs = evstr(unix_g("echo " + "''"+ txtc + "''" + "|sed ''s/;/;\n/g'' | egrep -o C[0-9]+ |sort|wc -l")(:));
 //n_Gs = evstr(unix_g("echo " + "''"+ txtc + "''" + "|sed ''s/;/;\n/g'' | egrep -o G[0-9]+ |sort|wc -l")(:));
