@@ -60,11 +60,11 @@ end
 translation = [];
 for i=1:n_total
   if nodes_in_graph(i) == 1
-    txt = nodename(i);
+    txtt = nodename(i);
   else
-    txt = 'not in graph';
+    txtt = 'not in graph';
   end
-  translation = [translation; txt];
+  translation = [translation; txtt];
 end
 
 //print_vectorized_topo_order();
