@@ -3833,21 +3833,21 @@ inline __attribute__((always_inline)) void
 eval<chicago14a, F>::
 HxH(const C<F>* __restrict x /*x and t*/, const C<F> * __restrict params, C<F>* __restrict y /*HxH*/) 
 {
-  const C<F> &X0 = x[0];
-  const C<F> &X1 = x[1];
-  const C<F> &X2 = x[2];
-  const C<F> &X3 = x[3];
-  const C<F> &X4 = x[4];
-  const C<F> &X5 = x[5];
-  const C<F> &X6 = x[6];
-  const C<F> &X7 = x[7];
-  const C<F> &X8 = x[8];
-  const C<F> &X9 = x[9];
-  const C<F> &X10 = x[10];
-  const C<F> &X11 = x[11];
-  const C<F> &X12 = x[12];
-  const C<F> &X13 = x[13];
-  const C<F> &X14 = x[14];
+  const C<F> &X0 = x[0];    // q0
+  const C<F> &X1 = x[1];    // q1
+  const C<F> &X2 = x[2];    // q2
+  const C<F> &X3 = x[3];    // q3
+  const C<F> &X4 = x[4];    // q0
+  const C<F> &X5 = x[5];    // q1
+  const C<F> &X6 = x[6];    // q2
+  const C<F> &X7 = x[7];    // q3
+  const C<F> &X8 = x[8];    // transl
+  const C<F> &X9 = x[9];    // transl
+  const C<F> &X10 = x[10];  // transl
+  const C<F> &X11 = x[11];  // transl
+  const C<F> &X12 = x[12];  // transl
+  const C<F> &X13 = x[13];  // transl
+  const C<F> &X14 = x[14];  // t
   
   const C<F> &X15 =  params[0];
   const C<F> &X16 =  params[1];
