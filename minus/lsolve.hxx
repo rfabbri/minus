@@ -7,7 +7,6 @@ lsolve(
     Map<Matrix<C<F>, minus_core<P,F>::f::nve, 1>,Aligned> & __restrict x)
 {
   typedef minus_core<P, F> M;
-  typedef Matrix<C<F>, M::f::nve, M::f::nve>  MatrixType;
   typedef PermutationMatrix<M::f::nve, M::f::nve> PermutationType;
   typedef Transpositions<M::f::nve, M::f::nve> TranspositionType;
   PermutationType m_p; TranspositionType m_rowsTranspositions;

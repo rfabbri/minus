@@ -89,7 +89,7 @@ class minus_core { // fully static, not to be instantiated - just used for templ
     F t;               // last value of parameter t used
     unsigned num_steps;  // number of steps taken along the path
     solution_status status;
-    solution() : status(UNDETERMINED), num_steps(0) { }
+    solution() : num_steps(0), status(UNDETERMINED) { }
   };
 
   static const track_settings DEFAULT;
@@ -126,9 +126,9 @@ struct minus_core<P, F>::track_settings {
     dt_decrease_factor_(1./dt_increase_factor_),  // m2 stepDecreaseFactor not existent in DEFAULT, using what is in track.m2:77 
     infinity_threshold_(1e7), // m2 InfinityThreshold
     infinity_threshold2_(infinity_threshold_ * infinity_threshold_),
-    max_corr_steps_(4),  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
+    max_num_steps_(500),
     num_successes_before_increase_(20), // m2 numberSuccessesBeforeIncrease
-    max_num_steps_(500)
+    max_corr_steps_(4)  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
   { }
   
   F init_dt_;   // m2 tStep, t_step, raw interface code initDt
