@@ -59,7 +59,7 @@ function de = direct_expression(i)
 endfunction
 
 disp roots:
-//l = get_roots()
+l = get_roots()
 nr = size(l,'*');
 
 de = '';
@@ -70,6 +70,6 @@ end
 
 del = de(l);
 
-write('expr.c',del);
+// write('expr.c',del);
 
 //  "(C0+(C1*X14))*X15"

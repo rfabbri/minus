@@ -7,8 +7,9 @@ set(minus_sources
   chicago14a.h chicago-default.h chicago14a-default-data.h chicago14a-io.h
   chicago14a.hxx chicago14a-default-data.hxx 
 #
-  cleveland14a.h cleveland-default.h cleveland14a-default-data.h cleveland14a-io.h
-  cleveland14a.hxx cleveland14a-default-data.hxx
+#  Work in progress: builds but needs more testing for production
+#  cleveland14a.h cleveland-default.h cleveland14a-default-data.h cleveland14a-io.h
+#  cleveland14a.hxx cleveland14a-default-data.hxx
 #
   problem-defs.h
 )
