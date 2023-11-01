@@ -81,7 +81,7 @@ function de = direct_expression_remove_out(i)
   global dag_to;
   global nodes_in_graph;
   global dag_to_copy;
-  if nodes_in_graph(i) == 0 | isempty(dag_to_copy(i)) & ~isempty(dag_to(i))
+  if nodes_in_graph(i) == 0 
     de = ''
   else
     if isempty(dag_from(i))
@@ -100,18 +100,18 @@ function de = direct_expression_remove_out(i)
           end
         end
       end
-      de = p1a + direct_expression(dag_from(i)(1)) + p1b + node_type(i) ..
-         + p2a + direct_expression(dag_from(i)(2)) + p2b;
-
-      remove_from_dag_to(dag_from(i)(1),i);
-      remove_from_dag_to(dag_from(i)(2),i);
+      de = p1a + direct_expression_remove_out(dag_from(i)(1)) + p1b + node_type(i) ..
+         + p2a + direct_expression_remove_out(dag_from(i)(2)) + p2b;
 
       // At least two nodes forma gate. The rest mst be the same type
       // of addition otherwise it is not supported.
       // Since we assume it is addition, we do not parenthesize
       for k=3:length(dag_from(i))
         // for now only '+' will be the case here
-        de = de + node_type(i) + p3a + direct_expression(dag_from(i)(k)) + p3b 
+        de = de + node_type(i) + p3a + direct_expression_remove_out(dag_from(i)(k)) + p3b 
+      end
+
+      for k=1:length(dag_from(i))
         remove_from_dag_to(dag_from(i)(k),i);
       end
     end
@@ -122,10 +122,14 @@ endfunction
 // gets explicit expression for node i and below,
 // without outputing expressions if they were alredy used
 function p = pedag(i)
+  global dag_to_copy;
+  global dag_to
   dag_to_copy = dag_to;
   p = ''; p(i) = '';
   for k=i:-1:1
-     p(k) = direct_expression_remove_out(k);
+    if ~isempty(dag_to_copy(k)) || isempty(dag_to(k))
+      p(k) = direct_expression_remove_out(k);
+    end
   end
 endfunction
 
@@ -141,7 +145,7 @@ end
 
 del = de(l);
 
-// p = pedag()
+// p=pedag(get_id('G8')); [p,gstat(1:size(p,1),:)]
 
 // write('expr.c',del);
 
