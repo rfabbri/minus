@@ -9,7 +9,7 @@ global nodes_in_graph;
 global node_type;
 global node_expr;
 
-exec chicago_bare_new.sce;
+exec in/Hxt/chicago_Hxt.sce;
 //exec dag_input.sce;
 //txt=mgetl('chicago.bare');
 txtc = strcat(txt,"",'r');

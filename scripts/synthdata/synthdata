@@ -1,0 +1,137 @@
+#!/bin/bash
+
+# extracts the desired trinocular data for Chicago
+# from synthetic data  files
+#
+if [ "$#" -ne 0 -a "$#" -ne 6 -a "$#" -ne 8 -a "$#" -ne 16 ]; then
+  echo 'Usage 1: generate data and ground truth for a single trifocal problem:' 1>&2;
+  echo '  synthdata [frame1 frame2 frame3 file_line1 file_line2 file_line3 [id0 id1]]' 1>&2; 
+  echo 'Usage 2: generate data for two trifocal problems A and B, and groundtruth for B:' 1>&2;
+  echo '  Usage A-B: synthdata frame1A frame2A frame3A file_line1A file_line2A file_line3A id0A id1A frame1B frame2B frame3B file_line1B file_line2B file_line3B id0B id1B' 1>&2; 
+  exit 2
+fi
+
+# echoerr() { echo "LOG $@" 1>&2; }
+echoerr() { printf "LOG %s\n" "$*" >&2; }
+#echoerr() { printf "LOG %s\n" "$*" >/dev/null; }
+
+# frames are 0-indexed
+# lines are 0-indexed
+#
+# each line is 0-5116 (number of points in synthdata is 5117)
+# each frame is 0-99 (number of frames in synthdata is 100)
+
+id0=0 # ids of the points with tangents
+id1=1
+
+if [ "$#" -eq 0 ]; then
+  frames="42 54 62"
+  # off by one mistake by hongyi:
+  lines="3011 3389 620"  # actual 0-id samples are 1 less this.
+elif [ "$#" -ge 6 ]; then
+  frames="$1 $2 $3"
+  echoerr "frames: $frames"
+  # off by one mistake by hongyi:
+  lines="$4 $5 $6"  # actual 0-id samples are 1 less this.
+  echoerr "lines: $lines"
+  if [ "$#" -ge 8 ]; then
+    id0=$7 # ids of the points with tangents
+    id1=$8
+    echoerr "ids: $id0 $id1"
+    framesB="$9 ${10} ${11}"
+    linesB="${12} ${13} ${14}"
+    id0B=${15} # ids of the points with tangents
+    id1B=${16}
+    echoerr "framesB: $framesB"
+    echoerr "linesB: $linesB"
+    echoerr "idsB: $id0B $id1B"
+  fi
+fi
+
+
+cd $HOME/lib/data/synthcurves-multiview-3d-dataset/spherical-ascii-100_views-perturb-radius_sigma10-normal_sigma0_01rad-minsep_15deg-no_two_cams_colinear_with_object
+
+frame_id=""
+for i in $frames; do
+  frame_id="$frame_id"\ $(printf "%04d" $i)
+done
+frames="$frame_id"
+
+lines0id=""
+for l in $lines; do
+   lines0id="$lines0id"\ `echo $l + 1 | bc`
+done
+lines="$lines0id"
+
+#set -x
+for i in $frames; do
+  echoerr "2D points for frame $i"
+  for l in $lines; do
+    sed -n "${l}p" frame_$i-pts-2D.txt
+  done
+done
+
+for i in $frames; do
+  echoerr "2D tangents for frame $i"
+  for l in $lines; do
+    sed -n "${l}p" frame_$i-tgts-2D.txt
+  done
+done
+
+echoerr id0 id1
+echo $id0 $id1
+
+#echoerr "3D points"
+#for l in $lines; do
+#  sed -n "${l}p" crv-3D-pts.txt
+#done
+
+#for i in $frames; do
+#  echoerr "tangents for frame $i"
+#  sed -n '3012p;3390p' frame_00$i-tgts-2d.txt
+#done
+echoerr K
+head -n 2 calib.intrinsic
+
+
+if [ "$#" -eq 16 ]; then
+  frame_id=""
+  for i in $framesB; do
+    frame_id="$frame_id"\ $(printf "%04d" $i)
+  done
+  framesB="$frame_id"
+  
+  for i in $framesB; do
+    echoerr "extrinsics for frame $i"
+    cat frame_$i.extrinsic
+  done
+
+  lines0id=""
+  for l in $linesB; do
+     lines0id="$lines0id"\ `echo $l + 1 | bc`
+  done
+  linesB="$lines0id"
+
+  #set -x
+  for i in $framesB; do
+    echoerr "2D points for frame $i"
+    for l in $linesB; do
+      sed -n "${l}p" frame_$i-pts-2D.txt
+    done
+  done
+
+  for i in $framesB; do
+    echoerr "2D tangents for frame $i"
+    for l in $linesB; do
+      sed -n "${l}p" frame_$i-tgts-2D.txt
+    done
+  done
+
+  echoerr id0B id1B
+  echo $id0B $id1B
+else
+  for i in $frames; do
+    echoerr "extrinsics for frame $i"
+    cat frame_$i.extrinsic
+  done
+fi

@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+# To substutute gates in the file
+# Geonerally after we are using direct_expressions
+#
+awk '{print $1+1}' xt-dep-uniq >/tmp/t_dep_lines
+sed 's/$/p;/g' /tmp/t_dep_lines >/tmp/t_dep_plines
+sed 's/$/d;/g' /tmp/t_dep_lines >/tmp/t_dep_dlines
+
+# for l in $lines; do
+#   sed -n "$((l+1))p" gates > 1-gates
+# done
+
+#echo -e $linesd | sed -n -f /dev/stdin gates > 1-gates
+#echo -e "$linesd"
+#echo -e $linesd | sed -f /dev/stdin gate_instructions > other-gates
+
+
+# HERE: ------------------------------------------------------------------------
+#set -x
+# "gates" is just a file with each G line in the evaluator C++
+sed -f /tmp/t_dep_dlines gates > other-gates
+sed -n -f /tmp/t_dep_plines gates > 1-gates

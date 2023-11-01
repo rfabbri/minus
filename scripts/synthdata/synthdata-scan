@@ -1,0 +1,6 @@
+# - make sure the work folder is cleared up
+max_corr_steps_list="3 4 5"
+epsilon_list="0.00005 0.000001 0.000005"
+
+# edit synthdata_batch first with the desired suffix
+parallel --nice 20 synthdata-batch {1} {2} ::: $max_corr_steps_list ::: $epsilon_list
