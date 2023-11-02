@@ -17,6 +17,10 @@ n_Xs = evstr(unix_g("echo " + "''"+ txtc + "''" + "|sed ''s/;/;\n/g'' | egrep -o
 n_Cs = evstr(unix_g("echo " + "''"+ txtc + "''" + "|sed ''s/;/;\n/g'' | egrep -o ''C[0-9]+'' |grep -o ''[0-9]*''|sort -n|tail -n 1")(:))+1
 n_Gs = evstr(unix_g("echo " + "''"+ txtc + "''" + "|sed ''s/;/;\n/g'' | egrep -o ''G[0-9]+'' |grep -o ''[0-9]*''|sort -n|tail -n 1")(:))+1
 
+txt_lhs = unix_g("echo " + "''"+ txtc + "''" + " |tr '';'' ''\n''| cut -f 1 -d \ ");
+txt_lhs = txt_lhs(1:$-1);
+
+
 //n_Xs = evstr(unix_g("echo " + "''"+ txtc + "''" + "|sed ''s/;/;\n/g'' | egrep -o X[0-9]+ |sort|wc -l")(:));
 //n_Cs = evstr(unix_g("echo " + "''"+ txtc + "''" + "|sed ''s/;/;\n/g'' | egrep -o C[0-9]+ |sort|wc -l")(:));
 //n_Gs = evstr(unix_g("echo " + "''"+ txtc + "''" + "|sed ''s/;/;\n/g'' | egrep -o G[0-9]+ |sort|wc -l")(:));

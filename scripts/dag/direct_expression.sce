@@ -125,28 +125,30 @@ function p = pedag(i)
   global dag_to_copy;
   global dag_to
   dag_to_copy = dag_to;
-  p = ''; p(i) = '';
-  for k=i:-1:1
-    if ~isempty(dag_to_copy(k)) || isempty(dag_to(k))
-      p(k) = direct_expression_remove_out(k);
+  i_file_order = find(txt_lhs==nodename(i))
+  p = ''; p(i_file_order) = '';
+  for k=i_file_order:-1:1
+    k_id = get_id(txt_lhs(k))
+    if ~isempty(dag_to_copy(k_id)) || isempty(dag_to(k_id))
+      p(k) = direct_expression_remove_out(k_id);
     end
   end
 endfunction
 
-disp roots:
-l = get_roots()
-nr = size(l,'*');
+// ---- The direct expression of all nodes involving only sources --------------
+// This is working, just uncomment it:
+//
+//disp roots:
+//l = get_roots()
+//nr = size(l,'*');
+//de = '';
+//de(max_n_nodes) = '';
+//for i=1:size(l,'*')
+//  de(l(i)) = nodename(l(i)) + ' = ' + direct_expression(l(i));
+//end
+//de_c = de(l);
+// write('expr.c',de_c);
 
-de = '';
-de(max_n_nodes) = '';
-for i=1:size(l,'*')
-  de(l(i)) = nodename(l(i)) + ' = ' + direct_expression(l(i));
-end
 
-del = de(l);
-
-// p=pedag(get_id('G8')); [p,gstat(1:size(p,1),:)]
-
-// write('expr.c',del);
-
-//  "(C0+(C1*X14))*X15"
+// -----------------------------------------------------------------------------
+exec get_pedag.sce

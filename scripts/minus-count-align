@@ -1,0 +1,7 @@
+for i in $*; do 
+  echo file: $i
+  echo aligned:
+  grep vmovap "$i" |wc -l
+  echo unaligned:
+  grep vmovup "$i" |wc -l
+done
