@@ -60,15 +60,14 @@ lines2params(const F plines[pp::nvislines][io::ncoords2d_h], C<F> * __restrict p
     double l0l0 = vec::dot(l0,l0), l0l1 = vec::dot(l0,l1), l1l1 = vec::dot(l1,l1),
     l2l0 = vec::dot(l2,l0), l2l1 = vec::dot(l2,l1);
     // cross([l0l0 l1l0 l2l0], [l0l1 l1l1 l2l1], l2_l0l1);
-    double l2_l0l1[3]; 
-    {
-      F v1[3], v2[3];
-      v1[0] = l0l0; v1[1] = l0l1; v1[2] = l2l0;
-      v2[0] = l0l1; v2[1] = l1l1; v2[2] = l2l1;
-      vec::cross(v1, v2, l2_l0l1);
-    }
-    params_lines[l][0] = l2_l0l1[0]/l2_l0l1[2]; // divide by the last coord (see cross prod formula, plug direct)
-    params_lines[l][1] = l2_l0l1[1]/l2_l0l1[2]; // TODO: normalize this to unit/ instead
+    F v1[3], v2[3];
+    v1[0] = l0l0; v1[1] = l0l1; v1[2] = l2l0;
+    v2[0] = l0l1; v2[1] = l1l1; v2[2] = l2l1;
+    //vec::cross(v1, v2, l2_l0l1);
+    params_lines[l][0] = v1[1] * v2[2] - v1[2] * v2[1];
+    params_lines[l][1] = v1[2] * v2[0] - v1[0] * v2[2];
+    //    params_lines[l][0] = l2_l0l1[0]/l2_l0l1[2]; // divide by the last coord (see cross prod formula, plug direct)
+    //    params_lines[l][1] = l2_l0l1[1]/l2_l0l1[2]; // TODO: normalize this to unit/ instead
   }
   //        
   //    pChart: just unit rands 17x1
