@@ -13,8 +13,8 @@ struct minus_data<chicago14a,F> {
   typedef minus_io_14a<chicago14a> io14;
   typedef std::complex<F> complex;
   static const complex start_sols_[M::nve*M::nsols];
-  static complex params_start_target_[2*M::f::nparams];
-  static complex default_params_start_target_gammified_[2*M::f::nparams];
+  alignas (64) static complex params_start_target_[2*M::f::nparams];
+  alignas (64) static complex default_params_start_target_gammified_[2*M::f::nparams];
   static const complex *params_;
   static F p_[io::pp::nviews][io::pp::npoints][io::ncoords2d];
   static const F p_correct_[io::pp::nviews][io::pp::npoints][io::ncoords2d];

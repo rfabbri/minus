@@ -103,24 +103,7 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
   asm("#------ ENDMUL!");
 
   asm("#------ Add to self!"); // not aligned
-    //  v::add_to_self(xt, dx4);
-    xt[0] += dx4[0];
-    xt[1] += dx4[1];
-    xt[2] += dx4[2];
-    xt[3] += dx4[3];
-    xt[4] += dx4[4];
-    xt[5] += dx4[5];
-    xt[6] += dx4[6];
-    xt[7] += dx4[7];
-    xt[8] += dx4[8];
-    xt[9] += dx4[9];
-    xt[10] += dx4[10];
-    xt[11] += dx4[11];
-    xt[12] += dx4[12];
-    xt[13] += dx4[13];
-//    xt[14] += dx4[14];
-//    xt[15] += dx4[15];
-//    xt[16] += dx4[16];
+    v::add_to_self(xt, dx4);
   asm("#------ end add to self!");
       v::multiply_scalar_to_self(dx4, 2.);
       xt[f::nve] += one_half_dt;  // t0+.5dt
