@@ -57,17 +57,17 @@ lines2params(const F plines[pp::nvislines][io::ncoords2d_h], C<F> * __restrict p
     const F *l0 = plines[triple_intersections[l][0]];
     const F *l1 = plines[triple_intersections[l][1]];
     const F *l2 = plines[triple_intersections[l][2]];
-    double l0l0 = vec::dot(l0,l0), l0l1 = vec::dot(l0,l1), l1l1 = vec::dot(l1,l1),
+    double l0l0 = (l0,l0), l0l1 = vec::dot(l0,l1), l1l1 = vec::dot(l1,l1),
     l2l0 = vec::dot(l2,l0), l2l1 = vec::dot(l2,l1);
-    // cross([l0l0 l1l0 l2l0], [l0l1 l1l1 l2l1], l2_l0l1);
-    F v1[3], v2[3];
-    v1[0] = l0l0; v1[1] = l0l1; v1[2] = l2l0;
-    v2[0] = l0l1; v2[1] = l1l1; v2[2] = l2l1;
-    //vec::cross(v1, v2, l2_l0l1);
-    params_lines[l][0] = v1[1] * v2[2] - v1[2] * v2[1];
-    params_lines[l][1] = v1[2] * v2[0] - v1[0] * v2[2];
-    //    params_lines[l][0] = l2_l0l1[0]/l2_l0l1[2]; // divide by the last coord (see cross prod formula, plug direct)
-    //    params_lines[l][1] = l2_l0l1[1]/l2_l0l1[2]; // TODO: normalize this to unit/ instead
+    double l2_l0l1[3]; // cross([l0l0 l1l0 l2l0], [l0l1 l1l1 l2l1], l2_l0l1);
+    {
+      F v1[3], v2[3];
+      v1[0] = l0l0; v1[1] = l0l1; v1[2] = l2l0;
+      v2[0] = l0l1; v2[1] = l1l1; v2[2] = l2l1;
+      vec::cross(v1, v2, l2_l0l1);
+    }
+    params_lines[l][0] = l2_l0l1[0]/l2_l0l1[2]; // divide by the last coord (see cross prod formula, plug direct)
+    params_lines[l][1] = l2_l0l1[1]/l2_l0l1[2]; // this will be unit-normalized if the lines are so
   }
   //        
   //    pChart: just unit rands 17x1
@@ -209,14 +209,14 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F 
   static constexpr double eps = 1e-4; // very important to tune this as it will
                                       // save a lot of time if trash is
                                       // early-detected
-  if (v::area2(p[0][i0],p[0][i1],p[0][i2])  < eps || 
+  if (v::area2(p[0][i0],p[0][i1],p[0][i2])  < eps ||  // retinal area.  Could be spherical area 
       v::area2(p[1][i0],p[1][i1],p[1][i2])  < eps || 
       v::area2(p[2][i0],p[2][i1],p[2][i2])  < eps) {
-//    std::cerr << "MINUS: area error ------------------------\n";
-//    std::cerr << "Areas: " << 
-//      v::area2(p[0][i0],p[0][i1],p[0][i2]) << " "  << 
-//      v::area2(p[1][i0],p[1][i1],p[1][i2]) << " " << 
-//      v::area2(p[2][i0],p[2][i1],p[2][i2]) << std::endl;
+      //    std::cerr << "MINUS: area error ------------------------\n";
+      //    std::cerr << "Areas: " << 
+      //      v::area2(p[0][i0],p[0][i1],p[0][i2]) << " "  << 
+      //      v::area2(p[1][i0],p[1][i1],p[1][i2]) << " " << 
+      //      v::area2(p[2][i0],p[2][i1],p[2][i2]) << std::endl;
     return false;
   }
   
@@ -242,6 +242,8 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F 
   minus_3d<F>::point_tangent2line(p[0][i1], t[0][i1], plines[12]);
   minus_3d<F>::point_tangent2line(p[1][i1], t[1][i1], plines[13]);
   minus_3d<F>::point_tangent2line(p[2][i1], t[2][i1], plines[14]);
+
+  io::normalize_lines(plines, pp::nvislines);
 
   if (v::abs_angle_between_lines(plines[0], plines[9])  < eps || 
       v::abs_angle_between_lines(plines[1], plines[10]) < eps ||
@@ -278,7 +280,6 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F 
    return false;
   }
   
-  io::normalize_lines(plines, pp::nvislines);
   return true;
 }
 
