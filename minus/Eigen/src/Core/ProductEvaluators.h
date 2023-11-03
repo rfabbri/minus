@@ -972,7 +972,7 @@ struct permutation_matrix_product<ExpressionType, Side, Transposed, DenseShape>
     typedef typename remove_all<MatrixType>::type MatrixTypeCleaned;
 
     template<typename Dest, typename PermutationType>
-    static inline void run(Dest& dst, const PermutationType& perm, const ExpressionType& xpr)
+    static inline void __attribute__((always_inline)) run(Dest& dst, const PermutationType& perm, const ExpressionType& xpr)
     {
       MatrixType mat(xpr);
       const Index n = Side==OnTheLeft ? mat.rows() : mat.cols();
@@ -1026,7 +1026,7 @@ template<typename Lhs, typename Rhs, int ProductTag, typename MatrixShape>
 struct generic_product_impl<Lhs, Rhs, PermutationShape, MatrixShape, ProductTag>
 {
   template<typename Dest>
-  static void evalTo(Dest& dst, const Lhs& lhs, const Rhs& rhs)
+  static void __attribute__((always_inline)) evalTo(Dest& dst, const Lhs& lhs, const Rhs& rhs)
   {
     permutation_matrix_product<Rhs, OnTheLeft, false, MatrixShape>::run(dst, lhs, rhs);
   }
