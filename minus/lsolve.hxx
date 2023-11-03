@@ -1,3 +1,4 @@
+
 // Specific to Chicago
 template <problem P, typename F>
 __attribute__((always_inline)) inline void
@@ -71,5 +72,6 @@ lsolve(
   x(2)  -= (m(2,3)*x(3)+m(2,4)*x(4)+m(2,5)*x(5)+m(2,6)*x(6)+m(2,7)*x(7)+m(2,8)*x(8)+m(2,9)*x(9)+m(2,10)*x(10)+m(2,11)*x(11)+m(2,12)*x(12)+m(2,13)*x(13)); x(2) /= m(2,2);
   x(1)  -= (m(1,2)*x(2)+m(1,3)*x(3)+m(1,4)*x(4)+m(1,5)*x(5)+m(1,6)*x(6)+m(1,7)*x(7)+m(1,8)*x(8)+m(1,9)*x(9)+m(1,10)*x(10)+m(1,11)*x(11)+m(1,12)*x(12)+m(1,13)*x(13)); x(1) /= m(1,1);
   x(0)  -= (m(0,1)*x(1)+m(0,2)*x(2)+m(0,3)*x(3)+m(0,4)*x(4)+m(0,5)*x(5)+m(0,6)*x(6)+m(0,7)*x(7)+m(0,8)*x(8)+m(0,9)*x(9)+m(0,10)*x(10)+m(0,11)*x(11)+m(0,12)*x(12)+m(0,13)*x(13)); x(0) /= m(0,0);
+
   asm("#------ END Lsolve itself"); // it is not inlining it, and also there is too many vmovsd moving data. It is sub-vectorized, using only xmm no y or zmm
 }

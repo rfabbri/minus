@@ -12,7 +12,7 @@
 #include "minus.h"
 #include "internal-util.hxx"
 
-#include "Eigen/LU"
+#include "Eigen/Core"
 
 namespace MiNuS {
 
@@ -53,7 +53,6 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
   Map<const Matrix<C<F>, f::nve, 1>, Aligned > bb(RHS);
   static constexpr F the_smallest_number = 1e-13; // XXX BENCHMARK THIS
   typedef minus_array<f::nve,F> v; typedef minus_array<NVEPLUS1,F> vp;
-  PartialPivLU<Matrix<C<F>, f::nve, f::nve> > lu;
 
   solution *t_s = raw_solutions + sol_min;  // current target solution
   const C<F>* __restrict s_s = s_sols + sol_min*f::nve;    // current start solution
