@@ -33,15 +33,14 @@ minus_core<P, F>::
 track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> params[2*f::nparams], solution raw_solutions[f::nsols], unsigned sol_min, unsigned sol_max)
 {
   assert(sol_min <= sol_max && sol_max <= f::nsols);
-  alignas(sizeof(C<F>)) C<F> Hxt[NVEPLUS1 * f::nve]; 
-  alignas(sizeof(C<F>)) C<F> x0t0xtblock[2*NVEPLUS1];
-  alignas(sizeof(C<F>)) C<F> dxdt[NVEPLUS1];
-  alignas(sizeof(C<F>)) C<F> dxi[f::nve];
-  C<F> *x0t0 = x0t0xtblock;  // t = real running in [0,1]
-  C<F> *x0 = x0t0;
-  F    *t0 = (F *) (x0t0 + f::nve);
-  C<F> *xt = x0t0xtblock + NVEPLUS1; 
-  C<F> *x1t1 = xt;      // reusing xt's space to represent x1t1
+  alignas(64) C<F> Hxt[NVEPLUS1 * f::nve]; 
+  alignas(64) C<F> x0t0[NVEPLUS1];
+  alignas(64) C<F> xt[NVEPLUS1];
+  alignas(64) C<F> dxdt[NVEPLUS1];
+  alignas(64) C<F> dxi[f::nve];
+  C<F> *const x0 = x0t0;
+  F    *const t0 = (F *) (x0t0 + f::nve);
+  C<F> *const x1t1 = xt;      // reusing xt's space to represent x1t1
   C<F> *const HxH=Hxt;  // HxH is reusing Hxt
   C<F> *const dx = dxdt; const C<F> *const RHS = Hxt + NVE2;  // Hx or Ht, same storage //// UNUSED:  C<F> *const LHS = Hxt;
   C<F> *const dx4 = dx;   // reuse dx for dx4
@@ -88,14 +87,41 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
       vp::copy(x0t0, xt);
 
       // dx1
+  asm("#------ BEGEVAL HXt!"); // it is not inlining it, and also there is too many vmovsd moving data. It is sub-vectorized, using only xmm no y or zmm
       evaluate_Hxt(xt, params, Hxt); // Outputs Hxt
+  asm("#------ END HXt!");
       // dx4_eigen = lu.compute(AA).solve(bb);
+  asm("#------ BEG SOLVE!"); // unaligned mmx
       lsolve<P,F>(AA, bb, dx4_eigen);
+  asm("#------ ENDSOLVE!");
       
       // dx2
       const C<F> one_half_dt = *dt*0.5;
+
+  asm("#------ BEGINMUL!"); // aligned
       v::multiply_scalar_to_self(dx4, one_half_dt);
-      v::add_to_self(xt, dx4);
+  asm("#------ ENDMUL!");
+
+  asm("#------ Add to self!"); // not aligned
+    //  v::add_to_self(xt, dx4);
+    xt[0] += dx4[0];
+    xt[1] += dx4[1];
+    xt[2] += dx4[2];
+    xt[3] += dx4[3];
+    xt[4] += dx4[4];
+    xt[5] += dx4[5];
+    xt[6] += dx4[6];
+    xt[7] += dx4[7];
+    xt[8] += dx4[8];
+    xt[9] += dx4[9];
+    xt[10] += dx4[10];
+    xt[11] += dx4[11];
+    xt[12] += dx4[12];
+    xt[13] += dx4[13];
+//    xt[14] += dx4[14];
+//    xt[15] += dx4[15];
+//    xt[16] += dx4[16];
+  asm("#------ end add to self!");
       v::multiply_scalar_to_self(dx4, 2.);
       xt[f::nve] += one_half_dt;  // t0+.5dt
       evaluate_Hxt(xt, params, Hxt);
@@ -104,23 +130,33 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
       // dx3
       v::multiply_scalar_to_self(dxi, one_half_dt);
       v::copy(x0t0, xt);
+  asm("#------ 2Add to self!"); // not aligned
       v::add_to_self(xt, dxi);
+  asm("#------ 2end add to self!");
       v::multiply_scalar_to_self(dxi, 4);
+  asm("#------ 3Add to self!"); // not aligned
       v::add_to_self(dx4, dxi);
+  asm("#------ 3end add to self!");
       evaluate_Hxt(xt, params, Hxt);
       lsolve<P,F>(AA, bb, dxi_eigen);
 
       // dx4
       v::multiply_scalar_to_self(dxi, *dt);
       vp::copy(x0t0, xt);
+  asm("#------ 4 add to self!");
       v::add_to_self(xt, dxi);
+  asm("#------ 4 add to self!");
       v::multiply_scalar_to_self(dxi, 2);
+  asm("#------ 5 add to self!");
       v::add_to_self(dx4, dxi);
+  asm("#------ 5 add to self!");
       xt[f::nve] = *t0 + *dt;               // t0+dt
       evaluate_Hxt(xt, params, Hxt);
       lsolve<P,F>(AA, bb, dxi_eigen);
       v::multiply_scalar_to_self(dxi, *dt);
+  asm("#------ 6 add to self!");
       v::add_to_self(dx4, dxi);
+  asm("#------ 6 add to self!");
       v::multiply_scalar_to_self(dx4, 1./6.);
 
       // "dx1" = .5*dx1*dt, "dx2" = .5*dx2*dt, "dx3" = dx3*dt. Eigen vectorizes this:
@@ -147,8 +183,9 @@ track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> pa
         if (*dt < s.min_dt_) t_s->status = MIN_STEP_FAILED; // slight difference to SLP-imp.hpp:612
       } else { // predictor success
         ++predictor_successes;
-        std::swap(x1t1,x0t0);
-        x0 = x0t0; t0 = (F *) (x0t0 + f::nve); xt = x1t1;
+        // std::swap(x1t1,x0t0);
+        // x0 = x0t0; t0 = (F *) (x0t0 + f::nve); xt = x1t1;
+        vp::copy(x1t1, x0t0);
         if (predictor_successes >= s.num_successes_before_increase_) {
           predictor_successes = 0;
           *dt *= s.dt_increase_factor_;

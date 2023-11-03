@@ -56,7 +56,6 @@ struct minus_array { // Speed critical -----------------------------------------
   {
     memcpy(b, a, N*sizeof(C<F>));
   }
-
   static inline __attribute__((always_inline)) F
   norm2(const C<F> *__restrict a)
   {
