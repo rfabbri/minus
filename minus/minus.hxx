@@ -12,15 +12,14 @@
 #include "minus.h"
 #include "internal-util.hxx"
 
-#include "Eigen-latest/Core"
+//#include "Eigen-latest/Core"
+#include "Eigen/Core"
 
 namespace MiNuS {
 
 using namespace Eigen; // only used for linear solve
 
-
 #include "lsolve.hxx"
-      
 
 // THE MEAT //////////////////////////////////////////////////////////////////////
 // t: tracker settings
@@ -89,24 +88,16 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       vp::copy(x0t0, xt);
 
       // dx1
-  asm("#------ BEGEVAL HXt!"); // it is not inlining it, and also there is too many vmovsd moving data. It is sub-vectorized, using only xmm no y or zmm
       evaluate_Hxt(xt, params, Hxt); // Outputs Hxt
-  asm("#------ END HXt!");
       // dx4_eigen = lu.compute(AA).solve(bb);
-  asm("#------ BEG SOLVE!"); // unaligned mmx
       lsolve<P,F>(AA, bb, dx4_eigen);
-  asm("#------ ENDSOLVE!");
       
       // dx2
       const C<F> one_half_dt = *dt*0.5;
 
-  asm("#------ BEGINMUL!"); // aligned
       v::multiply_scalar_to_self(dx4, one_half_dt);
-  asm("#------ ENDMUL!");
 
-  asm("#------ Add to self!"); // not aligned
     v::add_to_self(xt, dx4);
-  asm("#------ end add to self!");
       v::multiply_scalar_to_self(dx4, 2.);
       xt[f::nve] += one_half_dt;  // t0+.5dt
       evaluate_Hxt(xt, params, Hxt);
@@ -115,33 +106,23 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       // dx3
       v::multiply_scalar_to_self(dxi, one_half_dt);
       v::copy(x0t0, xt);
-  asm("#------ 2Add to self!"); // not aligned
       v::add_to_self(xt, dxi);
-  asm("#------ 2end add to self!");
       v::multiply_scalar_to_self(dxi, 4);
-  asm("#------ 3Add to self!"); // not aligned
       v::add_to_self(dx4, dxi);
-  asm("#------ 3end add to self!");
       evaluate_Hxt(xt, params, Hxt);
       lsolve<P,F>(AA, bb, dxi_eigen);
 
       // dx4
       v::multiply_scalar_to_self(dxi, *dt);
       vp::copy(x0t0, xt);
-  asm("#------ 4 add to self!");
       v::add_to_self(xt, dxi);
-  asm("#------ 4 add to self!");
       v::multiply_scalar_to_self(dxi, 2);
-  asm("#------ 5 add to self!");
       v::add_to_self(dx4, dxi);
-  asm("#------ 5 add to self!");
       xt[f::nve] = *t0 + *dt;               // t0+dt
       evaluate_Hxt(xt, params, Hxt);
       lsolve<P,F>(AA, bb, dxi_eigen);
       v::multiply_scalar_to_self(dxi, *dt);
-  asm("#------ 6 add to self!");
       v::add_to_self(dx4, dxi);
-  asm("#------ 6 add to self!");
       v::multiply_scalar_to_self(dx4, 1./6.);
 
       // "dx1" = .5*dx1*dt, "dx2" = .5*dx2*dt, "dx3" = dx3*dt. Eigen vectorizes this:
@@ -658,7 +639,7 @@ normalize_lines(F lines[][ncoords2d_h], unsigned nlines)
 } // namespace minus
 
 #include "chicago14a.hxx"      // specific implementation of chicago 14a formulation
-#include "cleveland14a.hxx"      // specific implementation of cleveland 14a formulation now in PLMP
+//#include "cleveland14a.hxx"      // specific implementation of cleveland 14a formulation now in PLMP
 // #include <minus/phoenix10a.hxx>      // specific implementation of chicago 14a formulation
 // #include "chicago6a.hxx"
 

@@ -109,6 +109,7 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   static constexpr unsigned NVEPLUS1 = f::nve+1;
   static constexpr unsigned NVEPLUS2 = f::nve+2;
   static constexpr unsigned NVE2 = f::nve*f::nve;
+  // force-inlining this makes it slower
   static void evaluate_Hxt(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
   static void evaluate_HxH(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
 };
