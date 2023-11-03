@@ -93,11 +93,11 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       lsolve<P,F>(AA, bb, dx4_eigen);
       
       // dx2
-      const C<F> one_half_dt = *dt*0.5;
+      const F one_half_dt = *dt*0.5;
 
       v::multiply_scalar_to_self(dx4, one_half_dt);
 
-    v::add_to_self(xt, dx4);
+      v::add_to_self(xt, dx4);
       v::multiply_scalar_to_self(dx4, 2.);
       xt[f::nve] += one_half_dt;  // t0+.5dt
       evaluate_Hxt(xt, params, Hxt);

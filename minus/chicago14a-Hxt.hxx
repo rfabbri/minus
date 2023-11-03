@@ -16,7 +16,7 @@
 template <typename F>
 inline __attribute__((always_inline)) void 
 eval<chicago14a, F>::
-Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> * __restrict uy /*HxH*/) 
+Hxt(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restrict uy /*HxH*/) 
 {
   const C<F> *params = reinterpret_cast<C<F> *> (__builtin_assume_aligned(uparams,64));
   const C<F> *x = reinterpret_cast<C<F> *> (__builtin_assume_aligned(ux,64));
@@ -36,8 +36,8 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> &X11 = x[11];  // transl
   const C<F> &X12 = x[12];  // transl
   const C<F> &X13 = x[13];  // transl
-  const C<F> &X14 = x[14];  // t
-  
+  const F &t = (F &) ux[14];
+    
   const C<F> &X15 =  params[0];
   const C<F> &X16 =  params[1];
   const C<F> &X17 =  params[2];
@@ -151,26 +151,26 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> &X125 = params[110];
   const C<F> &X126 = params[111];
   
-  static constexpr C<F> C0 = 1;
-  static constexpr C<F> C1 = -1;
-  static constexpr C<F> C2 = 2;
-  static constexpr C<F> C3 = 0;
-  const C<F> G0 = -X14;
+  static constexpr F C0 = 1.;
+  static constexpr F C1 = -1.;
+  static constexpr F C2 = 2.;
+  static constexpr F C3 = 0.;
+  const C<F> G0 = -t;
   const C<F> G1 = C0 + G0; // Packet2cd G1G3 = pload(G1G3); // Use Eigen arrays for AVX/SSE
   const C<F> G2 = G1 * X15;
-  const C<F> G3 = X14 * X71;
+  const C<F> G3 = t * X71;
   const C<F> G5 = G1 * X21;
-  const C<F> G6 = X14 * X77;
+  const C<F> G6 = t * X77;
   const C<F> G8 = X4 * X4;
   const C<F> G9 = X5 * X5;
   const C<F> G11 = X6 * X6;
   const C<F> G13 = X7 * X7;
   const C<F> G17 = G1 * X22;
-  const C<F> G18 = X14 * X78;
+  const C<F> G18 = t * X78;
   const C<F> G22 = G1 * X23;
-  const C<F> G23 = X14 * X79;
+  const C<F> G23 = t * X79;
   const C<F> G28 = G1 * X18;
-  const C<F> G29 = X14 * X74;
+  const C<F> G29 = t * X74;
   const C<F> G31 = C2 * X2;
   const C<F> G33 = G1 * X19;
   
@@ -192,13 +192,13 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   
   const C<F> G30 = G28 + G29;
   const C<F> G32 = G30 * G31;
-  const C<F> G34 = X14 * X75;
+  const C<F> G34 = t * X75;
   const C<F> G35 = G33 + G34;
   const C<F> G36 = C1 * X1;
   const C<F> G37 = C2 * G36;
   const C<F> G38 = G35 * G37;
   const C<F> G39 = G1 * X20;
-  const C<F> G40 = X14 * X76;
+  const C<F> G40 = t * X76;
   const C<F> G41 = G39 + G40;
   const C<F> G42 = X0 + X0;
   const C<F> G43 = G41 * G42;
@@ -233,7 +233,7 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G72 = G45 + G71;
   const C<F> G73 = G4 * G72;
   const C<F> G74 = G1 * X17;
-  const C<F> G75 = X14 * X73;
+  const C<F> G75 = t * X73;
   const C<F> G76 = G74 + G75;
   const C<F> G77 = G30 * G42;
   const C<F> G78 = C2 * X3;
@@ -264,7 +264,7 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G103 = C1 * G102;
   const C<F> G104 = G73 + G103;
   const C<F> G105 = G1 * X16;
-  const C<F> G106 = X14 * X72;
+  const C<F> G106 = t * X72;
   const C<F> G107 = G105 + G106;
   const C<F> G108 = G107 * G72;
   const C<F> G109 = C1 * X3;
@@ -295,31 +295,31 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G134 = C1 * G133;
   const C<F> G135 = G108 + G134;
   const C<F> G136 = G1 * X24;
-  const C<F> G137 = X14 * X80;
+  const C<F> G137 = t * X80;
   const C<F> G138 = G136 + G137;
   const C<F> G139 = G1 * X30;
-  const C<F> G140 = X14 * X86;
+  const C<F> G140 = t * X86;
   const C<F> G141 = G139 + G140;
   const C<F> G142 = G141 * G15;
   const C<F> G143 = G1 * X31;
-  const C<F> G144 = X14 * X87;
+  const C<F> G144 = t * X87;
   const C<F> G145 = G143 + G144;
   const C<F> G146 = G145 * G20;
   const C<F> G147 = G1 * X32;
-  const C<F> G148 = X14 * X88;
+  const C<F> G148 = t * X88;
   const C<F> G149 = G147 + G148;
   const C<F> G150 = G149 * G25;
   const C<F> G151 = G142 + G146 + G150;
   const C<F> G152 = G1 * X27;
-  const C<F> G153 = X14 * X83;
+  const C<F> G153 = t * X83;
   const C<F> G154 = G152 + G153;
   const C<F> G155 = G154 * G31;
   const C<F> G156 = G1 * X28;
-  const C<F> G157 = X14 * X84;
+  const C<F> G157 = t * X84;
   const C<F> G158 = G156 + G157;
   const C<F> G159 = G158 * G37;
   const C<F> G160 = G1 * X29;
-  const C<F> G161 = X14 * X85;
+  const C<F> G161 = t * X85;
   const C<F> G162 = G160 + G161;
   const C<F> G163 = G162 * G42;
   const C<F> G164 = G155 + G159 + G163;
@@ -337,7 +337,7 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G176 = G165 + G175;
   const C<F> G177 = G138 * G176;
   const C<F> G178 = G1 * X26;
-  const C<F> G179 = X14 * X82;
+  const C<F> G179 = t * X82;
   const C<F> G180 = G178 + G179;
   const C<F> G181 = G154 * G42;
   const C<F> G182 = G158 * G78;
@@ -355,7 +355,7 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G194 = C1 * G193;
   const C<F> G195 = G177 + G194;
   const C<F> G196 = G1 * X25;
-  const C<F> G197 = X14 * X81;
+  const C<F> G197 = t * X81;
   const C<F> G198 = G196 + G197;
   const C<F> G199 = G198 * G176;
   const C<F> G200 = G154 * G110;
@@ -374,31 +374,31 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G213 = C1 * G212;
   const C<F> G214 = G199 + G213;
   const C<F> G215 = G1 * X33;
-  const C<F> G216 = X14 * X89;
+  const C<F> G216 = t * X89;
   const C<F> G217 = G215 + G216;
   const C<F> G218 = G1 * X39;
-  const C<F> G219 = X14 * X95;
+  const C<F> G219 = t * X95;
   const C<F> G220 = G218 + G219;
   const C<F> G221 = G220 * G15;
   const C<F> G222 = G1 * X40;
-  const C<F> G223 = X14 * X96;
+  const C<F> G223 = t * X96;
   const C<F> G224 = G222 + G223;
   const C<F> G225 = G224 * G20;
   const C<F> G226 = G1 * X41;
-  const C<F> G227 = X14 * X97;
+  const C<F> G227 = t * X97;
   const C<F> G228 = G226 + G227;
   const C<F> G229 = G228 * G25;
   const C<F> G230 = G221 + G225 + G229;
   const C<F> G231 = G1 * X36;
-  const C<F> G232 = X14 * X92;
+  const C<F> G232 = t * X92;
   const C<F> G233 = G231 + G232;
   const C<F> G234 = G233 * G31;
   const C<F> G235 = G1 * X37;
-  const C<F> G236 = X14 * X93;
+  const C<F> G236 = t * X93;
   const C<F> G237 = G235 + G236;
   const C<F> G238 = G237 * G37;
   const C<F> G239 = G1 * X38;
-  const C<F> G240 = X14 * X94;
+  const C<F> G240 = t * X94;
   const C<F> G241 = G239 + G240;
   const C<F> G242 = G241 * G42;
   const C<F> G243 = G234 + G238 + G242;
@@ -416,7 +416,7 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G255 = G244 + G254;
   const C<F> G256 = G217 * G255;
   const C<F> G257 = G1 * X35;
-  const C<F> G258 = X14 * X91;
+  const C<F> G258 = t * X91;
   const C<F> G259 = G257 + G258;
   const C<F> G260 = G233 * G42;
   const C<F> G261 = G237 * G78;
@@ -434,7 +434,7 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G273 = C1 * G272;
   const C<F> G274 = G256 + G273;
   const C<F> G275 = G1 * X34;
-  const C<F> G276 = X14 * X90;
+  const C<F> G276 = t * X90;
   const C<F> G277 = G275 + G276;
   const C<F> G278 = G277 * G255;
   const C<F> G279 = G233 * G110;
@@ -453,20 +453,20 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G292 = C1 * G291;
   const C<F> G293 = G278 + G292;
   const C<F> G294 = G1 * X42;
-  const C<F> G295 = X14 * X98;
+  const C<F> G295 = t * X98;
   const C<F> G296 = G294 + G295;
   const C<F> G297 = G296 * G4;
   const C<F> G298 = G1 * X43;
-  const C<F> G299 = X14 * X99;
+  const C<F> G299 = t * X99;
   const C<F> G300 = G298 + G299;
   const C<F> G301 = G300 * G138;
   const C<F> G302 = G297 + G301;
   const C<F> G303 = G1 * X46;
-  const C<F> G304 = X14 * X102;
+  const C<F> G304 = t * X102;
   const C<F> G305 = G303 + G304;
   const C<F> G306 = G305 * G7;
   const C<F> G307 = G1 * X47;
-  const C<F> G308 = X14 * X103;
+  const C<F> G308 = t * X103;
   const C<F> G309 = G307 + G308;
   const C<F> G310 = G309 * G141;
   const C<F> G311 = G306 + G310;
@@ -481,11 +481,11 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G320 = G319 * G25;
   const C<F> G321 = G312 + G316 + G320;
   const C<F> G322 = G1 * X44;
-  const C<F> G323 = X14 * X100;
+  const C<F> G323 = t * X100;
   const C<F> G324 = G322 + G323;
   const C<F> G325 = G324 * G30;
   const C<F> G326 = G1 * X45;
-  const C<F> G327 = X14 * X101;
+  const C<F> G327 = t * X101;
   const C<F> G328 = G326 + G327;
   const C<F> G329 = G328 * G154;
   const C<F> G330 = G325 + G329;
@@ -550,20 +550,20 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G389 = C1 * G388;
   const C<F> G390 = G375 + G389;
   const C<F> G391 = G1 * X48;
-  const C<F> G392 = X14 * X104;
+  const C<F> G392 = t * X104;
   const C<F> G393 = G391 + G392;
   const C<F> G394 = G393 * G4;
   const C<F> G395 = G1 * X49;
-  const C<F> G396 = X14 * X105;
+  const C<F> G396 = t * X105;
   const C<F> G397 = G395 + G396;
   const C<F> G398 = G397 * G217;
   const C<F> G399 = G394 + G398;
   const C<F> G400 = G1 * X52;
-  const C<F> G401 = X14 * X108;
+  const C<F> G401 = t * X108;
   const C<F> G402 = G400 + G401;
   const C<F> G403 = G402 * G7;
   const C<F> G404 = G1 * X53;
-  const C<F> G405 = X14 * X109;
+  const C<F> G405 = t * X109;
   const C<F> G406 = G404 + G405;
   const C<F> G407 = G406 * G220;
   const C<F> G408 = G403 + G407;
@@ -578,11 +578,11 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G417 = G416 * G25;
   const C<F> G418 = G409 + G413 + G417;
   const C<F> G419 = G1 * X50;
-  const C<F> G420 = X14 * X106;
+  const C<F> G420 = t * X106;
   const C<F> G421 = G419 + G420;
   const C<F> G422 = G421 * G30;
   const C<F> G423 = G1 * X51;
-  const C<F> G424 = X14 * X107;
+  const C<F> G424 = t * X107;
   const C<F> G425 = G423 + G424;
   const C<F> G426 = G425 * G233;
   const C<F> G427 = G422 + G426;
@@ -677,7 +677,7 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G516 = G180 * G515;
   const C<F> G517 = G511 + G516;
   const C<F> G518 = G1 * X61;
-  const C<F> G519 = X14 * X117;
+  const C<F> G519 = t * X117;
   const C<F> G520 = G518 + G519;
   const C<F> G521 = G30 * G78;
   const C<F> G522 = C1 * X0;
@@ -893,7 +893,7 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G732 = G180 * G731;
   const C<F> G733 = G727 + G732;
   const C<F> G734 = G1 * X62;
-  const C<F> G735 = X14 * X118;
+  const C<F> G735 = t * X118;
   const C<F> G736 = G734 + G735;
   const C<F> G737 = G30 * G554;
   const C<F> G738 = X2 + X2;
@@ -1101,7 +1101,7 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G940 = G180 * G939;
   const C<F> G941 = G935 + G940;
   const C<F> G942 = G1 * X63;
-  const C<F> G943 = X14 * X119;
+  const C<F> G943 = t * X119;
   const C<F> G944 = G942 + G943;
   const C<F> G945 = X3 + X3;
   const C<F> G946 = G41 * G945;
@@ -1304,7 +1304,7 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G1143 = G180 * G1142;
   const C<F> G1144 = G1138 + G1143;
   const C<F> G1145 = G1 * X64;
-  const C<F> G1146 = X14 * X120;
+  const C<F> G1146 = t * X120;
   const C<F> G1147 = G1145 + G1146;
   const C<F> G1148 = X1 * X3;
   const C<F> G1149 = X0 * X2;
@@ -1652,7 +1652,7 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G1491 = G180 * G1490;
   const C<F> G1492 = G1486 + G1491;
   const C<F> G1493 = G1 * X66;
-  const C<F> G1494 = X14 * X122;
+  const C<F> G1494 = t * X122;
   const C<F> G1495 = G1493 + G1494;
   const C<F> G1496 = X5 + X5;
   const C<F> G1497 = X11 * G1496;
@@ -1868,7 +1868,7 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G1707 = G180 * G1706;
   const C<F> G1708 = G1702 + G1707;
   const C<F> G1709 = G1 * X67;
-  const C<F> G1710 = X14 * X123;
+  const C<F> G1710 = t * X123;
   const C<F> G1711 = G1709 + G1710;
   const C<F> G1712 = X6 + X6;
   const C<F> G1713 = X11 * G1712;
@@ -2076,7 +2076,7 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G1915 = G180 * G1914;
   const C<F> G1916 = G1910 + G1915;
   const C<F> G1917 = G1 * X68;
-  const C<F> G1918 = X14 * X124;
+  const C<F> G1918 = t * X124;
   const C<F> G1919 = G1917 + G1918;
   const C<F> G1920 = X7 + X7;
   const C<F> G1921 = X11 * G1920;
@@ -2279,7 +2279,7 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G2118 = G180 * G2117;
   const C<F> G2119 = G2113 + G2118;
   const C<F> G2120 = G1 * X69;
-  const C<F> G2121 = X14 * X125;
+  const C<F> G2121 = t * X125;
   const C<F> G2122 = G2120 + G2121;
   const C<F> G2123 = G30 * G1180;
   const C<F> G2124 = G62 * G2123;
@@ -2381,7 +2381,7 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G2220 = G180 * G2219;
   const C<F> G2221 = G2215 + G2220;
   const C<F> G2222 = G1 * X54;
-  const C<F> G2223 = X14 * X110;
+  const C<F> G2223 = t * X110;
   const C<F> G2224 = G2222 + G2223;
   const C<F> G2225 = G35 * G1180;
   const C<F> G2226 = G62 * G2225;
@@ -2483,7 +2483,7 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G2322 = G180 * G2321;
   const C<F> G2323 = G2317 + G2322;
   const C<F> G2324 = G1 * X55;
-  const C<F> G2325 = X14 * X111;
+  const C<F> G2325 = t * X111;
   const C<F> G2326 = G2324 + G2325;
   const C<F> G2327 = G41 * G1180;
   const C<F> G2328 = G62 * G2327;
@@ -2585,7 +2585,7 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G2424 = G180 * G2423;
   const C<F> G2425 = G2419 + G2424;
   const C<F> G2426 = G1 * X56;
-  const C<F> G2427 = X14 * X112;
+  const C<F> G2427 = t * X112;
   const C<F> G2428 = G2426 + G2427;
   const C<F> G2429 = G7 * G14;
   const C<F> G2430 = G1168 * G2429;
@@ -2669,7 +2669,7 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G2508 = G180 * G2507;
   const C<F> G2509 = G2503 + G2508;
   const C<F> G2510 = G1 * X57;
-  const C<F> G2511 = X14 * X113;
+  const C<F> G2511 = t * X113;
   const C<F> G2512 = G2510 + G2511;
   const C<F> G2513 = G19 * G14;
   const C<F> G2514 = G1168 * G2513;
@@ -2753,7 +2753,7 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G2592 = G180 * G2591;
   const C<F> G2593 = G2587 + G2592;
   const C<F> G2594 = G1 * X58;
-  const C<F> G2595 = X14 * X114;
+  const C<F> G2595 = t * X114;
   const C<F> G2596 = G2594 + G2595;
   const C<F> G2597 = G24 * G14;
   const C<F> G2598 = G1168 * G2597;
@@ -2837,7 +2837,7 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> G2676 = G180 * G2675;
   const C<F> G2677 = G2671 + G2676;
   const C<F> G2678 = G1 * X59;
-  const C<F> G2679 = X14 * X115;
+  const C<F> G2679 = t * X115;
   const C<F> G2680 = G2678 + G2679;
   const C<F> G2681 = G1168 * G27;
   const C<F> G2682 = G62 * G1187;
