@@ -1,4 +1,7 @@
 // to be included at the end of minus.hxx
+//
+
+#include "debug-util.h"
 
 // Evaluates Hx and Ht at the same time, reusing expressions.
 // 
@@ -21,6 +24,12 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> *params = reinterpret_cast<C<F> *> (__builtin_assume_aligned(uparams,64));
   const C<F> *x = reinterpret_cast<C<F> *> (__builtin_assume_aligned(ux,64));
   C<F> *y = reinterpret_cast<C<F> *> (__builtin_assume_aligned(uy,64));
+
+//  std::cout << "Hxt: Params===\n";
+//  print(params,112);
+
+//  std::cout << "xt: \n";
+//  print(params,15);
 
   const C<F> &X0  = x[0];   // q0
   const C<F> &X1  = x[1];   // q1
@@ -3809,5 +3818,7 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   y[207] = -G3409;
   y[208] = -G3424;
   y[209] = -G3439;
+//  std::cout << "Hxt(:) ===\n";
+//  print(y,210);
 }
 

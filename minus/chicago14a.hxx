@@ -91,7 +91,7 @@ lines2params(const F plines[pp::nvislines][io::ncoords2d_h], C<F> * __restrict p
 //
 // gamma1 .. gamma9
 // 
-// diag0 Generate a 3*9 = 27 entry thing by duplicationg gammas
+// diag0 Generate a 3*9 = 27 entry thing by duplicating gammas
 // gamma1
 // gamma1
 // gamma1
@@ -282,6 +282,8 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F 
   return true;
 }
 
+#include "debug-util.h" // XXXX
+
 // gammify_start_params: set to false if your start parameters are already
 // gammified. 
 template <typename F>
@@ -298,6 +300,8 @@ get_params_start_target(
   if (gammify_start_params)
     gammify(params);
   gammify(params+M::f::nparams);
+  std::cout << "Params target ===\n";
+  print(params+M::f::nparams,M::f::nparams);
 }
 
 // \param[in] tgts: three tangents, one at each point, in normalized coordinates
