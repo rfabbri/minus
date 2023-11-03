@@ -3607,8 +3607,8 @@ minus<chicago14a, F>::solve(
   if (!io::point_tangents2params(p, tgt, id_tgt0, id_tgt1, params))
     return false;
 
-  typename M::solution solutions[M::nsols];
-  typename M::track_settings settings = M::DEFAULT;
+  alignas(64) typename M::solution solutions[M::nsols];
+  alignas(64) typename M::track_settings settings = M::DEFAULT;
 
   unsigned npaths_per_thread = M::nsols/nthreads;
   assert(M::nsols % nthreads == 0);

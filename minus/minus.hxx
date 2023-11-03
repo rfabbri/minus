@@ -12,7 +12,7 @@
 #include "minus.h"
 #include "internal-util.hxx"
 
-#include "Eigen/Core"
+#include "Eigen-latest/Core"
 
 namespace MiNuS {
 
@@ -30,8 +30,11 @@ using namespace Eigen; // only used for linear solve
 // 
 template <problem P, typename F> void 
 minus_core<P, F>::
-track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], const C<F> params[2*f::nparams], solution raw_solutions[f::nsols], unsigned sol_min, unsigned sol_max)
+track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> params_u[2*f::nparams], solution raw_solutions_u[f::nsols], unsigned sol_min, unsigned sol_max)
 {
+  const C<F> *s_sols = reinterpret_cast<C<F> *> (__builtin_assume_aligned(s_sols_u,64));
+  const C<F> *params = reinterpret_cast<C<F> *> (__builtin_assume_aligned(params_u,64));
+  solution *raw_solutions = reinterpret_cast<solution *> (__builtin_assume_aligned(raw_solutions_u,64));
   assert(sol_min <= sol_max && sol_max <= f::nsols);
   alignas(64) C<F> Hxt[NVEPLUS1 * f::nve]; 
   alignas(64) C<F> x0t0[NVEPLUS1];
