@@ -207,8 +207,9 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F 
   assert (i0 < i1 && i1 < 3);
   unsigned i2 = (i0 == 0) ? ((i1 == 1) ? 2 : 1) : 0;
 
-  static constexpr double eps = 1e-5;
-
+  static constexpr double eps = 1e-4; // very important to tune this as it will
+                                      // save a lot of time if trash is
+                                      // early-detected
   if (v::area2(p[0][i0],p[0][i1],p[0][i2])  < eps || 
       v::area2(p[1][i0],p[1][i1],p[1][i2])  < eps || 
       v::area2(p[2][i0],p[2][i1],p[2][i2])  < eps) {
