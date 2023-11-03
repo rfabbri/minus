@@ -22,9 +22,12 @@ struct eval<chicago14a, F> {
 template <typename F>
 inline __attribute__((always_inline)) void 
 eval<chicago14a, F>::
-HxH(const C<F>* __restrict x /*x and t*/, const C<F> * __restrict uparams, C<F>* __restrict y /*HxH*/) 
+HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>* __restrict uy /*HxH*/) 
 {
   const C<F> *params = reinterpret_cast<C<F> *> (__builtin_assume_aligned(uparams,64));
+  const C<F> *x = reinterpret_cast<C<F> *> (__builtin_assume_aligned(ux,64));
+  C<F> *y = reinterpret_cast<C<F> *> (__builtin_assume_aligned(uy,64));
+
   const C<F> &X0 = x[0];    // q0
   const C<F> &X1 = x[1];    // q1
   const C<F> &X2 = x[2];    // q2
