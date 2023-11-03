@@ -57,7 +57,7 @@ lines2params(const F plines[pp::nvislines][io::ncoords2d_h], C<F> * __restrict p
     const F *l0 = plines[triple_intersections[l][0]];
     const F *l1 = plines[triple_intersections[l][1]];
     const F *l2 = plines[triple_intersections[l][2]];
-    double l0l0 = (l0,l0), l0l1 = vec::dot(l0,l1), l1l1 = vec::dot(l1,l1),
+    double l0l0 = vec::dot(l0,l0), l0l1 = vec::dot(l0,l1), l1l1 = vec::dot(l1,l1),
     l2l0 = vec::dot(l2,l0), l2l1 = vec::dot(l2,l1);
     double l2_l0l1[3]; // cross([l0l0 l1l0 l2l0], [l0l1 l1l1 l2l1], l2_l0l1);
     {
