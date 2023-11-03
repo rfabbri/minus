@@ -219,7 +219,8 @@ struct minus_io_common {
                                                  // normal, but the scale of the
                                                  // whole line is more important
                                                  // for certain numerics
-    const F nrm = l[0]*l[0] + l[1]*l[1] + l[2]*l[2];
+    //  const F nrm = l[0]*l[0] + l[1]*l[1] + l[2]*l[2];
+    const F nrm = std::hypot(l[0], l[1]);
     l[0] /= nrm; l[1] /= nrm; l[2] /= nrm;
   }
   static void normalize_lines(F lines[][ncoords2d_h], unsigned nlines);
