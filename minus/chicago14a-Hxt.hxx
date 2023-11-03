@@ -16,8 +16,9 @@
 template <typename F>
 inline __attribute__((always_inline)) void 
 eval<chicago14a, F>::
-Hxt(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/) 
+Hxt(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict uparams, C<F> * __restrict y /*HxH*/) 
 {
+  const C<F> *params = reinterpret_cast<C<F> *> (__builtin_assume_aligned(uparams,64));
   const C<F> &X0  = x[0];   // q0
   const C<F> &X1  = x[1];   // q1
   const C<F> &X2  = x[2];   // q2
@@ -152,7 +153,6 @@ Hxt(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * _
   static constexpr C<F> C2 = 2;
   static constexpr C<F> C3 = 0;
   const C<F> G0 = -X14;
-//#include "partial_expr.c"
   const C<F> G1 = C0 + G0; // Packet2cd G1G3 = pload(G1G3); // Use Eigen arrays for AVX/SSE
   const C<F> G2 = G1 * X15;
   const C<F> G3 = X14 * X71;
