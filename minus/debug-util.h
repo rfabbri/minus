@@ -1,10 +1,15 @@
 #ifndef debug_util_h_
 #define debug_util_h_
 
+#include <mutex>
+
 template <typename F>
 inline void
 print(const F *v, unsigned n, bool newline=false)
 {
+  static std::mutex lock;
+  const std::lock_guard<std::mutex> guard(lock);
+
   for (unsigned i=0; i < n; ++i)
     std::cout << v[i] << ((newline)? "\n" : " ");
   std::cout << std::endl;

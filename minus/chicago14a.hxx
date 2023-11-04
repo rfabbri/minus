@@ -300,8 +300,6 @@ get_params_start_target(
   if (gammify_start_params)
     gammify(params);
   gammify(params+M::f::nparams);
-  std::cout << "Params target ===\n";
-  print(params+M::f::nparams,M::f::nparams);
 }
 
 // \param[in] tgts: three tangents, one at each point, in normalized coordinates

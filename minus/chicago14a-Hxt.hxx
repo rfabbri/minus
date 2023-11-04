@@ -25,11 +25,7 @@ Hxt(const C<F> * __restrict ux /*x, t*/, const C<F> * __restrict uparams, C<F> *
   const C<F> *x = reinterpret_cast<C<F> *> (__builtin_assume_aligned(ux,64));
   C<F> *y = reinterpret_cast<C<F> *> (__builtin_assume_aligned(uy,64));
 
-//  std::cout << "Hxt: Params===\n";
-//  print(params,112);
-
-//  std::cout << "xt: \n";
-//  print(params,15);
+  print(x,15);
 
   const C<F> &X0  = x[0];   // q0
   const C<F> &X1  = x[1];   // q1
