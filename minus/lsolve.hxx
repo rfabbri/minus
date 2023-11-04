@@ -1,7 +1,7 @@
 // Specific to Chicago
 template <problem P, typename F>
 __attribute__((always_inline)) inline void
-lsolve(
+lsolve_14x14_chicago(
     Map<Matrix<C<F>, minus_core<P,F>::f::nve, minus_core<P,F>::f::nve +1>,Aligned> & __restrict m, 
     C<F> __restrict *ux)
 {
@@ -9,10 +9,13 @@ lsolve(
   //asm("#------ Lsolve begin"); // there is too many vmovsd moving data. It is sub-vectorized, using only xmm no y or zmm
   typedef minus_core<P, F> M;
   static constexpr unsigned char rows = M::f::nve;
-  for(unsigned char k = 0; k < M::f::nve; ++k) {
+  for(unsigned char k = 0; k < M::f::nve; ++k) { // unroll this loop make it
+                                                 // specific to m structure of
+                                                 // having many zeros in last 3
+                                                 // rowsj
     const unsigned char rrows = rows-k-1; unsigned char row_of_biggest_in_col = k;
     F biggest_in_corner = std::norm(m(k,k));
-    for (unsigned j=rows-1; j != k; --j) {
+    for (unsigned j=rows-1; j != k; --j) { // todo: no need to go beyond row 10, Hxt rows 11 12 and 13 are fixed
       F tmp;
       if ((tmp = std::norm(m(j,k))) > biggest_in_corner*1e3) {
           biggest_in_corner = tmp; row_of_biggest_in_col = j;
@@ -34,7 +37,7 @@ lsolve(
   x[7]  = m(7,14)-(m(7,0)*x[0]+m(7,1)*x[1]+m(7,2)*x[2]+m(7,3)*x[3]+m(7,4)*x[4]+m(7,5)*x[5]+m(7,6)*x[6]);
   x[8]  = m(8,14)-(m(8,0)*x[0]+m(8,1)*x[1]+m(8,2)*x[2]+m(8,3)*x[3]+m(8,4)*x[4]+m(8,5)*x[5]+m(8,6)*x[6]+m(8,7)*x[7]);
   x[9]  = m(9,14)-(m(9,0)*x[0]+m(9,1)*x[1]+m(9,2)*x[2]+m(9,3)*x[3]+m(9,4)*x[4]+m(9,5)*x[5]+m(9,6)*x[6]+m(9,7)*x[7]+m(9,8)*x[8]);
-  x[10] = m(10,14) -(m(10,0)*x[0]+m(10,1)*x[1]+m(10,2)*x[2]+m(10,3)*x[3]+m(10,4)*x[4]+m(10,5)*x[5]+m(10,6)*x[6]+m(10,7)*x[7]+m(10,8)*x[8]+m(10,9)*x[9]);
+  x[10] = m(10,14)-(m(10,0)*x[0]+m(10,1)*x[1]+m(10,2)*x[2]+m(10,3)*x[3]+m(10,4)*x[4]+m(10,5)*x[5]+m(10,6)*x[6]+m(10,7)*x[7]+m(10,8)*x[8]+m(10,9)*x[9]);
   x[11] = m(11,14)-(m(11,0)*x[0]+m(11,1)*x[1]+m(11,2)*x[2]+m(11,3)*x[3]+m(11,4)*x[4]+m(11,5)*x[5]+m(11,6)*x[6]+m(11,7)*x[7]+m(11,8)*x[8]+m(11,9)*x[9]+m(11,10)*x[10]);
   x[12] = m(12,14)-(m(12,0)*x[0]+m(12,1)*x[1]+m(12,2)*x[2]+m(12,3)*x[3]+m(12,4)*x[4]+m(12,5)*x[5]+m(12,6)*x[6]+m(12,7)*x[7]+m(12,8)*x[8]+m(12,9)*x[9]+m(12,10)*x[10]+m(12,11)*x[11]);
   x[13] = m(13,14)-(m(13,0)*x[0]+m(13,1)*x[1]+m(13,2)*x[2]+m(13,3)*x[3]+m(13,4)*x[4]+m(13,5)*x[5]+m(13,6)*x[6]+m(13,7)*x[7]+m(13,8)*x[8]+m(13,9)*x[9]+m(13,10)*x[10]+m(13,11)*x[11]+m(13,12)*x[12]);
