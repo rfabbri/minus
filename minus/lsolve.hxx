@@ -1,4 +1,3 @@
-
 // Specific to Chicago
 template <problem P, typename F>
 __attribute__((always_inline)) inline void
@@ -7,7 +6,7 @@ lsolve(
     C<F> __restrict *ux)
 {
   C<F> * const x= reinterpret_cast<C<F> *> (__builtin_assume_aligned(ux,64));
-  //asm("#------ Lsolve begin"); // it is not inlining it, and also there is too many vmovsd moving data. It is sub-vectorized, using only xmm no y or zmm
+  //asm("#------ Lsolve begin"); // there is too many vmovsd moving data. It is sub-vectorized, using only xmm no y or zmm
   typedef minus_core<P, F> M;
   static constexpr unsigned char rows = M::f::nve;
   for(unsigned char k = 0; k < M::f::nve; ++k) {
@@ -15,22 +14,16 @@ lsolve(
     F biggest_in_corner = std::norm(m(k,k));
     for (unsigned j=rows-1; j != k; --j) {
       F tmp;
-      if ((tmp = std::norm(m(j,k))) > biggest_in_corner*1000) {
-          biggest_in_corner = tmp;
-          row_of_biggest_in_col = j;
+      if ((tmp = std::norm(m(j,k))) > biggest_in_corner*1e3) {
+          biggest_in_corner = tmp; row_of_biggest_in_col = j;
           break;
       }
     }
-    if (k != row_of_biggest_in_col) 
-      m.row(k).swap(m.row(row_of_biggest_in_col));
-
+    if (k != row_of_biggest_in_col) m.row(k).swap(m.row(row_of_biggest_in_col));
     m.col(k).tail(rrows) /= m(k,k);
-
     if (k < rows-1)
-      //m.bottomRightCorner(rrows,rrows).noalias() -= m.col(k).tail(rrows) * m.row(k).tail(rrows);
       m.block(M::f::nve-rrows,M::f::nve-rrows,rrows,rrows).noalias() -= m.col(k).tail(rrows) * m.row(k).segment(M::f::nve-rrows,rrows);
   }
-
   x[0]  = m(0,14);
   x[1]  = m(1,14)-m(1,0)*x[0];
   x[2]  = m(2,14)-(m(2,0)*x[0]+m(2,1)*x[1]);
