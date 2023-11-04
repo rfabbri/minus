@@ -3609,9 +3609,7 @@ Hxt(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restri
   y[8] = G468;
   y[9] = G487;
   y[10] = G517;
-  y[11] = C3;
   y[12] = G520;
-  y[13] = C3;
   y[14] = G551;
   y[15] = G563;
   y[16] = G587;
@@ -3623,9 +3621,7 @@ Hxt(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restri
   y[22] = G692;
   y[23] = G703;
   y[24] = G733;
-  y[25] = C3;
   y[26] = G736;
-  y[27] = C3;
   y[28] = G764;
   y[29] = G775;
   y[30] = G798;
@@ -3637,9 +3633,7 @@ Hxt(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restri
   y[36] = G900;
   y[37] = G911;
   y[38] = G941;
-  y[39] = C3;
   y[40] = G944;
-  y[41] = C3;
   y[42] = G970;
   y[43] = G982;
   y[44] = G1003;
@@ -3651,9 +3645,7 @@ Hxt(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restri
   y[50] = G1102;
   y[51] = G1114;
   y[52] = G1144;
-  y[53] = C3;
   y[54] = G1147;
-  y[55] = C3;
   y[56] = G1226;
   y[57] = G1254;
   y[58] = G1290;
@@ -3665,8 +3657,6 @@ Hxt(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restri
   y[64] = G1446;
   y[65] = G1462;
   y[66] = G1492;
-  y[67] = C3;
-  y[68] = C3;
   y[69] = G1495;
   y[70] = G1526;
   y[71] = G1538;
@@ -3679,8 +3669,6 @@ Hxt(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restri
   y[78] = G1667;
   y[79] = G1678;
   y[80] = G1708;
-  y[81] = C3;
-  y[82] = C3;
   y[83] = G1711;
   y[84] = G1739;
   y[85] = G1750;
@@ -3693,8 +3681,6 @@ Hxt(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restri
   y[92] = G1875;
   y[93] = G1886;
   y[94] = G1916;
-  y[95] = C3;
-  y[96] = C3;
   y[97] = G1919;
   y[98] = G1945;
   y[99] = G1957;
@@ -3707,8 +3693,6 @@ Hxt(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restri
   y[106] = G2077;
   y[107] = G2089;
   y[108] = G2119;
-  y[109] = C3;
-  y[110] = C3;
   y[111] = G2122;
   y[112] = G2131;
   y[113] = G2137;
@@ -3722,8 +3706,6 @@ Hxt(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restri
   y[121] = G2197;
   y[122] = G2221;
   y[123] = G2224;
-  y[124] = C3;
-  y[125] = C3;
   y[126] = G2233;
   y[127] = G2239;
   y[128] = G2248;
@@ -3736,8 +3718,6 @@ Hxt(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restri
   y[135] = G2299;
   y[136] = G2323;
   y[137] = G2326;
-  y[138] = C3;
-  y[139] = C3;
   y[140] = G2335;
   y[141] = G2341;
   y[142] = G2350;
@@ -3750,8 +3730,6 @@ Hxt(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restri
   y[149] = G2401;
   y[150] = G2425;
   y[151] = G2428;
-  y[152] = C3;
-  y[153] = C3;
   y[154] = G2435;
   y[155] = G2440;
   y[156] = G2447;
@@ -3764,8 +3742,6 @@ Hxt(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restri
   y[163] = G2488;
   y[164] = G2509;
   y[165] = G2512;
-  y[166] = C3;
-  y[167] = C3;
   y[168] = G2519;
   y[169] = G2524;
   y[170] = G2531;
@@ -3778,8 +3754,6 @@ Hxt(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restri
   y[177] = G2572;
   y[178] = G2593;
   y[179] = G2596;
-  y[180] = C3;
-  y[181] = C3;
   y[182] = G2603;
   y[183] = G2608;
   y[184] = G2615;
@@ -3792,8 +3766,6 @@ Hxt(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restri
   y[191] = G2656;
   y[192] = G2677;
   y[193] = G2680;
-  y[194] = C3;
-  y[195] = C3;
   
   y[196] = -G2752;
   y[197] = -G2782;

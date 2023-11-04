@@ -19,7 +19,17 @@ namespace MiNuS {
 
 using namespace Eigen; // only used for linear solve
 
-#include "lsolve.hxx"
+#include "chicago14a-lsolve.hxx"
+
+//template <problem P, typename F>
+//__attribute__((always_inline)) inline void
+//memoize(C<F> __restrict *Hxxblock)
+//{
+//  C<F> *const h = reinterpret_cast<C<F> *> (__builtin_assume_aligned(Hxxblock,64));
+
+//}
+
+// memoize_HxH make it pure function.
 
 // THE MEAT //////////////////////////////////////////////////////////////////////
 // t: tracker settings
@@ -51,6 +61,12 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
   Map<Matrix<C<F>, f::nve, NVEPLUS1>,Aligned> AA((C<F> *)Hxt,f::nve,NVEPLUS1);  // accessors for the data
   static constexpr F the_smallest_number = 1e-13; // XXX BENCHMARK THIS
   typedef minus_array<f::nve,F> v; typedef minus_array<NVEPLUS1,F> vp;
+
+  Hxt[11]=Hxt[13]=Hxt[25]=Hxt[27]=Hxt[39]=Hxt[41]=Hxt[53]=Hxt[55]=Hxt[67]=
+          Hxt[68]=Hxt[81]=Hxt[82]=Hxt[95]=Hxt[96]=Hxt[109]=Hxt[110]=Hxt[124]=
+          Hxt[125]=Hxt[138]=Hxt[139]=Hxt[152]=Hxt[153]=Hxt[166]=Hxt[167]=
+          Hxt[180]=Hxt[181]=Hxt[194]=Hxt[195]=0;
+
 
   solution *t_s = raw_solutions + sol_min;  // current target solution
   const C<F>* __restrict s_s = s_sols + sol_min*f::nve;    // current start solution
