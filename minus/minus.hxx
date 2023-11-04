@@ -21,15 +21,64 @@ using namespace Eigen; // only used for linear solve
 
 #include "chicago14a-lsolve.hxx"
 
-//template <problem P, typename F>
-//__attribute__((always_inline)) inline void
-//memoize(C<F> __restrict *Hxxblock)
-//{
-//  C<F> *const h = reinterpret_cast<C<F> *> (__builtin_assume_aligned(Hxxblock,64));
+template <problem P, typename F>
+__attribute__((always_inline)) inline void
+memoize_Hxt(C<F> __restrict *block, C<F> * __restrict memo /* constants */)
+{
+  C<F> *const y = reinterpret_cast<C<F> *> (__builtin_assume_aligned(block,64));
+  C<F> *const yc = reinterpret_cast<C<F> *> (__builtin_assume_aligned(memo,64));
 
-//}
+  y[11]=y[13]=y[25]=y[27]=y[39]=y[41]=y[53]=y[55]=y[67]=
+          y[68]=y[81]=y[82]=y[95]=y[96]=y[109]=y[110]=y[124]=
+          y[125]=y[138]=y[139]=y[152]=y[153]=y[166]=y[167]=
+          y[180]=y[181]=y[194]=y[195]=0;
+  y[26]  = yc[0];
+  y[40]  = yc[1];
+  y[54]  = yc[2];
+  y[69]  = yc[3];
+  y[83]  = yc[4];
+  y[97]  = yc[5];
+  y[111] = yc[6];
+  y[123] = yc[7];
+  y[137] = yc[8];
+  y[151] = yc[9];
+  y[165] = yc[10];
+  y[179] = yc[11];
+  y[193] = yc[12];
+  y[207] = yc[13];
+  y[208] = yc[14];
+  y[209] = yc[15];
+}
 
-// memoize_HxH make it pure function.
+template <problem P, typename F>
+__attribute__((always_inline)) inline void
+memoize_HxH(C<F> __restrict *block, C<F> * __restrict memo /* constants */)
+{
+  C<F> *const y = reinterpret_cast<C<F> *> (__builtin_assume_aligned(block,64));
+  C<F> *const yc = reinterpret_cast<C<F> *> (__builtin_assume_aligned(memo,64));
+
+  y[11]=y[13]=y[25]=y[27]=y[39]=y[41]=y[53]=y[55]=y[67]=
+        y[68]=y[81]=y[82]=y[95]=y[96]=y[109]=y[110]=y[124]=
+        y[125]=y[138]=y[139]=y[152]=y[153]=y[166]=y[167]=
+        y[180]=y[181]=y[194]=y[195]=0;
+
+  y[26]  = yc[0];
+  y[40]  = yc[1];
+  y[54]  = yc[2];
+  y[69]  = yc[3];
+  y[83]  = yc[4];
+  y[97]  = yc[5];
+  y[111] = yc[6];
+  y[123] = yc[7];
+  y[137] = yc[8];
+  y[151] = yc[9];
+  y[165] = yc[10];
+  y[179] = yc[11];
+  y[193] = yc[12];
+  y[207] = yc[13];
+  y[208] = yc[14];
+  y[209] = yc[15];
+}
 
 // THE MEAT //////////////////////////////////////////////////////////////////////
 // t: tracker settings
@@ -52,22 +101,22 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
   alignas(64) C<F> dxi[f::nve];
   C<F> *const x0 = x0t0;
   F    *const t0 = (F *) (x0t0 + f::nve);
-  C<F> *const x1t1 = xt;      // reusing xt's space to represent x1t1
-  C<F> *const HxH=Hxt;  // HxH is reusing Hxt
-  C<F> *const dx = dxdt; const C<F> *const RHS = Hxt + NVE2;  // Hx or Ht, same storage //// UNUSED:  C<F> *const LHS = Hxt;
-  C<F> *const dx4 = dx;   // reuse dx for dx4
+  C<F> *const x1t1 = xt;
+  C<F> *const dx = dxdt;
+  C<F> *const dx4 = dx;
   F    *const dt = (F *)(dxdt + f::nve);
-  const F &t_step = s.init_dt_;  // initial step
-  Map<Matrix<C<F>, f::nve, NVEPLUS1>,Aligned> AA((C<F> *)Hxt,f::nve,NVEPLUS1);  // accessors for the data
+  C<F> *const HxH=Hxt;
+  Map<Matrix<C<F>, f::nve, NVEPLUS1>,Aligned> AA((C<F> *)Hxt,f::nve,NVEPLUS1);
   static constexpr F the_smallest_number = 1e-13; // XXX BENCHMARK THIS
   typedef minus_array<f::nve,F> v; typedef minus_array<NVEPLUS1,F> vp;
 
-  Hxt[11]=Hxt[13]=Hxt[25]=Hxt[27]=Hxt[39]=Hxt[41]=Hxt[53]=Hxt[55]=Hxt[67]=
-          Hxt[68]=Hxt[81]=Hxt[82]=Hxt[95]=Hxt[96]=Hxt[109]=Hxt[110]=Hxt[124]=
-          Hxt[125]=Hxt[138]=Hxt[139]=Hxt[152]=Hxt[153]=Hxt[166]=Hxt[167]=
-          Hxt[180]=Hxt[181]=Hxt[194]=Hxt[195]=0;
+  alignas(64) C<F> ycHxt[16]; 
+  alignas(64) C<F> ycHxH[16];
+  // memoization_init() : 
+  evaluate_Hxt_constants(xt, params, ycHxt);
+  //evaluate_HxH_constants(xt, params, ycHxH);
 
-
+  const F &t_step = s.init_dt_;  // initial step
   solution *t_s = raw_solutions + sol_min;  // current target solution
   const C<F>* __restrict s_s = s_sols + sol_min*f::nve;    // current start solution
   for (unsigned sol_n = sol_min; sol_n < sol_max; ++sol_n) { // solution loop
@@ -100,6 +149,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       vp::copy(x0t0, xt);
 
       // dx1
+      memoize_Hxt<P,F>(Hxt, ycHxt);
       evaluate_Hxt(xt, params, Hxt); // Outputs Hxt
       // dx4_eigen = lu.compute(AA).solve(bb);
       lsolve<P,F>(AA, dx4);
@@ -112,6 +162,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       v::add_to_self(xt, dx4);
       v::multiply_scalar_to_self(dx4, 2.);
       xt[f::nve] += one_half_dt;  // t0+.5dt
+      memoize_Hxt<P,F>(Hxt, ycHxt);
       evaluate_Hxt(xt, params, Hxt);
       lsolve<P,F>(AA, dxi);
 
@@ -121,6 +172,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       v::add_to_self(xt, dxi);
       v::multiply_scalar_to_self(dxi, 4);
       v::add_to_self(dx4, dxi);
+      memoize_Hxt<P,F>(Hxt, ycHxt);
       evaluate_Hxt(xt, params, Hxt);
       lsolve<P,F>(AA, dxi);
 
@@ -131,6 +183,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       v::multiply_scalar_to_self(dxi, 2);
       v::add_to_self(dx4, dxi);
       xt[f::nve] = *t0 + *dt;               // t0+dt
+      memoize_Hxt<P,F>(Hxt, ycHxt);
       evaluate_Hxt(xt, params, Hxt);
       lsolve<P,F>(AA, dxi);
       v::multiply_scalar_to_self(dxi, *dt);
@@ -149,6 +202,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       bool is_successful;
       do {
         ++n_corr_steps;
+        // memoize_HxH<P,F>(HxH, ycHxH);
         evaluate_HxH(x1t1, params, HxH);
         lsolve<P,F>(AA, dx);
         v::add_to_self(x1t1, dx);

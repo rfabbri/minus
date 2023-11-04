@@ -112,6 +112,8 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   // force-inlining this makes it slower
   static void evaluate_Hxt(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
   static void evaluate_HxH(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
+  static void evaluate_Hxt_constants(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
+  static void evaluate_HxH_constants(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
 };
 
 // TODO: make these static
@@ -182,21 +184,37 @@ struct minus_core<P, F>::track_settings {
 // specialization
 template <problem P, typename F>
 struct eval {
-  static void Hxt(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
-  static void HxH(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
+  static void Hxt(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y);
+  static void HxH(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y);
+  // optinonal memoization of constants and intermediate values:
+  static void Hxt_constants(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y);
+  static void HxH_constants(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y);
 };
 
 template <problem P, typename F>
-void minus_core<P, F>::evaluate_Hxt(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/)
+void minus_core<P, F>::evaluate_Hxt(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * __restrict y)
 {
   eval<P,F>::Hxt(x, params, y);
 }
 
 template <problem P, typename F>
-void minus_core<P, F>::evaluate_HxH(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/)
+void minus_core<P, F>::evaluate_HxH(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * __restrict y)
 {
   eval<P,F>::HxH(x, params, y);
 }
+
+template <problem P, typename F>
+void minus_core<P, F>::evaluate_Hxt_constants(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * __restrict y)
+{
+  eval<P,F>::Hxt_constants(x, params, y);
+}
+
+template <problem P, typename F>
+void minus_core<P, F>::evaluate_HxH_constants(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * __restrict y)
+{
+  eval<P,F>::HxH_constants(x, params, y);
+}
+
 // Internal data ---------------------------------------------------------------
 // Data every problem has to declare by specializing this template
 template <problem P, typename F=double>
