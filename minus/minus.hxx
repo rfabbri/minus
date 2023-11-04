@@ -36,17 +36,21 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
   solution *raw_solutions = reinterpret_cast<solution *> (__builtin_assume_aligned(raw_solutions_u,64));
   assert(sol_min <= sol_max && sol_max <= f::nsols);
   alignas(64) C<F> Hxt[NVEPLUS1 * f::nve]; 
-  alignas(64) C<F> x0t0[NVEPLUS1];
-  alignas(64) C<F> xt[NVEPLUS1];
-  alignas(64) C<F> dxdt[NVEPLUS1];
+  alignas(64) F x0t0block[f::nve*2+1];
+  alignas(64) F xtblock[f::nve*2+1];
+  alignas(64) F dxdtblock[f::nve*2+1];
   alignas(64) C<F> dxi[f::nve];
+  C<F> *const x0t0 = (C<F> *) x0t0block;
+  C<F> *const xt   = (C<F> *) xtblock;
+  F    *const t = xtblock + 2*f::nve;
+  C<F> *const dxdt = (C<F> *) dxdtblock;
   C<F> *const x0 = x0t0;
-  F    *const t0 = (F *) (x0t0 + f::nve);
+  F    *const t0 = x0t0block + 2*f::nve;
   C<F> *const x1t1 = xt;      // reusing xt's space to represent x1t1
   C<F> *const HxH=Hxt;  // HxH is reusing Hxt
   C<F> *const dx = dxdt; const C<F> *const RHS = Hxt + NVE2;  // Hx or Ht, same storage //// UNUSED:  C<F> *const LHS = Hxt;
   C<F> *const dx4 = dx;   // reuse dx for dx4
-  F    *const dt = (F *)(dxdt + f::nve);
+  F    *const dt = dxdtblock + 2*f::nve;
   const F &t_step = s.init_dt_;  // initial step
   Map<Matrix<C<F>, f::nve, 1>,Aligned> dxi_eigen(dxi);
   Map<Matrix<C<F>, f::nve, 1>,Aligned> dx4_eigen(dx4);
@@ -54,7 +58,8 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
   Map<Matrix<C<F>, f::nve, f::nve>,Aligned> AA((C<F> *)Hxt,f::nve,f::nve);  // accessors for the data
   Map<const Matrix<C<F>, f::nve, 1>, Aligned > bb(RHS);
   static constexpr F the_smallest_number = 1e-13; // XXX BENCHMARK THIS
-  typedef minus_array<f::nve,F> v; typedef minus_array<NVEPLUS1,F> vp;
+  typedef minus_array<f::nve,F> v; // typedef minus_array<NVEPLUS1,F> vp;
+  typedef minus_array<f::nve*2+1,F> vpt;
 
   solution *t_s = raw_solutions + sol_min;  // current target solution
   const C<F>* __restrict s_s = s_sols + sol_min*f::nve;    // current start solution
@@ -66,8 +71,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
     char predictor_successes = 0;
 
     // track H(x,t) for t in [0,1]
-    while (t_s->status == PROCESSING 
-        && 1 - *t0 > the_smallest_number) {
+    while (t_s->status == PROCESSING && 1 - *t0 > the_smallest_number) {
       if (t_s->num_steps == s.max_num_steps_) {
         t_s->status = MAX_NUM_STEPS_FAIL; // failed to reach solution in the available step budget
         break;
@@ -85,7 +89,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
           dx3 := solveHxTimesDXequalsminusHt(x0+(1/2)*dx2*dt,t0+(1/2)*dt);
           dx4 := solveHxTimesDXequalsminusHt(x0+dx3*dt,t0+dt);
           (1/6)*dt*(dx1+2*dx2+2*dx3+dx4) */
-      vp::copy(x0t0, xt);
+      vpt::copy(x0t0, xt);
 
       // dx1
       evaluate_Hxt(xt, params, Hxt); // Outputs Hxt
@@ -94,12 +98,10 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       
       // dx2
       const F one_half_dt = *dt*0.5;
-
       v::multiply_scalar_to_self(dx4, one_half_dt);
-
       v::add_to_self(xt, dx4);
       v::multiply_scalar_to_self(dx4, 2.);
-      xt[f::nve] += one_half_dt;  // t0+.5dt
+      *t += one_half_dt;  // t0+.5dt
       evaluate_Hxt(xt, params, Hxt);
       lsolve<P,F>(AA, bb, dxi_eigen);
 
@@ -114,11 +116,11 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
 
       // dx4
       v::multiply_scalar_to_self(dxi, *dt);
-      vp::copy(x0t0, xt);
+      vpt::copy(x0t0, xt);
       v::add_to_self(xt, dxi);
       v::multiply_scalar_to_self(dxi, 2);
       v::add_to_self(dx4, dxi);
-      xt[f::nve] = *t0 + *dt;               // t0+dt
+      *t = *t0 + *dt;               // t0+dt
       evaluate_Hxt(xt, params, Hxt);
       lsolve<P,F>(AA, bb, dxi_eigen);
       v::multiply_scalar_to_self(dxi, *dt);
@@ -129,8 +131,8 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       // dx4_eigen = (dx4_eigen* *dt + dx1_eigen*2 + dx2_eigen*4 + dx3_eigen*2)*(1./6.);
       
       // make prediction
-      vp::copy(x0t0, x1t1);
-      vp::add_to_self(x1t1, dxdt);
+      vpt::copy(x0t0, x1t1);
+      vpt::add_to_self(x1t1, dxdt);
       
       /// CORRECTOR ///
       char n_corr_steps = 0;
@@ -151,7 +153,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
         ++predictor_successes;
         // std::swap(x1t1,x0t0);
         // x0 = x0t0; t0 = (F *) (x0t0 + f::nve); xt = x1t1;
-        vp::copy(x1t1, x0t0);
+        vpt::copy(x1t1, x0t0);
         if (predictor_successes >= s.num_successes_before_increase_) {
           predictor_successes = 0;
           *dt *= s.dt_increase_factor_;

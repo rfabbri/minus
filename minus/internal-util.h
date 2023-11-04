@@ -138,6 +138,21 @@ struct minus_array { // Speed critical -----------------------------------------
   }
 };
 
+template <unsigned N, typename F> // N here given in number of floats (2x number of complexes)
+struct minus_xt_array { // Speed critical -----------------------------------------
+  static inline __attribute__((always_inline)) void 
+  add_to_self(F * __restrict a, F * __restrict b) // F not C<F>
+  {
+    for (unsigned int i=0; i < N; ++i,++a,++b) *a += *b;
+  }
+
+  static inline __attribute__((always_inline)) void 
+  copy(F * __restrict a_xt, F * __restrict b_xt)
+  {
+    memcpy(b_xt, a_xt, N*sizeof(F));
+  }
+};
+
 // Functions over 3 dimensions
 template <typename F>
 struct minus_3d {

@@ -36,7 +36,7 @@ Hxt(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restri
   const C<F> &X11 = x[11];  // transl
   const C<F> &X12 = x[12];  // transl
   const C<F> &X13 = x[13];  // transl
-  const F &t = (F &) ux[14];
+  const F &t = ((float *)x)[14*2];
     
   const C<F> &X15 =  params[0];
   const C<F> &X16 =  params[1];
