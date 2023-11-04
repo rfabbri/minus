@@ -48,11 +48,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
   C<F> *const dx4 = dx;   // reuse dx for dx4
   F    *const dt = (F *)(dxdt + f::nve);
   const F &t_step = s.init_dt_;  // initial step
-  Map<Matrix<C<F>, f::nve, 1>,Aligned> dxi_eigen(dxi);
-  Map<Matrix<C<F>, f::nve, 1>,Aligned> dx4_eigen(dx4);
-  Map<Matrix<C<F>, f::nve, 1>,Aligned> &dx_eigen = dx4_eigen;
-  Map<Matrix<C<F>, f::nve, f::nve>,Aligned> AA((C<F> *)Hxt,f::nve,f::nve);  // accessors for the data
-  Map<const Matrix<C<F>, f::nve, 1>, Aligned > bb(RHS);
+  Map<Matrix<C<F>, f::nve, NVEPLUS1>,Aligned> AA((C<F> *)Hxt,f::nve,NVEPLUS1);  // accessors for the data
   static constexpr F the_smallest_number = 1e-13; // XXX BENCHMARK THIS
   typedef minus_array<f::nve,F> v; typedef minus_array<NVEPLUS1,F> vp;
 
@@ -90,7 +86,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       // dx1
       evaluate_Hxt(xt, params, Hxt); // Outputs Hxt
       // dx4_eigen = lu.compute(AA).solve(bb);
-      lsolve<P,F>(AA, bb, dx4_eigen);
+      lsolve<P,F>(AA, dx4);
       
       // dx2
       const F one_half_dt = *dt*0.5;
@@ -101,7 +97,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       v::multiply_scalar_to_self(dx4, 2.);
       xt[f::nve] += one_half_dt;  // t0+.5dt
       evaluate_Hxt(xt, params, Hxt);
-      lsolve<P,F>(AA, bb, dxi_eigen);
+      lsolve<P,F>(AA, dxi);
 
       // dx3
       v::multiply_scalar_to_self(dxi, one_half_dt);
@@ -110,7 +106,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       v::multiply_scalar_to_self(dxi, 4);
       v::add_to_self(dx4, dxi);
       evaluate_Hxt(xt, params, Hxt);
-      lsolve<P,F>(AA, bb, dxi_eigen);
+      lsolve<P,F>(AA, dxi);
 
       // dx4
       v::multiply_scalar_to_self(dxi, *dt);
@@ -120,7 +116,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       v::add_to_self(dx4, dxi);
       xt[f::nve] = *t0 + *dt;               // t0+dt
       evaluate_Hxt(xt, params, Hxt);
-      lsolve<P,F>(AA, bb, dxi_eigen);
+      lsolve<P,F>(AA, dxi);
       v::multiply_scalar_to_self(dxi, *dt);
       v::add_to_self(dx4, dxi);
       v::multiply_scalar_to_self(dx4, 1./6.);
@@ -138,7 +134,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       do {
         ++n_corr_steps;
         evaluate_HxH(x1t1, params, HxH);
-        lsolve<P,F>(AA, bb, dx_eigen);
+        lsolve<P,F>(AA, dx);
         v::add_to_self(x1t1, dx);
         is_successful = v::norm2(dx) < s.epsilon2_ * v::norm2(x1t1); // |dx|^2/|x1|^2 < eps2
       } while (!is_successful && n_corr_steps < s.max_corr_steps_);
