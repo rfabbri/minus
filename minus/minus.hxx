@@ -110,10 +110,9 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
   typedef minus_array<f::nve,F> v; typedef minus_array<NVEPLUS1,F> vp;
 
   alignas(64) C<F> ycHxt[16]; 
-  alignas(64) C<F> ycHxH[210];
+  alignas(64) C<F> ycHxH[16];
   // memoization_init() : 
   evaluate_Hxt_constants(xt, params, ycHxt);
-  evaluate_HxH_constants(xt, params, ycHxH);
 
   const F &t_step = s.init_dt_;  // initial step
   solution *t_s = raw_solutions + sol_min;  // current target solution
@@ -201,6 +200,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       bool is_successful;
       do {
         ++n_corr_steps;
+        evaluate_HxH_constants(x1t1, params, ycHxH);
         memoize_HxH<P,F>(HxH, ycHxH);
         evaluate_HxH(x1t1, params, HxH);
         lsolve<P,F>(AA, dx);
