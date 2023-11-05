@@ -29,9 +29,9 @@ memoize_Hxt(C<F> __restrict *block, C<F> * __restrict memo /* constants */)
   C<F> *const yc = reinterpret_cast<C<F> *> (__builtin_assume_aligned(memo,64));
 
   y[11]=y[13]=y[25]=y[27]=y[39]=y[41]=y[53]=y[55]=y[67]=
-          y[68]=y[81]=y[82]=y[95]=y[96]=y[109]=y[110]=y[124]=
-          y[125]=y[138]=y[139]=y[152]=y[153]=y[166]=y[167]=
-          y[180]=y[181]=y[194]=y[195]=0;
+        y[68]=y[81]=y[82]=y[95]=y[96]=y[109]=y[110]=y[124]=
+        y[125]=y[138]=y[139]=y[152]=y[153]=y[166]=y[167]=
+        y[180]=y[181]=y[194]=y[195]=0;
   y[26]  = yc[0];
   y[40]  = yc[1];
   y[54]  = yc[2];
@@ -112,7 +112,6 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
   alignas(64) C<F> ycHxt[16]; 
   alignas(64) C<F> ycHxH[16];
   // memoization_init() : 
-  evaluate_Hxt_constants(xt, params, ycHxt);
 
   const F &t_step = s.init_dt_;  // initial step
   solution *t_s = raw_solutions + sol_min;  // current target solution
@@ -147,6 +146,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       vp::copy(x0t0, xt);
 
       // dx1
+      evaluate_Hxt_constants(xt, params, ycHxt);
       memoize_Hxt<P,F>(Hxt, ycHxt);
       evaluate_Hxt(xt, params, Hxt); // Outputs Hxt
       // dx4_eigen = lu.compute(AA).solve(bb);
@@ -198,9 +198,9 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       /// CORRECTOR ///
       char n_corr_steps = 0;
       bool is_successful;
+      evaluate_HxH_constants(x1t1, params, ycHxH);
       do {
         ++n_corr_steps;
-        evaluate_HxH_constants(x1t1, params, ycHxH);
         memoize_HxH<P,F>(HxH, ycHxH);
         evaluate_HxH(x1t1, params, HxH);
         lsolve<P,F>(AA, dx);
