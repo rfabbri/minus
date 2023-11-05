@@ -198,9 +198,9 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       /// CORRECTOR ///
       char n_corr_steps = 0;
       bool is_successful;
-      evaluate_HxH_constants(x1t1, params, ycHxH);
       do {
         ++n_corr_steps;
+        evaluate_HxH_constants(x1t1, params, ycHxH);
         memoize_HxH<P,F>(HxH, ycHxH);
         evaluate_HxH(x1t1, params, HxH);
         lsolve<P,F>(AA, dx);

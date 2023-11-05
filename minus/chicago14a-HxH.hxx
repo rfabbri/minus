@@ -3007,7 +3007,6 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   y[22] = G692;
   y[23] = G703;
   y[24] = G733;
-  y[26] = G736;
   y[28] = G764;
   y[29] = G775;
   y[30] = G798;
@@ -3019,7 +3018,6 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   y[36] = G900;
   y[37] = G911;
   y[38] = G941;
-  y[40] = G944;
   y[42] = G970;
   y[43] = G982;
   y[44] = G1003;
@@ -3031,7 +3029,6 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   y[50] = G1102;
   y[51] = G1114;
   y[52] = G1144;
-  y[54] = G1147;
   y[56] = G1226;
   y[57] = G1254;
   y[58] = G1290;
@@ -3043,7 +3040,6 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   y[64] = G1446;
   y[65] = G1462;
   y[66] = G1492;
-  y[69] = G1495;
   y[70] = G1526;
   y[71] = G1538;
   y[72] = G1562;
@@ -3055,7 +3051,6 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   y[78] = G1667;
   y[79] = G1678;
   y[80] = G1708;
-  y[83] = G1711;
   y[84] = G1739;
   y[85] = G1750;
   y[86] = G1773;
@@ -3067,7 +3062,6 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   y[92] = G1875;
   y[93] = G1886;
   y[94] = G1916;
-  y[97] = G1919;
   y[98] = G1945;
   y[99] = G1957;
   y[100] = G1978;
@@ -3079,7 +3073,6 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   y[106] = G2077;
   y[107] = G2089;
   y[108] = G2119;
-  y[111] = G2122;
   y[112] = G2131;
   y[113] = G2137;
   y[114] = G2146;
@@ -3091,7 +3084,6 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   y[120] = G2191;
   y[121] = G2197;
   y[122] = G2221;
-  y[123] = G2224;
   y[126] = G2233;
   y[127] = G2239;
   y[128] = G2248;
@@ -3103,7 +3095,6 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   y[134] = G2293;
   y[135] = G2299;
   y[136] = G2323;
-  y[137] = G2326;
   y[140] = G2335;
   y[141] = G2341;
   y[142] = G2350;
@@ -3115,7 +3106,6 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   y[148] = G2395;
   y[149] = G2401;
   y[150] = G2425;
-  y[151] = G2428;
   y[154] = G2435;
   y[155] = G2440;
   y[156] = G2447;
@@ -3127,7 +3117,6 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   y[162] = G2483;
   y[163] = G2488;
   y[164] = G2509;
-  y[165] = G2512;
   y[168] = G2519;
   y[169] = G2524;
   y[170] = G2531;
@@ -3139,7 +3128,6 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   y[176] = G2567;
   y[177] = G2572;
   y[178] = G2593;
-  y[179] = G2596;
   y[182] = G2603;
   y[183] = G2608;
   y[184] = G2615;
@@ -3151,8 +3139,6 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   y[190] = G2651;
   y[191] = G2656;
   y[192] = G2677;
-  y[193] = G2680;
-  
   y[196] = -G2692;
   y[197] = -G2700;
   y[198] = -G2712;
@@ -3164,9 +3150,6 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   y[204] = -G2772;
   y[205] = -G2780;
   y[206] = -G2810;
-  y[207] = -G2820;
-  y[208] = -G2828;
-  y[209] = -G2836;
 }
 
 // Evaluates Hx and H at the same time, reusing expressions.
@@ -6356,20 +6339,52 @@ HxH_constants(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict upa
 //  yc[208] = -G2828;
 //  yc[209] = -G2836;
 
-  yc[1] = G736;
-  yc[2] = G944;
-  yc[3] = G1147;
-  yc[4] = G1495;
-  yc[5] = G1711;
-  yc[6] = G1919;
-  yc[7] = G2122;
-  yc[8] = G2224;
-  yc[9] = G2326;
-  yc[10] = G2428;
-  yc[11] = G2512;
-  yc[12] = G2596;
-  yc[13] = G2680;
-  yc[14] = -G2820;
-  yc[15] = -G2828;
-  yc[16] = -G2836;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  yc[0 ] =  G736;
+  yc[1 ] =  G944;
+  yc[2 ] =  G1147;
+  yc[3 ] =  G1495;
+  yc[4 ] =  G1711;
+  yc[5 ] =  G1919;
+  yc[6 ] =  G2122;
+  yc[7 ] =  G2224;
+  yc[8 ] =  G2326;
+  yc[9 ] =  G2428;
+  yc[10] =  G2512;
+  yc[11] =  G2596;
+  yc[12] =  G2680;
+  yc[13] = -G2820;
+  yc[14] = -G2828;
+  yc[15] = -G2836;
 }
