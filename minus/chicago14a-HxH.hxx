@@ -6389,6 +6389,7 @@ inline __attribute__((always_inline)) void
 eval<chicago14a, F>::
 HxH_constants_all_sols(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>* __restrict uy /*HxH*/) 
 {
+#if 0
   const C<F> *params = reinterpret_cast<C<F> *> (__builtin_assume_aligned(uparams,64));
   const C<F> *x = reinterpret_cast<C<F> *> (__builtin_assume_aligned(ux,64));
   C<F> *yc = reinterpret_cast<C<F> *> (__builtin_assume_aligned(uy,64));
@@ -9567,12 +9568,11 @@ HxH_constants_all_sols(const C<F>* __restrict ux /*x and t*/, const C<F> * __res
 
 
 
-  std::cerr << yc[10] << std::endl;
-
 //  yc[10] =  G2512;
 //  yc[11] =  G2596;
 //  yc[12] =  G2680;
 //  yc[13] = -G2820;
 //  yc[14] = -G2828;
 //  yc[15] = -G2836;
+#endif
 }

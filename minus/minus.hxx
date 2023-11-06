@@ -201,9 +201,9 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       /// CORRECTOR ///
       char n_corr_steps = 0;
       bool is_successful;
-      if (t_s->num_steps ==0)
-      evaluate_HxH_constants_all_sols(x1t1, params, ycHxH);
-      evaluate_HxH_constants(x1t1, params, ycHxH);
+      //if (t_s->num_steps ==0)
+      //evaluate_HxH_constants_all_sols(x1t1, params, ycHxH);
+      //evaluate_HxH_constants(x1t1, params, ycHxH);
       /*
       {
         static std::mutex lock;
