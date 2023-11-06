@@ -3765,16 +3765,42 @@ Hxt(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restri
   y[204] = -G3269;
   y[205] = -G3304;
   y[206] = -G3388;
+
+  // these seem to be fairly regular, subject to memoization:
+
+  y[26] = G736;
+  y[40] = G944;
+  y[54] = G1147;
+  y[69] = G1495;
+  y[83] = G1711;
+  y[97] = G1919;
+  y[111] = G2122;
+  y[123] = G2224;
+  y[137] = G2326;
+  y[151] = G2428;
+  y[165] = G2512;
+  y[179] = G2596;
+  y[193] = G2680;
+  y[207] = -G3409;
+  y[208] = -G3424;
+  y[209] = -G3439;
 }
 
 // Computes constant values to be memoized. These values do not really depend on
 // x, only on params. They can be final matrix values or intermediate ones to
 // cache.
+//
+// TODO: if you fill-in this function, if it is not too big, make sure to force
+// inlining even further and guarante that the dissassembled shows no function
+// call. You have to test with inlining and without
 template <typename F>
 inline __attribute__((always_inline)) void 
 eval<chicago14a, F>::
 Hxt_constants(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restrict uy /*Hxt*/) 
 {
+  /* If there are separated constants, independent of ux, evaluate them here before the
+   * time-dependent evaluator. TODO: work w/team to get extract t-independent evaluators */
+#if 0
   const C<F> *params = reinterpret_cast<C<F> *> (__builtin_assume_aligned(uparams,64));
   const C<F> *x = reinterpret_cast<C<F> *> (__builtin_assume_aligned(ux,64));
   C<F> *yc = reinterpret_cast<C<F> *> (__builtin_assume_aligned(uy,64));
@@ -7389,4 +7415,5 @@ Hxt_constants(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> 
   yc[13] = -G3409;
   yc[14] = -G3424;
   yc[15] = -G3439;
+#endif
 }

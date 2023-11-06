@@ -32,22 +32,22 @@ memoize_Hxt(C<F> __restrict *block, C<F> * __restrict memo /* constants */)
         y[68]=y[81]=y[82]=y[95]=y[96]=y[109]=y[110]=y[124]=
         y[125]=y[138]=y[139]=y[152]=y[153]=y[166]=y[167]=
         y[180]=y[181]=y[194]=y[195]=0;
-  y[26]  = yc[0];
-  y[40]  = yc[1];
-  y[54]  = yc[2];
-  y[69]  = yc[3];
-  y[83]  = yc[4];
-  y[97]  = yc[5];
-  y[111] = yc[6];
-  y[123] = yc[7];
-  y[137] = yc[8];
-  y[151] = yc[9];
-  y[165] = yc[10];
-  y[179] = yc[11];
-  y[193] = yc[12];
-  y[207] = yc[13];
-  y[208] = yc[14];
-  y[209] = yc[15];
+//  y[26]  = yc[0];
+//  y[40]  = yc[1];
+//  y[54]  = yc[2];
+//  y[69]  = yc[3];
+//  y[83]  = yc[4];
+//  y[97]  = yc[5];
+//  y[111] = yc[6];
+//  y[123] = yc[7];
+//  y[137] = yc[8];
+//  y[151] = yc[9];
+//  y[165] = yc[10];
+//  y[179] = yc[11];
+//  y[193] = yc[12];
+//  y[207] = yc[13];
+//  y[208] = yc[14];
+//  y[209] = yc[15];
 }
 
 template <problem P, typename F>
@@ -61,19 +61,19 @@ memoize_HxH(C<F> __restrict *block, C<F> * __restrict memo /* constants */)
         y[68]=y[81]=y[82]=y[95]=y[96]=y[109]=y[110]=y[124]=
         y[125]=y[138]=y[139]=y[152]=y[153]=y[166]=y[167]=
         y[180]=y[181]=y[194]=y[195]=0;
-  y[26]  = yc[0];
-  y[40]  = yc[1];
-  y[54]  = yc[2];
-  y[69]  = yc[3];
-  y[83]  = yc[4];
-  y[97]  = yc[5];
-  y[111] = yc[6];
-  y[123] = yc[7];
-  y[137] = yc[8];
-  y[151] = yc[9];
-  y[165] = yc[10];
-  y[179] = yc[11];
-  y[193] = yc[12];
+//  y[26]  = yc[0];
+//  y[40]  = yc[1];
+//  y[54]  = yc[2];
+//  y[69]  = yc[3];
+//  y[83]  = yc[4];
+//  y[97]  = yc[5];
+//  y[111] = yc[6];
+//  y[123] = yc[7];
+//  y[137] = yc[8];
+//  y[151] = yc[9];
+//  y[165] = yc[10];
+//  y[179] = yc[11];
+//  y[193] = yc[12];
 //  y[207] = yc[13];
 //  y[208] = yc[14];
 //  y[209] = yc[15];
@@ -113,6 +113,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
   alignas(64) C<F> ycHxH[13];
   // memoization_init() : 
 
+   C<F> previous[13];
   const F &t_step = s.init_dt_;  // initial step
   solution *t_s = raw_solutions + sol_min;  // current target solution
   const C<F>* __restrict s_s = s_sols + sol_min*f::nve;    // current start solution
@@ -146,7 +147,9 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       vp::copy(x0t0, xt);
 
       // dx1
+      asm("#------ BEGIN evaluate constants!");
       evaluate_Hxt_constants(xt, params, ycHxt);
+      asm("#------ BEGIN memoize!");
       memoize_Hxt<P,F>(Hxt, ycHxt);
       evaluate_Hxt(xt, params, Hxt); // Outputs Hxt
       // dx4_eigen = lu.compute(AA).solve(bb);
@@ -198,17 +201,27 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       /// CORRECTOR ///
       char n_corr_steps = 0;
       bool is_successful;
+      if (t_s->num_steps ==0)
+      evaluate_HxH_constants_all_sols(x1t1, params, ycHxH);
       evaluate_HxH_constants(x1t1, params, ycHxH);
-//      ++t_s->num_steps;
-//      if (n_corr_steps > 1)
-//        for (unsigned i=0; i < 16; ++i)
-//          if (std::norm(ycHxH[i]-previous[i]) > 1e-5) {
-//            std::cerr << "Different " << i << "--------------------------------------------\n";
-//            std::cerr << "\tnow: " << ycHxH[i] << " previous: " << previous[i] << std::endl;
-//          }
-//      for (unsigned i=0; i < 16; ++i)
-//        previous[i] = ycHxH[i];
-      // C<F> previous[16];
+      /*
+      {
+        static std::mutex lock;
+        const std::lock_guard<std::mutex> guard(lock);
+         
+        if ( t_s->num_steps > 1)
+          for (unsigned i=0; i < 13; ++i) {
+            F err = std::norm(ycHxH[i]-previous[i]);
+            if (err > 1e-15) {
+              std::cerr << "Different " << i << " -------------------------------------------- " << err << std::endl;
+              std::cerr << "\tnow: " << ycHxH[i] << " previous: " << previous[i] << std::endl;
+            }
+          }
+        for (unsigned i=0; i < 13; ++i)
+          previous[i] = ycHxH[i];
+      }
+      */
+
       do {
         ++n_corr_steps;
         memoize_HxH<P,F>(HxH, ycHxH);

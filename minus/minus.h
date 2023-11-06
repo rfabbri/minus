@@ -114,6 +114,7 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   static void evaluate_HxH(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
   static void evaluate_Hxt_constants(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
   static void evaluate_HxH_constants(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
+  static void evaluate_HxH_constants_all_sols(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
 };
 
 // TODO: make these static
@@ -186,9 +187,10 @@ template <problem P, typename F>
 struct eval {
   static void Hxt(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y);
   static void HxH(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y);
-  // optinonal memoization of constants and intermediate values:
+  // optional memoization of constants and intermediate values:
   static void Hxt_constants(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y);
   static void HxH_constants(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y);
+  static void HxH_constants_all_sols(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y);
 };
 
 template <problem P, typename F>
@@ -213,6 +215,12 @@ template <problem P, typename F>
 void minus_core<P, F>::evaluate_HxH_constants(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * __restrict y)
 {
   eval<P,F>::HxH_constants(x, params, y);
+}
+
+template <problem P, typename F>
+void minus_core<P, F>::evaluate_HxH_constants_all_sols(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * __restrict y)
+{
+  eval<P,F>::HxH_constants_all_sols(x, params, y);
 }
 
 // Internal data ---------------------------------------------------------------
