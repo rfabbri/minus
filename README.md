@@ -400,6 +400,7 @@ Expect your program to take very very long - so reduce the problem / iterations
 before running.
 
 #### GPerftools
+https://developer.ridgerun.com/wiki/index.php/Profiling_with_GPerfTools
 https://github.com/gperftools/gperftools
 https://gperftools.github.io/gperftools/cpuprofile.html
 
@@ -420,6 +421,16 @@ can view profile data in command-line or with svg/web browser using pprof perl
 script from gperftools (pprof ./the_program profile01).
 
 pprof --pdf ./minus-chicago /tmp/prof >/tmp/p.pdf
+
+
+#### Apple Instruments
+
+```bash
+mkdir /tmp/out
+xctrace record --output /tmp/out --template "Time Profiler" --launch --  minus-chicago -g
+open /tmp/out/*
+```
+
 
 ### Compilers
 
@@ -487,6 +498,14 @@ At Brown's CCV cluster, I used the following flags:
  MINUS_EXTRA_CMAKE_CXX_FLAGS	  -I${MKLROOT}/include -no-prec-div -ansi-alias  -mskylake-avx512 -xSKYLAKE-AVX512 -axSKYLAKE-AVX512
  MINUS_EXTRA_CMAKE_EXE_LINKER_FLAGS   -L/gpfs/runtime/opt/intel/2018.1/mkl/lib/intel64_lin   -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -lpthread -lm
 ```
+### Prefetch
+
+https://www.naftaliharris.com/blog/2x-speedup-with-one-line-of-code/
+
+### Struct padding and alignmen study
+
+Linux: pahole
+macOS: clang -Wpadded
 
 ### Studying assembly output
 We refer to Eigen's documentation http://eigen.tuxfamily.org/index.php?title=Developer%27s_Corner#Studying_assembly_output 
@@ -506,10 +525,6 @@ Place this between code:
 
 use/adapt the script `scripts/minus-disassemble`
 
-### Struct padding and alignmen study
-
-Linux: pahole
-macOS: clang -Wpadded
 
 ## Authors
 
