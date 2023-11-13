@@ -390,6 +390,7 @@ from, specially under Linux.
 
 ### Profiling
 
+#### Kcachegrid
 The best way is with kcachegrind + valgrind, by far. 
 See [https://www.blogger.com/comment.g?blogID=7395958&postID=116062684092668856&bpli=1&pli=1]
 
@@ -397,6 +398,20 @@ In any system without valgrind or kcachegrind (eg, Macs), the easiest way is wit
 
 Expect your program to take very very long - so reduce the problem / iterations
 before running.
+
+#### GPerftools
+https://github.com/gperftools/gperftools
+https://gperftools.github.io/gperftools/cpuprofile.html
+
+Runs the program on real CPU. To use it, install it with homebrew, then link the
+program with libprofiler (add -Lpath_to_installed_gperftools -lprofiler) and run
+with CPUPROFILE environment variable set to some filename (CPUPROFILE=profile01
+./the_program). It will profile the program using interval timer (setitimer) and
+output profiling data to the filename, defined in CPUPROFILE env var. Then you
+can view profile data in command-line or with svg/web browser using pprof perl
+script from gperftools (pprof ./the_program profile01).
+
+pprof --pdf ./minus-chicago /tmp/prof >/tmp/p.pdf
 
 ### Compilers
 
