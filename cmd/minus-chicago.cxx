@@ -441,8 +441,8 @@ process_args(int argc, char **argv)
       }
       
       if (argstate == EPSILON) {
-        settings_.epsilon_ = std::stod(arg);
-        settings_.epsilon2_ = settings_.epsilon_*settings_.epsilon_;
+        double epsilon = std::stod(arg);
+        settings_.epsilon2_ = epsilon*epsilon;
         --argc; ++argv;
         argstate = AFTER_INITIAL_ARGS;
         incomplete = false;
@@ -512,7 +512,7 @@ main(int argc, char **argv)
     }
   }
   
-  static M::solution solutions[M::nsols];
+  alignas(64) static M::solution solutions[M::nsols];
   {
     LOG("\033[0;33mUsing 4 threads by default\e[m\n");
     #ifdef M_VERBOSE

@@ -193,7 +193,7 @@ main(int argc, char **argv)
 
   if (!profile && !mread<Float>(input)) return 1; // reads into global params_
   
-  static M::solution solutions[M::nsols];
+  alignas(64) static M::solution solutions[M::nsols];
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   #ifdef M_VERBOSE
   std::cerr << "LOG \033[0;33mStarting path tracker\e[m\n" << std::endl;

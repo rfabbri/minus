@@ -70,7 +70,7 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   static constexpr unsigned nsols = f::nsols;
   static constexpr unsigned nve = f::nve;
   
-  enum solution_status {
+  enum solution_status : unsigned char {
     UNDETERMINED,       // 0
     PROCESSING,         // 1
     REGULAR,            // 2 OK. rest is error.
@@ -124,12 +124,10 @@ struct minus_core<P, F>::track_settings {
     init_dt_(0.05),   // m2 tStep, t_step, raw interface code initDt
     min_dt_(1e-7),        // m2 tStepMin, raw interface code minDt
     end_zone_factor_(0.05),
-    epsilon_(0.000001), // m2 CorrectorTolerance (chicago.m2, track.m2), raw interface code epsilon (interface2.d, NAG.cpp::rawSwetParametersPT)
-    epsilon2_(epsilon_ * epsilon_), 
+    epsilon2_(0.000001*0.000001), // m2 CorrectorTolerance (chicago.m2, track.m2), raw interface code epsilon (interface2.d, NAG.cpp::rawSwetParametersPT)
     dt_increase_factor_(2.),  // m2 stepIncreaseFactor
     dt_decrease_factor_(1./dt_increase_factor_),  // m2 stepDecreaseFactor not existent in DEFAULT, using what is in track.m2:77 
-    infinity_threshold_(1e7), // m2 InfinityThreshold
-    infinity_threshold2_(infinity_threshold_ * infinity_threshold_),
+    infinity_threshold2_(1e7 * 1e7 ), // m2 InfinityThreshold^2
     max_num_steps_(500),
     num_successes_before_increase_(20), // m2 numberSuccessesBeforeIncrease
     max_corr_steps_(4)  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
@@ -138,11 +136,9 @@ struct minus_core<P, F>::track_settings {
   F init_dt_;   // m2 tStep, t_step, raw interface code initDt
   F min_dt_;        // m2 tStepMin, raw interface code minDt
   F end_zone_factor_;
-  F epsilon_; // m2 CorrectorTolerance (chicago.m2, track.m2), raw interface code epsilon (interface2.d, NAG.cpp:rawSwetParametersPT)
-  F epsilon2_; 
+  F epsilon2_; // m2 CorrectorTolerance (chicago.m2, track.m2), raw interface code epsilon (interface2.d, NAG.cpp:rawSwetParametersPT)
   F dt_increase_factor_;  // m2 stepIncreaseFactor
   F dt_decrease_factor_;  // m2 stepDecreaseFactor not existent in DEFAULT, using what is in track.m2:77 
-  F infinity_threshold_; // m2 InfinityThreshold
   F infinity_threshold2_;
   unsigned max_num_steps_; // maximum number of steps per track.  Each step takes roughly 1 microseconds (tops)
   char num_successes_before_increase_; // m2 numberSuccessesBeforeIncrease
