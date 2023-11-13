@@ -46,6 +46,12 @@ struct minus_array { // Speed critical -----------------------------------------
   }
 
   static inline __attribute__((always_inline)) void 
+  fadd_to_self(C<F> * __restrict a, const C<F> * __restrict b)
+  {
+    for (unsigned int i=0; i < N+1; ++i,++a,++b) *a += *b;
+  }
+
+  static inline __attribute__((always_inline)) void 
   add_scalar_to_self(C<F> * __restrict a, C<F> b)
   {
     for (unsigned int i=0; i < N; ++i,++a) *a += b;
@@ -56,6 +62,13 @@ struct minus_array { // Speed critical -----------------------------------------
   {
     memcpy(b, a, N*sizeof(C<F>));
   }
+
+  static inline __attribute__((always_inline)) void 
+  fcopy(const C<F> * __restrict a, C<F> * __restrict b)
+  {
+    memcpy(b, a, N*sizeof(C<F>)+sizeof(F));
+  }
+
   static inline __attribute__((always_inline)) F
   norm2(const C<F> *__restrict a)
   {
