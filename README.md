@@ -403,10 +403,18 @@ before running.
 https://github.com/gperftools/gperftools
 https://gperftools.github.io/gperftools/cpuprofile.html
 
-Runs the program on real CPU. To use it, install it with homebrew, then link the
+Runs the program on real CPU rather than a simulation. 
+This is a surprisingly fast profiler. Basically no overhead.
+
+To use it, install it with homebrew, then link the
 program with libprofiler (add -Lpath_to_installed_gperftools -lprofiler) and run
-with CPUPROFILE environment variable set to some filename (CPUPROFILE=profile01
-./the_program). It will profile the program using interval timer (setitimer) and
+with CPUPROFILE environment variable set to some filename 
+
+`CPUPROFILE=/tmp/prof ./minus-chicago -g`
+
+I use `-L/usr/loca/lib -lprofiler` on `MINUS_EXTRA_CMAKE_EXE_LINKER_FLAGS`
+
+It will profile the program using interval timer (setitimer) and
 output profiling data to the filename, defined in CPUPROFILE env var. Then you
 can view profile data in command-line or with svg/web browser using pprof perl
 script from gperftools (pprof ./the_program profile01).
