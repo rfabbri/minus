@@ -94,10 +94,13 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
   solution *raw_solutions = reinterpret_cast<solution *> (__builtin_assume_aligned(raw_solutions_u,64));
   assert(sol_min <= sol_max && sol_max <= f::nsols);
   alignas(64) C<F> Hxt[NVEPLUS1 * f::nve]; 
-  alignas(64) C<F> x0t0[NVEPLUS1];
-  alignas(64) C<F> xt[NVEPLUS1];
-  alignas(64) C<F> dxdt[NVEPLUS1];
+  alignas(64) F x0t0f[f::nve*2+1];
+  alignas(64) F xtf[f::nve*2+1];
+  alignas(64) F dxdtf[f::nve*2+1];
   alignas(64) C<F> dxi[f::nve];
+  C<F> *const x0t0 = (C<F> *) x0t0f;
+  C<F> *const xt = (C<F> *) xtf;
+  C<F> *const dxdt = (C<F> *) dxdtf;
   C<F> *const x0 = x0t0;
   F    *const t0 = (F *) (x0t0 + f::nve);
   C<F> *const x1t1 = xt;
@@ -107,20 +110,20 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
   C<F> *const HxH=Hxt;
   Map<Matrix<C<F>, f::nve, NVEPLUS1>,Aligned> AA((C<F> *)Hxt,f::nve,NVEPLUS1);
   static constexpr F the_smallest_number = 1e-13; // XXX BENCHMARK THIS
-  typedef minus_array<f::nve,F> v; typedef minus_array<NVEPLUS1,F> vp;
+  typedef minus_array<f::nve,F> v;
 
   alignas(64) C<F> ycHxt[16]; 
   alignas(64) C<F> ycHxH[13];
   // memoization_init() : 
 
-   C<F> previous[13];
+  // C<F> previous[13];
   const F &t_step = s.init_dt_;  // initial step
   solution *t_s = raw_solutions + sol_min;  // current target solution
   const C<F>* __restrict s_s = s_sols + sol_min*f::nve;    // current start solution
   for (unsigned sol_n = sol_min; sol_n < sol_max; ++sol_n) { // solution loop
     t_s->status = PROCESSING;
     bool end_zone = false;
-    v::copy(s_s, x0);
+    v::fcopy(s_s, x0);
     *t0 = 0; *dt = t_step;
     char predictor_successes = 0;
 
@@ -144,7 +147,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
           dx3 := solveHxTimesDXequalsminusHt(x0+(1/2)*dx2*dt,t0+(1/2)*dt);
           dx4 := solveHxTimesDXequalsminusHt(x0+dx3*dt,t0+dt);
           (1/6)*dt*(dx1+2*dx2+2*dx3+dx4) */
-      vp::copy(x0t0, xt);
+      v::fcopy(x0t0, xt);
 
       // dx1
       evaluate_Hxt_constants(xt, params, ycHxt);
@@ -177,7 +180,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
 
       // dx4
       v::multiply_scalar_to_self(dxi, *dt);
-      vp::copy(x0t0, xt);
+      v::fcopy(x0t0, xt);
       v::add_to_self(xt, dxi);
       v::multiply_scalar_to_self(dxi, 2);
       v::add_to_self(dx4, dxi);
@@ -193,8 +196,8 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       // dx4_eigen = (dx4_eigen* *dt + dx1_eigen*2 + dx2_eigen*4 + dx3_eigen*2)*(1./6.);
       
       // make prediction
-      vp::copy(x0t0, x1t1);
-      vp::add_to_self(x1t1, dxdt);
+      v::fcopy(x0t0, x1t1);
+      v::fadd_to_self(x1t1, dxdt);
       
       /// CORRECTOR ///
       char n_corr_steps = 0;
@@ -237,7 +240,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
         ++predictor_successes;
         // std::swap(x1t1,x0t0);
         // x0 = x0t0; t0 = (F *) (x0t0 + f::nve); xt = x1t1;
-        vp::copy(x1t1, x0t0);
+        v::fcopy(x1t1, x0t0);
         if (predictor_successes >= s.num_successes_before_increase_) {
           predictor_successes = 0;
           *dt *= s.dt_increase_factor_;
