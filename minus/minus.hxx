@@ -247,8 +247,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
         t_s->status = INFINITY_FAILED;
       ++t_s->num_steps;
     } // while (t loop)
-    v::copy(x0, t_s->x); // record the solution
-    t_s->t = *t0; // TODO try to include this in the previous memcpy
+    memcpy(t_s, x0t0, (f::nve*2+1)*sizeof(F));
     if (t_s->status == PROCESSING) t_s->status = REGULAR;
     ++t_s; s_s += f::nve;
   } // outer solution loop

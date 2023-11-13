@@ -122,12 +122,12 @@ template <problem P, typename F>
 struct minus_core<P, F>::track_settings {
   track_settings():
     init_dt_(0.05),   // m2 tStep, t_step, raw interface code initDt
-    min_dt_(1e-7),        // m2 tStepMin, raw interface code minDt
+    min_dt_(1e-7),    // m2 tStepMin, raw interface code minDt
     end_zone_factor_(0.05),
     epsilon2_(0.000001*0.000001), // m2 CorrectorTolerance (chicago.m2, track.m2), raw interface code epsilon (interface2.d, NAG.cpp::rawSwetParametersPT)
     dt_increase_factor_(2.),  // m2 stepIncreaseFactor
     dt_decrease_factor_(1./dt_increase_factor_),  // m2 stepDecreaseFactor not existent in DEFAULT, using what is in track.m2:77 
-    infinity_threshold2_(1e7 * 1e7 ), // m2 InfinityThreshold^2
+    infinity_threshold2_(1e7 * 1e7), // m2 InfinityThreshold^2
     max_num_steps_(500),
     num_successes_before_increase_(20), // m2 numberSuccessesBeforeIncrease
     max_corr_steps_(4)  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
