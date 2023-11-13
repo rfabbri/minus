@@ -12,6 +12,10 @@
 #include "minus.h"
 #include "internal-util.hxx"
 
+// not really necessary:
+#define EIGEN_UNROLLING_LIMIT 1000 
+// _really_ necessary:
+#define EIGEN_STRONG_INLINE __attribute__((always_inline)) 
 //#include "Eigen-latest/Core"
 #include "Eigen/Core"
 
