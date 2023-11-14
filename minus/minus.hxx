@@ -19,6 +19,9 @@
 //#include "Eigen-latest/Core"
 #include "Eigen/Core"
 
+#define unlikely(expr) __builtin_expect(!!(expr),0)
+#define likely(expr)   __builtin_expect(!!(expr),1)
+
 namespace MiNuS {
 
 using namespace Eigen; // only used for linear solve
@@ -132,18 +135,17 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
     char predictor_successes = 0;
 
     // track H(x,t) for t in [0,1]
-    while (t_s->status == PROCESSING 
-        && 1 - *t0 > the_smallest_number) {
-      if (t_s->num_steps == s.max_num_steps_) {
+    while (likely(t_s->status == PROCESSING && 1. - *t0 > the_smallest_number)) {
+      if (unlikely(t_s->num_steps == s.max_num_steps_)) {
         t_s->status = MAX_NUM_STEPS_FAIL; // failed to reach solution in the available step budget
         break;
       }
       
-      if (!end_zone && 1 - *t0 <= s.end_zone_factor_ + the_smallest_number)
+      if (unlikely(!end_zone && 1. - *t0 <= s.end_zone_factor_ + the_smallest_number))
         end_zone = true; // TODO: see if this path coincides with any other path on entry to the end zone
-      if (end_zone) {
-          if (*dt > 1 - *t0) *dt = 1 - *t0;
-      } else if (*dt > 1 - s.end_zone_factor_ - *t0) *dt = 1 - s.end_zone_factor_ - *t0;
+      if (unlikely(end_zone)) {
+          if (unlikely(*dt > 1. - *t0)) *dt = 1 - *t0;
+      } else if (unlikely(*dt > 1. - s.end_zone_factor_ - *t0)) *dt = 1. - s.end_zone_factor_ - *t0;
       /// PREDICTOR /// in: x0t0,dt out: dx
       /*  top-level code for Runge-Kutta-4
           dx1 := solveHxTimesDXequalsminusHt(x0,t0);
@@ -176,7 +178,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       v::multiply_scalar_to_self(dxi, one_half_dt);
       v::copy(x0t0, xt);
       v::add_to_self(xt, dxi);
-      v::multiply_scalar_to_self(dxi, 4);
+      v::multiply_scalar_to_self(dxi, 4.);
       v::add_to_self(dx4, dxi);
       evaluate_Hxt(xt, params, Hxt);
       memoize_Hxt<P,F>(Hxt, ycHxt);
@@ -186,7 +188,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       v::multiply_scalar_to_self(dxi, *dt);
       v::fcopy(x0t0, xt);
       v::add_to_self(xt, dxi);
-      v::multiply_scalar_to_self(dxi, 2);
+      v::multiply_scalar_to_self(dxi, 2.);
       v::add_to_self(dx4, dxi);
       xt[f::nve] = *t0 + *dt;               // t0+dt
       evaluate_Hxt(xt, params, Hxt);
@@ -202,6 +204,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       // make prediction
       v::fcopy(x0t0, x1t1);
       v::fadd_to_self(x1t1, dxdt);
+
       
       /// CORRECTOR ///
       char n_corr_steps = 0;
@@ -234,23 +237,23 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
         lsolve<P,F>(AA, dx);
         v::add_to_self(x1t1, dx);
         is_successful = v::norm2(dx) < s.epsilon2_ * v::norm2(x1t1); // |dx|^2/|x1|^2 < eps2
-      } while (!is_successful && n_corr_steps < s.max_corr_steps_);
+      } while (likely(!is_successful && n_corr_steps < s.max_corr_steps_));
       
-      if (!is_successful) { // predictor failure
+      if (unlikely(!is_successful)) { // predictor failure
         predictor_successes = 0;
         *dt *= s.dt_decrease_factor_;
-        if (*dt < s.min_dt_) t_s->status = MIN_STEP_FAILED; // slight difference to SLP-imp.hpp:612
+        if (unlikely(*dt < s.min_dt_)) t_s->status = MIN_STEP_FAILED; // slight difference to SLP-imp.hpp:612
       } else { // predictor success
         ++predictor_successes;
         // std::swap(x1t1,x0t0);
         // x0 = x0t0; t0 = (F *) (x0t0 + f::nve); xt = x1t1;
         v::fcopy(x1t1, x0t0);
-        if (predictor_successes >= s.num_successes_before_increase_) {
+        if (unlikely(predictor_successes >= s.num_successes_before_increase_)) {
           predictor_successes = 0;
           *dt *= s.dt_increase_factor_;
         }
       }
-      if (v::norm2(x0) > s.infinity_threshold2_)
+      if (unlikely(v::norm2(x0) > s.infinity_threshold2_))
         t_s->status = INFINITY_FAILED;
       ++t_s->num_steps;
     } // while (t loop)

@@ -13,18 +13,19 @@ lsolve(
                                                  // specific to m structure of
                                                  // having many zeros in last 3
                                                  // rowsj
+    __builtin_prefetch(m.col(k).data()+9);
     const unsigned char rrows = rows-k-1; unsigned char row_of_biggest_in_col = k;
     F biggest_in_corner = std::norm(m(k,k));
     for (unsigned j=rows-1; j != k; --j) { // todo: no need to go beyond row 10, Hxt rows 11 12 and 13 are fixed
       F tmp;
-      if ((tmp = std::norm(m(j,k))) > biggest_in_corner*1e3) {
+      if (unlikely((tmp = std::norm(m(j,k))) > biggest_in_corner*1e3)) {
           biggest_in_corner = tmp; row_of_biggest_in_col = j;
           break;
       }
     }
-    if (k != row_of_biggest_in_col) m.row(k).swap(m.row(row_of_biggest_in_col));
+    if (likely(k != row_of_biggest_in_col)) m.row(k).swap(m.row(row_of_biggest_in_col));
     m.col(k).tail(rrows) /= m(k,k);
-    if (k < rows-1)
+    if (likely(k < rows-1))
       m.block(M::f::nve-rrows,M::f::nve-rrows,rrows,rrows).noalias() -= m.col(k).tail(rrows) * m.row(k).segment(M::f::nve-rrows,rrows);
   }
   x[0]  = m(0,14);

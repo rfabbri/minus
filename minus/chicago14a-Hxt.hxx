@@ -21,6 +21,7 @@ Hxt(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restri
   const C<F> *params = reinterpret_cast<C<F> *> (__builtin_assume_aligned(uparams,64));
   const C<F> *x = reinterpret_cast<C<F> *> (__builtin_assume_aligned(ux,64));
   C<F> *y = reinterpret_cast<C<F> *> (__builtin_assume_aligned(uy,64));
+  __builtin_prefetch(x);
 
   const C<F> &X0  = x[0];   // q0
   const C<F> &X1  = x[1];   // q1
