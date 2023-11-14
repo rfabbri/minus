@@ -30,10 +30,10 @@ using namespace Eigen; // only used for linear solve
 
 template <problem P, typename F>
 __attribute__((always_inline)) inline void
-memoize_Hxt(C<F> __restrict *block, C<F> * __restrict memo /* constants */)
+memoize_Hxt(C<F> __restrict *block/*, C<F> * __restrict memo*/ /* constants */)
 {
   C<F> *const y = reinterpret_cast<C<F> *> (__builtin_assume_aligned(block,64));
-  C<F> *const yc = reinterpret_cast<C<F> *> (__builtin_assume_aligned(memo,64));
+//  C<F> *const yc = reinterpret_cast<C<F> *> (__builtin_assume_aligned(memo,64));
 
   y[11]=y[13]=y[25]=y[27]=y[39]=y[41]=y[53]=y[55]=y[67]=
         y[68]=y[81]=y[82]=y[95]=y[96]=y[109]=y[110]=y[124]=
@@ -59,10 +59,10 @@ memoize_Hxt(C<F> __restrict *block, C<F> * __restrict memo /* constants */)
 
 template <problem P, typename F>
 __attribute__((always_inline)) inline void
-memoize_HxH(C<F> __restrict *block, C<F> * __restrict memo /* constants */)
+memoize_HxH(C<F> __restrict *block/*, C<F> * __restrict memo*/ /* constants */)
 {
   C<F> *const y = reinterpret_cast<C<F> *> (__builtin_assume_aligned(block,64));
-  C<F> *const yc = reinterpret_cast<C<F> *> (__builtin_assume_aligned(memo,64));
+//  C<F> *const yc = reinterpret_cast<C<F> *> (__builtin_assume_aligned(memo,64));
 
   y[11]=y[13]=y[25]=y[27]=y[39]=y[41]=y[53]=y[55]=y[67]=
         y[68]=y[81]=y[82]=y[95]=y[96]=y[109]=y[110]=y[124]=
@@ -119,8 +119,8 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
   static constexpr F the_smallest_number = 1e-13; // XXX BENCHMARK THIS
   typedef minus_array<f::nve,F> v;
 
-  alignas(64) C<F> ycHxt[16]; 
-  alignas(64) C<F> ycHxH[13];
+  //  alignas(64) C<F> ycHxt[16]; 
+  //  alignas(64) C<F> ycHxH[13];
   // memoization_init() : 
 
   // C<F> previous[13];
@@ -156,8 +156,8 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       v::fcopy(x0t0, xt);
 
       // dx1
-      evaluate_Hxt_constants(xt, params, ycHxt);
-      memoize_Hxt<P,F>(Hxt, ycHxt);
+      // evaluate_Hxt_constants(xt, params, ycHxt);
+      memoize_Hxt<P,F>(Hxt);/*, ycHxt);*/
       evaluate_Hxt(xt, params, Hxt); // Outputs Hxt
       // dx4_eigen = lu.compute(AA).solve(bb);
       lsolve<P,F>(AA, dx4);
@@ -171,7 +171,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       v::multiply_scalar_to_self(dx4, 2.);
       xt[f::nve] += one_half_dt;  // t0+.5dt
       evaluate_Hxt(xt, params, Hxt);
-      memoize_Hxt<P,F>(Hxt, ycHxt);
+      memoize_Hxt<P,F>(Hxt);/*, ycHxt);*/
       lsolve<P,F>(AA, dxi);
 
       // dx3
@@ -181,7 +181,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       v::multiply_scalar_to_self(dxi, 4.);
       v::add_to_self(dx4, dxi);
       evaluate_Hxt(xt, params, Hxt);
-      memoize_Hxt<P,F>(Hxt, ycHxt);
+      memoize_Hxt<P,F>(Hxt);/*, ycHxt);*/
       lsolve<P,F>(AA, dxi);
 
       // dx4
@@ -192,7 +192,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       v::add_to_self(dx4, dxi);
       xt[f::nve] = *t0 + *dt;               // t0+dt
       evaluate_Hxt(xt, params, Hxt);
-      memoize_Hxt<P,F>(Hxt, ycHxt);
+      memoize_Hxt<P,F>(Hxt);/*, ycHxt);*/
       lsolve<P,F>(AA, dxi);
       v::multiply_scalar_to_self(dxi, *dt);
       v::add_to_self(dx4, dxi);
@@ -233,7 +233,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       do {
         ++n_corr_steps;
         evaluate_HxH(x1t1, params, HxH);
-        memoize_HxH<P,F>(HxH, ycHxH);
+        memoize_HxH<P,F>(HxH);//, ycHxH);
         lsolve<P,F>(AA, dx);
         v::add_to_self(x1t1, dx);
         is_successful = v::norm2(dx) < s.epsilon2_ * v::norm2(x1t1); // |dx|^2/|x1|^2 < eps2

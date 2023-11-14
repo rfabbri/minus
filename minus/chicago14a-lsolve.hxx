@@ -15,11 +15,11 @@ lsolve(
                                                  // rowsj
     __builtin_prefetch(m.col(k).data()+9);
     const unsigned char rrows = rows-k-1; unsigned char row_of_biggest_in_col = k;
-    F biggest_in_corner = std::norm(m(k,k));
+    F biggest_in_corner = std::norm(m(k,k))*1e3;
     for (unsigned j=rows-1; j != k; --j) { // todo: no need to go beyond row 10, Hxt rows 11 12 and 13 are fixed
       F tmp;
-      if (unlikely((tmp = std::norm(m(j,k))) > biggest_in_corner*1e3)) {
-          biggest_in_corner = tmp; row_of_biggest_in_col = j;
+      if (unlikely((tmp = std::norm(m(j,k))) > biggest_in_corner)) {
+          biggest_in_corner = tmp*1e3; row_of_biggest_in_col = j;
           break;
       }
     }

@@ -394,10 +394,24 @@ from, specially under Linux.
 The best way is with kcachegrind + valgrind, by far. 
 See [https://www.blogger.com/comment.g?blogID=7395958&postID=116062684092668856&bpli=1&pli=1]
 
-In any system without valgrind or kcachegrind (eg, Macs), the easiest way is with gprof
+If no valgrind or kcachegrind is available (eg, some Macs), the easiest way is with gprof
 
-Expect your program to take very very long - so reduce the problem / iterations
+Expect your program to take very very long - so maybe reduce the problem / iterations
 before running.
+
+Mac OS:
+Follow these intructions to install valgrind.
+https://github.com/LouisBrunner/valgrind-macos
+
+Install qcachegrind
+brew install qcachegrind
+
+Use
+valgrind --tool=callgrind minus-chicago -g
+
+kcachegrind (or qcachegrind)
+
+
 
 #### GPerftools
 https://developer.ridgerun.com/wiki/index.php/Profiling_with_GPerfTools
