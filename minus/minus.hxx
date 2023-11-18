@@ -130,7 +130,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
   for (unsigned sol_n = sol_min; sol_n < sol_max; ++sol_n) { // solution loop
     t_s->status = PROCESSING;
     bool end_zone = false;
-    v::fcopy(s_s, x0);
+    v::copy(s_s, x0);
     *t0 = 0; *dt = t_step;
     char predictor_successes = 0;
 

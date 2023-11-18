@@ -132,7 +132,6 @@ struct minus_core<P, F>::track_settings {
     num_successes_before_increase_(20), // m2 numberSuccessesBeforeIncrease
     max_corr_steps_(4)  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
   { }
-  
   F init_dt_;   // m2 tStep, t_step, raw interface code initDt
   F min_dt_;        // m2 tStepMin, raw interface code minDt
   F end_zone_factor_;

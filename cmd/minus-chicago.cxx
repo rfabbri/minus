@@ -355,24 +355,24 @@ print_settings(const M::track_settings &settings)
 {
   #ifdef M_VERBOSE
   std::cerr << "Track settings ------------------------------------------------\n";
-  const char *names[11] = {
+  const char *names[10] = {
     "init_dt_",
     "min_dt_",
     "end_zone_factor_",
-    "epsilon_",
     "epsilon2_",
     "dt_increase_factor_",
     "dt_decrease_factor_",
-    "infinity_threshold_",
     "infinity_threshold2_",
-    "max_corr_steps_",
-    "num_successes_before_increase_"
+    "max_num_steps_",
+    "num_successes_before_increase_",
+    "max_corr_steps_"
   };
   Float *ptr = (Float *) &settings;
-  for (int i=0; i < 9; ++i)
+  for (int i=0; i < 7; ++i)
     std::cerr << names[i] << " = " << *ptr++ << std::endl;
+  std::cerr << names[7] << " = " << settings.max_num_steps_ << std::endl;
+  std::cerr << names[8] << " = " << settings.num_successes_before_increase_ << std::endl;
   std::cerr << names[9] << " = " << settings.max_corr_steps_ << std::endl;
-  std::cerr << names[10] << " = " << settings.num_successes_before_increase_ << std::endl;
   std::cerr << "---------------------------------------------------------------\n";
   #endif 
 }
