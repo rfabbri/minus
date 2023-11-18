@@ -146,7 +146,7 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   static constexpr F C0 = 1.;
   static constexpr F C1 = -1.;
   static constexpr F C2 = 2.;
-  static constexpr F C3 = 0.;
+//  static constexpr F C3 = 0.;
   const C<F> G0  = C1 * t;
   const C<F> G1  = C0 + G0;
   const C<F> G2  = G1 * X15;
@@ -3321,7 +3321,7 @@ HxH_constants(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict upa
   static constexpr F C0 = 1.;
   static constexpr F C1 = -1.;
   static constexpr F C2 = 2.;
-  static constexpr F C3 = 0.;
+//  static constexpr F C3 = 0.;
   const C<F> G0  = C1 * t;
   const C<F> G1  = C0 + G0;
   const C<F> G2  = G1 * X15;
@@ -6526,7 +6526,7 @@ HxH_constants_all_sols(const C<F>* __restrict ux /*x and t*/, const C<F> * __res
   static constexpr F C0 = 1.;
   static constexpr F C1 = -1.;
   static constexpr F C2 = 2.;
-  static constexpr F C3 = 0.;
+//  static constexpr F C3 = 0.;
   const C<F> G0  = C1 * t;
   const C<F> G1  = C0 + G0;
   const C<F> G2  = G1 * X15;

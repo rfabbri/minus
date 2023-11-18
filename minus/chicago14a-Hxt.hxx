@@ -155,7 +155,7 @@ Hxt(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restri
   static constexpr F C0 = 1.;
   static constexpr F C1 = -1.;
   static constexpr F C2 = 2.;
-  static constexpr F C3 = 0.;
+//  static constexpr F C3 = 0.;
   const C<F> G0 = -t;
   const C<F> G1 = C0 + G0; // Packet2cd G1G3 = pload(G1G3); // Use Eigen arrays for AVX/SSE
   const C<F> G2 = G1 * X15;
@@ -3938,7 +3938,7 @@ Hxt_constants(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> 
   static constexpr F C0 = 1.;
   static constexpr F C1 = -1.;
   static constexpr F C2 = 2.;
-  static constexpr F C3 = 0.;
+//  static constexpr F C3 = 0.;
   const C<F> G0 = -t;
   const C<F> G1 = C0 + G0; // Packet2cd G1G3 = pload(G1G3); // Use Eigen arrays for AVX/SSE
   const C<F> G2 = G1 * X15;

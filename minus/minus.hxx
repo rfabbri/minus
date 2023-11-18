@@ -110,6 +110,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
   C<F> *const dxdt = (C<F> *) dxdtf;
   C<F> *const x0 = x0t0;
   F    *const t0 = (F *) (x0t0 + f::nve);
+  F    *const t  = (F *) (xt + f::nve);
   C<F> *const x1t1 = xt;
   C<F> *const dx = dxdt;
   C<F> *const dx4 = dx;
@@ -169,7 +170,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
 
       v::add_to_self(xt, dx4);
       v::multiply_scalar_to_self(dx4, 2.);
-      xt[f::nve] += one_half_dt;  // t0+.5dt
+      *t += one_half_dt;  // t0+.5dt
       evaluate_Hxt(xt, params, Hxt);
       memoize_Hxt<P,F>(Hxt);/*, ycHxt);*/
       lsolve<P,F>(AA, dxi);
@@ -190,7 +191,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       v::add_to_self(xt, dxi);
       v::multiply_scalar_to_self(dxi, 2.);
       v::add_to_self(dx4, dxi);
-      xt[f::nve] = *t0 + *dt;               // t0+dt
+      *t = *t0 + *dt;               // t0+dt
       evaluate_Hxt(xt, params, Hxt);
       memoize_Hxt<P,F>(Hxt);/*, ycHxt);*/
       lsolve<P,F>(AA, dxi);
@@ -203,7 +204,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
       
       // make prediction
       v::fcopy(x0t0, x1t1);
-      v::fadd_to_self(x1t1, dxdt);
+      v::fadd_to_self((double *)x1t1, (double *)dxdt);
 
       
       /// CORRECTOR ///

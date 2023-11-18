@@ -46,9 +46,9 @@ struct minus_array { // Speed critical -----------------------------------------
   }
 
   static inline __attribute__((always_inline)) void 
-  fadd_to_self(C<F> * __restrict a, const C<F> * __restrict b)
+  fadd_to_self(F * __restrict a, F * __restrict b)
   {
-    for (unsigned int i=0; i < N+1; ++i,++a,++b) *a += *b;
+    for (unsigned int i=0; i < 2*N+1; ++i,++a,++b) *a += *b;
   }
 
   static inline __attribute__((always_inline)) void 
