@@ -1,10 +1,18 @@
+-- Ex and Pro marked bellow mean Example (simple) and Pro (fast)
+
+
 -- code for generating various evaluators 
 restart
 needsPackage "SLPexpressions"
 needsPackage "MonodromySolver"
 -- "gateSystem" exists only in M2 v 1.14
+
+-- Ex---------------------------------------------------------------------------
+-- Pro doesn't use declareVariable
 variables = declareVariable \ {x,y}
 params = declareVariable \ {a,b,c,d,e,f}
+
+-- Ex and Pro ------------------------------------------------------------------
 GS = gateSystem(
     matrix{params},
     matrix{variables},
@@ -13,9 +21,16 @@ GS = gateSystem(
 	    d*x+e*y+f}
 	}
     )
+-------------------------------------------------------------------------------
 
+-- Ex and Pro ------------------------------------------------------------------
 cameraVars = flatten entries vars GS
 PH = parametricSegmentHomotopy GS
+
+-- Pro only --------------------------------------------------------------------
+-- setDefault(CorrectorTolerance=>1e-8)
+
+-------------------------------------------------------------------------------
 
 -- HxHt
 h=cCode(
@@ -25,6 +40,9 @@ h=cCode(
 
 -- HxH
 h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{cameraVars|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters})
+
+-- Maybe useful
+-- cCode PH
 
 -- Ex 1 --------------------------------------------------------------------------
 -- monodromy needs an initial pair of parameter, solution
@@ -57,10 +75,9 @@ h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{cameraVar
 
 -- Ex 3 -------------------------------------------------------------------
 -- parameter point
--- V.BasePoint
+V.BasePoint
 -- corresponding solutions
--- points V.PartialSols
--------------------------------------------------------------------------------
+points V.PartialSols
 
 -- Pro 3 --------------------------------------------------------------
 -- quality check
