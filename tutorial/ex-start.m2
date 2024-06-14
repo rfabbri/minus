@@ -28,7 +28,25 @@ cameraVars = flatten entries vars GS
 PH = parametricSegmentHomotopy GS
 
 -- Pro only --------------------------------------------------------------------
--- setDefault(CorrectorTolerance=>1e-8)
+
+-- SET TRACKER OPTIONS HERE
+-- null indicates default value 
+scan({CorrectorTolerance=>1e-4,
+	EndZoneFactor=>2e-1,
+	InfinityThreshold => 1e6, 
+	maxCorrSteps => 3, 
+	NoOutput => true,
+	numberSuccessesBeforeIncrease => 2,
+	Precision => null,
+	Predictor => RungeKutta4,
+	stepIncreaseFactor => 2,
+	tStep => 5e-2,
+	tStepMin => 1e-5
+	}, 
+    opt -> setDefault(opt))
+
+setDefault(CorrectorTolerance=>1e-8)
+
 
 -------------------------------------------------------------------------------
 

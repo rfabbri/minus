@@ -12,8 +12,10 @@ C = {
 
 ## Evaluate to check equation
 - How can we evaluate the the equations on the system?
-evaluate(F,x0||p0) only for F gatematrix, but we ony have gateSystem in Ex, not
-gatematrix.
+
+    - evaluate(F,x0||p0) only for F gatematrix, 
+    - but we ony have gateSystem in Ex, not gatematrix. 
+    - gateSystem is >= M2 1.14, whats the corresponding eval fn?
 
 Usually one creates gateSystem from Gatematrix:
 GS = gateSystem(GS)
