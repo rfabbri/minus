@@ -14,7 +14,7 @@ struct eval<chicago14a, F> {
 };
 
 #include "chicago14a-Hxt.hxx"
-#include "chicago14a-HxH-tst2.hxx"
+#include "chicago14a-HxH.hxx"
 
 // Problem and Formulation Paramers --------------------------------------------
 
