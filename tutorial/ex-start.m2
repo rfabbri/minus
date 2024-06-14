@@ -1,5 +1,8 @@
--- SYNOPSIS
---      "Fast HC Code Inteligencer" -- exactly how to craft your fast HC
+-- EX-START                        Homotopy Continuation Tutorial                             EX-START
+--
+-- NAME
+--      Fast HC Code Inteligencer - exactly how to craft your fast HC
+--      Module: Start solution generator (a.k.a. training stage, run once offline)
 --
 -- DESCRIPTION
 --      This script shows how to craft a fast solver for your problem
@@ -22,8 +25,9 @@
 -- OTHERS
 --      - Think of this as a prompt precise enough for LLM to help generate a fast solver
 --
--- DATE 
---      2024
+-- TODO
+--      - update with PLMP versions of common, etc, making _sure_ it
+--        doesn't impact performance
 --
 -- AUTHORS 
 --      Ricardo Fabbri (C++ and M2) and Timothy Duff (M2)
@@ -33,6 +37,7 @@
 restart
 needsPackage "SLPexpressions"
 needsPackage "MonodromySolver"
+needs "MinusUtility.m2" -- put cCode extesion here
 -- "gateSystem" exists only in M2 v 1.14
 
 -- Ex---------------------------------------------------------------------------
@@ -76,7 +81,7 @@ scan({CorrectorTolerance=>1e-4,
 
 setDefault(CorrectorTolerance=>1e-8)
 
--- Pro Gammify -----------------------------------------------------------------
+-- Pro Gammify-style Randomization ---------------------------------------------------
 
 
 -- YOU: adapt for your problem
@@ -128,37 +133,37 @@ h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{cameraVar
 --          the fastest and proven. Example:
 
 
----- PRO ------- fabricateChicago = F -> ( -- gold standard Pro example ----------------------
----- PRO -------     D := (5,0,{{0,1,3},{0,2,4},{1,2}});
----- PRO -------     (P, L ) := fabricatePair(D, F, nparams);
----- PRO -------     P1 := id_(CC^3)|matrix{{0},{0},{0}};
----- PRO -------     P2 := (Q2R take(P,{0,3})) | 
----- PRO -------          transpose matrix({take(P,{8,10})});
----- PRO -------     P3 := Q2R take(P,{4,8})|transpose matrix{take(P,{11,13})};
----- PRO -------     projs := {P1,P2,P3};
----- PRO -------     allLines := L/last;
----- PRO -------     independentLineIndices := fold((last D)/(p -> set {p#0,p#1}),(a,b)->a+b);
----- PRO -------     dependentLineIndices := set(0..D#0-1)-independentLineIndices;
----- PRO -------     p0 := flatten entries fold(
----- PRO ------- 	    allLines/(m->m^(toList independentLineIndices))
----- PRO ------- 	    ,(a,b)->a|b);    
----- PRO -------     p1 = flatten flatten(
----- PRO ------- 	allLines/(m -> (
----- PRO ------- 	    n :=numericalKernel(transpose m^{0,1,3}, kTol);
----- PRO ------- 	    entries((1/n_(2,0))*n^{0,1})))
----- PRO -------     );
----- PRO -------     p2 = flatten flatten(
----- PRO -------     	    allLines/(m -> (
----- PRO ------- 	    n :=numericalKernel(transpose m^{0,2,4}, kTol);
----- PRO ------- 	    entries((1/n_(2,0))*n^{0,1})))
----- PRO -------     );
----- PRO -------     x := transpose matrix{take(P,nvars)};
----- PRO -------     p3 := flatten entries randKernel(transpose(x^{8..13}||matrix{{1_CC}}), F);
----- PRO -------     p4 := flatten entries randKernel(transpose(x^{0..3}||matrix{{1_CC}}), F);
----- PRO -------     p5 := flatten entries randKernel(transpose(x^{4..7}||matrix{{1_CC}}), F);
----- PRO -------     p := transpose matrix{p0|p1|p2|p3|p4|p5};
----- PRO -------     (p, x)
----- PRO -------     )
+---- Pro ----- fabricateChicago = F -> ( -- gold standard Pro example ----------------------
+---- Pro -----     D := (5,0,{{0,1,3},{0,2,4},{1,2}});
+---- Pro -----     (P, L ) := fabricatePair(D, F, nparams);
+---- Pro -----     P1 := id_(CC^3)|matrix{{0},{0},{0}};
+---- Pro -----     P2 := (Q2R take(P,{0,3})) | 
+---- Pro -----          transpose matrix({take(P,{8,10})});
+---- Pro -----     P3 := Q2R take(P,{4,8})|transpose matrix{take(P,{11,13})};
+---- Pro -----     projs := {P1,P2,P3};
+---- Pro -----     allLines := L/last;
+---- Pro -----     independentLineIndices := fold((last D)/(p -> set {p#0,p#1}),(a,b)->a+b);
+---- Pro -----     dependentLineIndices := set(0..D#0-1)-independentLineIndices;
+---- Pro -----     p0 := flatten entries fold(
+---- Pro ----- 	    allLines/(m->m^(toList independentLineIndices))
+---- Pro ----- 	    ,(a,b)->a|b);    
+---- Pro -----     p1 = flatten flatten(
+---- Pro ----- 	allLines/(m -> (
+---- Pro ----- 	    n :=numericalKernel(transpose m^{0,1,3}, kTol);
+---- Pro ----- 	    entries((1/n_(2,0))*n^{0,1})))
+---- Pro -----     );
+---- Pro -----     p2 = flatten flatten(
+---- Pro -----     	    allLines/(m -> (
+---- Pro ----- 	    n :=numericalKernel(transpose m^{0,2,4}, kTol);
+---- Pro ----- 	    entries((1/n_(2,0))*n^{0,1})))
+---- Pro -----     );
+---- Pro -----     x := transpose matrix{take(P,nvars)};
+---- Pro -----     p3 := flatten entries randKernel(transpose(x^{8..13}||matrix{{1_CC}}), F);
+---- Pro -----     p4 := flatten entries randKernel(transpose(x^{0..3}||matrix{{1_CC}}), F);
+---- Pro -----     p5 := flatten entries randKernel(transpose(x^{4..7}||matrix{{1_CC}}), F);
+---- Pro -----     p := transpose matrix{p0|p1|p2|p3|p4|p5};
+---- Pro -----     (p, x)
+---- Pro -----     )
 
 -- (p0, x0) = fabricateChicago(CC)   -- CC just means Complexes
 
@@ -186,9 +191,7 @@ h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{cameraVar
 -- parameter point
 V.BasePoint
 -- corresponding solutions
-points V.PartialSols
-
--- Pro 3 --------------------------------------------------------------
+points V.PartialSols -- Pro 3 --------------------------------------------------------------
 -- quality check
 -- sols = solutionsWithMultiplicity points V.PartialSols;
 -- L = (sols/(x -> (
