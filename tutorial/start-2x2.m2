@@ -1,4 +1,4 @@
--- EX-START                        Homotopy Continuation Tutorial                             EX-START
+-- START-2x2                    Homotopy Continuation tutorial                  START-2x2
 --
 -- NAME
 --      Fast HC Code Inteligencer - exactly how to craft your fast HC
@@ -19,7 +19,7 @@
 --      of what matterscarefully for writing a fast C++ solver
 --
 -- LEGEND
---      - Ex and Pro marked bellow mean Example (simple) and Pro (fast)
+--      - Noob and Pro marked bellow mean Example (simple) and Pro (fast)
 --      - YOU shows where can you make it faster for your problem
 
 -- OTHERS
@@ -40,12 +40,12 @@ needsPackage "MonodromySolver"
 needs "MinusUtility.m2" -- put cCode extesion here
 -- "gateSystem" exists only in M2 v 1.14
 
--- Ex---------------------------------------------------------------------------
+-- Noob---------------------------------------------------------------------------
 -- Pro doesn't use declareVariable
 variables = declareVariable \ {x,y}
 params = declareVariable \ {a,b,c,d,e,f}
 
--- Ex and Pro ------------------------------------------------------------------
+-- Noob and Pro ------------------------------------------------------------------
 GS = gateSystem(
     matrix{params},
     matrix{variables},
@@ -56,7 +56,7 @@ GS = gateSystem(
     )
 -------------------------------------------------------------------------------
 
--- Ex and Pro ------------------------------------------------------------------
+-- Noob and Pro ------------------------------------------------------------------
 cameraVars = flatten entries vars GS
 PH = parametricSegmentHomotopy GS
 
@@ -118,7 +118,7 @@ h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{cameraVar
 -- Maybe useful
 -- cCode PH
 
--- Ex 1 --------------------------------------------------------------------------
+-- Noob 1 --------------------------------------------------------------------------
 -- monodromy needs an initial pair of parameter, solution
 -- the command below won't work for most use cases
 -- ie) need 
@@ -128,7 +128,7 @@ h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{cameraVar
 --
 -- YOU
 --    - write a specialized function to sample from the parameter space
---    - TODO: write an example on how to do this for Ex
+--    - TODO: write an example on how to do this for Noob
 --        - Always base your final solver on chicago.m2 technique, currently
 --          the fastest and proven. Example:
 
@@ -176,7 +176,7 @@ h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{cameraVar
 --     )
 -- filterEval(p0,x0)  ----------------------------------------------------------
 
--- Ex 2
+-- Noob 2
 (V,np) = monodromySolve(GS,p0,{x0},Verbose=>true,NumberOfNodes=>5)
 
 -- Pro 2 -------------------------------------------------------------------
@@ -187,7 +187,7 @@ h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{cameraVar
 -------------------------------------------------------------------------------
 
 
--- Ex 3 -------------------------------------------------------------------
+-- Noob 3 -------------------------------------------------------------------
 -- parameter point
 V.BasePoint
 -- corresponding solutions
