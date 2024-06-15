@@ -56,6 +56,12 @@ GS = gateSystem(
     )
 -------------------------------------------------------------------------------
 
+
+-- Pro optional
+-- Seed random seeds for reproducible
+-- setRandomSeed H#CLBlocks
+
+
 -- Noob and Pro ------------------------------------------------------------------
 cameraVars = flatten entries vars GS
 PH = parametricSegmentHomotopy GS
@@ -131,39 +137,40 @@ h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{cameraVar
 --    - TODO: write an example on how to do this for Noob
 --        - Always base your final solver on chicago.m2 technique, currently
 --          the fastest and proven. Example:
-
-
----- Pro ----- fabricateChicago = F -> ( -- gold standard Pro example ----------------------
----- Pro -----     D := (5,0,{{0,1,3},{0,2,4},{1,2}});
----- Pro -----     (P, L ) := fabricatePair(D, F, nparams);
----- Pro -----     P1 := id_(CC^3)|matrix{{0},{0},{0}};
----- Pro -----     P2 := (Q2R take(P,{0,3})) | 
----- Pro -----          transpose matrix({take(P,{8,10})});
----- Pro -----     P3 := Q2R take(P,{4,8})|transpose matrix{take(P,{11,13})};
----- Pro -----     projs := {P1,P2,P3};
----- Pro -----     allLines := L/last;
----- Pro -----     independentLineIndices := fold((last D)/(p -> set {p#0,p#1}),(a,b)->a+b);
----- Pro -----     dependentLineIndices := set(0..D#0-1)-independentLineIndices;
----- Pro -----     p0 := flatten entries fold(
----- Pro ----- 	    allLines/(m->m^(toList independentLineIndices))
----- Pro ----- 	    ,(a,b)->a|b);    
----- Pro -----     p1 = flatten flatten(
----- Pro ----- 	allLines/(m -> (
----- Pro ----- 	    n :=numericalKernel(transpose m^{0,1,3}, kTol);
----- Pro ----- 	    entries((1/n_(2,0))*n^{0,1})))
----- Pro -----     );
----- Pro -----     p2 = flatten flatten(
----- Pro -----     	    allLines/(m -> (
----- Pro ----- 	    n :=numericalKernel(transpose m^{0,2,4}, kTol);
----- Pro ----- 	    entries((1/n_(2,0))*n^{0,1})))
----- Pro -----     );
----- Pro -----     x := transpose matrix{take(P,nvars)};
----- Pro -----     p3 := flatten entries randKernel(transpose(x^{8..13}||matrix{{1_CC}}), F);
----- Pro -----     p4 := flatten entries randKernel(transpose(x^{0..3}||matrix{{1_CC}}), F);
----- Pro -----     p5 := flatten entries randKernel(transpose(x^{4..7}||matrix{{1_CC}}), F);
----- Pro -----     p := transpose matrix{p0|p1|p2|p3|p4|p5};
----- Pro -----     (p, x)
----- Pro -----     )
+--
+-- gold standard Pro example:
+--
+-- fabricateChicago = F -> ( 
+--     D := (5,0,{{0,1,3},{0,2,4},{1,2}});
+--     (P, L ) := fabricatePair(D, F, nparams);
+--     P1 := id_(CC^3)|matrix{{0},{0},{0}};
+--     P2 := (Q2R take(P,{0,3})) | 
+--          transpose matrix({take(P,{8,10})});
+--     P3 := Q2R take(P,{4,8})|transpose matrix{take(P,{11,13})};
+--     projs := {P1,P2,P3};
+--     allLines := L/last;
+--     independentLineIndices := fold((last D)/(p -> set {p#0,p#1}),(a,b)->a+b);
+--     dependentLineIndices := set(0..D#0-1)-independentLineIndices;
+--     p0 := flatten entries fold(
+-- 	    allLines/(m->m^(toList independentLineIndices))
+-- 	    ,(a,b)->a|b);    
+--     p1 = flatten flatten(
+-- 	allLines/(m -> (
+-- 	    n :=numericalKernel(transpose m^{0,1,3}, kTol);
+-- 	    entries((1/n_(2,0))*n^{0,1})))
+--     );
+--     p2 = flatten flatten(
+--     	    allLines/(m -> (
+-- 	    n :=numericalKernel(transpose m^{0,2,4}, kTol);
+-- 	    entries((1/n_(2,0))*n^{0,1})))
+--     );
+--     x := transpose matrix{take(P,nvars)};
+--     p3 := flatten entries randKernel(transpose(x^{8..13}||matrix{{1_CC}}), F);
+--     p4 := flatten entries randKernel(transpose(x^{0..3}||matrix{{1_CC}}), F);
+--     p5 := flatten entries randKernel(transpose(x^{4..7}||matrix{{1_CC}}), F);
+--     p := transpose matrix{p0|p1|p2|p3|p4|p5};
+--     (p, x)
+--     )
 
 -- (p0, x0) = fabricateChicago(CC)   -- CC just means Complexes
 
@@ -191,7 +198,9 @@ h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{cameraVar
 -- parameter point
 V.BasePoint
 -- corresponding solutions
-points V.PartialSols -- Pro 3 --------------------------------------------------------------
+points V.PartialSols 
+
+-- Pro 3 --------------------------------------------------------------
 -- quality check
 -- sols = solutionsWithMultiplicity points V.PartialSols;
 -- L = (sols/(x -> (
@@ -201,4 +210,5 @@ points V.PartialSols -- Pro 3 --------------------------------------------------
 -- 	log10((max S)/(min S))
 -- 	)));
 -- summary L -------------------------------------------------------------------
--- writeStartSys(V.BasePoint, sols, Filename => "startSys" | (toString CLBlocks#0)|(toString CLBlocks#1))
+
+writeStartSys(V.BasePoint, sols, Filename => "startSys" | (toString CLBlocks#0)|(toString CLBlocks#1))
