@@ -1,5 +1,25 @@
-# TODO
-## 4Tim
+# CVPR 204 fast Homotopy Continuation tutorial
+
+
+
+
+# Developer Internal Notes
+
+## Starting files
+The tutorial started from Chicago trifocal problem code
+
+mostly 
+
+minus/m2/chicago/formulation-minors-original-in-minus/t
+minus/scripts/eval_monodromy_demo.m2
+
+and the code after "end" in 
+/Users/rfabbri/cprg/vxlprg/lemsvpe/minus/M2/chicago/formulation-minors-original-in-minus/chicago.m2
+
+
+
+## TODO
+### 4Tim
 
 - createSeedPair vs fabricateChicago exactly?
 
@@ -10,7 +30,7 @@ C = {
     makeSLProgram(matrix{cameraParams},P3)
   }
 
-## Evaluate to check equation
+### Evaluate to check equation
 - How can we evaluate the the equations on the system?
 
     - evaluate(F,x0||p0) only for F gatematrix, 

@@ -17,3 +17,25 @@ cCode (String, List,List) := (outfile, outputs,inputs) -> (
 
 cCode (String, GateMatrix,GateMatrix) := (outfile, M,I) -> cCode(outfile,
 flatten entries M, flatten entries I)
+
+-- from original Chicago parser.m2
+readStartSys = filename -> (
+    l := separate("\n", get filename);
+    p0 := value(l#1);
+    sols := for i from 3 to #l-2 list value(l#i);
+    (transpose matrix p0, sols/(x->transpose matrix x))
+    )
+
+-- from original common.m2
+-- write starting parameters and solutions to file
+writeStartSys = method(Options=>{Filename=>"startSys"})
+writeStartSys (Matrix, List) := o -> (M, sols) -> writeStartSys(point M, sols, o)
+writeStartSys (Point, List) := o -> (p, sols) -> (
+   assert(instance(o.Filename,String));
+   f := openOut o.Filename;
+   f << "Parameter values: " << endl;
+   f << toExternalString p << endl;
+   f << "Solutions : " << endl;
+   for s in sols do f << toExternalString s << endl;
+   close f;
+   )
