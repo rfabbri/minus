@@ -178,3 +178,5 @@ scripts/m.s
 tutorial/slides/
 ys3d.tmp
 ysnew.tmp
+scripts/synthdata/results-synth/
+tests/Fastor/
