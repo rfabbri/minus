@@ -1,0 +1,49 @@
+#!/bin/bash
+
+
+# 0) minus-chicago -g must return found
+
+
+# 1) Choose point-tangents with known cameras
+#
+
+synthdata | minus-chicago  -i 
+
+# Provide ground-truth cameras to minus
+#
+# See if cameras are recovered
+
+
+synthdata | minus-chicago  -i -gt
+
+
+# ------------------------------------------------------------------------------
+# Continue between two problems -AB but provide B = A, should also find
+# solutions
+
+
+
+
+# ------------------------------------------------------------------------------
+# Continue between any two problems A and B
+
+ ./synthdata 5   30 27    1650 1035   4770    0 1  78  86 88    2200 3685    620 0 1 | ../cmd/minus-chicago -i -gt -AB >/tmp/out
+ 
+ ./synthdata 78  86 88    2200 3685    620 0 1 | ../cmd/minus-chicago -i -gt >>/tmp/out
+
+# seems to be 30% faster. But fails more often?
+
+
+# Same problems should give zero but gives a lot and still does not find sol!
+ ./synthdata 5   30 27    1650 1035   4770    0 1  5   30 27    1650 1035   4770    0 1  | ../cmd/minus-chicago -i -gt -AB >/tmp/out
+
+ 
+# From good A to another point B1, good fail rate, better time
+./synthdata 42 54 62  3011 3389 620 0 1  78  86 88    2200 3685    620    0 1 | ../cmd/minus-chicago -i -gt -AB >/dev/null
+ 
+# From good A to another point B2, moderate fail rate, worse time
+./synthdata 42 54 62  3011 3389 620 0 1 5   30 27    1650 1035   4770    0 1  | ../cmd/minus-chicago -i -gt -AB >/dev/null
+ 
+./synthdata 42 54 62  3011 3389 620 0 1  | ../cmd/minus-chicago -i -gt -AB >/dev/null
+ 
+
