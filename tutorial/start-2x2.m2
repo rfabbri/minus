@@ -37,8 +37,7 @@
 restart
 needsPackage "SLPexpressions"
 needsPackage "MonodromySolver"
-needs "MinusUtility.m2" -- put cCode extesion here
--- "gateSystem" exists only in M2 v 1.14
+needs "MinusUtility.m2"
 
 -- Noob---------------------------------------------------------------------------
 -- Pro doesn't use declareVariable
@@ -46,6 +45,7 @@ variables = declareVariable \ {x,y}
 params = declareVariable \ {a,b,c,d,e,f}
 
 -- Noob and Pro ------------------------------------------------------------------
+-- gateSystem exists only in M2 v 1.14
 GS = gateSystem(
     matrix{params},
     matrix{variables},
@@ -56,19 +56,18 @@ GS = gateSystem(
     )
 -------------------------------------------------------------------------------
 
-
--- Pro optional
--- Seed random seeds for reproducible
+-- Pro 
+-- random seeds for reproducible runs
 -- setRandomSeed H#CLBlocks
 
-
 -- Noob and Pro ------------------------------------------------------------------
-cameraVars = flatten entries vars GS
+symbols = flatten entries vars GS
 PH = parametricSegmentHomotopy GS
 
--- Pro only --------------------------------------------------------------------
+-- Pro ---------------------------------------------------------------------------
 
--- YOU set tracker options here
+-- Set Monodromy tracker options here
+-- 
 -- null indicates default value 
 -- TODO: show how to get default values here
 scan({CorrectorTolerance=>1e-4,
@@ -87,7 +86,7 @@ scan({CorrectorTolerance=>1e-4,
 
 setDefault(CorrectorTolerance=>1e-8)
 
--- Pro Gammify-style Randomization ---------------------------------------------------
+-- Pro Gammify-style Randomization -------------------------------------------------
 
 
 -- YOU: adapt for your problem
@@ -115,11 +114,11 @@ setDefault(CorrectorTolerance=>1e-8)
 -- HxHt
 h=cCode(
     transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"Ht"),
-    gateMatrix{cameraVars|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters}
+    gateMatrix{symbols|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters}
     )
 
 -- HxH
-h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{cameraVars|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters})
+h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{symbol|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters})
 
 -- Maybe useful
 -- cCode PH
@@ -128,6 +127,7 @@ h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{cameraVar
 -- monodromy needs an initial pair of parameter, solution
 -- the command below won't work for most use cases
 -- ie) need 
+-- XXX
 (p0, x0) = createSeedPair GS   
 
 -- Pro 1 -----------------------------------------------------

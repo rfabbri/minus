@@ -39,15 +39,134 @@
 --
 
 restart
-needs "parser.m2"
-elapsedTime needs "chicago.m2"
+needs "MinusUtility.m2"
 
-(p0,sols) = readStartSys "startSys";
+-- Pro -------------------------------------------------------------------------
+--
+-- Set online tracker options here
+-- 
+-- null indicates default value 
+-- TODO: show how to get default values here
+-- TODO: are these the same for start and end sys?
+-- scan({CorrectorTolerance=>1e-4,
+-- 	EndZoneFactor=>2e-1,
+-- 	InfinityThreshold => 1e6, 
+-- 	maxCorrSteps => 3, 
+-- 	noOutput => true,
+-- 	numberSuccessesBeforeIncrease => 2,
+-- 	Precision => null,
+-- 	Predictor => RungeKutta4,
+-- 	stepIncreaseFactor => 2,
+-- 	tStep => 5e-2,
+-- 	tStepMin => 1e-5
+-- 	}, 
+--     opt -> setDefault(opt)) -- setDefault is in MonodromySolver
+-- 
+-- setDefault(CorrectorTolerance=>1e-8)
+
+
+-- Noob and Pro ----------------------------------------------------------------
+-- Read start system
+(p0,sols0) = readStartSys "startSys";
+
+-- Pro -------------------------------------------------------------------------
 -- verify options are set as desired
-netList((keys options trackHomotopy)/(opt ->(opt, getDefault opt)))
-NAGtrace 3
-setRandomSeed 0
+-- netList((keys options trackHomotopy)/(opt ->(opt, getDefault opt)))
+-- NAGtrace 3
+-- setRandomSeed 0
+-- 
+-- Reads from file
+-- p1 = data2parameters("target_system_data.txt'); 
 
+p0 := if (numcols p0 == 1) then p0 else transpose p0;
 
--- (pLines, x) = parseFile(1,Tests=>true);
--- elapsedTime K = solveChicago(p0, pLines, sols);
+-- Noob ------------------------------------------------------------------------
+p1 = {2, 3, 4, 6, -2, 11.4};
+x1gt = {} -- ground truth solutions of target system
+
+-- p1 = {a, b, c, d, e, f};
+-- where {a*(x^2+y^2)+b*x+c, d*x+e*y+f}
+--
+-- Pro -------------------------------------------------------------------------
+-- Convert your physical data to the parameters here.
+-- p1 := data2parameters targetData; -- XXX just put any abcdef here
+
+P01 = p0||p1;
+
+-- Pro -------------------------------------------------------------------------
+-- P01 := (gammify p0)||(gammify p1); -- include Noob and Pro gammify
+
+-- Noob and Pro ----------------------------------------------------------------
+H01 := specialize(PH, P01);
+trackHomotopy(H01, sols0, K)
+
+-- Evaluate check
+-- 
+F = xxx
+evaluate(F,x0||p0)
+evaluate(F,x1||p1)
+
+-- Pro -------------------------------------------------------------------------
+-- J0 = evaluate(J,x0||p0); -- Evaluates Jacobian if desired
+
+-- Pro -------------------------------------------------------------------------
+-- Example of technique to improve speed and robustness
+-- 
+-- -*
+-- (p,x)=fabricateChicago CC
+-- evaluate(F,x||p)
+-- 
+-- (p0,x0) = fabricateChicago(CC)
+-- evaluate(F,x0||p0)
+-- --J0 = evaluate(J,x0||p0);
+-- --272, 279, 286
+-- S = subsets(4,2)
+-- for s in S do (
+--     << s << endl;
+--     Jpivots = flatten for i from 0 to 4 list {4*i+s#0,4*i+s#1};
+--     F' = F^(Jpivots);
+--     J'=diff(matrix{cameraVars},F');
+--     J'0 = evaluate(J', x0||p0);
+--     << J'0 << endl;
+--     S=first SVD J'0;
+--     << toString((max S)/(min S)) << endl;
+--     << S << endl;
+--     )
+-- 
+-- norm evaluate(F',x0||p0)
+-- transpose x0^{6..11} * p0^{39..44}
+-- p0_(45,0)
+-- 
+-- netList rsort for k from 272 to 272+15-1 list (
+--     --try 289?
+--     Jpivots = {2, 3, 6, 7, 10, 11, 14, 15, 18, 19,k,numrows F-3,numrows F-2,numrows F-1};--rowSelector J0;
+--     F' = F^(Jpivots);
+--     J'=diff(matrix{cameraVars},F');
+--     S = first SVD evaluate(J', x0||p0);
+--     c = (max S)/(min S);
+--     e = evaluate(diff(matrix{cameraVars},F^{k}),x||p);
+--     n = norm e;
+--     (c, k, n, e)
+--     )
+-- *-
+-- -- INDICES FOR SQUARE SUBSYTEM
+-- Jpivots = flatten(for i from 0 to 4 list {4*i+CLBlocks#0,4*i+CLBlocks#1})  | {274,numrows F-3,numrows F-2,numrows F-1};
+-- 
+-- assert(# Jpivots==nvars)
+-- F' = F^(Jpivots);
+-- J'=diff(matrix{cameraVars},F');
+-- elapsedTime GS = gateSystem(gateMatrix{dataParams},gateMatrix{cameraVars},F');
+-- elapsedTime PH = parametricSegmentHomotopy GS;
+-- setDefault(CorrectorTolerance=>1e-8)
+-- 
+-- -- filter path jumps during monodromy
+-- filterEval = (p,x) -> (
+--     -- false iff residual small
+--     resid := norm evaluate(F,x||p);
+-- --    << "residual: " << resid << endl;
+--     (resid > 1e-4)
+--     )
+-- 
+-- seeds = {16314, 62236, 77740, 69544, 11665, 1055}
+-- H = hashTable apply(subsets(4,2),seeds, (ss,s) -> ss=>s)
+-- 
