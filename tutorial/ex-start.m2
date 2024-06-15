@@ -51,7 +51,7 @@ GS = gateSystem(
     matrix{variables},
     transpose matrix{
 	{a*(x^2+y^2)+b*x+c,
-	    d*x+e*y+f}
+	 d*x+e*y+f}
 	}
     )
 -------------------------------------------------------------------------------
