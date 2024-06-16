@@ -43,6 +43,7 @@ needs "MinusUtility.m2"
 variables = declareVariable \ {x,y}
 params = declareVariable \ {a,b,c,d,e,f}
 
+evaluate(GS,p0,x0)
 -- Noob and Pro ------------------------------------------------------------------
 -- gateSystem exists only in M2 v 1.14
 GS = gateSystem(

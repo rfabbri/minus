@@ -44,9 +44,9 @@ needs "MinusUtility.m2"
 --
 -- Set online tracker options here
 -- 
--- null indicates default value 
--- TODO: show how to get default values here
--- TODO: are these the same for start and end sys?
+-- Usually the same as for the start system monodromy
+-- 
+-- 'null' indicates default value, use getDefault(parameterName) to see it
 -- scan({CorrectorTolerance=>1e-4,
 -- 	EndZoneFactor=>2e-1,
 -- 	InfinityThreshold => 1e6, 
@@ -59,9 +59,11 @@ needs "MinusUtility.m2"
 -- 	tStep => 5e-2,
 -- 	tStepMin => 1e-5
 -- 	}, 
---     opt -> setDefault(opt)) -- setDefault is in MonodromySolver
+--     opt -> setDefault(opt)) -- check if originally we used 'null' XXX
 -- 
--- setDefault(CorrectorTolerance=>1e-8)
+-- 
+-- setDefault(CorrectorTolerance=>1e-8) -- XXX is it used in the tracker or monodromy?
+--
 
 
 -- Noob and Pro ----------------------------------------------------------------
@@ -79,9 +81,10 @@ needs "MinusUtility.m2"
 
 p0 := if (numcols p0 == 1) then p0 else transpose p0;
 
--- Noob ------------------------------------------------------------------------
-p1 = {2, 3, 4, 6, -2, 11.4};
-x1gt = {} -- ground truth solutions of target system
+p1 = transpose matrix{{2, 3, 4, 6, -2, 11.4}};
+x1gt = transpose matrix{{2,}}}; -- ground truth solutions of target system
+
+evaluate(GS,p1,x1gt) -- shoold be 0
 
 -- p1 = {a, b, c, d, e, f};
 -- where {a*(x^2+y^2)+b*x+c, d*x+e*y+f}
@@ -94,10 +97,15 @@ P01 = p0||p1;
 
 -- Pro -------------------------------------------------------------------------
 -- P01 := (gammify p0)||(gammify p1); -- include Noob and Pro gammify
+-- XXX suggest how to write gammify function 
 
 -- Noob and Pro ----------------------------------------------------------------
 H01 := specialize(PH, P01);
-trackHomotopy(H01, sols0, K)
+trackHomotopy(H01, sols0)
+
+-- Pro
+-- Pass options as 3rd argument that will override what was set with setDefault
+trackHomotopy(H01, sols0, NewOptions)
 
 -- Evaluate check
 -- 
