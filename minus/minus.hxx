@@ -27,6 +27,7 @@ namespace MiNuS {
 using namespace Eigen; // only used for linear solve
 
 #include "chicago14a-lsolve.hxx"
+#include "linecircle-lsolve.hxx"
 
 template <problem P, typename F>
 __attribute__((always_inline)) inline void
@@ -735,6 +736,7 @@ normalize_lines(F lines[][ncoords2d_h], unsigned nlines)
 } // namespace minus
 
 #include "chicago14a.hxx"      // specific implementation of chicago 14a formulation
+#include "linecircle.hxx"      // specific implementation of chicago 14a formulation
 //#include "cleveland14a.hxx"      // specific implementation of cleveland 14a formulation now in PLMP
 // #include <minus/phoenix10a.hxx>      // specific implementation of chicago 14a formulation
 // #include "chicago6a.hxx"

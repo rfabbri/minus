@@ -26,7 +26,7 @@
 namespace MiNuS {
 
 // Internal note: m2: script t, variable sols
-// You can reinterpret in C as start_sols_[M::nsols][M::nve]
+// You can reinterpret as 2D matrix in C as start_sols_[M::nsols][M::nve]
 template <typename F>
 alignas(64) const std::complex<F> minus_data<chicago14a,F>::
 start_sols_[M::nve*M::nsols] = {

@@ -31,6 +31,7 @@ enum problem {chicago14a, chicago6a, cleveland14a, phoenix10a /*, standard*/};
 // The current best formulations for each problem
 constexpr problem chicago = problem::chicago14a;
 constexpr problem cleveland = problem::cleveland14a;
+constexpr problem linecircle = problem::linecircle;
 // You can now use solver<chicago> to default to the best formulation
 
 // Each problem specializes this in their specific .h
