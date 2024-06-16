@@ -10,11 +10,11 @@
 #include <thread>
 #include <minus/minus.h>
 #include <minus/linecircle-io.h>
-#include <minus/chicago-default.h>
+#include <minus/linecircle-default.h>
 
 using namespace MiNuS;
 #define Float double
-typedef minus_core<chicago> M;
+typedef minus_core<linecircle> M;
 static constexpr Float tol = 1e-3;
 typedef std::complex<Float> complex;
 using namespace std::chrono;
@@ -138,7 +138,7 @@ print_usage()
   id0 id1           # id \in {0,1,2} of the point to consider the tangent
 
   # One way to use this is 
-  #     synthdata | minus-chicago -i
+  #     synthdata | minus-linecircle -i
   # where synthdata is provided in minus/scripts)";
              
   exit(1);
@@ -301,7 +301,7 @@ iread(std::istream &in)
 }
 
 // reads into the global variable params_
-// Format is just like P01 variable in solveChicago in chicago.m2
+// Format is just like P01 variable in solvelinecircle in linecircle.m2
 // and contains the concatenated parameters of the start system
 // and of the target system, with some randomization to improve conditioning.
 // But here there is no imaginary 'i' string:
@@ -473,7 +473,7 @@ process_args(int argc, char **argv)
   }
 }
 
-// Simplest possible command to compute the Chicago problem
+// Simplest possible command to compute the linecircle problem
 // for estimating calibrated trifocal geometry from points and lines at points
 //
 // This is to be kept very simple C with only minimal C++ with Templates.
