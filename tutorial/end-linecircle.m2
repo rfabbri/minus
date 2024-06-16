@@ -40,7 +40,7 @@
 
 restart -- only useful for debugging
 needs "MinusUtility.m2"
-load "equations-2x2.m2"
+load "equations-linecircle.m2"
 
 -- Pro -------------------------------------------------------------------------
 --
