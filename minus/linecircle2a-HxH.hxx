@@ -13,7 +13,7 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   const C<F> *params = reinterpret_cast<C<F> *> (__builtin_assume_aligned(uparams,64));
   const C<F> *x = reinterpret_cast<C<F> *> (__builtin_assume_aligned(ux,64));
   C<F> *y = reinterpret_cast<C<F> *> (__builtin_assume_aligned(uy,64));
-{ // 
+
   const C<F> &X0 = x[0];
   const C<F> &X1 = x[1];
   const C<F> &X2 = x[2];

@@ -1,5 +1,5 @@
-#ifndef linecircle_hxx_
-#define linecircle_hxx_
+#ifndef linecircle2a_hxx_
+#define linecircle2a_hxx_
 // to be included at the end of minus.hxx
 
 namespace MiNuS {
@@ -176,4 +176,4 @@ has_valid_solutions(const typename M::solution solutions[M::nsols])
 }
 
 } // namespace minus
-#endif // linecircle_hxx_
+#endif // linecircle2a_hxx_

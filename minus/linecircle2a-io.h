@@ -1,5 +1,5 @@
-#ifndef linecircle_internals_h
-#define linecircle_internals_h
+#ifndef linecircle2a_internals_h
+#define linecircle2a_internals_h
 // TODO: rename to io
 
 namespace MiNuS {
@@ -24,4 +24,4 @@ struct minus_io<linecircle2a, F> : public minus_io_14a<linecircle2a, F> {
 
 } // namespace minus
 
-#endif //linecircle_internals_h
+#endif //linecircle2a_internals_h

@@ -308,15 +308,15 @@ RC_to_QT_format(const F rc[pp::nviews][4][3], F qt[M::nve])
 template <problem P, typename F>
 inline void 
 minus_io<P, F>::
-all_real_solutions(solution raw_solutions[M::nsols], F real_solutions[M::nsols][M::nve], 
+all_real_solutions(typename M::solution raw_solutions[M::nsols], F real_solutions[M::nsols][M::nve], 
                    unsigned id_sols[M::nsols], unsigned *nsols_real)
 {
   typedef minus_array<M::nve,F> v;
-  *nsols_final = 0;
-  id_sols[*nsols_final] = 0;
+  *nsols_real = 0;
+  id_sols[*nsols_real] = 0;
   for (unsigned sol=0; sol < M::nsols; ++sol) {
-    if (raw_solutions[sol].status == M::REGULAR && v::get_real(raw_solutions[sol].x, real_solutions[*id_sols[nsols_final]]))
-      id_sols[(*nsols_final)++] = sol;
+    if (raw_solutions[sol].status == M::REGULAR && v::get_real(raw_solutions[sol].x, real_solutions[*id_sols[nsols_real]]))
+      id_sols[(*nsols_real)++] = sol;
   }
 }
 
@@ -756,7 +756,7 @@ normalize_lines(F lines[][ncoords2d_h], unsigned nlines)
 } // namespace minus
 
 #include "chicago14a.hxx"      // specific implementation of chicago 14a formulation
-#include "linecircle.hxx"      // specific implementation of chicago 14a formulation
+#include "linecircle2a.hxx"      // specific implementation of chicago 14a formulation
 //#include "cleveland14a.hxx"      // specific implementation of cleveland 14a formulation now in PLMP
 // #include <minus/phoenix10a.hxx>      // specific implementation of chicago 14a formulation
 // #include "chicago6a.hxx"
