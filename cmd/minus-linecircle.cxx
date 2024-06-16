@@ -55,7 +55,7 @@ print_usage()
                "  minus input_file solutions_file\n"
                "  minus <input_file >solutions_file\n"
                "  minus -g       # (or --profile) : performs a default solve for profiling\n"
-               "  minus -i       # (or --image_data) : reads point-tangents from stdin\n"
+               "  minus -i       # (or --param_data) : reads point-tangents from stdin\n"
                "  minus -h       # (or --help) : print this help message\n"
                // "  minus -r       # (or --real)  :  outputs only real solutions\n"
                // "  minus -AB      # (or --two_problems) : continue between 2 given problems\n"
@@ -300,7 +300,7 @@ process_args(int argc, char **argv)
   --argc; ++argv;
   // switches that can show up only in 1st position
   
-  enum {INITIAL_ARGS, AFTER_INITIAL_ARGS, MAX_CORR_STEPS, EPSILON} argstate = INITIAL_ARGS;
+  enum {INITIAL_ARGS, AFTER_INITIAL_ARGS, param_data, MAX_CORR_STEPS, EPSILON} argstate = INITIAL_ARGS;
   bool incomplete = false;
   std::string arg;
   if (argc) {
@@ -310,6 +310,10 @@ process_args(int argc, char **argv)
     if (arg == "-g" || arg == "--profile") {
       profile_ = true;
       argstate = AFTER_INITIAL_ARGS;
+      --argc; ++argv;
+    } else if (arg == "-i" || arg == "--param_data") {
+      param_data_ = true; 
+      argstate = param_data;
       --argc; ++argv;
     } else if (arg[0] != '-') {
       if (argc == 2) {
@@ -327,6 +331,17 @@ process_args(int argc, char **argv)
       LOG("parsing arg " + arg);
       
       // argstate >= AFTER_INITIAL_ARGS ----------------------------------------
+      if (argstate == param_data) {
+        if (arg == "-gt") {
+          ground_truth_ = true;
+          --argc; ++argv;
+          argstate = param_data;
+          continue;
+        }
+        argstate = AFTER_INITIAL_ARGS;
+        continue;
+      }
+      
       if (argstate == MAX_CORR_STEPS) {
         settings_.max_corr_steps_ = std::stoi(arg);
         --argc; ++argv;
@@ -381,8 +396,8 @@ main(int argc, char **argv)
   
   process_args(argc, argv);
 
-  if (image_data_) {
-    LOG("param: input is image pixel data");
+  if (param_data_) {
+    LOG("param: input is parameters");
     if (ground_truth_)
       LOG("param: reading ground truth appended to input pixel data");
   }
@@ -397,7 +412,7 @@ main(int argc, char **argv)
 
   if (!profile_) { // read files: either stdio or physical
     init_input(input_, inp);
-    if (image_data_) {  // read image pixel-based I/O parameters
+    if (param_data_) {  // read image pixel-based I/O parameters
       if (!iread<Float>(*inp))
         return 1;
       data::params_ = data::params_start_target_;
@@ -411,13 +426,7 @@ main(int argc, char **argv)
   {
     LOG("\033[0;33mUsing 4 threads by default\e[m\n");
     #ifdef M_VERBOSE
-    if (two_problems_given_)
-      std::cerr 
-        << "LOG \033[0;33mContinuing between two problems A -> B by internal 0->A then A->B\e[m\n" 
-        << "LOG \033[0;33mStarting path tracker from random initial solution to first problem 0->A\e[m\n" 
-        << std::endl;
-    else
-      std::cerr << "LOG \033[0;33mStarting path tracker from random initial solution to given problem\e[m\n" << std::endl;
+    std::cerr << "LOG \033[0;33mStarting path tracker from random initial solution to given problem\e[m\n" << std::endl;
     #endif 
     std::thread t[4];
     high_resolution_clock::time_point t1 = high_resolution_clock::now();
@@ -438,86 +447,17 @@ main(int argc, char **argv)
     #endif
   }
 
-  if (two_problems_given_) {
-    // First, lets make sure problem A was properly solved
-    if (!io::has_valid_solutions(solutions)) { // if no ground-truth is provided, it will return error
-      LOG("\033[1;91mFAIL:\e[m  no valid solutions in problem A");
-      return SOLVER_FAILURE;                    // if it can detect that the solver failed by generic tests
-    }
-    
-    // 
-    // Continue between two problems A and B by continuing from an internal
-    // problem R to A (to discover all solutions of A), then from A to B.
-    //
-    // format solutions (of A) to be similar to data::start_sols_
-    complex sols_A_matrix[M::nsols][M::nve];
-    io::solutions_struct2vector(solutions, sols_A_matrix);
-    const complex * const sols_A = (complex *) sols_A_matrix;
-    
-    // reset solutions
-    static const M::solution s0;
-    for (unsigned s=0; s < M::nsols; ++s)
-      solutions[s] = s0;
-
-    // generate homotopy params_ -----------------------------------------------
-    //
-    // At this point:
-    // params_start_target_ = [ P0gammified, PAgammified]
-    //    
-    // We want
-    // params_start_target_ = [ PAgammified, PBbammified]
-    //
-    // First we do params_start_target  = [ PAgammified, PAgammified]
-    memcpy(data::params_start_target_, 
-           data::params_start_target_+M::f::nparams, M::f::nparams*sizeof(complex));
-    
-    LOG("\033[0;33mReading second problem B\e[m\n");
-    // Now read problem B & extract parameters into 2nd half of
-    // params_start_target_
-    if (image_data_) {  // read image pixel-based I/O parameters
-      if (!iread<Float>(*inp))
-        return 1;
-      data::params_ = data::params_start_target_;
-    } else {  // read raw I/O homotopy parameters (to be used as engine)
-      std::cerr << "When continuing from A to B, non-pixel input not implemented\n";
-      return 1;
-    }
-    
-    // Homotopy-continue from A to B ---------------------------------------
-    LOG("\033[0;33mUsing 4 threads by default\e[m\n");
-    #ifdef M_VERBOSE
-    std::cerr << "LOG \033[0;33mStarting path tracker from A to B\e[m\n" << std::endl;
-    #endif 
-    std::thread t[4];
-    high_resolution_clock::time_point t1 = high_resolution_clock::now();
-
-    //  unsigned retval = 
-    //  ptrack(&MINUS_DEFAULT, start_sols_, params_, solutions);
-    {
-      t[0] = std::thread(M::track, settings_, sols_A, data::params_, solutions, 0, 78);
-      t[1] = std::thread(M::track, settings_, sols_A, data::params_, solutions, 78, 78*2);
-      t[2] = std::thread(M::track, settings_, sols_A, data::params_, solutions, 78*2, 78*3);
-      t[3] = std::thread(M::track, settings_, sols_A, data::params_, solutions, 78*3, 78*4);
-      t[0].join(); t[1].join(); t[2].join(); t[3].join();
-    }
-    high_resolution_clock::time_point t2 = high_resolution_clock::now();
-    auto duration = duration_cast<milliseconds>(t2 - t1).count();
-    #ifdef M_VERBOSE
-    print_num_steps(solutions);
-    std::cerr << "LOG \033[1;32mTime of solver A -> B: " << duration << "ms\e[m" << std::endl;
-    #endif
-  }
   
   if (profile_) {
-    // compare solutions to certain values from M2
+    // compare solutions to certain hardcoded values from M2
     // two random entries
-    if (std::abs(solutions[1].x[1] - complex(-.25177177692982444e1, -.84845195030295639)) <= tol &&
-        std::abs(solutions[M::nsols-2].x[2] - complex(.7318330016224166, .10129116603501138)) <= tol)
+    if (std::abs(solutions[1].x[1] - solutions_gt_[0]) <= tol &&
+        std::abs(solutions[M::nsols-2].x[2] - solutions_gt_[1]) <= tol)
       std::cerr << "LOG solutions look OK\n";
     else  {
       std::cerr << "LOG \033[1;91merror:\e[m solutions dont match m2. Errors: ";
-      std::cerr << std::abs(solutions[1].x[2] - complex(-.25177177692982444e1, -.84845195030295639)) << ", "
-          << std::abs(solutions[M::nsols-2].x[2] - complex(.7318330016224166, .10129116603501138)) << std::endl;
+      std::cerr << std::abs(solutions[1].x[2] - solutions_gt_[0]) << ", "
+          << std::abs(solutions[M::nsols-2].x[2] - solutions_gt_[1]) << std::endl;
     }
   }
   
@@ -528,9 +468,8 @@ main(int argc, char **argv)
   // optional: filter solutions using positive depth, etc.
   if (ground_truth_ || profile_) {
     // TODO(juliana) should we has_valid_solutions here? 
-    io::RC_to_QT_format(data::cameras_gt_, data::cameras_gt_quat_);
     unsigned sol_id;
-    bool found = io::probe_all_solutions(solutions, data::cameras_gt_quat_, &sol_id);
+    bool found = io::probe_all_solutions(solutions, data::sols_gt_, &sol_id);
     if (found) {
       LOG("found solution at index: " << sol_id);
       LOG("number of iterations of solution: " << solutions[sol_id].num_steps);
