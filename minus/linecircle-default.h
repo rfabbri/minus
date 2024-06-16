@@ -3,7 +3,7 @@
 // Include this last of all in user app
 
 #include "minus.h"
-#include "linecircle2a-default-data.h" // default start system etc
+#include "linecircle-default-data.h" // default start system etc
 
 // Convenience types to use Minus and the linecircle problem
 typedef MiNuS::minus_core<MiNuS::linecircle> M;

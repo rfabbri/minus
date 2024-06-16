@@ -21,13 +21,13 @@
 
 
 #include "minus.h"
-#include "linecircle-default-data.h"
+#include "linecircle2a-default-data.h"
 
 namespace MiNuS {
 
 // You can reinterpret as 2D matrix in C as start_sols_[M::nsols][M::nve]
 template <typename F>
-alignas(64) const std::complex<F> minus_data<linecircle,F>::
+alignas(64) const std::complex<F> minus_data<linecircle2a,F>::
 start_sols_[M::nve*M::nsols] = {
   // solution 0
   {-.17713365790154765e1, .18062520635371109e1},  // x
@@ -51,7 +51,7 @@ start_sols_[M::nve*M::nsols] = {
 //                                  to store target system params
 //                                  the latter M::nparams are trash
 template <typename F>
-alignas(64) std::complex<F> minus_data<linecircle,F>::
+alignas(64) std::complex<F> minus_data<linecircle2a,F>::
 params_start_target_[2*M::f::nparams] = {
   {-.54232002300332649, .84017200182443086},
   {-.50519558694885758, -.86300487769618039},
@@ -73,7 +73,7 @@ params_start_target_[2*M::f::nparams] = {
 // In tutorial/start-linecirc.m2 example 
 //
 template <typename F>
-alignas(64) std::complex<F> minus_data<linecircle,F>::
+alignas(64) std::complex<F> minus_data<linecircle2a,F>::
 default_params_start_target_gammified_[2*M::f::nparams] = {
   {-.54232002300332649, .84017200182443086},
   {-.50519558694885758, -.86300487769618039},
@@ -83,14 +83,14 @@ default_params_start_target_gammified_[2*M::f::nparams] = {
   {-.15952718229455548, .98719353629830842}
 };
 template <typename F>
-const std::complex<F> * minus_data<linecircle,F>::
+const std::complex<F> * minus_data<linecircle2a,F>::
 params_= default_params_start_target_gammified_;
 
 // Input point correspondences for testing could be hardcoded here
 // see p_ and p_correct in chicago-default-data.hxx
 
 template <typename F>
-C<F> minus_data<linecircle,F>::
+C<F> minus_data<linecircle2a,F>::
 solutions_gt_[M::nve] = {
   {-.83999999999999997, -.38032880511473233},
   {30000000000000006e-1, -.11409864153441969}

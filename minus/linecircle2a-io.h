@@ -5,10 +5,10 @@
 namespace MiNuS {
 
 template <typename F>
-struct minus_io<linecircle, F> : public minus_io_14a<linecircle, F> {
+struct minus_io<linecircle2a, F> : public minus_io_14a<linecircle2a, F> {
   // template specialization defined in problem-internals.h
-  typedef problem_parameters<linecircle> pp;
-  typedef minus_core<linecircle, F> M;
+  typedef problem_parameters<linecircle2a> pp;
+  typedef minus_core<linecircle2a, F> M;
   typedef minus_io_common<F> io;
   // shortcuts to the problem parameters
   static constexpr unsigned nviews  = pp::nviews;

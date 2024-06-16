@@ -5,7 +5,7 @@
 namespace MiNuS {
   
 template <typename F>
-struct eval<linecircle, F> {
+struct eval<linecircle2a, F> {
   static void inline  __attribute__((always_inline)) Hxt(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y /*Hxt*/);
   static void inline  __attribute__((always_inline)) HxH(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
   static void inline  __attribute__((always_inline)) Hxt_constants(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y /*Hxt*/);
@@ -13,14 +13,14 @@ struct eval<linecircle, F> {
   static void inline  __attribute__((always_inline)) HxH_constants_all_sols(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
 };
 
-#include "linecircle-Hxt.hxx"
-#include "linecircle-HxH.hxx"
+#include "linecircle2a-Hxt.hxx"
+#include "linecircle2a-HxH.hxx"
 
 // Problem and Formulation Paramers --------------------------------------------
 
 } // namespace minus
 
-#include "linecircle-io.h"
+#include "linecircle2a-io.h"
 
 namespace MiNuS {
 
@@ -61,7 +61,7 @@ namespace MiNuS {
 //
 template <typename F>
 inline void 
-minus_io<linecircle, F>::
+minus_io<linecircle2a, F>::
 gammify(C<F> * __restrict params /*[ chicago: M::nparams]*/)
 {
   // Noob ----------------------------------------------------------------------
@@ -75,7 +75,7 @@ gammify(C<F> * __restrict params /*[ chicago: M::nparams]*/)
 // gammified. 
 template <typename F>
 inline void
-minus_io<linecircle, F>::
+minus_io<linecircle2a, F>::
 get_params_start_target(
     F plines[/*15 for chicago*/][io::ncoords2d_h], 
     C<F> * __restrict params/*[static 2*M::nparams]*/,
@@ -94,7 +94,7 @@ get_params_start_target(
 // Highlevel solver interface - Class minus ------------------------------------
 
 #include <thread>
-#include "linecircle-default-data.h"
+#include "linecircle2a-default-data.h"
 
 namespace MiNuS {
 
@@ -117,15 +117,15 @@ namespace MiNuS {
 // 
 template <typename F>
 inline bool
-minus<linecircle, F>::solve(
-    const C<F> params_final, // p1 in linecircle-end.m2 
+minus<linecircle2a, F>::solve(
+    const C<F> params_final, // p1 in linecircle2a-end.m2 
     F solutions[M::nsols],  // first camera is always [I | 0]
     unsigned id_sols[M::nsols],
     unsigned *nsols_final,
     unsigned nthreads
     )
 {
-  typedef minus_data<linecircle,F> data;
+  typedef minus_data<linecircle2a,F> data;
   alignas(64) C<F> params[2*M::f::nparams];
   memcpy(params, data::params_start_target_, M::f::nparams*sizeof(C<F>));
   
@@ -164,7 +164,7 @@ minus<linecircle, F>::solve(
 // 
 template <typename F>
 inline bool 
-minus_io<linecircle, F>::
+minus_io<linecircle2a, F>::
 has_valid_solutions(const typename M::solution solutions[M::nsols])
 {
   typedef minus_array<M::nve,F> v;

@@ -2,7 +2,7 @@
 #define linecircle_h_
 
 template <>
-struct formulation_parameters<linecircle> {
+struct formulation_parameters<linecircle2a> {
   static constexpr unsigned nsols = 2;    // number of solutions
   static constexpr unsigned nve = 2;      // size of the system (Number of Variables or Equations)
                                           // this formulation: two quaternions and 
@@ -12,7 +12,7 @@ struct formulation_parameters<linecircle> {
 
 // setup problem (data) parameters and attributes
 template <>
-struct problem_parameters<linecircle> {
+struct problem_parameters<linecircle2a> {
   // static constexpr unsigned nviews = 3; 
   // static constexpr unsigned npoints = 3;
 };

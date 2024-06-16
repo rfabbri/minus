@@ -7,10 +7,10 @@
 namespace MiNuS {
 
 template <typename F>
-struct minus_data<linecircle,F> {
-  typedef minus_core<linecircle> M;
-  typedef minus_io<linecircle> io;
-  typedef minus_io_14a<linecircle> io14;
+struct minus_data<linecircle2a,F> {
+  typedef minus_core<linecircle2a> M;
+  typedef minus_io<linecircle2a> io;
+  typedef minus_io_14a<linecircle2a> io14;
   typedef std::complex<F> complex;
   static const complex start_sols_[M::nve*M::nsols];
   alignas (64) static complex params_start_target_[2*M::f::nparams];

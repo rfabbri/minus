@@ -7,7 +7,7 @@
 // (Ask Tim for the way to use cCode so that the input orders are like this.
 template <typename F>
 inline __attribute__((always_inline)) void 
-eval<linecircle, F>::
+eval<linecircle2a, F>::
 HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>* __restrict uy /*HxH*/) 
 {
   const C<F> *params = reinterpret_cast<C<F> *> (__builtin_assume_aligned(uparams,64));
@@ -84,7 +84,7 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
 // (Ask Tim for the way to use cCode so that the input orders are like this.
 template <typename F>
 inline __attribute__((always_inline)) void 
-eval<linecircle, F>::
+eval<linecircle2a, F>::
 HxH_constants(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>* __restrict uy /*HxH*/) 
 {
 }
@@ -98,7 +98,7 @@ HxH_constants(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict upa
 // (Ask Tim for the way to use cCode so that the input orders are like this.
 template <typename F>
 inline __attribute__((always_inline)) void 
-eval<linecircle, F>::
+eval<linecircle2a, F>::
 HxH_constants_all_sols(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>* __restrict uy /*HxH*/) 
 {
 }
