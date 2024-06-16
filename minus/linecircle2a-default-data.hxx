@@ -25,6 +25,7 @@
 
 namespace MiNuS {
 
+
 // You can reinterpret as 2D matrix in C as start_sols_[M::nsols][M::nve]
 template <typename F>
 alignas(64) const std::complex<F> minus_data<linecircle2a,F>::
@@ -59,10 +60,12 @@ params_start_target_[2*M::f::nparams] = {
   {-.22606308570353237, -.9741126635467775},
   {.98518486450687703, .17149572223984591},
   {-.15952718229455548, .98719353629830842}
-  // plus nparams we dont initialize and fill later
+  // plus nparams we dont statically initialize and fill later
+  // ...j
 };
 
-// Example randomized parameters for a specific given input
+// Example randomized parameters for a specific given input for testing
+// 
 // Used for testing and comparing to M2
 //
 // This is the line 
@@ -70,7 +73,7 @@ params_start_target_[2*M::f::nparams] = {
 //
 //  toExternalString(point P01)
 //
-// In tutorial/start-linecirc.m2 example 
+// In tutorial/linecircle-start.m2 example 
 //
 template <typename F>
 alignas(64) std::complex<F> minus_data<linecircle2a,F>::
@@ -80,11 +83,23 @@ default_params_start_target_gammified_[2*M::f::nparams] = {
   {.78557292739942153, -.61876908110950668},
   {-.22606308570353237, -.9741126635467775},
   {.98518486450687703, .17149572223984591},
-  {-.15952718229455548, .98719353629830842}
+  {-.15952718229455548, .98719353629830842},
+  // plus nparams we dont statically initialize and fill later
+  // in this case a b c d e and f for the line-circle eq
+  2,
+  3,
+  4,
+  6,
+  -2,
+  5.1 
 };
+
 template <typename F>
 const std::complex<F> * minus_data<linecircle2a,F>::
 params_= default_params_start_target_gammified_;
+
+
+// Input parameters corresponding to the above gammified homotopy parameters
 
 // Input point correspondences for testing could be hardcoded here
 // see p_ and p_correct in chicago-default-data.hxx

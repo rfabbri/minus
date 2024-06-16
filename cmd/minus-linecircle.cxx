@@ -75,17 +75,16 @@ print_usage()
 
 bool stdio_ = true;  // by default read/write from stdio
 bool ground_truth_ = false;
-bool two_problems_given_ = false;
-bool reading_first_point_ = true;
+// bool two_problems_given_ = false;
+// bool reading_first_point_ = true;
 std::ifstream infp_;
-bool image_data_ = false;
 bool profile_ = false;   // run some default solves for profiling
 const char *input_ = "stdin";
 const char *output_ = "stdout";
 M::track_settings settings_;
 
 void
-print_num_steps(M::solution solutions[M::nsols])
+print_num_steps(M::solution solutions[M::nsols]) // TODO: move to utils
 {
   LOG("solution id x num steps:");
   unsigned sum=0;
@@ -150,7 +149,10 @@ mwrite(const M::solution s[M::nsols], const char *fname)
   if (!stdio_) fsols.close();
   return true;
 }
+
 // Try to read n elements, filling in p in row-major order.
+// Only pure floats supported 
+// TODO: generic -- move to common io class
 template <typename F=double>
 static bool
 read_block(std::istream &in, F *p, unsigned n)
@@ -177,6 +179,7 @@ read_block(std::istream &in, F *p, unsigned n)
   return true;
 }
 
+// TODO: generic -- move to common io class
 static bool
 init_input(const char *fname, std::istream *inp)
 {
@@ -201,32 +204,14 @@ template <typename F=double>
 static bool
 iread(std::istream &in)
 {
-  LOG("reading p_");
-  if (!read_block(in, (F *)data::p_, io::pp::nviews*io::pp::npoints*io::ncoords2d))
+  LOG("reading parameters a b c d e f directly."); // for other problems you may
+                                                   // have to read data and
+                                                   // convert to params
+  if (!read_block(in, (F *)data::params_start_target_+M::f::nparams, M::f::nparams))
     return false;
-  LOG("reading tgt_");
-  if (!read_block(in, (F *)data::tgt_, io::pp::nviews*io::pp::npoints*io::ncoords2d))
+  LOG("reading ground truth solutionss");
+  if (ground_truth_ && !read_block(in, (F *) data::solutions_gt_, M::f::nsols))
     return false;
-  unsigned tgt_ids[2];
-  LOG("reading tgt_ids");
-  if (!read_block<unsigned>(in, tgt_ids, 2))
-    return false;
-  if (reading_first_point_) {
-    LOG("reading K_");
-    if (!read_block(in, (F *) data::K_, io::ncoords2d*io::ncoords2d_h))
-      return false;
-    LOG("reading ground truth cams");
-    if (ground_truth_ && !read_block(in, (F *) data::cameras_gt_, io::pp::nviews*4*3))
-      return false;
-    io::point_tangents2params_img(data::p_, data::tgt_, tgt_ids[0], tgt_ids[1],
-        data::K_, data::params_start_target_);
-    reading_first_point_ = false;
-  } else { // when reading second point B, do not gammify A again
-    static constexpr bool gammify_target_problem = false;
-    io::point_tangents2params_img(data::p_, data::tgt_, tgt_ids[0], tgt_ids[1],
-        data::K_, data::params_start_target_, gammify_target_problem);
-  }
-  return true;
 }
 
 // reads into the global variable params_
