@@ -26,7 +26,7 @@ namespace MiNuS {
 
 using namespace Eigen; // only used for linear solve
 
-#include "chicago14a-lsolve.hxx"
+// #include "chicago14a-lsolve.hxx" TODO XXX make lsolve a template by problem // name
 #include "linecircle2a-lsolve.hxx"
 
 template <problem P, typename F>
@@ -307,7 +307,7 @@ RC_to_QT_format(const F rc[pp::nviews][4][3], F qt[M::nve])
 // array with that minimum.
 template <problem P, typename F>
 inline void 
-minus_io_14a<P, F>::
+minus_io<P, F>::
 all_real_solutions(solution raw_solutions[M::nsols], F real_solutions[M::nsols][M::nve], 
                    unsigned id_sols[M::nsols], unsigned *nsols_real)
 {

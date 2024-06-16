@@ -17,8 +17,8 @@ lsolve(
   static constexpr unsigned char rows = M::f::nve;
 
   // Noob ----------------------------------------------------------------------
-  PartialPivLU<Matrix<C<F>, M::f::nve, f::nve> > lu;
-  Map<Matrix<C<F>, <minus_core<P,F>::f::nve, 1>,Aligned> > x_eigen(x);
+  PartialPivLU<Matrix<C<F>, M::f::nve, M::f::nve> > lu;
+  Map<Matrix<C<F>, minus_core<P,F>::f::nve, 1>, Aligned> > x_eigen(x);
   x_eigen = lu.compute(m.block<minus_core<P,F>::f::nve, minus_core<P,F>::f::nve>(0,0).solve(m.col(minus_core<P,F>::f::nve));
 
   // Pro -----------------------------------------------------------------------
