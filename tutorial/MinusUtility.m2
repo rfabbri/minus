@@ -1,3 +1,4 @@
+needsPackage "MonodromySolver"
 -- Utilities to help iterface with Minus
 -- To be included ih other files
 

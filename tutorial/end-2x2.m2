@@ -1,4 +1,4 @@
--- EX-RUN                          Homotopy Continuation Tutorial                              EX-RUN
+-- EX-RUN                     Homotopy Continuation Tutorial                      EX-RUN
 --
 -- NAME
 --      Fast HC Code Inteligencer - exactly how to craft your fast HC
@@ -21,10 +21,10 @@
 --      scripts of PLMP, this version of them is the definitive account
 --      of what matterscarefully for writing a fast C++ solver
 --    
---      Run ex-start first once
+--      Run noob-start first once
 --
 -- LEGEND
---      - Ex and Pro marked bellow mean Example (simple) and Pro (fast)
+--      - Noob and Pro marked bellow mean Example (simple) and Pro (fast)
 --      - YOU shows where can you make it faster for your problem
 
 -- OTHERS
@@ -40,6 +40,7 @@
 
 restart -- only useful for debugging
 needs "MinusUtility.m2"
+load "equations-2x2.m2"
 
 -- Pro -------------------------------------------------------------------------
 --
@@ -71,6 +72,10 @@ needs "MinusUtility.m2"
 -- Read start system
 (p0,sols0) = readStartSys "startSys";
 
+print "Start solutions should evaluate to 0:"
+sols0 = flatten \ entries \ sols0 -- convert to list of list
+print(apply(sols0, x -> evaluate(GS, point p0, x)))
+
 -- Pro -------------------------------------------------------------------------
 -- verify options are set as desired
 -- netList((keys options trackHomotopy)/(opt ->(opt, getDefault opt)))
@@ -80,12 +85,14 @@ needs "MinusUtility.m2"
 -- Reads from file
 -- p1 = data2parameters("target_system_data.txt'); 
 
-p0 := if (numcols p0 == 1) then p0 else transpose p0;
+p1 = matrix{{2, 3, 4, 6, -2, 5.1}};
+sols1gt = matrix{{
+  -.83999999999999997p53 -.38032880511473233p53*ii,
+  30000000000000006p53e-1 -.11409864153441969p53e1*ii
+}}; -- ground truth solutions of target system
 
-p1 = transpose matrix{{2, 3, 4, 6, -2, 11.4}};
-x1gt = transpose matrix{{2,}}}; -- ground truth solutions of target system
 
-evaluate(GS,p1,x1gt) -- shoold be 0
+evaluate(GS,p1,sols1gt) -- shoold be 0
 
 -- p1 = {a, b, c, d, e, f};
 -- where {a*(x^2+y^2)+b*x+c, d*x+e*y+f}
@@ -94,27 +101,28 @@ evaluate(GS,p1,x1gt) -- shoold be 0
 -- Convert your physical data to the parameters here.
 -- p1 := data2parameters targetData; -- XXX just put any abcdef here
 
-P01 = p0||p1;
+P01 = p0 || transpose p1;
 
 -- Pro -------------------------------------------------------------------------
 -- P01 := (gammify p0)||(gammify p1); -- include Noob and Pro gammify
 -- XXX suggest how to write gammify function 
 
 -- Noob and Pro ----------------------------------------------------------------
-H01 := specialize(PH, P01);
-trackHomotopy(H01, sols0)
+H01 = specialize(PH, P01);
+sols1 = trackHomotopy(H01, sols0)
 
 -- Pro
 -- Pass options as 3rd argument that will override what was set with setDefault
-trackHomotopy(H01, sols0, NewOptions)
+-- trackHomotopy(H01, sols0, NewOptions)
 
 -- Evaluate check
 -- 
-evaluate(GS,p0,x0)
-evaluate(GS,p1,x1)
+
+print "Target found solutions should evaluate to 0:"
+print(apply(sols1, x -> evaluate(GS, point p1, x)))
 
 -- Pro -------------------------------------------------------------------------
--- J0 = evaluate(J,x0||p0); -- Evaluates Jacobian if desired
+-- J0 = evaluate(J,sols0||p0); -- Evaluates Jacobian if desired
 
 -- Pro -------------------------------------------------------------------------
 -- Example of technique to improve speed and robustness
@@ -123,9 +131,9 @@ evaluate(GS,p1,x1)
 -- (p,x)=fabricateChicago CC
 -- evaluate(F,x||p)
 -- 
--- (p0,x0) = fabricateChicago(CC)
--- evaluate(F,x0||p0)
--- --J0 = evaluate(J,x0||p0);
+-- (p0,sols0) = fabricateChicago(CC)
+-- evaluate(F,sols0||p0)
+-- --J0 = evaluate(J,sols0||p0);
 -- --272, 279, 286
 -- S = subsets(4,2)
 -- for s in S do (
@@ -133,15 +141,15 @@ evaluate(GS,p1,x1)
 --     Jpivots = flatten for i from 0 to 4 list {4*i+s#0,4*i+s#1};
 --     F' = F^(Jpivots);
 --     J'=diff(matrix{cameraVars},F');
---     J'0 = evaluate(J', x0||p0);
+--     J'0 = evaluate(J', sols0||p0);
 --     << J'0 << endl;
 --     S=first SVD J'0;
 --     << toString((max S)/(min S)) << endl;
 --     << S << endl;
 --     )
 -- 
--- norm evaluate(F',x0||p0)
--- transpose x0^{6..11} * p0^{39..44}
+-- norm evaluate(F',sols0||p0)
+-- transpose sols0^{6..11} * p0^{39..44}
 -- p0_(45,0)
 -- 
 -- netList rsort for k from 272 to 272+15-1 list (
@@ -149,7 +157,7 @@ evaluate(GS,p1,x1)
 --     Jpivots = {2, 3, 6, 7, 10, 11, 14, 15, 18, 19,k,numrows F-3,numrows F-2,numrows F-1};--rowSelector J0;
 --     F' = F^(Jpivots);
 --     J'=diff(matrix{cameraVars},F');
---     S = first SVD evaluate(J', x0||p0);
+--     S = first SVD evaluate(J', sols0||p0);
 --     c = (max S)/(min S);
 --     e = evaluate(diff(matrix{cameraVars},F^{k}),x||p);
 --     n = norm e;

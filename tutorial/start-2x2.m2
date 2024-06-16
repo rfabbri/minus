@@ -35,26 +35,8 @@
 
 -- code for generating various evaluators 
 restart -- only useful for debugging
-needsPackage "SLPexpressions"
-needsPackage "MonodromySolver"
 needs "MinusUtility.m2"
-
--- Noob---------------------------------------------------------------------------
--- Pro doesn't use declareVariable
-variables = declareVariable \ {x,y}
-params = declareVariable \ {a,b,c,d,e,f}
-
--- Noob and Pro ------------------------------------------------------------------
--- gateSystem exists only in M2 v 1.14
-GS = gateSystem(
-    matrix{params},
-    matrix{variables},
-    transpose matrix{
-	{a*(x^2+y^2)+b*x+c,
-	 d*x+e*y+f}
-	}
-    )
--------------------------------------------------------------------------------
+load "equations-2x2.m2"
 
 -- Pro 
 -- random seeds for reproducible runs
@@ -130,8 +112,8 @@ h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{symbols|{
 -- the command below won't work for most use cases
 -- except for e.g. linear in parameters
 -- Here you can write a random generator from parameters 
-(p0, x0) = createSeedPair GS    -- 
-print(evaluate(GS,p0,x0));
+(p0, sols0) = createSeedPair GS    -- 
+print(evaluate(GS,p0,sols0))
 
 -- Pro 1 -----------------------------------------------------
 --
@@ -175,7 +157,7 @@ print(evaluate(GS,p0,x0));
 --     (p, x)
 --     )
 
--- (p0, x0) = fabricateChicago(CC)   -- CC just means Complexes
+-- (p0, sols0) = fabricateChicago(CC)   -- CC just means Complexes
 
 -- filter path jumps during monodromy
 -- filterEval = (p,x) -> (
@@ -184,14 +166,14 @@ print(evaluate(GS,p0,x0));
 -- --    << "residual: " << resid << endl;
 --     (resid > 1e-4)
 --     )
--- filterEval(p0,x0)  ----------------------------------------------------------
+-- filterEval(p0,sols0)  ----------------------------------------------------------
 
 -- Noob 2
-(V,np) = monodromySolve(GS,p0,{x0},Verbose=>true,NumberOfNodes=>5) -- first try with default NumberOfNodes
+(V,np) = monodromySolve(GS,p0,{sols0},Verbose=>true,NumberOfNodes=>5) -- first try with default NumberOfNodes
 
 -- Pro 2 -------------------------------------------------------------------
 -- elapsedTime (V,np)= monodromySolve(PH, 
---     point p0, {point x0},Verbose=>true,
+--     point p0, {point sols0},Verbose=>true,
 --     FilterCondition=>filterEval,TargetSolutionCount=>312,SelectEdgeAndDirection=>selectBestEdgeAndDirection,
 --     Potential=>potentialE, Randomizer=>gammify)
 -------------------------------------------------------------------------------
