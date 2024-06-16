@@ -63,12 +63,12 @@ print_usage()
   R"(
   Input format:
 
-  a b c d e f       # can also be one per line, system is a(x^2 + y^2) + bx + c = 0 and dx + ey + f =0
+  areal aimag breal bimag creal cimag dreal dimag ereal eimag freal fimag       # can also be one per line, system is a(x^2 + y^2) + bx + c = 0 and dx + ey + f =0
 
                     # GROUND TRUTH (optional) if -gt flag provided, pass the ground truth here
-  x0 y0             # first solution, each of these are complex numbers
+  x0real x0imag y0real y0imag             # first solution, each of these are complex numbers
                     # second solution
-  x1 y1             #)".
+  x1real x1imag y1real y1imag     #)".
 
   exit(1);
 }
@@ -206,10 +206,10 @@ iread(std::istream &in)
   LOG("reading parameters a b c d e f directly."); // for other problems you may
                                                    // have to read data and
                                                    // convert to params
-  if (!read_block(in, data::params_start_target_+M::f::nparams, M::f::nparams))
+  if (!read_block(in, (F *)data::params_start_target_+M::f::nparams, M::f::nparams))
     return false;
   LOG("reading ground truth solutions");
-  if (ground_truth_ && !read_block(in, data::solutions_gt_, M::f::nsols))
+  if (ground_truth_ && !read_block(in, (F *)data::solutions_gt_, M::f::nsols))
     return false;
 }
 
@@ -237,6 +237,8 @@ iread(std::istream &in)
 // be it point-tangents as in Ric's format, be it a linecomplex as in Hongy's format
 //
 // This format is generic enough to be adapted to M2 or matlab
+//
+// TODO: general utility, move to base class
 template <typename F=double>
 static bool
 mread(std::istream &in)
@@ -263,6 +265,7 @@ mread(std::istream &in)
   return true;
 }
 
+// TODO: general utility, move to base class
 void
 print_settings(const M::track_settings &settings)
 {
@@ -297,7 +300,7 @@ process_args(int argc, char **argv)
   --argc; ++argv;
   // switches that can show up only in 1st position
   
-  enum {INITIAL_ARGS, AFTER_INITIAL_ARGS, IMAGE_DATA, MAX_CORR_STEPS, EPSILON} argstate = INITIAL_ARGS;
+  enum {INITIAL_ARGS, AFTER_INITIAL_ARGS, MAX_CORR_STEPS, EPSILON} argstate = INITIAL_ARGS;
   bool incomplete = false;
   std::string arg;
   if (argc) {
@@ -307,10 +310,6 @@ process_args(int argc, char **argv)
     if (arg == "-g" || arg == "--profile") {
       profile_ = true;
       argstate = AFTER_INITIAL_ARGS;
-      --argc; ++argv;
-    } else if (arg == "-i" || arg == "--image_data") {
-      image_data_ = true; 
-      argstate = IMAGE_DATA;
       --argc; ++argv;
     } else if (arg[0] != '-') {
       if (argc == 2) {
@@ -328,23 +327,6 @@ process_args(int argc, char **argv)
       LOG("parsing arg " + arg);
       
       // argstate >= AFTER_INITIAL_ARGS ----------------------------------------
-      if (argstate == IMAGE_DATA) {
-        if (arg == "-gt") {
-          ground_truth_ = true;
-          --argc; ++argv;
-          argstate = IMAGE_DATA;
-          continue;
-        }
-        if (arg == "-AB") {
-          two_problems_given_ = true;
-          --argc; ++argv;
-          argstate = IMAGE_DATA;
-          continue;
-        }
-        argstate = AFTER_INITIAL_ARGS;
-        continue;
-      }
-      
       if (argstate == MAX_CORR_STEPS) {
         settings_.max_corr_steps_ = std::stoi(arg);
         --argc; ++argv;

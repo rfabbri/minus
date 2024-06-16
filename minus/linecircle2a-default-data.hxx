@@ -86,12 +86,12 @@ default_params_start_target_gammified_[2*M::f::nparams] = {
   {-.15952718229455548, .98719353629830842},
   // plus nparams we dont statically initialize and fill later
   // in this case a b c d e and f for the line-circle eq
-  2,
-  3,
-  4,
-  6,
-  -2,
-  5.1 
+  {2, 0},
+  {3, 0},
+  {4, 0},
+  {6, 0},
+  {-2, 0},
+  {5.1, 0}
 };
 
 template <typename F>
