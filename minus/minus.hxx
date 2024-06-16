@@ -27,7 +27,7 @@ namespace MiNuS {
 using namespace Eigen; // only used for linear solve
 
 #include "chicago14a-lsolve.hxx"
-#include "linecircle-lsolve.hxx"
+#include "linecircle2a-lsolve.hxx"
 
 template <problem P, typename F>
 __attribute__((always_inline)) inline void

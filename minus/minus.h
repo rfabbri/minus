@@ -26,7 +26,6 @@ template <typename F>
 using C = typename std::complex<F>;
 
 // The problem solvers that this solver template currently supports
-enum problem {chicago14a, chicago6a, cleveland14a, phoenix10a /*, standard*/};
 enum problem {chicago14a, chicago6a, cleveland14a, phoenix10a, linecircle2a /*, standard*/};
 
 // The current best formulations for each problem
