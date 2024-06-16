@@ -1,7 +1,7 @@
 -- START-2x2                    Homotopy Continuation tutorial                  START-2x2
 --
 -- NAME
---      Fast HC Code Inteligencer - exactly how to craft your fast HC
+--      Fast HC Code Tutorial - exactly how to craft your fast HC
 --      Module: Start solution generator (a.k.a. training stage, run once offline)
 --
 -- DESCRIPTION
@@ -34,7 +34,6 @@
 --
 
 -- code for generating various evaluators 
-restart
 needsPackage "SLPexpressions"
 needsPackage "MonodromySolver"
 needs "MinusUtility.m2"
@@ -61,30 +60,31 @@ GS = gateSystem(
 -- setRandomSeed H#CLBlocks
 
 -- Noob and Pro ------------------------------------------------------------------
-symbols = flatten entries vars GS
 PH = parametricSegmentHomotopy GS
 
 -- Pro ---------------------------------------------------------------------------
 
 -- Set Monodromy tracker options here
 -- 
+-- This is for both monodromy and online tracking. You may want to use different
 -- null indicates default value 
+-- 
 -- TODO: show how to get default values here
-scan({CorrectorTolerance=>1e-4,
-	EndZoneFactor=>2e-1,
-	InfinityThreshold => 1e6, 
-	maxCorrSteps => 3, 
-	noOutput => true,
-	numberSuccessesBeforeIncrease => 2,
-	Precision => null,
-	Predictor => RungeKutta4,
-	stepIncreaseFactor => 2,
-	tStep => 5e-2,
-	tStepMin => 1e-5
-	}, 
-    opt -> setDefault(opt)) -- setDefault is in MonodromySolver
-
-setDefault(CorrectorTolerance=>1e-8)
+-- scan({CorrectorTolerance=>1e-4,
+-- 	EndZoneFactor=>2e-1,
+-- 	InfinityThreshold => 1e6, 
+-- 	maxCorrSteps => 3, 
+-- 	noOutput => true,
+-- 	numberSuccessesBeforeIncrease => 2,
+-- 	Precision => null,
+-- 	Predictor => RungeKutta4,
+-- 	stepIncreaseFactor => 2,
+-- 	tStep => 5e-2,
+-- 	tStepMin => 1e-5
+-- 	}, 
+--     opt -> setDefault(opt)) -- setDefault is in MonodromySolver
+-- 
+-- setDefault(CorrectorTolerance=>1e-8)
 
 -- Pro Gammify-style Randomization -------------------------------------------------
 
@@ -112,6 +112,7 @@ setDefault(CorrectorTolerance=>1e-8)
 -------------------------------------------------------------------------------
 
 -- HxHt
+symbols = flatten entries vars GS
 h=cCode(
     transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"Ht"),
     gateMatrix{symbols|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters}
@@ -126,9 +127,9 @@ h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{symbol|{P
 -- Noob 1 --------------------------------------------------------------------------
 -- monodromy needs an initial pair of parameter, solution
 -- the command below won't work for most use cases
--- ie) need 
--- XXX
-(p0, x0) = createSeedPair GS   
+-- except for e.g. linear in parameters
+-- Here you can write a random generator from parameters 
+(p0, x0) = createSeedPair GS    -- 
 
 -- Pro 1 -----------------------------------------------------
 --
@@ -184,7 +185,7 @@ h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{symbol|{P
 -- filterEval(p0,x0)  ----------------------------------------------------------
 
 -- Noob 2
-(V,np) = monodromySolve(GS,p0,{x0},Verbose=>true,NumberOfNodes=>5)
+(V,np) = monodromySolve(GS,p0,{x0},Verbose=>true,NumberOfNodes=>5) -- first try with default NumberOfNodes
 
 -- Pro 2 -------------------------------------------------------------------
 -- elapsedTime (V,np)= monodromySolve(PH, 
@@ -195,14 +196,16 @@ h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{symbol|{P
 
 
 -- Noob 3 -------------------------------------------------------------------
--- parameter point
-V.BasePoint
+-- Pro
+-- May want to inspect basepoint used for the initial solutions
+-- V.BasePoint;
 -- corresponding solutions
 points V.PartialSols 
+  sols = solutionsWithMultiplicity points V.PartialSols; -- solutionsWithMultiplicity only a safe option, can try remove
+                                                         -- it might speed up if removed
 
 -- Pro 3 --------------------------------------------------------------
 -- quality check
--- sols = solutionsWithMultiplicity points V.PartialSols;
 -- L = (sols/(x -> (
 -- 	o := (transpose matrix x) ||
 -- 	   (transpose matrix V.BasePoint);
@@ -211,4 +214,4 @@ points V.PartialSols
 -- 	)));
 -- summary L -------------------------------------------------------------------
 
-writeStartSys(V.BasePoint, sols, Filename => "startSys" | (toString CLBlocks#0)|(toString CLBlocks#1))
+writeStartSys(V.BasePoint, sols, Filename => "startSys")

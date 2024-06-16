@@ -38,7 +38,6 @@
 --      Ricardo Fabbri (C++ and M2) and Timothy Duff (M2)
 --
 
-restart
 needs "MinusUtility.m2"
 
 -- Pro -------------------------------------------------------------------------
@@ -102,9 +101,8 @@ trackHomotopy(H01, sols0, K)
 
 -- Evaluate check
 -- 
-F = xxx
-evaluate(F,x0||p0)
-evaluate(F,x1||p1)
+evaluate(GS,p0,x0)
+evaluate(GS,p1,x1)
 
 -- Pro -------------------------------------------------------------------------
 -- J0 = evaluate(J,x0||p0); -- Evaluates Jacobian if desired
