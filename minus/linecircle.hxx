@@ -1,11 +1,11 @@
-#ifndef chicago14a_hxx_
-#define chicago14a_hxx_
+#ifndef linecircle_hxx_
+#define linecircle_hxx_
 // to be included at the end of minus.hxx
 
 namespace MiNuS {
   
 template <typename F>
-struct eval<chicago14a, F> {
+struct eval<linecircle, F> {
   static void inline  __attribute__((always_inline)) Hxt(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y /*Hxt*/);
   static void inline  __attribute__((always_inline)) HxH(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
   static void inline  __attribute__((always_inline)) Hxt_constants(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y /*Hxt*/);
@@ -13,14 +13,14 @@ struct eval<chicago14a, F> {
   static void inline  __attribute__((always_inline)) HxH_constants_all_sols(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
 };
 
-#include "chicago14a-Hxt.hxx"
-#include "chicago14a-HxH.hxx"
+#include "linecircle-Hxt.hxx"
+#include "linecircle-HxH.hxx"
 
 // Problem and Formulation Paramers --------------------------------------------
 
 } // namespace minus
 
-#include "chicago14a-io.h"
+#include "linecircle-io.h"
 
 namespace MiNuS {
 
@@ -30,7 +30,7 @@ namespace MiNuS {
 // to gammify/randomize
 template <typename F>
 inline void 
-minus_io<chicago14a, F>::
+minus_io<linecircle, F>::
 lines2params(const F plines[pp::nvislines][io::ncoords2d_h], C<F> * __restrict params/*[static 2*M::nparams]*/)
 {
   typedef minus_util<F> util;
@@ -123,7 +123,7 @@ lines2params(const F plines[pp::nvislines][io::ncoords2d_h], C<F> * __restrict p
 //
 template <typename F>
 inline void 
-minus_io<chicago14a, F>::
+minus_io<linecircle, F>::
 gammify(C<F> * __restrict params /*[ chicago: M::nparams]*/)
 {
   typedef minus_util<F> util;
@@ -199,7 +199,7 @@ gammify(C<F> * __restrict params /*[ chicago: M::nparams]*/)
 
 template <typename F>
 bool 
-minus_io<chicago14a, F>::
+minus_io<linecircle, F>::
 point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F t[pp::nviews][pp::npoints][io::ncoords2d], unsigned i0, unsigned i1, F plines[pp::nvislines][io::ncoords2d_h])
 {
   typedef minus_3d<F> vec;
@@ -289,7 +289,7 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F 
 // gammified. 
 template <typename F>
 inline void
-minus_io<chicago14a, F>::
+minus_io<linecircle, F>::
 get_params_start_target(
     F plines[/*15 for chicago*/][io::ncoords2d_h], 
     C<F> * __restrict params/*[static 2*M::nparams]*/,
@@ -313,7 +313,7 @@ get_params_start_target(
 // 
 template <typename F>
 bool 
-minus_io<chicago14a, F>::
+minus_io<linecircle, F>::
 point_tangents2params(
     const F p[pp::nviews][pp::npoints][io::ncoords2d], 
     const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
@@ -333,7 +333,7 @@ point_tangents2params(
 // Same but for pixel input
 template <typename F>
 inline bool
-minus_io<chicago14a, F>::
+minus_io<linecircle, F>::
 point_tangents2params_img(
     const F p[pp::nviews][pp::npoints][io::ncoords2d], 
     const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
@@ -361,7 +361,7 @@ point_tangents2params_img(
 // Highlevel solver interface - Class minus ------------------------------------
 
 #include <thread>
-#include "chicago14a-default-data.h"
+#include "linecircle-default-data.h"
 
 namespace MiNuS {
 
@@ -396,7 +396,7 @@ namespace MiNuS {
 // 
 template <typename F>
 inline bool
-minus<chicago14a, F>::solve(
+minus<linecircle, F>::solve(
     const F p[pp::nviews][pp::npoints][io::ncoords2d], 
     const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
     F solutions_cams[M::nsols][pp::nviews-1][4][3],  // first camera is always [I | 0]
@@ -405,7 +405,7 @@ minus<chicago14a, F>::solve(
     unsigned nthreads
     )
 {
-  typedef minus_data<chicago14a,F> data;
+  typedef minus_data<linecircle,F> data;
   alignas(64) C<F> params[2*M::f::nparams];
   memcpy(params, data::params_start_target_, M::f::nparams*sizeof(C<F>));
   
@@ -447,7 +447,7 @@ minus<chicago14a, F>::solve(
 // 
 template <typename F>
 inline bool
-minus<chicago14a, F>::solve_img(
+minus<linecircle, F>::solve_img(
     const F K[/*3 or 2 ignoring last line*/][io::ncoords2d_h],
     const F p[pp::nviews][pp::npoints][io::ncoords2d], 
     const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
@@ -477,7 +477,7 @@ minus<chicago14a, F>::solve_img(
 // 
 template <typename F>
 inline bool 
-minus_io<chicago14a, F>::
+minus_io<linecircle, F>::
 has_valid_solutions(const typename M::solution solutions[M::nsols])
 {
   typedef minus_array<M::nve,F> v;
@@ -489,4 +489,4 @@ has_valid_solutions(const typename M::solution solutions[M::nsols])
 }
 
 } // namespace minus
-#endif // chicago14a_hxx_
+#endif // linecircle_hxx_
