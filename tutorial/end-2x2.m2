@@ -72,10 +72,6 @@ load "equations-2x2.m2"
 -- Read start system
 (p0,sols0) = readStartSys "startSys";
 
-print "Start solutions should evaluate to 0:"
-sols0 = flatten \ entries \ sols0 -- convert to list of list
-print(apply(sols0, x -> evaluate(GS, point p0, x)))
-
 -- Pro -------------------------------------------------------------------------
 -- verify options are set as desired
 -- netList((keys options trackHomotopy)/(opt ->(opt, getDefault opt)))
@@ -120,6 +116,11 @@ sols1 = trackHomotopy(H01, sols0)
 
 print "Target found solutions should evaluate to 0:"
 print(apply(sols1, x -> evaluate(GS, point p1, x)))
+
+print "Start solutions should evaluate to 0:"
+sols0 = point \ sols0 -- convert to list of list
+print(apply(sols0, x -> evaluate(GS, point p0, x)))
+
 
 -- Pro -------------------------------------------------------------------------
 -- J0 = evaluate(J,sols0||p0); -- Evaluates Jacobian if desired
