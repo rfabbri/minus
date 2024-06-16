@@ -182,3 +182,5 @@ scripts/synthdata/results-synth/
 tests/Fastor/
 original
 tutorial/startSys
+tutorial/HxH.cxx
+tutorial/HxHt.cxx
