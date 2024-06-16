@@ -1,4 +1,5 @@
 needsPackage "MonodromySolver"
+debug SLPexpressions
 -- Utilities to help iterface with Minus
 -- To be included ih other files
 

@@ -1,4 +1,4 @@
--- START-2x2                    Homotopy Continuation tutorial                  START-2x2
+-- START-LINECIRCLE             Homotopy Continuation tutorial          
 --
 -- NAME
 --      Fast HC Code Tutorial - exactly how to craft your fast HC
@@ -36,7 +36,7 @@
 -- code for generating various evaluators 
 restart -- only useful for debugging
 needs "MinusUtility.m2"
-load "equations-2x2.m2"
+load "equations-linecircle.m2"
 
 -- Pro 
 -- random seeds for reproducible runs
@@ -96,13 +96,13 @@ PH = parametricSegmentHomotopy GS
 
 -- HxHt
 symbols = flatten entries vars GS
-h=cCode(
+h=cCode("HxHt.cxx",
     transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"Ht"),
     gateMatrix{symbols|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters}
     )
 
 -- HxH
-h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{symbols|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters})
+h=cCode("HxH.cxx",transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{symbols|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters})
 
 -- Maybe useful
 -- cCode PH
