@@ -14,7 +14,7 @@ struct minus_io<linecircle, F> : public minus_io_14a<linecircle, F> {
   static constexpr unsigned nviews  = pp::nviews;
   static constexpr unsigned npoints = pp::npoints;
   // Input ---------------------------------------------------------------------
-  static void gammify(C<F> * __restrict params/*[ chicago: M::nparams]*/);
+  static void gammify(C<F> * __restrict params/*[ M::nparams]*/);
   // problem-specific input
   // Any function to convert data to parameters would go here
   // see point_tangents2params

@@ -118,7 +118,7 @@ namespace MiNuS {
 template <typename F>
 inline bool
 minus<linecircle, F>::solve(
-    const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
+    const C<F> params_final, // p1 in linecircle-end.m2 
     F solutions[M::nsols],  // first camera is always [I | 0]
     unsigned id_sols[M::nsols],
     unsigned *nsols_final,
@@ -129,8 +129,7 @@ minus<linecircle, F>::solve(
   alignas(64) C<F> params[2*M::f::nparams];
   memcpy(params, data::params_start_target_, M::f::nparams*sizeof(C<F>));
   
-  if (!io::point_tangents2params(p, tgt, id_tgt0, id_tgt1, params))
-    return false;
+  // You may want to convert your data e.g. points into params here
 
   alignas(64) typename M::solution solutions[M::nsols];
   alignas(64) typename M::track_settings settings = M::DEFAULT;
@@ -153,38 +152,10 @@ minus<linecircle, F>::solve(
   if (!io::has_valid_solutions(solutions))
     return false;
  
-  // you may want to decode solutions into a standar format, eg convert quaternions to 3x4 cams
+  // you may want to decode solutions into a standard format, eg convert quaternions to 3x4 cams
+  io::all_real_solutions(solutions, solutions_real, id_sols, nsols_final);
+
   return true;
-}
-
-// 
-// same as solve() but intrinsics not inverted (input is in actual pixel units)
-// returns false in case of numerical failure to find valid real solutions
-// 
-template <typename F>
-inline bool
-minus<linecircle, F>::solve_img(
-    const F K[/*3 or 2 ignoring last line*/][io::ncoords2d_h],
-    const F p[pp::nviews][pp::npoints][io::ncoords2d], 
-    const F tgt[pp::nviews][pp::npoints][io::ncoords2d], 
-    F solutions_cams[M::nsols][pp::nviews-1][4][3],  // first camera is always [I | 0]
-    unsigned id_sols[M::nsols],
-    unsigned *nsols_final,
-    unsigned nthreads)
-{
-  F pn[pp::nviews][pp::npoints][io::ncoords2d];
-  F tn[pp::nviews][pp::npoints][io::ncoords2d];
-  
-  // see if uno minus  default_gammas_m2 is less than 1
-  io::invert_intrinsics(K, p[0], pn[0], pp::npoints);
-  io::invert_intrinsics(K, p[1], pn[1], pp::npoints);
-  io::invert_intrinsics(K, p[2], pn[2], pp::npoints);
-  // don't use all three, but just invert all anyways.
-  io::invert_intrinsics_tgt(K, tgt[0], tn[0], pp::npoints);
-  io::invert_intrinsics_tgt(K, tgt[1], tn[1], pp::npoints);
-  io::invert_intrinsics_tgt(K, tgt[2], tn[2], pp::npoints);
-
-  return solve(pn, tn, solutions_cams, id_sols, nsols_final, nthreads);
 }
 
 //

@@ -301,6 +301,26 @@ RC_to_QT_format(const F rc[pp::nviews][4][3], F qt[M::nve])
   u::quat_transform(q2,dc, qt + 8 + 3);
 }
 
+// Returns all real solutions
+// The real_solutions array is fixed in size to NSOLS which is the max
+// number of solutions, which perfectly fits in memory. The caller must pass an
+// array with that minimum.
+template <problem P, typename F>
+inline void 
+minus_io_14a<P, F>::
+all_real_solutions(solution raw_solutions[M::nsols], F real_solutions[M::nsols][M::nve], 
+                   unsigned id_sols[M::nsols], unsigned *nsols_real)
+{
+  typedef minus_array<M::nve,F> v;
+  *nsols_final = 0;
+  id_sols[*nsols_final] = 0;
+  for (unsigned sol=0; sol < M::nsols; ++sol) {
+    if (raw_solutions[sol].status == M::REGULAR && v::get_real(raw_solutions[sol].x, real_solutions[*id_sols[nsols_final]]))
+      id_sols[(*nsols_final)++] = sol;
+  }
+}
+
+
 //
 // returns cameras[0:nsols_final][2][4][3]
 //
