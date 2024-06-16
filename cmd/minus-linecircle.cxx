@@ -151,7 +151,6 @@ mwrite(const M::solution s[M::nsols], const char *fname)
 }
 
 // Try to read n elements, filling in p in row-major order.
-// Only pure floats supported 
 // TODO: generic -- move to common io class
 template <typename F=double>
 static bool
@@ -207,10 +206,10 @@ iread(std::istream &in)
   LOG("reading parameters a b c d e f directly."); // for other problems you may
                                                    // have to read data and
                                                    // convert to params
-  if (!read_block(in, (F *)data::params_start_target_+M::f::nparams, M::f::nparams))
+  if (!read_block(in, data::params_start_target_+M::f::nparams, M::f::nparams))
     return false;
-  LOG("reading ground truth solutionss");
-  if (ground_truth_ && !read_block(in, (F *) data::solutions_gt_, M::f::nsols))
+  LOG("reading ground truth solutions");
+  if (ground_truth_ && !read_block(in, data::solutions_gt_, M::f::nsols))
     return false;
 }
 
