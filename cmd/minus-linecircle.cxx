@@ -26,8 +26,8 @@ using namespace std::chrono;
 #include <minus/debug-util.h>
 
 
-//  exit code. Conventions:
-//  0 (Zero)	Success
+// exit code. Conventions:
+// 0 (Zero)	Success
 // Non-zero	Failure
 // 2	Incorrect usage
 // 127	Command Not found
@@ -58,89 +58,18 @@ print_usage()
                "  minus -i       # (or --image_data) : reads point-tangents from stdin\n"
                "  minus -h       # (or --help) : print this help message\n"
                // "  minus -r       # (or --real)  :  outputs only real solutions\n"
-               "  minus -AB      # (or --two_problems) : continue between 2 given problems\n"
+               // "  minus -AB      # (or --two_problems) : continue between 2 given problems\n"
             <<
-  R"(-i | --image_data usage:
- 
-  Input format (notation _view_points_coords. any number of spaces and newlines optional. can be in
-  one row or one column as well). This input format assumes tangent data for
-  all points, but you specify which one to use in id0 and id1 below. When
-  --use_all_tangents is passed (TODO), will try to select the better conditioned / least degenerate tangents 
- 
-  p000 p001        # If continuing from a standard internal problem to a new problem A, this is problem A
-  p010 p011        # If continuing from two problems from A to B (flag -AB), this is also problem A
-  p020 p021
-  
-  p100 p101
-  p110 p111
-  p120 p121
-  
-  p100 p101
-  p110 p111
-  p120 p121
- 
-  t000 t001
-  t010 t011
-  t020 t021
-  
-  t100 t101
-  t110 t111
-  t120 t121
-  
-  t100 t101
-  t110 t111
-  t120 t121
-  
-  id0 id1           # id \in {0,1,2} of the point to consider the tangent
-  
-  K00 K01 K02       # intrinsic parameters: only these elements
-   0  K11 K22
+  R"(
+  Input format:
 
-  r000 r001 r002    # GROUND TRUTH (optional) if -gt flag provided, pass the ground truth here:
-  r010 r011 r012    # default camera format if synthcurves flag passed: 
-  r020 r021 r022    # just like a 3x4 [R|T] but transposed to better fit row-major:
-   c00  c01  c02    #         | R |
-                    # P_4x3 = | - |
-  r100 r101 r102    #         | C'|
-  r110 r111 r112    # 
-  r120 r121 r122    #  
-   c10  c11  c12    #                                                                                                                   # If two problems A->B are provided (flag -AB), this is only for problem B below
-                    #
-  r200 r201 r202    # 
-  r210 r211 r212    # 
-  r220 r221 r222    #
-   c20  c21  c22    # 
+  a b c d e f       # can also be one per line, system is a(x^2 + y^2) + bx + c = 0 and dx + ey + f =0
 
-  p000 p001         # If two problems A->B are provided (flag -AB), this is problem B
-  p010 p011
-  p020 p021
-  
-  p100 p101
-  p110 p111
-  p120 p121
-  
-  p100 p101
-  p110 p111
-  p120 p121
- 
-  t000 t001
-  t010 t011
-  t020 t021
-  
-  t100 t101
-  t110 t111
-  t120 t121
-  
-  t100 t101
-  t110 t111
-  t120 t121
-  
-  id0 id1           # id \in {0,1,2} of the point to consider the tangent
+                    # GROUND TRUTH (optional) if -gt flag provided, pass the ground truth here
+  x0 y0             # first solution, each of these are complex numbers
+                    # second solution
+  x1 y1             #)".
 
-  # One way to use this is 
-  #     synthdata | minus-linecircle -i
-  # where synthdata is provided in minus/scripts)";
-             
   exit(1);
 }
 

@@ -26,8 +26,8 @@ using namespace std::chrono;
 #include <minus/debug-util.h>
 
 
-//  exit code. Conventions:
-//  0 (Zero)	Success
+// exit code. Conventions:
+// 0 (Zero)	Success
 // Non-zero	Failure
 // 2	Incorrect usage
 // 127	Command Not found
@@ -62,7 +62,7 @@ print_usage()
             <<
   R"(-i | --image_data usage:
  
-  Input format (notation _view_points_coords. any number of spaces and newlines optional. can be in
+  Input format (indexing goes _view_points_coords. any number of spaces and newlines optional. can be in
   one row or one column as well). This input format assumes tangent data for
   all points, but you specify which one to use in id0 and id1 below. When
   --use_all_tangents is passed (TODO), will try to select the better conditioned / least degenerate tangents 
