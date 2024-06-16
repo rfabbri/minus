@@ -38,6 +38,7 @@
 --      Ricardo Fabbri (C++ and M2) and Timothy Duff (M2)
 --
 
+restart -- only useful for debugging
 needs "MinusUtility.m2"
 
 -- Pro -------------------------------------------------------------------------

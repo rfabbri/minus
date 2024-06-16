@@ -34,6 +34,7 @@
 --
 
 -- code for generating various evaluators 
+restart -- only useful for debugging
 needsPackage "SLPexpressions"
 needsPackage "MonodromySolver"
 needs "MinusUtility.m2"
@@ -43,7 +44,6 @@ needs "MinusUtility.m2"
 variables = declareVariable \ {x,y}
 params = declareVariable \ {a,b,c,d,e,f}
 
-evaluate(GS,p0,x0)
 -- Noob and Pro ------------------------------------------------------------------
 -- gateSystem exists only in M2 v 1.14
 GS = gateSystem(
@@ -120,7 +120,7 @@ h=cCode(
     )
 
 -- HxH
-h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{symbol|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters})
+h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{symbols|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters})
 
 -- Maybe useful
 -- cCode PH
@@ -131,6 +131,7 @@ h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{symbol|{P
 -- except for e.g. linear in parameters
 -- Here you can write a random generator from parameters 
 (p0, x0) = createSeedPair GS    -- 
+print(evaluate(GS,p0,x0));
 
 -- Pro 1 -----------------------------------------------------
 --
@@ -202,7 +203,7 @@ h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{symbol|{P
 -- V.BasePoint;
 -- corresponding solutions
 points V.PartialSols 
-  sols = solutionsWithMultiplicity points V.PartialSols; -- solutionsWithMultiplicity only a safe option, can try remove
+sols = solutionsWithMultiplicity points V.PartialSols; -- solutionsWithMultiplicity only a safe option, can try remove
                                                          -- it might speed up if removed
 
 -- Pro 3 --------------------------------------------------------------
