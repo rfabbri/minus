@@ -1,5 +1,5 @@
-#ifndef chicago14a_default_data_h_
-#define chicago14a_default_data_h_
+#ifndef linecircle_default_data_h_
+#define linecircle_default_data_h_
 // see .hxx for documentation
 
 #include "minus.h"
@@ -20,4 +20,4 @@ struct minus_data<linecircle,F> {
 
 } // namespace minus
 
-#endif   // chicago14a_default_data_h_
+#endif   // linecircle_default_data_h_

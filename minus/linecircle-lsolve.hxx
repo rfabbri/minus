@@ -1,4 +1,3 @@
-// Specific to Chicago
 // Solves Ax = b
 //
 // That is:

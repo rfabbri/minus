@@ -1,16 +1,21 @@
 needsPackage "MonodromySolver"
-debug SLPexpressions
+debug SLPexpressions -- for newprinttable
 -- Utilities to help iterface with Minus
 -- To be included ih other files
 
 -- Version of cCode that outputs to file other than stdout ---------------------------------------
-cCode (String, List,List) := (outfile, outputs,inputs) -> (
+cCode (String, List,List) := (outfile, outputs, inputs) -> (
+-- template <typename F>
+-- inline __attribute__((always_inline)) void 
+-- eval<chicago14a, F>::
+-- Hxt(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restrict uy /*Hxt*/) 
+-- header 
     f := openOut outfile;
     h := newPrintTable " = ";
     scan(inputs, g->printName(g,h));
     scan(outputs, g->printName(g,h));
-    f << "{" << endl;
-    scan(h#"#vars", i-> f << ("  C<F> &X"|i|" = x["|i|"];") << endl);
+    f << "{ // " << endl;
+    scan(h#"#vars",  i-> f << ("  const C<F> &X"|i|" = x["|i|"];") << endl);
     scan(h#"#lines", i-> f << ("  const C<F> "| h#i | ";") << endl);
     scan(#outputs, i-> f << ("  y["|i|"] = "|printName(outputs#i,h)|";") << endl); 
     f << "}";

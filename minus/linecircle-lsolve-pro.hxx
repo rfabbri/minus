@@ -1,4 +1,4 @@
-// Specific to Chicago
+// Specific to Lsolve-Pro
 // Solves Ax = b
 //
 // That is:
