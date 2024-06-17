@@ -9,7 +9,6 @@
 namespace MiNuS {
   
 template class minus_core<linecircle2a, double>;
-template struct minus_io_14a<linecircle2a, double>;
 template struct minus_io<linecircle2a, double>;
 template struct minus<linecircle2a, double>;
 template struct minus_data<linecircle2a, double>;

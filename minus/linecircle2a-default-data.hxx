@@ -122,6 +122,6 @@ solutions_gt_[M::nve] = {
 // tangents, we ask them as input anyways.
 // This is in pixel-based image coordinates. 
   
-r // namespace minus
+} // namespace minus
 
 #endif   // linecircle_default_data_hxx_

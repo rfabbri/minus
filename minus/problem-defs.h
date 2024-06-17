@@ -65,11 +65,11 @@ struct minus <P, F> {
 
   static bool solve(
     const C<F> params_final, // p1 in linecircle2a-end.m2 
-    F solutions[M::nsols],  // first camera is always [I | 0]
+    C<F> usolutions[M::nsols],  // first camera is always [I | 0] XXX
     unsigned id_sols[M::nsols],
     unsigned *nsols_final,
     unsigned nthreads
-    );
+  );
 };
 #undef P
 #endif  // problem_defs_h_

@@ -343,6 +343,10 @@ struct minus_io : public minus_io_common<F> {
   // Output --------------------------------------------------------------------
   static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
   // Utilities
+
+  static void all_regular_solutions(typename M::solution raw_solutions[M::nsols], C<F> regular_solutions[M::nsols][M::nve], 
+                   unsigned id_sols[M::nsols], unsigned *nsols_regular);
+
   static void all_real_solutions(typename M::solution raw_solutions[M::nsols], F real_solutions[M::nsols][M::nve], 
                      unsigned id_sols[M::nsols], unsigned *nsols_real);
 };

@@ -16,6 +16,7 @@ struct minus_data<linecircle2a,F> {
   alignas (64) static complex params_start_target_[2*M::f::nparams];
   alignas (64) static complex default_params_start_target_gammified_[2*M::f::nparams];
   static const complex *params_;
+  static complex solutions_gt_[M::nve];
 };
 
 } // namespace minus

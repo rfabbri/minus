@@ -71,24 +71,6 @@ gammify(C<F> * __restrict params /*[ chicago: M::nparams]*/)
   // see chigago14a.hxx gammify
 }
 
-// gammify_start_params: set to false if your start parameters are already
-// gammified. 
-template <typename F>
-inline void
-minus_io<linecircle2a, F>::
-get_params_start_target(
-    F plines[/*15 for chicago*/][io::ncoords2d_h], 
-    C<F> * __restrict params/*[static 2*M::nparams]*/,
-    bool gammify_start_params)
-{
-  // the user provides the start params in the first half of params.
-  // we fill the second half and gammify both.
-  lines2params(plines, params+M::f::nparams);
-  if (gammify_start_params)
-    gammify(params);
-  gammify(params+M::f::nparams);
-}
-
 } // namespace minus
 
 // Highlevel solver interface - Class minus ------------------------------------
@@ -114,12 +96,14 @@ namespace MiNuS {
 // array with that minimum.
 // 
 // returns false in case of numerical failure to find valid real solutions
+//
+// defined in problem-defs.h
 // 
 template <typename F>
 inline bool
 minus<linecircle2a, F>::solve(
     const C<F> params_final, // p1 in linecircle2a-end.m2 
-    F solutions[M::nsols],  // first camera is always [I | 0]
+    C<F> solutions_final[M::nsols],
     unsigned id_sols[M::nsols],
     unsigned *nsols_final,
     unsigned nthreads
@@ -153,7 +137,7 @@ minus<linecircle2a, F>::solve(
     return false;
  
   // you may want to decode solutions into a standard format, eg convert quaternions to 3x4 cams
-  io::all_real_solutions(solutions, solutions_real, id_sols, nsols_final);
+  io::all_regular_solutions(solutions, solutions_final, id_sols, nsols_final);
 
   return true;
 }

@@ -17,7 +17,7 @@
 // _really_ necessary:
 #define EIGEN_STRONG_INLINE __attribute__((always_inline)) inline
 //#include "Eigen-latest/Core"
-#include "Eigen/Core"
+#include "Eigen/Core" // enough for 14a
 
 #define unlikely(expr) __builtin_expect(!!(expr),0)
 #define likely(expr)   __builtin_expect(!!(expr),1)
@@ -317,6 +317,23 @@ all_real_solutions(typename M::solution raw_solutions[M::nsols], F real_solution
   for (unsigned sol=0; sol < M::nsols; ++sol) {
     if (raw_solutions[sol].status == M::REGULAR && v::get_real(raw_solutions[sol].x, real_solutions[*id_sols[nsols_real]]))
       id_sols[(*nsols_real)++] = sol;
+  }
+}
+
+template <problem P, typename F>
+inline void 
+minus_io<P, F>::
+all_regular_solutions(typename M::solution raw_solutions[M::nsols], C<F> regular_solutions[M::nsols][M::nve], 
+                   unsigned id_sols[M::nsols], unsigned *nsols_regular)
+{
+  typedef minus_array<M::nve,F> v;
+  *nsols_regular = 0;
+  id_sols[*nsols_regular] = 0;
+  for (unsigned sol=0; sol < M::nsols; ++sol) {
+    if (raw_solutions[sol].status == M::REGULAR) {
+      minus_array<M::f::nve,F>::copy(raw_solutions[sol].x, regular_solutions[*id_sols[nsols_regular]]);
+      id_sols[(*nsols_regular)++] = sol;
+    }
   }
 }
 
