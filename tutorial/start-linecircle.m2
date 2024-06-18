@@ -6,21 +6,21 @@
 --
 -- DESCRIPTION
 --      This script shows how to craft a fast solver for your problem
---      It is broken into Generic and Pro blocks
+--      It is broken into Generic ("Noob") and Pro blocks
 --
 --      The design-goal of the file is to closely match what will be in the fast C++
 --      solver, so you can start with a generic and incrementally craft and test out the pro features
 --      
 --      The file is not based on generic tutorial scripts. Rather, it is rather technical
 --      based on techniques that originally solved a very hard problem and for the
---      first time ever before, trifical pose from points and tangents Fabbri, etal, CVPR'10.
+--      first time ever before, trifocal pose from points and tangents Fabbri, etal, CVPR'10.
 --      It is important to keep in mind that, while there are novelties in the -- associated m2 
---      scripts of PLMP, this version of them is the definitive account
---      of what matterscarefully for writing a fast C++ solver
+--      scripts of Duff's PLMP, this version of them is the definitive account
+--      of what matters carefully for writing a fast C++ solver
 --
 -- LEGEND
 --      - Noob and Pro marked bellow mean Example (simple) and Pro (fast)
---      - YOU shows where can you make it faster for your problem
+--      - YOU shows places for you to fill in/customize/optimize for your problem
 
 -- OTHERS
 --      - Think of this as a prompt precise enough for LLM to help generate a fast solver
