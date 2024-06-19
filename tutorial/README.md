@@ -1,4 +1,4 @@
-# CVPR 204 fast Homotopy Continuation tutorial
+# CVPR 2024 fast Homotopy Continuation tutorial
 
 
 
