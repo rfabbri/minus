@@ -1,4 +1,4 @@
--- START-2x2                    Homotopy Continuation tutorial                  START-2x2
+-- START-LINECIRCLE             Homotopy Continuation tutorial          
 --
 -- NAME
 --      Fast HC Code Tutorial - exactly how to craft your fast HC
@@ -6,21 +6,21 @@
 --
 -- DESCRIPTION
 --      This script shows how to craft a fast solver for your problem
---      It is broken into Generic and Pro blocks
+--      It is broken into Generic ("Noob") and Pro blocks
 --
 --      The design-goal of the file is to closely match what will be in the fast C++
 --      solver, so you can start with a generic and incrementally craft and test out the pro features
 --      
 --      The file is not based on generic tutorial scripts. Rather, it is rather technical
 --      based on techniques that originally solved a very hard problem and for the
---      first time ever before, trifical pose from points and tangents Fabbri, etal, CVPR'10.
+--      first time ever before, trifocal pose from points and tangents Fabbri, etal, CVPR'10.
 --      It is important to keep in mind that, while there are novelties in the -- associated m2 
---      scripts of PLMP, this version of them is the definitive account
---      of what matterscarefully for writing a fast C++ solver
+--      scripts of Duff's PLMP, this version of them is the definitive account
+--      of what matters carefully for writing a fast C++ solver
 --
 -- LEGEND
 --      - Noob and Pro marked bellow mean Example (simple) and Pro (fast)
---      - YOU shows where can you make it faster for your problem
+--      - YOU shows places for you to fill in/customize/optimize for your problem
 
 -- OTHERS
 --      - Think of this as a prompt precise enough for LLM to help generate a fast solver
@@ -36,7 +36,7 @@
 -- code for generating various evaluators 
 restart -- only useful for debugging
 needs "MinusUtility.m2"
-load "equations-2x2.m2"
+load "equations-linecircle.m2"
 
 -- Pro 
 -- random seeds for reproducible runs
@@ -96,13 +96,14 @@ PH = parametricSegmentHomotopy GS
 
 -- HxHt
 symbols = flatten entries vars GS
-h=cCode(
-    transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"Ht"),
-    gateMatrix{symbols|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters}
-    )
+h=cCode(--"HxHt.cxx",
+        transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"Ht"),
+        gateMatrix{symbols|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters})
 
 -- HxH
-h=cCode(transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),gateMatrix{symbols|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters})
+h=cCode("HxH.cxx",
+        transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),
+        gateMatrix{symbols|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters})
 
 -- Maybe useful
 -- cCode PH

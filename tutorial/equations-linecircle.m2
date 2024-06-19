@@ -10,3 +10,10 @@ GS = gateSystem(
 	 d*x+e*y+f}
 	}
     )
+
+-- Pro 
+-- random seeds for reproducible runs
+-- setRandomSeed H#CLBlocks
+
+PH = parametricSegmentHomotopy GS
+

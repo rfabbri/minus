@@ -1,4 +1,4 @@
--- EX-RUN                     Homotopy Continuation Tutorial                      EX-RUN
+-- END-LINECIRCLE                     Homotopy Continuation Tutorial                   
 --
 -- NAME
 --      Fast HC Code Inteligencer - exactly how to craft your fast HC
@@ -40,7 +40,7 @@
 
 restart -- only useful for debugging
 needs "MinusUtility.m2"
-load "equations-2x2.m2"
+load "equations-linecircle.m2"
 
 -- Pro -------------------------------------------------------------------------
 --
