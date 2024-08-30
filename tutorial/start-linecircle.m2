@@ -96,7 +96,7 @@ PH = parametricSegmentHomotopy GS
 
 -- HxHt
 symbols = flatten entries vars GS
-h=cCode(--"HxHt.cxx",
+h=cCode("HxHt.cxx",
         transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"Ht"),
         gateMatrix{symbols|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters})
 
