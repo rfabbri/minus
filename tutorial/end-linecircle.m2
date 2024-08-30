@@ -88,7 +88,7 @@ sols1gt = matrix{{
 }}; -- ground truth solutions of target system
 
 
-evaluate(GS,p1,sols1gt) -- shoold be 0
+evaluate(GS,p1,sols1gt) -- should be 0
 
 -- p1 = {a, b, c, d, e, f};
 -- where {a*(x^2+y^2)+b*x+c, d*x+e*y+f}
