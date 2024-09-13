@@ -33,7 +33,7 @@ load("start-linecircle.m2")
 This will run monodromy to compute the solutions in your file.
 It will write out the following files into the current folder:
 
-- `startSys` : the start solution and corresponding base point (parameters).
+- `startSys` : the start solutions and corresponding base point (parameters).
   This is a text file in Macaulay format. It can be used both for your fast C++ solver,
   and for prototyping the fast online solution in the next step.
   
@@ -87,7 +87,7 @@ This will get you running the basic scripted solver in Macaulay.
 You can then follow the steps to produce a more optiized solver still in
 Macaulay as documented above for `linecircle`. 
 
-There are steps to now to generate your own C++ optimized solver within the
+There are steps to now generate your own C++ optimized solver within the
 Minus C++ framework. We are in the process of releasing the precise steps.
 An idea can be had in the toploevel `minus/README.md` file with accompanying
 videos. The final steps will be released soon.
