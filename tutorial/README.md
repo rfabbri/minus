@@ -1,4 +1,4 @@
-# CVPR 204 fast Homotopy Continuation tutorial
+# CVPR 2024 fast Homotopy Continuation tutorial
 
 A new polynomial systems can be solved in a number of ways within our framework,
 ranging from an initial Macaulay prototype, to a more advanced Macaulay
