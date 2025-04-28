@@ -371,8 +371,8 @@ print_settings(const M::track_settings &settings)
   for (int i=0; i < 7; ++i)
     std::cerr << names[i] << " = " << *ptr++ << std::endl;
   std::cerr << names[7] << " = " << settings.max_num_steps_ << std::endl;
-  std::cerr << names[8] << " = " << settings.num_successes_before_increase_ << std::endl;
-  std::cerr << names[9] << " = " << settings.max_corr_steps_ << std::endl;
+  std::cerr << names[8] << " = " << (int)settings.num_successes_before_increase_ << std::endl;
+  std::cerr << names[9] << " = " << (int)settings.max_corr_steps_ << std::endl;
   std::cerr << "---------------------------------------------------------------\n";
   #endif 
 }
