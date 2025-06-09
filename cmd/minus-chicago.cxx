@@ -289,8 +289,11 @@ iread(std::istream &in)
     LOG("reading ground truth cams");
     if (ground_truth_ && !read_block(in, (F *) data::cameras_gt_, io::pp::nviews*4*3))
       return false;
-    io::point_tangents2params_img(data::p_, data::tgt_, tgt_ids[0], tgt_ids[1],
-        data::K_, data::params_start_target_);
+    if (!io::point_tangents2params_img(data::p_, data::tgt_, tgt_ids[0], tgt_ids[1],
+        data::K_, data::params_start_target_)) {
+      LOG("Data configuration close to degenerate, discarding");
+      return false;
+    }
     reading_first_point_ = false;
   } else { // when reading second point B, do not gammify A again
     static constexpr bool gammify_target_problem = false;

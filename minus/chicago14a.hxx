@@ -214,11 +214,11 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F 
   if (v::area2(p[0][i0],p[0][i1],p[0][i2])  < eps ||  // retinal area.  Could be spherical area 
       v::area2(p[1][i0],p[1][i1],p[1][i2])  < eps || 
       v::area2(p[2][i0],p[2][i1],p[2][i2])  < eps) {
-      //    std::cerr << "MINUS: area error ------------------------\n";
-      //    std::cerr << "Areas: " << 
-      //      v::area2(p[0][i0],p[0][i1],p[0][i2]) << " "  << 
-      //      v::area2(p[1][i0],p[1][i1],p[1][i2]) << " " << 
-      //      v::area2(p[2][i0],p[2][i1],p[2][i2]) << std::endl;
+          std::cerr << "MINUS: area error ------------------------\n";
+          std::cerr << "Areas: " << 
+            v::area2(p[0][i0],p[0][i1],p[0][i2]) << " "  << 
+            v::area2(p[1][i0],p[1][i1],p[1][i2]) << " " << 
+            v::area2(p[2][i0],p[2][i1],p[2][i2]) << std::endl;
     return false;
   }
   
@@ -262,23 +262,23 @@ point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F 
       v::abs_angle_between_lines(plines[0], plines[12]) < eps ||
       v::abs_angle_between_lines(plines[1], plines[13]) < eps ||
       v::abs_angle_between_lines(plines[2], plines[14]) < eps) {
-//    std::cerr << "MINUS: angle error ------------------------\n";
-//    std::cerr << "Angles: " << 
-//          v::abs_angle_between_lines(plines[0], plines[9])  << " " << 
-//          v::abs_angle_between_lines(plines[1], plines[10]) << " " <<
-//          v::abs_angle_between_lines(plines[2], plines[11]) << " " <<
+    std::cerr << "MINUS: angle error ------------------------\n";
+    std::cerr << "Angles: " << 
+          v::abs_angle_between_lines(plines[0], plines[9])  << " " << 
+          v::abs_angle_between_lines(plines[1], plines[10]) << " " <<
+          v::abs_angle_between_lines(plines[2], plines[11]) << " " <<
 
-//          v::abs_angle_between_lines(plines[3], plines[9]) << " " <<
-//          v::abs_angle_between_lines(plines[4], plines[10]) << " " <<
-//          v::abs_angle_between_lines(plines[5], plines[11]) << " " <<
-//          
-//          v::abs_angle_between_lines(plines[6], plines[12]) << " " <<
-//          v::abs_angle_between_lines(plines[7], plines[13]) << " " <<
-//          v::abs_angle_between_lines(plines[8], plines[14]) << " " <<
-//          
-//          v::abs_angle_between_lines(plines[0], plines[12]) << " " <<
-//          v::abs_angle_between_lines(plines[1], plines[13]) << " " <<
-//          v::abs_angle_between_lines(plines[2], plines[14]);
+          v::abs_angle_between_lines(plines[3], plines[9]) << " " <<
+          v::abs_angle_between_lines(plines[4], plines[10]) << " " <<
+          v::abs_angle_between_lines(plines[5], plines[11]) << " " <<
+          
+          v::abs_angle_between_lines(plines[6], plines[12]) << " " <<
+          v::abs_angle_between_lines(plines[7], plines[13]) << " " <<
+          v::abs_angle_between_lines(plines[8], plines[14]) << " " <<
+          
+          v::abs_angle_between_lines(plines[0], plines[12]) << " " <<
+          v::abs_angle_between_lines(plines[1], plines[13]) << " " <<
+          v::abs_angle_between_lines(plines[2], plines[14]);
    return false;
   }
   
