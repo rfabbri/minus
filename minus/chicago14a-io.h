@@ -1,6 +1,5 @@
-#ifndef chicago14a_internals_h
-#define chicago14a_internals_h
-// TODO: rename to io
+#ifndef chicago14a_io_h
+#define chicago14a_io_h
 
 namespace MiNuS {
 
@@ -28,4 +27,4 @@ struct minus_io<chicago14a, F> : public minus_io_14a<chicago14a, F> {
 
 } // namespace minus
 
-#endif //chicago14a_internals_h
+#endif //chicago14a_io_h

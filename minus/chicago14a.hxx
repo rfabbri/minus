@@ -200,7 +200,7 @@ gammify(C<F> * __restrict params /*[ chicago: M::nparams]*/)
 template <typename F>
 bool 
 minus_io<chicago14a, F>::
-point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F t[pp::nviews][pp::npoints][io::ncoords2d], unsigned i0, unsigned i1, F plines[pp::nvislines][io::ncoords2d_h])
+point_tangents2lines(const F p[pp::nviews][pp::npoints][io::ncoords2d], const F t[pp::nviews][pp::npoints][io::ncoords2d], unsigned i0, unsigned i1, F plines[pp::nvislines][io::ncoords2d_h], bool prefilter_degeneracy)
 {
   typedef minus_3d<F> vec;
   typedef minus_array<M::nve,F> v;

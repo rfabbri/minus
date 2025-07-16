@@ -1,5 +1,5 @@
-#ifndef cleveland14a_internals_h
-#define cleveland14a_internals_h
+#ifndef cleveland14a_io_h
+#define cleveland14a_io_h
 
 namespace MiNuS {
   
@@ -27,4 +27,4 @@ struct minus_io<cleveland14a, F> : public minus_io_14a<cleveland14a, F> {
 
 } // namespace minus
 
-#endif //cleveland14a_internals_h
+#endif //cleveland14a_io_h
