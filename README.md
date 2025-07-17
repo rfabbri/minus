@@ -567,3 +567,4 @@ highlight](https://mathinstitutes.org/highlights/algebraic-computer-vision-advan
 * ``MiNuS + machine learning for optimizing certain problems:'' https://github.com/petrhruby97/learning_minimal 
 * ``MiNuS + quadrifocal geometry:'' https://github.com/petrhruby97/radial_quadrifocal
 * PS: These titles are an over-simplification of the linked papers
+* [ChangeLog](CHANGELOG.md): a curated list of recent changes
