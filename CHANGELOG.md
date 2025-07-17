@@ -8,7 +8,7 @@ All notable changes to MiNuS will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Commit caef5e51e48ee95f10f4d90e128b5e4770cfb345
+## 20250717 Commit caef5e51e48ee95f10f4d90e128b5e4770cfb345
 
 ### Added
 
