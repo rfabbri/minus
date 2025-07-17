@@ -563,8 +563,8 @@ the authors Leykin, Hauenstein and the latter by Fabbri. Minus received an [NSF 
 highlight](https://mathinstitutes.org/highlights/algebraic-computer-vision-advances-the-3d-reconstruction-of-curves-and-surfaces-from-multiple-views/).
 
 ## See also
-* ``MiNuS + GPU'': https://github.com/C-H-Chien/Homotopy-Continuation-Tracker-on-GPU
-* ``MiNuS + machine learning for optimizing certain problems:'' https://github.com/petrhruby97/learning_minimal 
-* ``MiNuS + quadrifocal geometry:'' https://github.com/petrhruby97/radial_quadrifocal
+* `MiNuS + GPU': https://github.com/C-H-Chien/Homotopy-Continuation-Tracker-on-GPU
+* `MiNuS + machine learning for optimizing certain problems:' https://github.com/petrhruby97/learning_minimal 
+* `MiNuS + quadrifocal geometry:' https://github.com/petrhruby97/radial_quadrifocal
 * PS: These titles are an over-simplification of the linked papers
 * [ChangeLog](CHANGELOG.md): a curated list of recent changes
