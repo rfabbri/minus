@@ -298,7 +298,7 @@ iread(std::istream &in)
     reading_first_point_ = false;
   } else { // when reading second point B, do not gammify A again
     static constexpr bool gammify_target_problem = false;
-    io::point_tangents2params_img(data::p_, data::tgt_, tgt_ids[0], tgt_ids[1],
+    io::point_tangents2params_img(ssettings_, data::p_, data::tgt_, tgt_ids[0], tgt_ids[1],
         data::K_, data::params_start_target_, gammify_target_problem);
   }
   return true;
