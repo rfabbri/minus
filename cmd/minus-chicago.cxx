@@ -153,7 +153,8 @@ bool image_data_ = false;
 bool profile_ = false;   // run some default solves for profiling
 const char *input_ = "stdin";
 const char *output_ = "stdout";
-M::track_settings settings_;
+M::track_settings settings_; // general homotopy settings
+M::f::settings ssettings_;   // specific settings (formulation-specific)
 
 void
 print_num_steps(M::solution solutions[M::nsols])
@@ -289,7 +290,7 @@ iread(std::istream &in)
     LOG("reading ground truth cams");
     if (ground_truth_ && !read_block(in, (F *) data::cameras_gt_, io::pp::nviews*4*3))
       return false;
-    if (!io::point_tangents2params_img(data::p_, data::tgt_, tgt_ids[0], tgt_ids[1],
+    if (!io::point_tangents2params_img(ssettings_, data::p_, data::tgt_, tgt_ids[0], tgt_ids[1],
         data::K_, data::params_start_target_)) {
       LOG("Data configuration close to degenerate, discarding");
       return false;
@@ -384,6 +385,7 @@ void
 process_args(int argc, char **argv)
 {
   settings_ = M::DEFAULT;
+  ssettings_ = M::f::DEFAULT;
   --argc; ++argv;
   // switches that can show up only in 1st position
   

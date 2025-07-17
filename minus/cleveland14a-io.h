@@ -5,7 +5,6 @@ namespace MiNuS {
   
 template <typename F>
 struct minus_io<cleveland14a, F> : public minus_io_14a<cleveland14a, F> {
-  // template specialization defined in problem-internals.h
   typedef problem_parameters<cleveland14a> pp;
   typedef minus_core<cleveland14a, F> M;
   typedef minus_io_common<F> io;

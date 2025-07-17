@@ -15,6 +15,31 @@ struct formulation_parameters<chicago14a> {
   //    pChart: 2xquaternions + 2translations + 1 homg coord per quat + 1 homg
   //    coord per [t01 t02] pair = 2*4+2*3+2+1 = 17
   //    internal note: see inGates in chicago.m2
+  struct settings;
+  static const settings DEFAULT;
+};
+
+// Settings specific to each formulation such as prefilters to reject bad input,
+// or postfilters to reject bad solutions
+struct formulation_parameters<chicago14a>::settings {
+  settings():
+  // Prefilter Parameters ------------------------------------------------------
+  // These parameters are used in precomputations, such as early detection of
+  // degeneracy before homotopy continuation
+  // 
+  // Very important to tune this as it will save a lot of time if trash is
+  // early-detected
+  // 
+    prefilter_degeneracy_(true),
+    prefilter_area_degeneracy_eps_(1e-4),
+    prefilter_angle_degeneracy_eps_(1e-4)
+  // Postfilter Parameters ------------------------------------------------------
+  // 
+  // TODO Epsilon for converting complex to real solutions etc.
+  { }
+  bool prefilter_degeneracy_; // prefilter degeneracy?
+  double prefilter_area_degeneracy_eps_;
+  double prefilter_angle_degeneracy_eps_;
 };
 
 template <>
