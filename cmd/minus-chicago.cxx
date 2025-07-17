@@ -358,6 +358,7 @@ void
 print_settings(const M::track_settings &settings)
 {
   #ifdef M_VERBOSE
+  {
   std::cerr << "Track settings ------------------------------------------------\n";
   const char *names[10] = {
     "init_dt_",
@@ -377,7 +378,21 @@ print_settings(const M::track_settings &settings)
   std::cerr << names[7] << " = " << settings.max_num_steps_ << std::endl;
   std::cerr << names[8] << " = " << (int)settings.num_successes_before_increase_ << std::endl;
   std::cerr << names[9] << " = " << (int)settings.max_corr_steps_ << std::endl;
+  }
+  
+  std::cerr << "Formulation-specific settings ---------------------------------\n";
+  {
+  const char *names[10] = {
+    "prefilter_degeneracy_",
+    "prefilter_area_degeneracy_eps_",
+    "prefilter_angle_degeneracy_eps_"
+  };
+  std::cerr << names[0] << " = " << ssettings_.prefilter_degeneracy_ << std::endl;
+  Float *ptr = (Float *) &settings;
+  for (int i=1; i < 3; ++i)
+    std::cerr << names[i] << " = " << *ptr++ << std::endl;
   std::cerr << "---------------------------------------------------------------\n";
+  }
   #endif 
 }
 
@@ -389,7 +404,10 @@ process_args(int argc, char **argv)
   --argc; ++argv;
   // switches that can show up only in 1st position
   
-  enum {INITIAL_ARGS, AFTER_INITIAL_ARGS, IMAGE_DATA, MAX_CORR_STEPS, EPSILON} argstate = INITIAL_ARGS;
+  enum {
+    INITIAL_ARGS, AFTER_INITIAL_ARGS, IMAGE_DATA, MAX_CORR_STEPS, 
+    EPSILON, FILTER_DEGENERACY
+  } argstate = INITIAL_ARGS;
   bool incomplete = false;
   std::string arg;
   if (argc) {
@@ -465,6 +483,20 @@ process_args(int argc, char **argv)
         --argc; ++argv;
         argstate = EPSILON;
         incomplete = true;
+        continue;
+      }
+      if (arg == "--prefilter_degeneracy=yes") {
+        --argc; ++argv;
+        ssettings_.prefilter_degeneracy_ = true;
+        argstate = AFTER_INITIAL_ARGS;
+        incomplete = false;
+        continue;
+      }
+      if (arg == "--prefilter_degeneracy=no") {
+        --argc; ++argv;
+        ssettings_.prefilter_degeneracy_ = false;
+        argstate = AFTER_INITIAL_ARGS;
+        incomplete = false;
         continue;
       }
       std::cerr << "minus: \033[1;91m error\e[m\n - unrecognized argument " << arg << std::endl;;
