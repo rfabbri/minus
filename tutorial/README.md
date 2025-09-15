@@ -1,11 +1,11 @@
-# CVPR 204 fast Homotopy Continuation tutorial
+# CVPR 2004 fast Homotopy Continuation tutorial
 
 A new polynomial systems can be solved in a number of ways within our framework,
 ranging from an initial Macaulay prototype, to a more advanced Macaulay
 prototype to a fast C++ version. From the initial prototype to the final C++
 code, there are a number of intermediate steps to follow. 
 
-In this tutorial ywe use a toy example codenamed `linecircle` which you can use
+In this tutorial we use a toy example codenamed `linecircle` which you can use
 as a template for your own solver. You should codename your own
 problem/formulation into a string, say, `problem1`, and follow what is done for
 linecircle to your own problem.
