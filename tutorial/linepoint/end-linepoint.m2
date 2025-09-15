@@ -40,7 +40,7 @@
 
 restart -- only useful for debugging
 needs "MinusUtility.m2"
-load "equations-linecircle.m2"
+load "equations-linepoint.m2"
 
 -- Pro -------------------------------------------------------------------------
 --
@@ -81,10 +81,10 @@ load "equations-linecircle.m2"
 -- Reads from file
 -- p1 = data2parameters("target_system_data.txt'); 
 
-p1 = matrix{{2, 3, 4, 6, -2, 5.1}};
+p1 = matrix{{1,-1 + 0*ii}};
 sols1gt = matrix{{
-  -.83999999999999997p53 -.38032880511473233p53*ii,
-  30000000000000006p53e-1 -.11409864153441969p53e1*ii
+        1 + 0*ii, 
+        1 + 0*ii
 }}; -- ground truth solutions of target system
 
 

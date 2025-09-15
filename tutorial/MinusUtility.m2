@@ -1,5 +1,5 @@
 needsPackage "MonodromySolver"
-debug SLPexpressions -- for newprinttable
+debug SLPexpressions -- for newPrintTable
 -- Utilities to help iterface with Minus
 -- To be included ih other files
 

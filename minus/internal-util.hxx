@@ -17,6 +17,8 @@ std::normal_distribution<F> minus_util<F>::gauss{0.0,1000.0};
 template <problem P, typename F> const typename 
 minus_core<P, F>::track_settings minus_core<P, F>::DEFAULT;
 
+const formulation_parameters<chicago14a>::settings formulation_parameters<chicago14a>::DEFAULT;
+
 } // namespace minus
 
 #endif // internal_util_hxx_

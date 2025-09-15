@@ -4,8 +4,11 @@
 ## MINUS: MInimial problem NUmerical continuation Solver 
 ![Build Status](https://github.com/rfabbri/minus/actions/workflows/compile_and_run_test.yml/badge.svg?branch=master)
 
-This package originated in solving medium-sized  (eg, degree > 100) square problems
-(ie, exactly-determined, 0-dimensional), notably in computer vision where
+**New!!!** Macaulay HC scripts available at minus/tutorial to help building your fast
+solver prototype.
+
+A C++ framework capable of solving medium-sized (eg, degree > 100) square
+polynomial systems (ie, exactly-determined, 0-dimensional), and which is currently *fastest than any other package* for the CPU, notably in computer vision where
 trifocal minimal problems from points and lines are of importance (as in
 curve-based structure from motion, where lines are tangents to curves).
 As of this date, such problems are too high degree to be solved symbolically,
@@ -560,7 +563,8 @@ the authors Leykin, Hauenstein and the latter by Fabbri. Minus received an [NSF 
 highlight](https://mathinstitutes.org/highlights/algebraic-computer-vision-advances-the-3d-reconstruction-of-curves-and-surfaces-from-multiple-views/).
 
 ## See also
-* ``MiNuS + GPU'': https://github.com/C-H-Chien/Homotopy-Continuation-Tracker-on-GPU
-* ``MiNuS + machine learning for optimizing certain problems:'' https://github.com/petrhruby97/learning_minimal 
-* ``MiNuS + quadrifocal geometry:'' https://github.com/petrhruby97/radial_quadrifocal
+* `MiNuS + GPU': https://github.com/C-H-Chien/Homotopy-Continuation-Tracker-on-GPU
+* `MiNuS + machine learning for optimizing certain problems:' https://github.com/petrhruby97/learning_minimal 
+* `MiNuS + quadrifocal geometry:' https://github.com/petrhruby97/radial_quadrifocal
 * PS: These titles are an over-simplification of the linked papers
+* [ChangeLog](CHANGELOG.md): a curated list of recent changes

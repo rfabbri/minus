@@ -35,8 +35,8 @@
 
 -- code for generating various evaluators 
 restart -- only useful for debugging
-needs "MinusUtility.m2"
-load "equations-linecircle.m2"
+needs "../MinusUtility.m2"
+load "equations-linepoint.m2"
 
 -- Pro 
 -- random seeds for reproducible runs
@@ -96,7 +96,7 @@ PH = parametricSegmentHomotopy GS
 
 -- HxHt
 symbols = flatten entries vars GS
-h=cCode("HxHt.cxx",
+h=cCode(--"HxHt.cxx",
         transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"Ht"),
         gateMatrix{symbols|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters})
 
@@ -113,7 +113,12 @@ h=cCode("HxH.cxx",
 -- the command below won't work for most use cases
 -- except for e.g. linear in parameters
 -- Here you can write a random generator from parameters 
-(p0, sols0) = createSeedPair GS    -- 
+-- (p0, sols0) = createSeedPair GS    -- 
+
+
+p0 = matrix {{1+0*ii,1+0*ii}}
+-- sols0: b = 1, a = -y/x = -1
+sols0 = matrix {{-1+0*ii,1+0*ii}}
 print(evaluate(GS,p0,sols0))
 
 -- Pro 1 -----------------------------------------------------
@@ -170,7 +175,7 @@ print(evaluate(GS,p0,sols0))
 -- filterEval(p0,sols0)  ----------------------------------------------------------
 
 -- Noob 2
-(V,np) = monodromySolve(GS,p0,{sols0},Verbose=>true,NumberOfNodes=>5) -- first try with default NumberOfNodes
+(V,np) = monodromySolve(GS,point p0,{point sols0},Verbose=>true,NumberOfNodes=>5) -- first try with default NumberOfNodes
 
 -- Pro 2 -------------------------------------------------------------------
 -- elapsedTime (V,np)= monodromySolve(PH, 
