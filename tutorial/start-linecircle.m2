@@ -116,6 +116,7 @@ h=cCode("HxH.cxx",
 -- except for e.g. linear in parameters
 -- Here you can write a random generator from parameters 
 (p0, sols0) = createSeedPair GS
+print "\nEvaluation of sols0 into system GS with parameters p0 should be 0:"
 print(evaluate(GS,p0,sols0))
 
 -- Pro 1 -----------------------------------------------------------------------
@@ -172,6 +173,7 @@ print(evaluate(GS,p0,sols0))
 -- filterEval(p0,sols0)  ----------------------------------------------------
 
 -- Noob 2 -------------------------------------------------------------------
+print "\nComputing all complex solutions of GS at p0 continuing from sols0:"
 (V,np) = monodromySolve(GS,p0,{sols0},Verbose=>true,NumberOfNodes=>5) -- first try with default NumberOfNodes
 
 -- Pro 2 --------------------------------------------------------------------
@@ -179,21 +181,28 @@ print(evaluate(GS,p0,sols0))
 --     point p0, {point sols0},Verbose=>true,
 --     FilterCondition=>filterEval,TargetSolutionCount=>312,SelectEdgeAndDirection=>selectBestEdgeAndDirection,
 --     Potential=>potentialE, Randomizer=>gammify)
+
+-- Pro May want to inspect basepoint used for the initial solutions
+-- V.BasePoint;
 -----------------------------------------------------------------------------
 
 
 -- Noob 3 -------------------------------------------------------------------
--- Pro
--- May want to inspect basepoint used for the initial solutions
--- V.BasePoint;
 -- corresponding solutions
-points V.PartialSols 
+points V.PartialSols   -- "Partial" here should have them all.
 sols = solutionsWithMultiplicity points V.PartialSols; 
+-- solutionsWithMultiplicity replaces clusters of approximately equal points 
+-- by single points with multiplicity
+-- 
 -- NOTE: solutionsWithMultiplicity is only a safe option, can try removing it.
 -- It might speed up if removed.
 
 -- Pro 3 --------------------------------------------------------------------
 -- quality check
+-- This may be used e.g. to force a recomputation / re-randomization to make sure
+-- the conditioning is as best as possible (smallest). To generate fast solvers
+-- one might want a well-conditioned start system
+-- 
 -- L = (sols/(x -> (
 -- 	o := (transpose matrix x) ||
 -- 	   (transpose matrix V.BasePoint);
@@ -202,4 +211,5 @@ sols = solutionsWithMultiplicity points V.PartialSols;
 -- 	)));
 -- summary L ----------------------------------------------------------------
 
+print "\nWriting start sols for system parameters V.BasePoint in startSys"
 writeStartSys(V.BasePoint, sols, Filename => "startSys")
