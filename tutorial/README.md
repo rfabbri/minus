@@ -1,7 +1,7 @@
 # CVPR 2024 fast Homotopy Continuation tutorial
 
-A new polynomial systems can be solved in a number of ways within our framework,
-ranging from an initial Macaulay prototype, to a more advanced Macaulay
+A new polynomial system can be solved in a number of ways within our framework,
+ranging from an initial Macaulay prototype, to a more advanced "Pro" Macaulay
 prototype to a fast C++ version. From the initial prototype to the final C++
 code, there are a number of intermediate steps to follow. 
 
@@ -63,7 +63,7 @@ additional parameters in Minus for performance.
 
 Inside the files `*-linecircle.m2` there are commented sections "Pro" after each
 Macaulay command detaling what can be done to optimize the code. Try to
-uncommment some of these and experiment with your code
+uncommment some of these and experiment with your code.
 
 ## Building a fast C++ solver
 
@@ -79,12 +79,12 @@ sections.
 
 ## Solving your own system
 
-Give your new problem a name, say `problem1`, you should first
+Give your new problem a name, say `problem1`. You should first
 copy the corresponding files in `minus/tutorial/*linecircle` by substituting the
 string `linecircle` to `problem1` in the filenames and their contents.
 
 This will get you running the basic scripted solver in Macaulay.
-You can then follow the steps to produce a more optiized solver still in
+You can then follow the steps to produce a more optimized solver still in
 Macaulay as documented above for `linecircle`. 
 
 There are steps to now generate your own C++ optimized solver within the
