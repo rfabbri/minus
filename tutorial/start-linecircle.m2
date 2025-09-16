@@ -11,9 +11,9 @@
 --      The design-goal of the file is to closely match what will be in the fast C++
 --      solver, so you can start with a generic and incrementally craft and test out the pro features
 --      
---      The file is not based on generic tutorial scripts. Rather, it is rather technical
+--      The file is not based on generic `tutorial-like' scripts. It is rather technical
 --      based on techniques that originally solved a very hard problem and for the
---      first time ever before, trifocal pose from points and tangents Fabbri, etal, CVPR'10.
+--      first time ever before, trifocal pose from points and tangents Fabbri, etal, CVPR'20.
 --      It is important to keep in mind that, while there are novelties in the associated m2 
 --      scripts of Duff's PLMP, this version of them is the definitive account
 --      of what matters carefully for writing a fast C++ solver
@@ -50,6 +50,8 @@ PH = parametricSegmentHomotopy GS
 -- Set Monodromy tracker options here
 -- 
 -- This is for both monodromy and online tracking. You may want to use different
+-- ones for each.
+--
 -- null indicates default value 
 -- 
 -- TODO: show how to get default values here
@@ -108,15 +110,15 @@ h=cCode("HxH.cxx",
 -- Maybe useful
 -- cCode PH
 
--- Noob 1 --------------------------------------------------------------------------
--- monodromy needs an initial pair of parameter, solution
+-- Noob 1 ----------------------------------------------------------------------
+-- Monodromy needs an initial pair of parameter, solution
 -- the command below won't work for most use cases
 -- except for e.g. linear in parameters
 -- Here you can write a random generator from parameters 
-(p0, sols0) = createSeedPair GS    -- 
+(p0, sols0) = createSeedPair GS
 print(evaluate(GS,p0,sols0))
 
--- Pro 1 -----------------------------------------------------
+-- Pro 1 -----------------------------------------------------------------------
 --
 -- YOU
 --    - write a specialized function to sample from the parameter space
@@ -167,17 +169,17 @@ print(evaluate(GS,p0,sols0))
 -- --    << "residual: " << resid << endl;
 --     (resid > 1e-4)
 --     )
--- filterEval(p0,sols0)  ----------------------------------------------------------
+-- filterEval(p0,sols0)  ----------------------------------------------------
 
--- Noob 2
+-- Noob 2 -------------------------------------------------------------------
 (V,np) = monodromySolve(GS,p0,{sols0},Verbose=>true,NumberOfNodes=>5) -- first try with default NumberOfNodes
 
--- Pro 2 -------------------------------------------------------------------
+-- Pro 2 --------------------------------------------------------------------
 -- elapsedTime (V,np)= monodromySolve(PH, 
 --     point p0, {point sols0},Verbose=>true,
 --     FilterCondition=>filterEval,TargetSolutionCount=>312,SelectEdgeAndDirection=>selectBestEdgeAndDirection,
 --     Potential=>potentialE, Randomizer=>gammify)
--------------------------------------------------------------------------------
+-----------------------------------------------------------------------------
 
 
 -- Noob 3 -------------------------------------------------------------------
@@ -186,10 +188,11 @@ print(evaluate(GS,p0,sols0))
 -- V.BasePoint;
 -- corresponding solutions
 points V.PartialSols 
-sols = solutionsWithMultiplicity points V.PartialSols; -- solutionsWithMultiplicity only a safe option, can try remove
-                                                         -- it might speed up if removed
+sols = solutionsWithMultiplicity points V.PartialSols; 
+-- NOTE: solutionsWithMultiplicity is only a safe option, can try removing it.
+-- It might speed up if removed.
 
--- Pro 3 --------------------------------------------------------------
+-- Pro 3 --------------------------------------------------------------------
 -- quality check
 -- L = (sols/(x -> (
 -- 	o := (transpose matrix x) ||
@@ -197,6 +200,6 @@ sols = solutionsWithMultiplicity points V.PartialSols; -- solutionsWithMultiplic
 -- 	S := first SVD evaluate(J',o);
 -- 	log10((max S)/(min S))
 -- 	)));
--- summary L -------------------------------------------------------------------
+-- summary L ----------------------------------------------------------------
 
 writeStartSys(V.BasePoint, sols, Filename => "startSys")
