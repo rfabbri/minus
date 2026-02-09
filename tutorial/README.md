@@ -81,24 +81,24 @@ sections.
 
 Give your new problem a name, say `problem1`. 
 
-### Step 1 build generic Macaulay2 scrips for your polynomial system
+### 1 build generic Macaulay2 scrips for your polynomial system
 You should first
 copy the corresponding files in `minus/tutorial/*linecircle` by substituting the
 string `linecircle` to `problem1` in the filenames and their contents.
 
 This should get you running the basic scripted solver in Macaulay.
 
-### Step 2 fine-tune your Macaulay2 scrips
+### 2 fine-tune your Macaulay2 scrips
 You can then follow the steps to produce a more optimized solver still in
 Macaulay as documented above for `linecircle`. 
 
-### Step 3 C++ fast solver
+### 3 C++ fast solver
 There are steps to now generate your own C++ optimized solver within the
 Minus C++ framework. We are in the process of releasing the precise steps.
 An idea can be had in the toplevel `minus/README.md` file with accompanying
 videos. The final steps will be released soon, but you can start with.
 
-#### Step 3.1 define a tag ID for your polynomial system
+#### 3.1 define a tag ID for your polynomial system
 The tag encodes a specific problem, and a specific formulation and optimization
 Example: linecircle2a  is <problem><system size><formulation tag>, where
 
@@ -119,9 +119,36 @@ formulation and specific solver 'a' which corresponds to a certain
 Cayley/homogeneous quaternion formulation. 
 
 
-#### Step 3.2 fill in minus.h header with the polynomial system ID tag
+#### 3.2 fill in minus.h header with the polynomial system ID tag
 
 Everywhere the sample tag linecircle2a appears, adapt to your system ID tag.
-Currently this is only two lines in minus.h
+Currently this is only two lines in minus.h to edit.
+
+##### 3.2.1 Fill parameters.h (included by minus.h) with the include for your polynomial system
+
+##### 3.2.2 Fill problem-defs (included by minus.h) with a specialized struct for your problem
+
+
+#### 3.3 copy linecircle2a.h to yor system_id_tag.h and adapt it
+
+Fill in this file with the number of solutions, etc.
+
+#### 3.4 copy linecircle2a.hxx to yor system_id_tag.h and adapt it
+
+The file linecircle2a.hxx has Noob/Pro markings on it to help adapt this file
+
+XXX 
+
+#### 3.5 copy Macaulay2-generated C++ evaluators to Minus
+
+Copy linecircle-Hxt.hxx to system_id_tag-Hxt.hxx and adapt, using
+Macaulay2-generated c++ code
+
+Copy linecircle-HxH.hxx to system_id_tag-HxH.hxx and adapt, using
+Macaulay2-generated c++ code
+
+
+#### 3.6 write basic functions used in I/O
+Adapt linecircle2a-io.h to your problem
 
 
