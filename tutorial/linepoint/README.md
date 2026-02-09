@@ -1,6 +1,6 @@
 # Line - Point problem
 
-Problem: find a line that passes to a given point.
+Problem: find a line through the origin that passes through a given point.
 
 The variables are the coefficients of the line
 
@@ -9,7 +9,7 @@ An auxiliary eq is necessary b = 1 (in Chicago this is a random linear constrain
 
 ### 
 
-Note: MonodromySolve has no real function here . It will be passed a single
+Note: MonodromySolve has no real function here. It will be passed a single
 parameter/solution pair, and will output a single problem,solution pair.
 One would think it wouldn't alter that only solution we gave it,
 but it does:

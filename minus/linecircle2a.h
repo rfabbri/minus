@@ -5,8 +5,6 @@ template <>
 struct formulation_parameters<linecircle2a> {
   static constexpr unsigned nsols = 2;    // number of solutions
   static constexpr unsigned nve = 2;      // size of the system (Number of Variables or Equations)
-                                          // this formulation: two quaternions and 
-                                          // two translation vectors
   static constexpr unsigned nparams = 6;  // number of parameters
 };
 
