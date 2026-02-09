@@ -96,13 +96,13 @@ PH = parametricSegmentHomotopy GS
 
 -------------------------------------------------------------------------------
 
--- HxHt
+-- write out HxHt evaluator code to be used in C++
 symbols = flatten entries vars GS
 h=cCode("HxHt.cxx",
         transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"Ht"),
         gateMatrix{symbols|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters})
 
--- HxH
+-- write out HxH evaluator code to be used in C++
 h=cCode("HxH.cxx",
         transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),
         gateMatrix{symbols|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters})

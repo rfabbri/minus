@@ -17,7 +17,7 @@
 --      The file is not based on generic tutorial scripts. It is rather technical
 --      based on techniques that originally solved a very hard problem and for the
 --      first time ever before, trifical pose from points and tangents Fabbri, etal, CVPR'20.
---      It is important to keep in mind that, while there are novelties in the -- associated m2 
+--      It is important to keep in mind that, while there are novelties in the associated m2 
 --      scripts of PLMP, this version of them is the definitive account
 --      of what matterscarefully for writing a fast C++ solver
 --    

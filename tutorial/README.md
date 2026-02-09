@@ -42,7 +42,7 @@ It will write out the following files into the current folder:
 
 ### Solver for any target system in Macaulay
 
-In file `end-linecircle.m2` variable `p1` will hold the desired target parameters.
+In the script `end-linecircle.m2` variable `p1` will hold the desired target parameters.
 For real problems, p1 will be constructed from problem data, say, image
 correspondences.
 
@@ -79,15 +79,49 @@ sections.
 
 ## Solving your own system
 
-Give your new problem a name, say `problem1`. You should first
+Give your new problem a name, say `problem1`. 
+
+### Step 1 build generic Macaulay2 scrips for your polynomial system
+You should first
 copy the corresponding files in `minus/tutorial/*linecircle` by substituting the
 string `linecircle` to `problem1` in the filenames and their contents.
 
-This will get you running the basic scripted solver in Macaulay.
+This should get you running the basic scripted solver in Macaulay.
+
+### Step 2 fine-tune your Macaulay2 scrips
 You can then follow the steps to produce a more optimized solver still in
 Macaulay as documented above for `linecircle`. 
 
+### Step 3 C++ fast solver
 There are steps to now generate your own C++ optimized solver within the
 Minus C++ framework. We are in the process of releasing the precise steps.
-An idea can be had in the toploevel `minus/README.md` file with accompanying
-videos. The final steps will be released soon.
+An idea can be had in the toplevel `minus/README.md` file with accompanying
+videos. The final steps will be released soon, but you can start with.
+
+#### Step 3.1 define a tag ID for your polynomial system
+The tag encodes a specific problem, and a specific formulation and optimization
+Example: linecircle2a  is <problem><system size><formulation tag>, where
+
+<problem> = a non-numeric short string naming your problem (eg, linecircle)
+<system size> = number of variables or equations of the square system (eg, 2 for 2x2)
+<formulation tag> = a letter (or any string) to identify the specific
+                    formulation. A formulation is a special set of equations and
+                    solver optimizations. Eg, linecircle2a means formulation
+                    'a', which represents a circle as a quadratic cartesian equation,
+                    and a line as a homogeneous equation of degree 1, with
+                    specific code optimizations. You could technically break
+                    this tag into more informative components if you are
+                    experimenting with diverse equations, representations,
+                    coordinates, and source code optimizations.
+
+Examples: chicago14a means a trifocal problem codenamed chicago, 14x14,
+formulation and specific solver 'a' which corresponds to a certain
+Cayley/homogeneous quaternion formulation. 
+
+
+#### Step 3.2 fill in minus.h header with the polynomial system ID tag
+
+Everywhere the sample tag linecircle2a appears, adapt to your system ID tag.
+Currently this is only two lines in minus.h
+
+
