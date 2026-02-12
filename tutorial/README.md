@@ -12,19 +12,18 @@ linecircle to your own problem.
 
 ## Running the example Macaulay template
 
-The example is called linecircle and computes the intersection of a line and a
-circle.
+The example is called linecircle, stored in its own folder linecircle/
+It simply computes the intersection of a line and a circle.
 
 The equations are stored in: `equations-linecircle.m2`
 
 ### Solve the start solutions in Macaulay
 
-In a terminal, start Macaulay2, typing:
+In a terminal, start Macaulay2, by typing:
 ```bash
 m2
 ```
-
-Then
+inside `linecircle/`. Then
 
 ```
 load("start-linecircle.m2")
