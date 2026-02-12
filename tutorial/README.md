@@ -122,7 +122,6 @@ Cayley/homogeneous quaternion formulation.
 #### 3.2 fill in minus.h header with the polynomial system ID tag
 
 Everywhere the sample tag linecircle2a appears, adapt to your system ID tag.
-Currently this is only two lines in minus.h to edit.
 
 ##### 3.2.1 Fill parameters.h (included by minus.h) with the include for your polynomial system
 

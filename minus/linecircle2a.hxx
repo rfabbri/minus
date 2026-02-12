@@ -102,7 +102,7 @@ namespace MiNuS {
 template <typename F>
 inline bool
 minus<linecircle2a, F>::solve(
-    const C<F> params_final, // p1 in linecircle2a-end.m2 
+    const C<F> params_final, // p1 in end-linecircle2a.m2 
     C<F> solutions_final[M::nsols],
     unsigned id_sols[M::nsols],
     unsigned *nsols_final,

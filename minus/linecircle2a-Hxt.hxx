@@ -1,7 +1,20 @@
-// Evaluates Hx and H at the same time, reusing expressions.
+// Evaluates Hx and Ht at the same time, reusing expressions.
 // 
-// Map from a multivariate poly with x 127-dimensional to y NVExNVEPLUS1 dimensional
-// Where 127 = 14 for x, 1 for t, 2*56 total parameters. Returns where y = [Hx|H]
+// Maps from a multivariate polynomial with variables x and parameters
+// uparams, to y = [Hx|Ht]. 
+//
+// INPUT 
+//    x, 3-dimensional: 2 for variables (x1,x2), 1 for t
+//    params, 12-dimensional: 6 parameters for start system, 
+//                            6 for target system.
+// 
+// OUTPUT 
+//    y, NVExNVEPLUS1-dimensional
+// 
+// see tutorial/*/start-*.m2 to see how to generate these from equations in
+// Macaulay2, e.g.:
+// 
+// cCode(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"Ht",gateMatrix{cameraVars})
 // 
 template <typename F>
 inline __attribute__((always_inline)) void 

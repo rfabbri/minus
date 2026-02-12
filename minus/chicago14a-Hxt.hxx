@@ -1,18 +1,19 @@
-// to be included at the end of minus.hxx
-
 // Evaluates Hx and Ht at the same time, reusing expressions.
 // 
-// Map from a multivariate poly with x 127-dimensional to y NVExNVEPLUS1 dimensional
-// Where 127 = 14 for x, 1 for t, 2*56 total parameters. Returns y = [Hx|Ht]
+// Maps from a multivariate polynomial whose variables and parameters are
+// encoded in x, to y = [Hx|Ht]. 
+//
+// input x is 127-dimensional: 14 for variables, 1 for t, and 2*56 total parameters. 
+// 
+// output y is NVExNVEPLUS1-dimensional
+// 
+// see tutorial/*/start-*.m2 or scripts/eval_monodromy_demo.m2 to see how to
+// generate these from equations in Macaulay2, e.g.:
 // 
 // cCode(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"Ht",gateMatrix{cameraVars})
 //
-// PH = gate parameter homotopy
 //
-// see scripts/eval_monodromy_demo.m2 to see how to generate these from
-// equations
 // 
-// (Ask Tim for the way to use cCode so that the input orders are like this.
 template <typename F>
 inline __attribute__((always_inline)) void 
 eval<chicago14a, F>::

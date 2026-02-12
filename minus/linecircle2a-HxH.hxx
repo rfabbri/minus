@@ -1,7 +1,7 @@
 // Evaluates Hx and H at the same time, reusing expressions.
 // 
-// Map from a multivariate poly with x 127-dimensional to y NVExNVEPLUS1 dimensional
-// Where 127 = 14 for x, 1 for t, 2*56 total parameters. Returns where y = [Hx|H]
+// Map from a multivariate poly with x 14-dimensional to y NVExNVEPLUS1 dimensional
+// Where 14 for x, 1 for t, 2*56 total parameters. Returns where y = [Hx|H]
 // 
 // cCode(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H",gateMatrix{cameraVars})
 // (Ask Tim for the way to use cCode so that the input orders are like this.

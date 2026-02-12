@@ -89,10 +89,14 @@ memoize_HxH(C<F> __restrict *block/*, C<F> * __restrict memo*/ /* constants */)
 }
 
 // THE MEAT //////////////////////////////////////////////////////////////////////
-// t: tracker settings
-// s_sols: start sols      
-// params: params of target as specialized homotopy params - P01 in SolveChicago
-// compute solutions sol_min...sol_max-1 within NSOLS
+//
+// INPUT
+//    s: tracker settings
+//    s_sols: start sols      
+//    params: params of start system, and of target system as specialized homotopy params (P01 in SolveChicago)
+//    
+// OUTPUT
+//    raw_solutions: compute solutions sol_min...sol_max-1 within all nsols
 // 
 template <problem P, typename F> void 
 minus_core<P, F>::
@@ -774,8 +778,8 @@ normalize_lines(F lines[][ncoords2d_h], unsigned nlines)
 
 } // namespace minus
 
-#include "chicago14a.hxx"      // specific implementation of chicago 14a formulation
-#include "linecircle2a.hxx"      // specific implementation of chicago 14a formulation
+#include "chicago14a.hxx"      // specific implementation of chicago problem, 14a formulation
+#include "linecircle2a.hxx"      // specific implementation of linecircle problem, 2a formulation
 //#include "cleveland14a.hxx"      // specific implementation of cleveland 14a formulation now in PLMP
 // #include <minus/phoenix10a.hxx>      // specific implementation of chicago 14a formulation
 // #include "chicago6a.hxx"
