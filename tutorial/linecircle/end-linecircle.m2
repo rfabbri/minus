@@ -14,7 +14,7 @@
 --      The design-goal of the file is to closely match what will be in the fast C++
 --      solver, so you can start with a generic and incrementally craft and test out the pro features
 --      
---      The file is not based on generic tutorial scripts. It is rather technical
+--      The file is not based on generic tutorial scripts. Rather, it is rather technical
 --      based on techniques that originally solved a very hard problem and for the
 --      first time ever before, trifical pose from points and tangents Fabbri, etal, CVPR'20.
 --      It is important to keep in mind that, while there are novelties in the associated m2 
@@ -82,10 +82,9 @@ print "Reading start system startSys."
 -- Reads from file
 -- p1 = data2parameters("target_system_data.txt'); 
 
--- Parameters defining the system we want to solve
+-- Parameters defining the target system we want to solve
 p1 = matrix{{2, 3, 4, 6, -2, 5.1}};
--- recall p1 = {a, b, c, d, e, f};
--- where {a*(x^2+y^2)+b*x+c, d*x+e*y+f}
+-- recall parameters from equations file
 
 -- Ground-truth solutions we know before hand, just for validation
 sols1gt = matrix{{
@@ -103,7 +102,7 @@ print evalresults
 -- p1 := data2parameters targetData; -- XXX just put any abcdef here
 
 P01 = p0 || transpose p1; -- cat start and end parameters 
- 
+
 -- Pro -------------------------------------------------------------------------
 -- P01 := (gammify p0)||(gammify p1); -- include Noob and Pro gammify
 -- TODO suggest how to write gammify function
