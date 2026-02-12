@@ -6,9 +6,9 @@ GS = gateSystem(
     matrix{params},
     matrix{variables},
     transpose matrix{
-	{a*(x^2+y^2)+b*x+c,
-	 d*x+e*y+f}
-	}
+      {a*(x^2+y^2)+b*x+c,
+       d*x+e*y+f}
+      }
     )
 
 -- Pro 
@@ -16,4 +16,3 @@ GS = gateSystem(
 -- setRandomSeed H#CLBlocks
 
 PH = parametricSegmentHomotopy GS
-

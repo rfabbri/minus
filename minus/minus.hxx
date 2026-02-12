@@ -93,7 +93,9 @@ memoize_HxH(C<F> __restrict *block/*, C<F> * __restrict memo*/ /* constants */)
 // INPUT
 //    s: tracker settings
 //    s_sols: start sols      
-//    params: params of start system, and of target system as specialized homotopy params (P01 in SolveChicago)
+//    params: parameters of the homotopy between start and end system. This is currently the
+//            parameters of the start system, followed by that of of target system as
+//            specialized homotopy params (P01 in SolveChicago)
 //    
 // OUTPUT
 //    raw_solutions: compute solutions sol_min...sol_max-1 within all nsols

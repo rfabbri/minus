@@ -11,10 +11,10 @@
 --      The design-goal of the file is to closely match what will be in the fast C++
 --      solver, so you can start with a generic and incrementally craft and test out the pro features
 --      
---      The file is not based on generic `tutorial-like' scripts. It is rather technical
+--      The file is not based on generic tutorial scripts. Rather, it is rather technical
 --      based on techniques that originally solved a very hard problem and for the
---      first time ever before, trifocal pose from points and tangents Fabbri, etal, CVPR'20.
---      It is important to keep in mind that, while there are novelties in the associated m2 
+--      first time ever before, trifocal pose from points and tangents Fabbri, etal, CVPR'10.
+--      It is important to keep in mind that, while there are novelties in the -- associated m2 
 --      scripts of Duff's PLMP, this version of them is the definitive account
 --      of what matters carefully for writing a fast C++ solver
 --
@@ -35,15 +35,8 @@
 
 -- code for generating various evaluators 
 restart -- only useful for debugging
-needs "MinusUtility.m2"
+needs "../MinusUtility.m2"
 load "equations-linecircle.m2"
-
--- Pro 
--- random seeds for reproducible runs
--- setRandomSeed H#CLBlocks
-
--- Noob and Pro ------------------------------------------------------------------
-PH = parametricSegmentHomotopy GS
 
 -- Pro ---------------------------------------------------------------------------
 
@@ -189,8 +182,8 @@ print "\nComputing all complex solutions of GS at p0 continuing from sols0:"
 
 -- Noob 3 -------------------------------------------------------------------
 -- corresponding solutions
-points V.PartialSols   -- "Partial" here should have them all.
-sols = solutionsWithMultiplicity points V.PartialSols; 
+points V.PartialSols   -- Despite the name "partial", should have them all.
+sols = solutionsWithMultiplicity points V.PartialSols;
 -- solutionsWithMultiplicity replaces clusters of approximately equal points 
 -- by single points with multiplicity
 -- 
@@ -209,7 +202,7 @@ sols = solutionsWithMultiplicity points V.PartialSols;
 -- 	S := first SVD evaluate(J',o);
 -- 	log10((max S)/(min S))
 -- 	)));
--- summary L ----------------------------------------------------------------
+-- summary L -------------------------------------------------------------------
 
 print "\nWriting start sols for system parameters V.BasePoint in startSys"
 writeStartSys(V.BasePoint, sols, Filename => "startSys")
