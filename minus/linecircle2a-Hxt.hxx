@@ -1,15 +1,31 @@
 // Evaluates Hx and Ht at the same time, reusing expressions.
 // 
-// Maps from a multivariate polynomial with variables x and parameters
-// uparams, to y = [Hx|Ht]. 
+// Maps from a multivariate polynomial whose variables and t are stored in x =
+// [x_1,..,x_NVE, t] and parameters are params, 
+// to y = [Hx|Ht], which is the full Jacobian of the homotopy equations
+// with respect to the variables and time, where Hx is the Jacobian matrix of
+// the homotopy equations with respect to the x variables [x_1,...,x_NVE], and Ht is the 1D
+// vector of temporal derivatives of each equation.
 //
 // INPUT 
 //    x, 3-dimensional: 2 for variables (x1,x2), 1 for t
-//    params, 12-dimensional: 6 parameters for start system, 
+//    params, 12-dimensional: 6 parameters for start system
 //                            6 for target system.
-// 
+//                            For this implementation, these are just
+//                            coefficients.
+//                            These could also potentially encode 1) what is varied depending on t,
+//                            such as polynomial coefficients or a function of
+//                            them that blends between start and end system as t
+//                            varies, and 2) what is kept constant and is not
+//                            varied, such as randomization of start and end
+//                            systems. In many randomized implementations, only
+//                            the target system is randomized, but this is
+//                            sub-optimal. Ideally it should depend on t and
+//                            the randomization distribution also varied
+//                            according to the topology and geometry.
+//
 // OUTPUT 
-//    y, NVExNVEPLUS1-dimensional
+//    y: NVExNVEPLUS1 matrix [Hx|Ht] as a 1D vector
 // 
 // see tutorial/*/start-*.m2 to see how to generate these from equations in
 // Macaulay2, e.g.:

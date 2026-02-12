@@ -1,10 +1,19 @@
-// Evaluates Hx and H at the same time, reusing expressions.
+// Evaluates Hx and H itself at the same time, reusing expressions.
 // 
-// Map from a multivariate poly with x 127-dimensional to y NVExNVEPLUS1 dimensional
-// Where 127 = 14 for x, 1 for t, 2*56 total parameters. Returns where y = [Hx|H]
+// Maps from a multivariate polynomial whose variables and t are stored in x =
+// [x_1,..,x_NVE, t] and parameters are params, to y = [Hx|H], where Hx is the Jacobian
+// matrix of the homotopy equations with respect to the x variables [x_1,...,x_NVE], 
+// and H evaluates the homotopy equations themselves with parameters params at x (and t),
+// H = [f_1(x,t,params),...,f_NVE(x,t,params)]
+// 
+// INPUT 
+//    x, params: see documentation in the corresponding Hxt file
+// 
+// OUTPUT 
+//    y: NVExNVEPLUS1 matrix [Hx|H] as a 1D vector
 // 
 // cCode(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H",gateMatrix{cameraVars})
-// (Ask Tim for the way to use cCode so that the input orders are like this.
+//
 template <typename F>
 inline __attribute__((always_inline)) void 
 eval<chicago14a, F>::

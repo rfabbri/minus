@@ -135,8 +135,6 @@ Fill in this file with the number of solutions, etc.
 
 The file linecircle2a.hxx has Noob/Pro markings on it to help adapt this file
 
-XXX 
-
 #### 3.5 copy Macaulay2-generated C++ evaluators to Minus
 
 Copy linecircle-Hxt.hxx to system_id_tag-Hxt.hxx and adapt, using
@@ -145,6 +143,21 @@ Macaulay2-generated c++ code
 Copy linecircle-HxH.hxx to system_id_tag-HxH.hxx and adapt, using
 Macaulay2-generated c++ code
 
+##### Split x to separate params
+Automatically-generated Macaulay2 evaluators encode the variables, parameters,
+and homotopy parameter t all in one big vector x. For performance reasons,
+MINUS splits the parameters out into a separate vector. For now,
+you must rename this by hand, e.g.:
+
+const C<F> &X0 = x[0]; // x
+const C<F> &X1 = x[1]; // y
+const C<F> &X2 = x[2]; // t
+const C<F> &X3 = x[3]; // HERE: replace x[3] with params [0]
+                       //       replace x[4] with params [1]
+                       // ....
+                       // and so on until the last x.
+
+TODO We could provide our own version of cCode for that.
 
 #### 3.6 write basic functions used in I/O
 Adapt linecircle2a-io.h to your problem
