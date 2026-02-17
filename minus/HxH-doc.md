@@ -17,7 +17,7 @@
    x, params: see documentation in the corresponding Hxt file and Hxt-doc.md
 
 # OUTPUT 
-   y: NVExNVEPLUS1 matrix [Hx|H] as a 1D vector
+   y: NVExNVEPLUS1 matrix [Hx|H] as a col-major 1D vector
 
 ```Macaulay2
     cCode(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H",gateMatrix{cameraVars})

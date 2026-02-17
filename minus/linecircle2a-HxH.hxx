@@ -66,7 +66,7 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   const C<F> G33 = X2 * X14;
   const C<F> G34 = G32 + G33;
   const C<F> G35 = G31 + G34;
-  y[0] = G10; // NVExNVEPLUS1 matrix [Hx|H] as a 1D vector
+  y[0] = G10; // NVExNVEPLUS1 matrix [Hx|H] as a 1D vector, col-major
   y[1] = G13;
   y[2] = G15;
   y[3] = G18;
