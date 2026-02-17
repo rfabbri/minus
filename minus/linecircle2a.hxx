@@ -142,22 +142,5 @@ minus<linecircle2a, F>::solve(
   return true;
 }
 
-//
-// Performs tests to see if there are potentially valid solutions,
-// without making use of ground truth. 
-// 
-template <typename F>
-inline bool 
-minus_io<linecircle2a, F>::
-has_valid_solutions(const typename M::solution solutions[M::nsols])
-{
-  typedef minus_array<M::nve,F> v;
-  F real_solution[M::nve];
-  for (unsigned sol = 0; sol < M::nsols; ++sol) 
-    if (solutions[sol].status == M::REGULAR && v::get_real(solutions[sol].x, real_solution))
-      return true;
-  return false;
-}
-
 } // namespace minus
 #endif // linecircle2a_hxx_

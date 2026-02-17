@@ -143,7 +143,7 @@ Macaulay2-generated c++ code
 Copy linecircle-HxH.hxx to system_id_tag-HxH.hxx and adapt, using
 Macaulay2-generated c++ code
 
-##### Split x to separate params
+##### 3.5.1 Split x to separate params
 Automatically-generated Macaulay2 evaluators encode the variables, parameters,
 and homotopy parameter t all in one big vector x. For performance reasons,
 MINUS splits the parameters out into a separate vector. For now,
@@ -160,6 +160,8 @@ const C<F> &X3 = x[3]; // HERE: replace x[3] with params [0]
 TODO We could provide our own version of cCode for that.
 
 #### 3.6 write basic functions used in I/O
-Adapt linecircle2a-io.h to your problem
+- Adapt linecircle2a-io.h to your problem
+- Implement has_valid_solutions in linecircle2a.hxx
+
 
 

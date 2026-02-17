@@ -9,7 +9,7 @@
 template <typename F>
 inline __attribute__((always_inline)) void 
 eval<linecircle2a, F>::
-Hxt(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>* __restrict uy /*HxH*/) 
+Hxt(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>* __restrict uy /*Hxt*/) 
 {
   const C<F> *params = reinterpret_cast<C<F> *> (__builtin_assume_aligned(uparams,64));
   const C<F> *x = reinterpret_cast<C<F> *> (__builtin_assume_aligned(ux,64));

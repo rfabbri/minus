@@ -246,6 +246,7 @@ struct minus_io_common {
     l[0] /= nrm; l[1] /= nrm; l[2] /= nrm;
   }
   static void normalize_lines(F lines[][ncoords2d_h], unsigned nlines);
+  static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
 };
 
 #include "common-14a-io.h"

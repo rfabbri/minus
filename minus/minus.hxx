@@ -784,6 +784,23 @@ normalize_lines(F lines[][ncoords2d_h], unsigned nlines)
 
 } // namespace minus
 
+//
+// Performs tests to see if there are potentially valid solutions,
+// without making use of ground truth. 
+// 
+template <typename F>
+inline bool 
+minus_io_common<F>::
+has_valid_solutions(const typename M::solution solutions[M::nsols])
+{
+  typedef minus_array<M::nve,F> v;
+  F real_solution[M::nve];
+  for (unsigned sol = 0; sol < M::nsols; ++sol) 
+    if (solutions[sol].status == M::REGULAR && v::get_real(solutions[sol].x, real_solution))
+      return true;
+  return false;
+}
+
 #include "chicago14a.hxx"      // specific implementation of chicago problem, 14a formulation
 #include "linecircle2a.hxx"      // specific implementation of linecircle problem, 2a formulation
 //#include "cleveland14a.hxx"      // specific implementation of cleveland 14a formulation now in PLMP
