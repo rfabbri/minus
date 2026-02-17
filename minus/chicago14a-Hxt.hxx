@@ -1,36 +1,15 @@
-// Evaluates Hx and Ht at the same time, reusing expressions.
 // 
-// Maps from a multivariate polynomial whose variables are x and parameters are
-// params, to y = [Hx|Ht], which is the full Jacobian of the homotopy equations
-// with respect to the variables and time, where Hx is the Jacobian matrix of
-// the homotopy equations with respect to the x variables, and Ht is the 1D
-// vector of temporal derivatives of each equation.
+// Generic documentatin: -------------------------------------------------------
+//    See Hxt-doc.md
+// 
+// Specific documentation: ------------------------------------------------------
 //
-// INPUT 
-//    x, 127-dimensional: 14 for variables (x1,x2,...), 1 for t
-//    params, 12-dimensional: 56 parameters for start system, 
-//                            56 for target system.
-//
-//                            These encode 1) what is varied depending on t,
-//                            such as polynomial coefficients or a function of
-//                            them that blends between start and end system as t
-//                            varies, and 2) what is kept constant and is not
-//                            varied, such as randomization of start and end
-//                            systems. In this implementation, only the target
-//                            system is randomized. While it is reliable and
-//                            fairly fast, this is sub-optimal. Ideally it
-//                            should depend on t and the randomization
-//                            distribution also varied according to the
-//                            topology and geometry.
-//
-// OUTPUT 
-//    y: NVExNVEPLUS1 matrix [Hx|Ht] as a 1D vector
-// 
-// see tutorial/*/start-*.m2 or scripts/eval_monodromy_demo.m2 to see how to
-// generate these from equations in Macaulay2, e.g.:
-// 
-// cCode(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"Ht",gateMatrix{cameraVars})
-// 
+//    Chigago14a: 
+//        In this implementation, only the target system is randomized. While it
+//        is reliable and fairly fast, this is sub-optimal. Ideally it should
+//        depend on t and the randomization distribution also varied according
+//        to the topology and geometry.
+//        
 template <typename F>
 inline __attribute__((always_inline)) void 
 eval<chicago14a, F>::

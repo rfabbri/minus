@@ -1,21 +1,7 @@
-// Evaluates Hx and H itself at the same time, reusing expressions.
 // 
-// Maps from a multivariate polynomial whose variables and t are stored in x =
-// [x_1,..,x_NVE, t] and parameters are params, to y = [Hx|H], where Hx is the Jacobian
-// matrix of the homotopy equations with respect to the x variables [x_1,...,x_NVE], 
-// and H evaluates the homotopy equations themselves with parameters params at x (and t),
-// H = [f_1(x,t,params),...,f_NVE(x,t,params)]. Some just put everything in one
-// x (because all parameters are really all like variables), then we write
-// H = [f_1(x),...,f_NVE(x)].
+// Generic documentatin: -------------------------------------------------------
+//    See HxH-doc.md
 // 
-// INPUT 
-//    x, params: see documentation in the corresponding Hxt file
-// 
-// OUTPUT 
-//    y: NVExNVEPLUS1 matrix [Hx|H] as a 1D vector
-// 
-// cCode(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H",gateMatrix{cameraVars})
-//
 template <typename F>
 inline __attribute__((always_inline)) void 
 eval<linecircle2a, F>::
@@ -29,18 +15,18 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   const C<F> &X1 = x[1]; // y
   const C<F> &X2 = x[2]; // t
 
-  const C<F> &X3 = x[3];
-  const C<F> &X4 = x[4];
-  const C<F> &X5 = x[5];
-  const C<F> &X6 = x[6];
-  const C<F> &X7 = x[7];
-  const C<F> &X8 = x[8];
-  const C<F> &X9 = x[9];
-  const C<F> &X10 = x[10];
-  const C<F> &X11 = x[11];
-  const C<F> &X12 = x[12];
-  const C<F> &X13 = x[13];
-  const C<F> &X14 = x[14];
+  const C<F> &X3  = params[0];
+  const C<F> &X4  = params[1];
+  const C<F> &X5  = params[2];
+  const C<F> &X6  = params[3];
+  const C<F> &X7  = params[4];
+  const C<F> &X8  = params[5];
+  const C<F> &X9  = params[6];
+  const C<F> &X10 = params[7];
+  const C<F> &X11 = params[8];
+  const C<F> &X12 = params[9];
+  const C<F> &X13 = params[10];
+  const C<F> &X14 = params[11];
   
   const C<F> C0 = 1;
   const C<F> C1 = -1;
@@ -80,7 +66,7 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   const C<F> G33 = X2 * X14;
   const C<F> G34 = G32 + G33;
   const C<F> G35 = G31 + G34;
-  y[0] = G10;
+  y[0] = G10; // NVExNVEPLUS1 matrix [Hx|H] as a 1D vector
   y[1] = G13;
   y[2] = G15;
   y[3] = G18;

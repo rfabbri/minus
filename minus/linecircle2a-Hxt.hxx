@@ -1,37 +1,11 @@
-// Evaluates Hx and Ht at the same time, reusing expressions.
 // 
-// Maps from a multivariate polynomial whose variables and t are stored in x =
-// [x_1,..,x_NVE, t] and parameters are params, 
-// to y = [Hx|Ht], which is the full Jacobian of the homotopy equations
-// with respect to the variables and time, where Hx is the Jacobian matrix of
-// the homotopy equations with respect to the x variables [x_1,...,x_NVE], and Ht is the 1D
-// vector of temporal derivatives of each equation.
-//
-// INPUT 
-//    x, 3-dimensional: 2 for variables (x1,x2), 1 for t
-//    params, 12-dimensional: 6 parameters for start system
-//                            6 for target system.
-//                            For this implementation, these are just
-//                            coefficients.
-//                            These could also potentially encode 1) what is varied depending on t,
-//                            such as polynomial coefficients or a function of
-//                            them that blends between start and end system as t
-//                            varies, and 2) what is kept constant and is not
-//                            varied, such as randomization of start and end
-//                            systems. In many randomized implementations, only
-//                            the target system is randomized, but this is
-//                            sub-optimal. Ideally it should depend on t and
-//                            the randomization distribution also varied
-//                            according to the topology and geometry.
-//
-// OUTPUT 
-//    y: NVExNVEPLUS1 matrix [Hx|Ht] as a 1D vector
+// Generic documentatin: -------------------------------------------------------
+//    See Hxt-doc.md
 // 
-// see tutorial/*/start-*.m2 to see how to generate these from equations in
-// Macaulay2, e.g.:
-// 
-// cCode(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"Ht",gateMatrix{cameraVars})
-// 
+// Specific documentation: ------------------------------------------------------
+//    linecircle2a
+//      For this implementation, the parameters are just coefficients. 
+//        
 template <typename F>
 inline __attribute__((always_inline)) void 
 eval<linecircle2a, F>::
@@ -45,13 +19,13 @@ Hxt(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   const C<F> &X1 = x[1]; // y
   const C<F> &X2 = x[2]; // t
 
-  const C<F> &X3 = params[0];
-  const C<F> &X4 = params[1];
-  const C<F> &X5 = params[2];
-  const C<F> &X6 = params[3];
-  const C<F> &X7 = params[4];
-  const C<F> &X8 = params[5];
-  const C<F> &X9 = params[6];
+  const C<F> &X3  = params[0];
+  const C<F> &X4  = params[1];
+  const C<F> &X5  = params[2];
+  const C<F> &X6  = params[3];
+  const C<F> &X7  = params[4];
+  const C<F> &X8  = params[5];
+  const C<F> &X9  = params[6];
   const C<F> &X10 = params[7];
   const C<F> &X11 = params[8];
   const C<F> &X12 = params[9];
@@ -102,7 +76,7 @@ Hxt(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   const C<F> G39 = C1 * X8;
   const C<F> G40 = G39 + X14;
   const C<F> G41 = G38 + G40;
-  y[0] = G10;
+  y[0] = G10; // NVExNVEPLUS1 matrix [Hx|Ht] as a 1D vector
   y[1] = G13;
   y[2] = G15;
   y[3] = G18;

@@ -275,6 +275,19 @@ track(const track_settings &s,
     if (t_s->status == PROCESSING) t_s->status = REGULAR;
     ++t_s; s_s += f::nve;
   } // outer solution loop
+  // -----------------------------------------------------------------------
+  // TMP DELETEME
+
+
+  std::cout << "Hxt linearly" << std::endl;
+  for (unsigned i=0; i < NVEPLUS1*NVE; ++i) {
+    std::cout << Hxt[i] << ' ';
+  }
+  
+  
+  std::cout << "AA matrix" << std::endl;
+  std::cout << "----------------------------------------------------------------";
+  std::cout << AA << std::endl;
 }
 
 // I/O Base functions ----------------------------------------------------------
