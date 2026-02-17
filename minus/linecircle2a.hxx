@@ -24,6 +24,8 @@ struct eval<linecircle2a, F> {
 
 namespace MiNuS {
 
+#if 0 // Noob - not used  ------------------------------------------------------
+// Pro -------------------------------------------------------------------------
 // --- gammify -----------------------------------------------------------------
 //
 // 9 random complex numbers (rand x + i rand y), non unit, seemingly uniform
@@ -70,6 +72,7 @@ gammify(C<F> * __restrict params /*[ chicago: M::nparams]*/)
   // Pro -----------------------------------------------------------------------
   // see chigago14a.hxx gammify
 }
+#endif
 
 } // namespace minus
 

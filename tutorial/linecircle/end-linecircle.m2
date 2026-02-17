@@ -39,7 +39,7 @@
 --
 
 restart -- only useful for debugging
-needs "MinusUtility.m2"
+needs "../MinusUtility.m2"
 load "equations-linecircle.m2"
 
 -- Pro -------------------------------------------------------------------------
@@ -121,7 +121,7 @@ sols1 = trackHomotopy(H01, sols0) -- solve system defined by parameters p1
 print "\nTarget found solutions should evaluate to 0:"
 print(apply(sols1, x -> evaluate(GS, point p1, x)))
 
-print "\nStart solutions should evaluate to 0:"
+print "\nStart solutions should also evaluate to 0:"
 sols0 = point \ sols0 -- convert to list of list
 print(apply(sols0, x -> evaluate(GS, point p0, x)))
 

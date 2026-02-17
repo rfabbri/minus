@@ -161,7 +161,7 @@ TODO We could provide our own version of cCode for that.
 
 #### 3.6 write basic functions used in I/O
 - Adapt linecircle2a-io.h to your problem
-- Implement has_valid_solutions in linecircle2a.hxx
+- Fill in default data in linecircle2a-default-data.h
 
 
 

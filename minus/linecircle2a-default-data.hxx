@@ -1,5 +1,5 @@
-#ifndef linecircle_default_data_hxx_
-#define linecircle_default_data_hxx_
+#ifndef linecircle2a_default_data_hxx_
+#define linecircle2a_default_data_hxx_
 //
 // Default start solutions and gammified system parameters
 // for inclusion in minus app for default
@@ -124,4 +124,4 @@ solutions_gt_[M::nve] = {
   
 } // namespace minus
 
-#endif   // linecircle_default_data_hxx_
+#endif   // linecircle2a_default_data_hxx_
