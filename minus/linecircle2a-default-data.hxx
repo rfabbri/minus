@@ -27,16 +27,18 @@ namespace MiNuS {
 
 
 // You can reinterpret as 2D matrix in C as start_sols_[M::nsols][M::nve]
+//
+// /minus/tutorial/linecircle/linecircle2a-startSys
 template <typename F>
 alignas(64) const std::complex<F> minus_data<linecircle2a,F>::
 start_sols_[M::nve*M::nsols] = {
   // solution 0
-  {-.17713365790154765e1, .18062520635371109e1},  // x
-  {-.23659492745314794e1, -.19271488053270542e1}, // y
+  {-.17590111751758006, .79337030532105957},    // x
+  {.52121743263206199, .6735216912555235e-1},   // y
 
   // solution 1
-  {.97369023998695536, -.2199662496162279}, // x
-  {.5699492277349707, -.18897940219334727}, // y
+  {.11550940600414354e1, .20377392928276108},   // x
+  {-.69566546964533349, .86633155025362207}     // y
 };
 
 // Non-gammified (non-randomized)
@@ -54,16 +56,19 @@ start_sols_[M::nve*M::nsols] = {
 template <typename F>
 alignas(64) std::complex<F> minus_data<linecircle2a,F>::
 params_start_target_[2*M::f::nparams] = {
-  {-.54232002300332649, .84017200182443086},
-  {-.50519558694885758, -.86300487769618039},
-  {.78557292739942153, -.61876908110950668},
-  {-.22606308570353237, -.9741126635467775},
-  {.98518486450687703, .17149572223984591},
-  {-.15952718229455548, .98719353629830842}
+  {.88881367728739857, -.458268749825746},
+  {-.90958124762797854, .41552611706549814},
+  {.55992250117654629, .82854498530629017},
+  {-.96824002271365794, -.25002251581698631},
+  {-.91443211037109806, -.40473931798413143},
+  {.80682944155872807e-1, .99673981686413049}
   // plus nparams we dont statically initialize and fill later
   // ...j
 };
 
+#if 0
+// Pro -------------------------------------------------------------------------
+// 
 // Example randomized parameters for a specific given input for testing
 // 
 // Used for testing and comparing to M2
@@ -73,7 +78,7 @@ params_start_target_[2*M::f::nparams] = {
 //
 //  toExternalString(point P01)
 //
-// In tutorial/linecircle-start.m2 example 
+// In tutorial/linecircle-end.m2 example 
 //
 template <typename F>
 alignas(64) std::complex<F> minus_data<linecircle2a,F>::
@@ -94,16 +99,16 @@ default_params_start_target_gammified_[2*M::f::nparams] = {
   {5.1, 0}
 };
 
+#endif
+
 template <typename F>
 const std::complex<F> * minus_data<linecircle2a,F>::
-params_= default_params_start_target_gammified_;
+// Pro: 
+// params_= default_params_start_target_gammified_;
+params_= params_start_target_;
 
 
 // Input parameters corresponding to the above gammified homotopy parameters
-
-// Input point correspondences for testing could be hardcoded here
-// see p_ and p_correct in chicago-default-data.hxx
-
 template <typename F>
 C<F> minus_data<linecircle2a,F>::
 solutions_gt_[M::nve] = {
@@ -112,16 +117,8 @@ solutions_gt_[M::nve] = {
 };
 
 // Ground-truth solutions in your data format could be here.
-// For instance, the camera matrices in matrix format,
-// while internally it would use Cayley or Quaternions format
 // see cameras_gt_ in chicago.m2
 
-
-// The tgt_ array is the same size as the p_ array.
-// At each solve only two are used, but since usually all three points have
-// tangents, we ask them as input anyways.
-// This is in pixel-based image coordinates. 
-  
 } // namespace minus
 
 #endif   // linecircle2a_default_data_hxx_

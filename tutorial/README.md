@@ -162,6 +162,11 @@ TODO We could provide our own version of cCode for that.
 #### 3.6 write basic functions used in I/O
 - Adapt linecircle2a-io.h to your problem
 - Fill in default data in linecircle2a-default-data.h
+    - Copy startsys to an auxiliary file, say startsys.c
+    - Open in vim, run :so minus/scripts/parse-m2string2.vim
+    - Copy these to your linecircle2a-default-data.h at the appropriate places
+    - Copy ground-truth solutions from end-linecirle.m2
+    
 
 
 
