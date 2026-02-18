@@ -168,5 +168,7 @@ TODO We could provide our own version of cCode for that.
     - Copy ground-truth solutions from end-linecirle.m2
     
 
-
-
+#### 3.7 write the function solve in linecircle2a.hxx
+- You need to set the start and target parameters, optionally converting from
+  user data (e.g., point correspondences) to these parameters used in the
+  equatons.

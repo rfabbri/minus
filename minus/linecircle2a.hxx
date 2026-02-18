@@ -83,30 +83,32 @@ gammify(C<F> * __restrict params /*[ chicago: M::nparams]*/)
 
 namespace MiNuS {
 
-// Input: data (e.g., point correspondences)
+// INPUT 
+//    data 
 // 
-// Output: solutions
-// Output: nsols, the number of solutions
-// Output: id_sols
-// a vector of the ids of the points that lead to each solution:
-// So each solution is actually cameras[id_sols[i]][view_id][:][:], for i=1 to
-// nsols.
+// OUTPUT 
+//    solutions
+//    nsols: 
+//        the number of solutions
+//    id_sols: 
+//        a vector of the ids of the points that lead to each solution: So each
+//        solution is actually cameras[id_sols[i]][view_id][:][:], for i=1 to
+//        nsols.
 //
 // This design is for cache speed
 // 
-// The cameras array is fixed in size to NSOLS which is the max
+// The solutions array is fixed in size to NSOLS which is the max
 // number of solutions, which perfectly fits in memory. The caller must pass an
 // array with that minimum.
 // 
 // returns false in case of numerical failure to find valid real solutions
 //
-// defined in problem-defs.h
-// 
 template <typename F>
 inline bool
 minus<linecircle2a, F>::solve(
-    const C<F> params_final, // p1 in end-linecircle2a.m2 
-    C<F> solutions_final[M::nsols],
+    const C<F> params_target[M::f::nparams], // p1 in end-linecircle2a.m2 
+    C<F> solutions_final[M::nsols],  //:< the real solutions with other optional filters
+    alignas(64) typename M::solution solutions_target[M::nsols], //:< all the solutions to the target
     unsigned id_sols[M::nsols],
     unsigned *nsols_final,
     unsigned nthreads
@@ -114,34 +116,42 @@ minus<linecircle2a, F>::solve(
 {
   typedef minus_data<linecircle2a,F> data;
   alignas(64) C<F> params[2*M::f::nparams];
+  // copy the start parameters over to 1st half of params
   memcpy(params, data::params_start_target_, M::f::nparams*sizeof(C<F>));
+  // copy the target parameters over to 2nd half of params
+  memcpy(params+M::f::nparams, params_target, M::f::nparams*sizeof(C<F>));
+  
+  // Pro: ----------------------------------------------------------------------
+  // optionally gammify / randomize both
   
   // You may want to convert your data e.g. points into params here
+  // See chicago14a.hxx for an example
 
-  alignas(64) typename M::solution solutions[M::nsols];
   alignas(64) typename M::track_settings settings = M::DEFAULT;
 
   unsigned npaths_per_thread = M::nsols/nthreads;
   assert(M::nsols % nthreads == 0);
   
-
   // TODO: improve https://stackoverflow.com/questions/55908791/creating-100-threads-in-c
   std::vector<std::thread> t; 
   t.reserve(nthreads);
-  { // TODO: smarter way to select start solutions
+  { // Pro: --------------------------------------------------------------------
+    // smarter way to select start solutions than just the single one in memory
+    // -------------------------------------------------------------------------
     for (unsigned i = 0; i < nthreads; ++i)
-      t.emplace_back(M::track, settings, data::start_sols_, params, solutions, 
+      t.emplace_back(M::track, settings, data::start_sols_, params, solutions_target, 
           npaths_per_thread*i, npaths_per_thread*(i+1));
 
      for (auto &thr : t)
           thr.join();
   }
-  if (!io::has_valid_solutions(solutions))
+  if (!io::has_valid_solutions(solutions_target))
     return false;
  
+  // Pro: ----------------------------------------------------------------------
   // you may want to decode solutions into a standard format, eg convert quaternions to 3x4 cams
-  io::all_regular_solutions(solutions, solutions_final, id_sols, nsols_final);
-
+  // ---------------------------------------------------------------------------
+  io::all_regular_solutions(solutions_target, solutions_final, id_sols, nsols_final);
   return true;
 }
 
