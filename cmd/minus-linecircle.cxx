@@ -1,6 +1,6 @@
 // 
-// \author Ricardo Fabbri based on original code by Anton Leykin 
-// \date February 2019
+// \author Ricardo Fabbri
+// \date February 2026
 // 
 #include <cstring>
 #include <iostream>
@@ -55,7 +55,6 @@ print_usage()
                "  minus input_file solutions_file\n"
                "  minus <input_file >solutions_file\n"
                "  minus -g       # (or --profile) : performs a default solve for profiling\n"
-               "  minus -i       # (or --param_data) : reads point-tangents from stdin\n"
                "  minus -h       # (or --help) : print this help message\n"
                // "  minus -r       # (or --real)  :  outputs only real solutions\n"
                // "  minus -AB      # (or --two_problems) : continue between 2 given problems\n"
@@ -63,25 +62,29 @@ print_usage()
   R"(
   Input format:
 
-  areal aimag breal bimag creal cimag dreal dimag ereal eimag freal fimag       # can also be one per line, system is a(x^2 + y^2) + bx + c = 0 and dx + ey + f =0
+  areal aimag breal bimag creal cimag dreal dimag ereal eimag freal fimag   
+      # Space and new-line separators allowed.
+      # These are coeffcients for the target system you want to solve:
+      #     a(x^2 + y^2) + bx + c = 0, 
+      #               dx + ey + f = 0
 
-                    # GROUND TRUTH (optional) if -gt flag provided, pass the ground truth here
-  x0real x0imag y0real y0imag             # first solution, each of these are complex numbers
-                    # second solution
-  x1real x1imag y1real y1imag     #)".
+  # GROUND TRUTH (optional) if -gt flag provided, pass the ground truth here
+  # first solution (x0,y0)
+  x0real x0imag y0real y0imag            
+  # second solution (x1,y1)
+  x1real x1imag y1real y1imag)".
 
   exit(1);
 }
 
 bool stdio_ = true;  // by default read/write from stdio
 bool ground_truth_ = false;
-// bool two_problems_given_ = false;
-// bool reading_first_point_ = true;
 std::ifstream infp_;
 bool profile_ = false;   // run some default solves for profiling
 const char *input_ = "stdin";
 const char *output_ = "stdout";
 M::track_settings settings_;
+M::f::settings ssettings_;   // specific settings (formulation-specific)
 
 void
 print_num_steps(M::solution solutions[M::nsols]) // TODO: move to utils

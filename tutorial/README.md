@@ -172,3 +172,11 @@ TODO We could provide our own version of cCode for that.
 - You need to set the start and target parameters, optionally converting from
   user data (e.g., point correspondences) to these parameters used in the
   equatons.
+
+#### 3.8 write commandline solver for your problem
+- This is a commandline tool that will read the target problem parameters
+  (i.e., the coefficients or parameters of the system you want to solve),
+  and output the solutions. 
+  Pro: -------------------------------------------------------------------------
+  It may optionally enable randomization or choice of start solution.
+  
