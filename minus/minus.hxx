@@ -17,8 +17,8 @@
 // _really_ necessary:
 #define EIGEN_STRONG_INLINE __attribute__((always_inline)) inline
 //#include "Eigen-latest/Core"
-//#include "Eigen/Core" // enough for 14a
-#include "Eigen/LU" // Noob
+#include "Eigen/Core" // enough for 14a
+#include "Eigen/LU" // Noob XXX TODO: only include if necessary
 
 #define unlikely(expr) __builtin_expect(!!(expr),0)
 #define likely(expr)   __builtin_expect(!!(expr),1)

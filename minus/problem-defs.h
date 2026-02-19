@@ -65,7 +65,7 @@ struct minus <P, F> {
 
   static bool solve(
       const C<F> params_target[M::f::nparams], // p1 in end-linecircle2a.m2 
-      C<F> solutions_final[M::nsols],  //:< the real solutions with other optional filters
+      C<F> solutions_final[M::nsols][M::nve],  //:< the real solutions with other optional filters
       typename M::solution solutions_target[M::nsols], //:< all the solutions to the target
       unsigned id_sols[M::nsols],
       unsigned *nsols_final,
