@@ -10,6 +10,8 @@ set(minus_sources
   linecircle2a.h linecircle-default.h linecircle2a-default-data.h linecircle2a-io.h
   linecircle2a.hxx linecircle2a-default-data.hxx 
 
+  internal-util.h internal-util.hxx debug-util.h 
+
 #
 #  Work in progress: builds but needs more testing for production
 #  cleveland14a.h cleveland-default.h cleveland14a-default-data.h cleveland14a-io.h

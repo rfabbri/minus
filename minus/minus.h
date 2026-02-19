@@ -143,6 +143,7 @@ struct minus_core<P, F>::track_settings {
   unsigned max_num_steps_; // maximum number of steps per track.  Each step takes roughly 1 microseconds (tops)
   char num_successes_before_increase_; // m2 numberSuccessesBeforeIncrease
   char max_corr_steps_;  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
+  // print() as a separate function in minus/cmd/cmd-util.h
 };
 // Original settings from Tim: Fri Feb 22 12:00:06 -03 2019 Git 0ec3340
 // o9 = MutableHashTable{AffinePatches => DynamicPatch     }
