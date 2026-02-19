@@ -476,6 +476,7 @@ minus<chicago14a, F>::solve_img(
   return solve(pn, tn, solutions_cams, id_sols, nsols_final, nthreads);
 }
 
+/* Some specializations to this problem ----------------------------------------------
 //
 // Performs tests to see if there are potentially valid solutions,
 // without making use of ground truth. 
@@ -485,13 +486,9 @@ inline bool
 minus_io<chicago14a, F>::
 has_valid_solutions(const typename M::solution solutions[M::nsols])
 {
-  typedef minus_array<M::nve,F> v;
-  F real_solution[M::nve];
-  for (unsigned sol = 0; sol < M::nsols; ++sol) 
-    if (solutions[sol].status == M::REGULAR && v::get_real(solutions[sol].x, real_solution))
-      return true;
-  return false;
+ // If desired, you may specialize this function here.
 }
+*/
 
 } // namespace minus
 #endif // chicago14a_hxx_

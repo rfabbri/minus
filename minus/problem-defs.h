@@ -64,12 +64,13 @@ struct minus <P, F> {
   typedef problem_parameters<P> pp;
 
   static bool solve(
-    const C<F> params_final, // p1 in linecircle2a-end.m2 
-    C<F> usolutions[M::nsols],  // first camera is always [I | 0] XXX
-    unsigned id_sols[M::nsols],
-    unsigned *nsols_final,
-    unsigned nthreads
-  );
+      const C<F> params_target[M::f::nparams], // p1 in end-linecircle2a.m2 
+      C<F> solutions_final[M::nsols],  //:< the real solutions with other optional filters
+      typename M::solution solutions_target[M::nsols], //:< all the solutions to the target
+      unsigned id_sols[M::nsols],
+      unsigned *nsols_final,
+      unsigned nthreads
+    );
 };
 #undef P
 #endif  // problem_defs_h_

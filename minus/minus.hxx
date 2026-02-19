@@ -327,7 +327,8 @@ all_real_solutions(typename M::solution raw_solutions[M::nsols], F real_solution
   *nsols_real = 0;
   id_sols[*nsols_real] = 0;
   for (unsigned sol=0; sol < M::nsols; ++sol) {
-    if (raw_solutions[sol].status == M::REGULAR && v::get_real(raw_solutions[sol].x, real_solutions[*id_sols[nsols_real]]))
+    if (raw_solutions[sol].status == M::REGULAR && 
+        v::get_real(raw_solutions[sol].x, real_solutions[id_sols[*nsols_real]]))
       id_sols[(*nsols_real)++] = sol;
   }
 }
@@ -343,12 +344,31 @@ all_regular_solutions(typename M::solution raw_solutions[M::nsols], C<F> regular
   id_sols[*nsols_regular] = 0;
   for (unsigned sol=0; sol < M::nsols; ++sol) {
     if (raw_solutions[sol].status == M::REGULAR) {
-      minus_array<M::f::nve,F>::copy(raw_solutions[sol].x, regular_solutions[*id_sols[nsols_regular]]);
+      minus_array<M::f::nve,F>::copy(raw_solutions[sol].x, regular_solutions[id_sols[*nsols_regular]]);
       id_sols[(*nsols_regular)++] = sol;
     }
   }
 }
 
+//
+// Performs tests to see if there are potentially valid solutions,
+// without making use of ground truth. 
+//
+// This is the generic implementation. It may be specialized for each 
+// problem tag
+// 
+template <problem P, typename F>
+inline bool 
+minus_io<P, F>::
+has_valid_solutions(const typename M::solution solutions[M::nsols])
+{
+  typedef minus_array<M::nve,F> v;
+  F real_solution[M::nve];
+  for (unsigned sol = 0; sol < M::nsols; ++sol) 
+    if (solutions[sol].status == M::REGULAR && v::get_real(solutions[sol].x, real_solution))
+      return true;
+  return false;
+}
 
 //
 // returns cameras[0:nsols_final][2][4][3]
@@ -784,22 +804,6 @@ normalize_lines(F lines[][ncoords2d_h], unsigned nlines)
 
 } // namespace minus
 
-//
-// Performs tests to see if there are potentially valid solutions,
-// without making use of ground truth. 
-// 
-template <typename F>
-inline bool 
-minus_io_common<F>::
-has_valid_solutions(const typename M::solution solutions[M::nsols])
-{
-  typedef minus_array<M::nve,F> v;
-  F real_solution[M::nve];
-  for (unsigned sol = 0; sol < M::nsols; ++sol) 
-    if (solutions[sol].status == M::REGULAR && v::get_real(solutions[sol].x, real_solution))
-      return true;
-  return false;
-}
 
 #include "chicago14a.hxx"      // specific implementation of chicago problem, 14a formulation
 #include "linecircle2a.hxx"      // specific implementation of linecircle problem, 2a formulation

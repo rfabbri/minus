@@ -247,10 +247,21 @@ struct minus_io_common {
     l[0] /= nrm; l[1] /= nrm; l[2] /= nrm;
   }
   static void normalize_lines(F lines[][ncoords2d_h], unsigned nlines);
-  static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
 };
 
 #include "common-14a-io.h"
+
+// Common IO class for solvers that have nviews, npoints
+/*
+template <problem P, typename F=double>
+struct minus_io_multiview : public minus_io_common<F> {
+  // template specialization defined in problem-internals.h
+  typedef problem_parameters<P> pp;
+  // shortcuts to the problem parameters
+  static constexpr unsigned  nviews = pp::nviews;
+  static constexpr unsigned  npoints = pp::npoints;
+}
+*/
 
 // IO shaping: not used in tracker, but only for shaping user data
 // The user specializes this to their problem inside problem.hxx
@@ -274,20 +285,21 @@ struct minus_io : public minus_io_common<F> {
   typedef problem_parameters<P> pp;
   typedef minus_core<P, F> M;
   typedef minus_io_common<F> io;
-  // shortcuts to the problem parameters
-  static constexpr unsigned  nviews = pp::nviews;
-  static constexpr unsigned  npoints = pp::npoints;
   // Input ---------------------------------------------------------------------
   static void gammify(C<F> * __restrict params/*[ chicago: M::nparams]*/);
   // Output --------------------------------------------------------------------
-  static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
+  // --
   // Utilities
 
-  static void all_regular_solutions(typename M::solution raw_solutions[M::nsols], C<F> regular_solutions[M::nsols][M::nve], 
-                   unsigned id_sols[M::nsols], unsigned *nsols_regular);
+  static void all_regular_solutions(
+      typename M::solution raw_solutions[M::nsols], 
+      C<F> regular_solutions[M::nsols][M::nve], 
+      unsigned id_sols[M::nsols], unsigned *nsols_regular);
 
   static void all_real_solutions(typename M::solution raw_solutions[M::nsols], F real_solutions[M::nsols][M::nve], 
                      unsigned id_sols[M::nsols], unsigned *nsols_real);
+  
+  static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
 };
 
 // Highlevel API ---------------------------------------------------------------

@@ -21,6 +21,7 @@ struct minus_io<chicago14a, F> : public minus_io_14a<chicago14a, F> {
   static bool point_tangents2lines(const typename M::f::settings &s, const F p[pp::nviews][pp::npoints][io::ncoords2d], const F tgt[pp::nviews][pp::npoints][io::ncoords2d], unsigned id_tgt0, unsigned id_tgt1, F plines[pp::nvislines][io::ncoords2d_h]);
   static void lines2params(const F plines[pp::nvislines][io::ncoords2d_h], C<F> * __restrict params/*[static M::n//params]*/);
   // Output --------------------------------------------------------------------
+  // Shadows base class version if you want to specialize
   static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
 };
 

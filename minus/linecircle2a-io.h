@@ -3,9 +3,13 @@
 
 namespace MiNuS {
 
+
+#if 0
+// specialize your minus_io class to the problem, in case you want 
+// specific implementations for each function
+
 template <typename F>
-struct minus_io<linecircle2a, F> : public minus_io_common<F> {
-  // template specialization defined in problem-internals.h
+struct minus_io<linecircle2a, F> : public minus_io<linecircle2a, F> {
   typedef problem_parameters<linecircle2a> pp;
   typedef minus_core<linecircle2a, F> M;
   typedef minus_io_common<F> io;
@@ -15,7 +19,10 @@ struct minus_io<linecircle2a, F> : public minus_io_common<F> {
   // Any function to convert data to parameters would go here
   // see point_tangents2params
   // Output --------------------------------------------------------------------
+  // Shadows base class version if you want to specialize
+  static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
 };
+#endif
 
 } // namespace minus
 

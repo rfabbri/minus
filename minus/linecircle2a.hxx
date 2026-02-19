@@ -108,7 +108,7 @@ inline bool
 minus<linecircle2a, F>::solve(
     const C<F> params_target[M::f::nparams], // p1 in end-linecircle2a.m2 
     C<F> solutions_final[M::nsols],  //:< the real solutions with other optional filters
-    alignas(64) typename M::solution solutions_target[M::nsols], //:< all the solutions to the target
+    typename M::solution solutions_target[M::nsols], //:< all the solutions to the target
     unsigned id_sols[M::nsols],
     unsigned *nsols_final,
     unsigned nthreads
@@ -154,6 +154,20 @@ minus<linecircle2a, F>::solve(
   io::all_regular_solutions(solutions_target, solutions_final, id_sols, nsols_final);
   return true;
 }
+
+/* Some specializations to this problem ----------------------------------------------
+//
+// Performs tests to see if there are potentially valid solutions,
+// without making use of ground truth. 
+// 
+template <typename F>
+inline bool 
+minus_io<linecircle2a, F>::
+has_valid_solutions(const typename M::solution solutions[M::nsols])
+{
+ // If desired, you may specialize this function here.
+}
+*/
 
 } // namespace minus
 #endif // linecircle2a_hxx_
