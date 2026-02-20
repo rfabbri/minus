@@ -3796,7 +3796,7 @@ inline __attribute__((always_inline)) void
 eval<chicago14a, F>::
 Hxt_constants(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restrict uy /*Hxt*/) 
 {
-  /* If there are separated constants, independent of ux, evaluate them here before the
+  /* If there are separated constants, independent of x, evaluate them here before the
    * time-dependent evaluator. TODO: work w/team to get extract t-independent evaluators */
 #if 0
   const C<F> *params = reinterpret_cast<C<F> *> (__builtin_assume_aligned(uparams,64));
@@ -7414,4 +7414,34 @@ Hxt_constants(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> 
   yc[14] = -G3424;
   yc[15] = -G3439;
 #endif
+}
+
+template <typename F>
+__attribute__((always_inline)) inline void
+eval<chicago14a, F>::
+Hxt_memoize(C<F> __restrict *block/*, C<F> * __restrict memo*/ /* constants */)
+{
+  C<F> *const y = reinterpret_cast<C<F> *> (__builtin_assume_aligned(block,64));
+//  C<F> *const yc = reinterpret_cast<C<F> *> (__builtin_assume_aligned(memo,64));
+
+  y[11]=y[13]=y[25]=y[27]=y[39]=y[41]=y[53]=y[55]=y[67]=
+        y[68]=y[81]=y[82]=y[95]=y[96]=y[109]=y[110]=y[124]=
+        y[125]=y[138]=y[139]=y[152]=y[153]=y[166]=y[167]=
+        y[180]=y[181]=y[194]=y[195]=0;
+//  y[26]  = yc[0];
+//  y[40]  = yc[1];
+//  y[54]  = yc[2];
+//  y[69]  = yc[3];
+//  y[83]  = yc[4];
+//  y[97]  = yc[5];
+//  y[111] = yc[6];
+//  y[123] = yc[7];
+//  y[137] = yc[8];
+//  y[151] = yc[9];
+//  y[165] = yc[10];
+//  y[179] = yc[11];
+//  y[193] = yc[12];
+//  y[207] = yc[13];
+//  y[208] = yc[14];
+//  y[209] = yc[15];
 }

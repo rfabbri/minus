@@ -12,70 +12,13 @@
 #include "minus.h"
 #include "internal-util.hxx"
 
+// TODO: perhaps move inside problem.hxx
 #include "chicago14a-lsolve.hxx"
 // #include "partialpivLU-NxN-lsolve.hxx" // TODO put generic solve here
 #include "linecircle2a-lsolve.hxx"
 
 namespace MiNuS {
 
-
-template <problem P, typename F>
-__attribute__((always_inline)) inline void
-memoize_Hxt(C<F> __restrict *block/*, C<F> * __restrict memo*/ /* constants */)
-{
-  C<F> *const y = reinterpret_cast<C<F> *> (__builtin_assume_aligned(block,64));
-//  C<F> *const yc = reinterpret_cast<C<F> *> (__builtin_assume_aligned(memo,64));
-
-  y[11]=y[13]=y[25]=y[27]=y[39]=y[41]=y[53]=y[55]=y[67]=
-        y[68]=y[81]=y[82]=y[95]=y[96]=y[109]=y[110]=y[124]=
-        y[125]=y[138]=y[139]=y[152]=y[153]=y[166]=y[167]=
-        y[180]=y[181]=y[194]=y[195]=0;
-//  y[26]  = yc[0];
-//  y[40]  = yc[1];
-//  y[54]  = yc[2];
-//  y[69]  = yc[3];
-//  y[83]  = yc[4];
-//  y[97]  = yc[5];
-//  y[111] = yc[6];
-//  y[123] = yc[7];
-//  y[137] = yc[8];
-//  y[151] = yc[9];
-//  y[165] = yc[10];
-//  y[179] = yc[11];
-//  y[193] = yc[12];
-//  y[207] = yc[13];
-//  y[208] = yc[14];
-//  y[209] = yc[15];
-}
-
-template <problem P, typename F>
-__attribute__((always_inline)) inline void
-memoize_HxH(C<F> __restrict *block/*, C<F> * __restrict memo*/ /* constants */)
-{
-  C<F> *const y = reinterpret_cast<C<F> *> (__builtin_assume_aligned(block,64));
-//  C<F> *const yc = reinterpret_cast<C<F> *> (__builtin_assume_aligned(memo,64));
-
-  y[11]=y[13]=y[25]=y[27]=y[39]=y[41]=y[53]=y[55]=y[67]=
-        y[68]=y[81]=y[82]=y[95]=y[96]=y[109]=y[110]=y[124]=
-        y[125]=y[138]=y[139]=y[152]=y[153]=y[166]=y[167]=
-        y[180]=y[181]=y[194]=y[195]=0;
-//  y[26]  = yc[0];
-//  y[40]  = yc[1];
-//  y[54]  = yc[2];
-//  y[69]  = yc[3];
-//  y[83]  = yc[4];
-//  y[97]  = yc[5];
-//  y[111] = yc[6];
-//  y[123] = yc[7];
-//  y[137] = yc[8];
-//  y[151] = yc[9];
-//  y[165] = yc[10];
-//  y[179] = yc[11];
-//  y[193] = yc[12];
-//  y[207] = yc[13];
-//  y[208] = yc[14];
-//  y[209] = yc[15];
-}
 
 // THE MEAT //////////////////////////////////////////////////////////////////////
 //
@@ -161,7 +104,7 @@ track(const track_settings &s,
 
       // dx1
       // evaluate_Hxt_constants(xt, params, ycHxt);
-      memoize_Hxt<P,F>(Hxt);/*, ycHxt);*/
+      memoize_Hxt(Hxt);/*, ycHxt);*/
       evaluate_Hxt(xt, params, Hxt); // Outputs Hxt
       // dx4_eigen = lu.compute(AA).solve(bb);
       numerics::lsolve(AA, dx4);
@@ -175,7 +118,7 @@ track(const track_settings &s,
       v::multiply_scalar_to_self(dx4, 2.);
       *t += one_half_dt;  // t0+.5dt
       evaluate_Hxt(xt, params, Hxt);
-      memoize_Hxt<P,F>(Hxt);/*, ycHxt);*/
+      memoize_Hxt(Hxt);/*, ycHxt);*/
       numerics::lsolve(AA, dxi);
 
       // dx3
@@ -185,7 +128,7 @@ track(const track_settings &s,
       v::multiply_scalar_to_self(dxi, 4.);
       v::add_to_self(dx4, dxi);
       evaluate_Hxt(xt, params, Hxt);
-      memoize_Hxt<P,F>(Hxt);/*, ycHxt);*/
+      memoize_Hxt(Hxt);/*, ycHxt);*/
       numerics::lsolve(AA, dxi);
 
       // dx4
@@ -196,7 +139,7 @@ track(const track_settings &s,
       v::add_to_self(dx4, dxi);
       *t = *t0 + *dt;               // t0+dt
       evaluate_Hxt(xt, params, Hxt);
-      memoize_Hxt<P,F>(Hxt);/*, ycHxt);*/
+      memoize_Hxt(Hxt);/*, ycHxt);*/
       numerics::lsolve(AA, dxi);
       v::multiply_scalar_to_self(dxi, *dt);
       v::add_to_self(dx4, dxi);
@@ -237,7 +180,7 @@ track(const track_settings &s,
       do {
         ++n_corr_steps;
         evaluate_HxH(x1t1, params, HxH);
-        memoize_HxH<P,F>(HxH);//, ycHxH);
+        memoize_HxH(HxH);//, ycHxH);
         numerics::lsolve(AA, dx);
         v::add_to_self(x1t1, dx);
         is_successful = v::norm2(dx) < s.epsilon2_ * v::norm2(x1t1); // |dx|^2/|x1|^2 < eps2

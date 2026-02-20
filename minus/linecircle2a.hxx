@@ -11,6 +11,8 @@ struct eval<linecircle2a, F> {
   static void inline  __attribute__((always_inline)) Hxt_constants(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y /*Hxt*/);
   static void inline  __attribute__((always_inline)) HxH_constants(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
   static void inline  __attribute__((always_inline)) HxH_constants_all_sols(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
+  static void inline  __attribute__((always_inline)) Hxt_memoize(C<F> __restrict *block/*, C<F> * __restrict memo*/ /* constants */);
+  static void inline  __attribute__((always_inline)) HxH_memoize(C<F> __restrict *block/*, C<F> * __restrict memo*/ /* constants */);
 };
 
 #include "linecircle2a-Hxt.hxx"
