@@ -1,3 +1,4 @@
+#include "Eigen/LU" // Noob XXX TODO: only include if necessary
 // Solves Ax = b
 //
 // That is:
@@ -5,8 +6,10 @@
 // given input m = [A | b]
 // produces output x such that Ax = b
 //
-template <problem P, typename F>
+#define P linecircle2a
+template <typename F>
 __attribute__((always_inline)) inline void
+numeric_subroutines<P,F>::
 lsolve(
     Map<Matrix<C<F>, minus_core<P,F>::f::nve, minus_core<P,F>::f::nve +1>,Aligned> & __restrict m, 
     C<F> __restrict *ux)
@@ -25,3 +28,4 @@ lsolve(
   // Fine-tune Eigen's LU to your problem size and structure, e.g., limit pivoting
   // check out linecircle-lsolve-pro.hxx --------------------------------------
 }
+#undef P

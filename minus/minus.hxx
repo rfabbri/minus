@@ -17,17 +17,22 @@
 // _really_ necessary:
 #define EIGEN_STRONG_INLINE __attribute__((always_inline)) inline
 //#include "Eigen-latest/Core"
-#include "Eigen/Core" // enough for 14a
-#include "Eigen/LU" // Noob XXX TODO: only include if necessary
-
-#define unlikely(expr) __builtin_expect(!!(expr),0)
-#define likely(expr)   __builtin_expect(!!(expr),1)
+#include "Eigen/Core"
 
 namespace MiNuS {
 
 using namespace Eigen; // only used for linear solve
 
-// #include "chicago14a-lsolve.hxx" TODO XXX make lsolve a template by problem // name
+// construct to enable partial template instantiation for each problem specific
+// linear solve, etc.
+template <problem P, typename F>
+struct numeric_subroutines {
+ static void lsolve(
+    Map<Matrix<C<F>, minus_core<P,F>::f::nve, minus_core<P,F>::f::nve +1>,Aligned> & __restrict m, 
+    C<F> __restrict *ux);
+};
+
+#include "chicago14a-lsolve.hxx"
 // #include "partialpivLU-NxN-lsolve.hxx" // TODO put generic solve here
 #include "linecircle2a-lsolve.hxx"
 
@@ -132,6 +137,7 @@ track(const track_settings &s,
   Map<Matrix<C<F>, f::nve, NVEPLUS1>,Aligned> AA((C<F> *)Hxt,f::nve,NVEPLUS1);
   static constexpr F the_smallest_number = 1e-13; // XXX BENCHMARK THIS
   typedef minus_array<f::nve,F> v;
+  typedef numeric_subroutines<P,F> numerics;
 
   //  alignas(64) C<F> ycHxt[16]; 
   //  alignas(64) C<F> ycHxH[13];
@@ -175,7 +181,7 @@ track(const track_settings &s,
       memoize_Hxt<P,F>(Hxt);/*, ycHxt);*/
       evaluate_Hxt(xt, params, Hxt); // Outputs Hxt
       // dx4_eigen = lu.compute(AA).solve(bb);
-      lsolve<P,F>(AA, dx4);
+      numerics::lsolve(AA, dx4);
       
       // dx2
       const F one_half_dt = *dt*0.5;
@@ -187,7 +193,7 @@ track(const track_settings &s,
       *t += one_half_dt;  // t0+.5dt
       evaluate_Hxt(xt, params, Hxt);
       memoize_Hxt<P,F>(Hxt);/*, ycHxt);*/
-      lsolve<P,F>(AA, dxi);
+      numerics::lsolve(AA, dxi);
 
       // dx3
       v::multiply_scalar_to_self(dxi, one_half_dt);
@@ -197,7 +203,7 @@ track(const track_settings &s,
       v::add_to_self(dx4, dxi);
       evaluate_Hxt(xt, params, Hxt);
       memoize_Hxt<P,F>(Hxt);/*, ycHxt);*/
-      lsolve<P,F>(AA, dxi);
+      numerics::lsolve(AA, dxi);
 
       // dx4
       v::multiply_scalar_to_self(dxi, *dt);
@@ -208,7 +214,7 @@ track(const track_settings &s,
       *t = *t0 + *dt;               // t0+dt
       evaluate_Hxt(xt, params, Hxt);
       memoize_Hxt<P,F>(Hxt);/*, ycHxt);*/
-      lsolve<P,F>(AA, dxi);
+      numerics::lsolve(AA, dxi);
       v::multiply_scalar_to_self(dxi, *dt);
       v::add_to_self(dx4, dxi);
       v::multiply_scalar_to_self(dx4, 1./6.);
@@ -249,7 +255,7 @@ track(const track_settings &s,
         ++n_corr_steps;
         evaluate_HxH(x1t1, params, HxH);
         memoize_HxH<P,F>(HxH);//, ycHxH);
-        lsolve<P,F>(AA, dx);
+        numerics::lsolve(AA, dx);
         v::add_to_self(x1t1, dx);
         is_successful = v::norm2(dx) < s.epsilon2_ * v::norm2(x1t1); // |dx|^2/|x1|^2 < eps2
       } while (likely(!is_successful && n_corr_steps < s.max_corr_steps_));

@@ -19,6 +19,11 @@ minus_core<P, F>::track_settings minus_core<P, F>::DEFAULT;
 
 const formulation_parameters<chicago14a>::settings formulation_parameters<chicago14a>::DEFAULT;
 
+
 } // namespace minus
+
+// branch prediction annotation
+#define unlikely(expr) __builtin_expect(!!(expr),0)
+#define likely(expr)   __builtin_expect(!!(expr),1)
 
 #endif // internal_util_hxx_
