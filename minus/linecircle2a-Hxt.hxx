@@ -83,3 +83,19 @@ Hxt(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   y[4] = G31;
   y[5] = G41;
 }
+
+// Computes constant values to be memoized. These values do not really depend on
+// x, only on params. They can be final matrix values or intermediate ones to
+// cache.
+//
+// TODO: if you fill-in this function, if it is not too big, make sure to force
+// inlining even further and guarante that the dissassembled shows no function
+// call. You have to test with inlining and without
+template <typename F>
+inline __attribute__((always_inline)) void 
+eval<linecircle2a, F>::
+Hxt_constants(const C<F> * __restrict ux, const C<F> * __restrict uparams, C<F> * __restrict uy /*Hxt*/) 
+{
+  /* If there are separated constants, independent of ux, evaluate them here before the
+   * time-dependent evaluator. TODO: work w/team to get extract t-independent evaluators */
+}
