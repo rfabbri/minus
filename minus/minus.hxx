@@ -18,6 +18,7 @@
 #define EIGEN_STRONG_INLINE __attribute__((always_inline)) inline
 //#include "Eigen-latest/Core"
 #include "Eigen/Core"
+#include "Eigen/LU" // Noob XXX TODO: only include if necessary
 
 namespace MiNuS {
 
