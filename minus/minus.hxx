@@ -28,6 +28,7 @@ namespace MiNuS {
 using namespace Eigen; // only used for linear solve
 
 // #include "chicago14a-lsolve.hxx" TODO XXX make lsolve a template by problem // name
+// #include "partialpivLU-NxN-lsolve.hxx" // TODO put generic solve here
 #include "linecircle2a-lsolve.hxx"
 
 template <problem P, typename F>

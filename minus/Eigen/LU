@@ -23,8 +23,8 @@
   * \endcode
   */
 
-#include "src/misc/Kernel.h"
-#include "src/misc/Image.h"
+//#include "src/misc/Kernel.h"
+//#include "src/misc/Image.h"
 //#include "src/LU/FullPivLU.h"
 #include "src/LU/PartialPivLU.h"
 /*
@@ -37,7 +37,7 @@
 #include "src/LU/PartialPivLU_LAPACKE.h"
 #endif
 */
-#include "src/LU/Determinant.h"
+//#include "src/LU/Determinant.h"
 #include "src/LU/InverseImpl.h"
 
 // Use the SSE optimized version whenever possible. At the moment the
