@@ -12,30 +12,12 @@
 #include "minus.h"
 #include "internal-util.hxx"
 
-// not really necessary:
-#define EIGEN_UNROLLING_LIMIT 1000 
-// _really_ necessary:
-#define EIGEN_STRONG_INLINE __attribute__((always_inline)) inline
-//#include "Eigen-latest/Core"
-#include "Eigen/Core"
-#include "Eigen/LU" // Noob XXX TODO: only include if necessary
-
-namespace MiNuS {
-
-using namespace Eigen; // only used for linear solve
-
-// construct to enable partial template instantiation for each problem specific
-// linear solve, etc.
-template <problem P, typename F>
-struct numeric_subroutines {
- static void lsolve(
-    Map<Matrix<C<F>, minus_core<P,F>::f::nve, minus_core<P,F>::f::nve +1>,Aligned> & __restrict m, 
-    C<F> __restrict *ux);
-};
-
 #include "chicago14a-lsolve.hxx"
 // #include "partialpivLU-NxN-lsolve.hxx" // TODO put generic solve here
 #include "linecircle2a-lsolve.hxx"
+
+namespace MiNuS {
+
 
 template <problem P, typename F>
 __attribute__((always_inline)) inline void

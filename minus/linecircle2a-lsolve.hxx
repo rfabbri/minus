@@ -1,4 +1,7 @@
+#include "Eigen/LU" // Noob XXX TODO: only include if necessary
+
 #define P linecircle2a
+namespace MiNuS {
 template <typename F>
 struct numeric_subroutines<P, F> {
  static void lsolve(
@@ -33,4 +36,6 @@ lsolve(
   // Fine-tune Eigen's LU to your problem size and structure, e.g., limit pivoting
   // check out linecircle-lsolve-pro.hxx --------------------------------------
 }
+
+} // namespace minus
 #undef P
