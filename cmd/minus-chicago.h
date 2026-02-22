@@ -155,7 +155,7 @@ M::f::settings ssettings_;   // specific settings (formulation-specific)
 
 // print specialized settings
 void
-print_ssettings(const M::f:track_settings &ssettings) {
+print_ssettings(const M::f::settings &ssettings) {
   #ifdef M_VERBOSE
   std::cerr << "Formulation-specific settings ---------------------------------\n";
   {
@@ -165,7 +165,7 @@ print_ssettings(const M::f:track_settings &ssettings) {
     "prefilter_angle_degeneracy_eps_"
   };
   std::cerr << names[0] << " = " << ssettings_.prefilter_degeneracy_ << std::endl;
-  Float *ptr = (Float *) &settings;
+  Float *ptr = (Float *) &ssettings;
   for (int i=1; i < 3; ++i)
     std::cerr << names[i] << " = " << *ptr++ << std::endl;
   std::cerr << "---------------------------------------------------------------\n";
@@ -174,10 +174,10 @@ print_ssettings(const M::f:track_settings &ssettings) {
 }
 
 void
-print_all_settings(const M::track_settings &settings, const M::f:track_settings &ssettings)
+print_all_settings(const M::track_settings &settings, const M::f::settings &ssettings)
 {
   print_settings(settings);
-  print_ssettings(ssetings);
+  print_ssettings(ssettings);
 }
 
 //

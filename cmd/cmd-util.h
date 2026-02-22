@@ -139,7 +139,7 @@ struct minus_cmd_io {
   //
   // This format is generic enough to be adapted to M2 or matlab
   //
-  static bool
+  bool
   mread(std::istream &in) const
   {
     F *dparams = (F *)data::params_;

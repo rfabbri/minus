@@ -14,7 +14,7 @@
 #include <chrono>
 #include <thread>
 #include <minus/minus.h>
-#include <minus/linecircle-io.h>
+#include <minus/linecircle2a-io.h>
 #include <minus/linecircle-default.h>
 
 using namespace MiNuS;
@@ -78,7 +78,7 @@ print_usage()
   # first solution (x0,y0)
   x0real x0imag y0real y0imag            
   # second solution (x1,y1)
-  x1real x1imag y1real y1imag)".
+  x1real x1imag y1real y1imag)";
 
   exit(1);
 }
@@ -90,17 +90,17 @@ M::f::settings ssettings_;   // specific settings (formulation-specific)
 
 // print specialized settings, if any
 void
-print_ssettings(const M::f:track_settings &ssettings) {
+print_ssettings(const M::f::settings &ssettings) {
   #ifdef M_VERBOSE
   // print here
   #endif
 }
 
 void
-print_all_settings(const M::track_settings &settings, const M::f:track_settings &ssettings)
+print_all_settings(const M::track_settings &settings, const M::f::settings &ssettings)
 {
   print_settings(settings);
-  print_ssettings(ssetings);
+  print_ssettings(ssettings);
 }
 
 //
