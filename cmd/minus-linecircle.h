@@ -129,7 +129,11 @@ process_args(int argc, char **argv)
   --argc; ++argv;
   // switches that can show up only in 1st position
   
-  enum {INITIAL_ARGS, AFTER_INITIAL_ARGS, param_data, MAX_CORR_STEPS, EPSILON} argstate = INITIAL_ARGS;
+  enum {
+    INITIAL_ARGS, AFTER_INITIAL_ARGS, 
+    INPUT_DATA /* input is problem/user data representation */, 
+    MAX_CORR_STEPS, EPSILON, FILTER_DEGENERACY
+  } argstate = INITIAL_ARGS;
   bool incomplete = false;
   std::string arg;
   if (argc) {
@@ -140,11 +144,21 @@ process_args(int argc, char **argv)
       profile_ = true;
       argstate = AFTER_INITIAL_ARGS;
       --argc; ++argv;
-    } else if (arg == "-i" || arg == "--param_data") {
-      param_data_ = true; 
+    } else if (arg == "-i" || arg == "--input_data") {
+      // Input is just the data specifying the target system to be solved.
+      // 
+      // Without this flag, the input is the full homotopy parameters comprising
+      // of the concatenaded start and end system parameters, possibly
+      // randomized. This is used if you want to set or randomize the
+      // parameters outside MINUS, possibly together with setting your own start
+      // solutions, or if you want to debug MINUS bypassing parameter
+      // construction from the user's input representation (e.g., image points).
+      // 
+      // See print_usage() 
+      input_data_ = true; 
       argstate = param_data;
       --argc; ++argv;
-    } else if (arg[0] != '-') {
+    } else if (arg[0] != '-') { // not a flag -> two file names
       if (argc == 2) {
           input_ = argv[1];
           output_ = argv[2];
@@ -160,11 +174,11 @@ process_args(int argc, char **argv)
       LOG("parsing arg " + arg);
       
       // argstate >= AFTER_INITIAL_ARGS ----------------------------------------
-      if (argstate == param_data) {
+      if (argstate == INPUT_DATA) {
         if (arg == "-gt") {
           ground_truth_ = true;
           --argc; ++argv;
-          argstate = param_data;
+          argstate = INPUT_DATA;
           continue;
         }
         argstate = AFTER_INITIAL_ARGS;
@@ -200,6 +214,29 @@ process_args(int argc, char **argv)
         argstate = EPSILON;
         incomplete = true;
         continue;
+      }
+      if (arg == "--prefilter_degeneracy=yes") {
+        // Flag to discard degenerate data with cheap rules (collinear points, etc).
+        // 
+        // Use with caution, since homotopy continuation is excellent at solving
+        // nearly degenerate systems. Often the concern is not that HC may fail,
+        // but that it may be slow.
+        // 
+        std::cerr << "LOG \033[1;91merror: no prefilter degeneracy option implemented\n";
+        print_usage();
+        // ssettings_.prefilter_degeneracy_ = true;
+        // argstate = AFTER_INITIAL_ARGS;
+        // incomplete = false;
+        // continue;
+      }
+      if (arg == "--prefilter_degeneracy=no") {
+        print_usage();
+        std::cerr << "LOG \033[1;91merror: no prefilter degeneracy option implemented\n";
+        // --argc; ++argv;
+        // ssettings_.prefilter_degeneracy_ = false;
+        // argstate = AFTER_INITIAL_ARGS;
+        // incomplete = false;
+        // continue;
       }
       std::cerr << "minus: \033[1;91m error\e[m\n - unrecognized argument " << arg << std::endl;;
       print_usage();

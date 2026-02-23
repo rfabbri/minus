@@ -1,7 +1,11 @@
+// 
+// \author Ricardo Fabbri based on original code by Anton Leykin 
+// \date February 2019-2026
+// 
 #include "minus-linecircle.h"
 
 // Simplest possible command to compute the linecircle problem
-// for estimating calibrated trifocal geometry from points and lines at points
+// of intersecting a line and a circle 
 //
 // This is to be kept very simple C with only minimal C++ with Templates.
 // If you want to complicate this, please create another executable.
@@ -13,32 +17,36 @@ main(int argc, char **argv)
   
   process_args(argc, argv);
 
-  if (param_data_) {
-    LOG("param: input is parameters");
+  if (input_data_) {
+    LOG("param: input is problem data ");
+    // by parameters we mean coefficients,direct problem data or more general
+    // parameters, as opposed to the  XXX
     if (ground_truth_)
-      LOG("param: reading ground truth appended to input pixel data");
+      LOG("param: reading ground truth appended to input target problem data");
   }
   if (profile_)
     LOG("Running default solve for profiling");
-  if (stdio_)
+  else if (stdio_) 
     LOG("reading from stdio");
   else
     LOG("reading from " << input_ << " writing to " << output_);
 
   print_all_settings(settings_, ssettings_);
 
-  if (!profile_) { // read files: either stdio or physical
-    init_input(input_, inp);
-    if (param_data_) {  // read image pixel-based I/O parameters
-      if (!iread<Float>(*inp))
+  minus_cmd_io cmd;
+
+  if (!profile_) { // Read files: either stdio or physical
+    cmd.init_input(input_, inp);
+    if (input_data_) {          // Read target problem data, which is then converted to
+      if (!iread<Float>(*inp))  // the internally used problem parameters
         return 1;
       data::params_ = data::params_start_target_;
-    } else {  // read raw I/O homotopy parameters (to be used as engine)
-      if (!mread<Float>(*inp))  // reads into global params_
+    } else {  // Read raw start+target homotopy parameters, possibly randomized. (To be used as engine)
+      if (!cmd.mread<Float>(*inp))  // Reads into global params_
         return 1;
     }
-  }
-  
+  } // else, profile: the homotopy data is already hardcoded in data::params_
+
   alignas(64) static M::solution solutions[M::nsols];
   {
     LOG("\033[0;33mUsing 4 threads by default\e[m\n");
@@ -64,17 +72,26 @@ main(int argc, char **argv)
     #endif
   }
 
-  
   if (profile_) {
     // compare solutions to certain hardcoded values from M2
-    // two random entries
-    if (std::abs(solutions[1].x[1] - solutions_gt_[0]) <= tol &&
-        std::abs(solutions[M::nsols-2].x[2] - solutions_gt_[1]) <= tol)
-      std::cerr << "LOG solutions look OK\n";
-    else  {
-      std::cerr << "LOG \033[1;91merror:\e[m solutions dont match m2. Errors: ";
-      std::cerr << std::abs(solutions[1].x[2] - solutions_gt_[0]) << ", "
-          << std::abs(solutions[M::nsols-2].x[2] - solutions_gt_[1]) << std::endl;
+
+    bool solutions_bad = false;
+    for (unsigned s=0; s < M::nsols; ++s)
+      for (unsigned v=0; v < M::nve; ++v)
+        if (std::abs(solutions[s].x[v] - solutions_gt_[s][v]) > tol) {
+          solutions_bad = true;
+          goto not_ok;
+        }
+    std::cerr << "LOG solutions look OK\n";
+    not_ok: 
+    if (solutions_bad) {
+      std::cerr << "LOG \033[1;91merror:\e[m solutions dont match hardcoded ground-truth exactly (could be a normalization issue). Errors: ";
+      for (unsigned s=0; s < M::nsols; ++s) {
+        std::cerr << "Solution id " << s << ", errors as pairs (variable id, error): " << std::endl;
+        for (unsigned v=0; v < M::nve; ++v) {
+          std::cerr << "\t" << v << "\t" << std::abs(solutions[s].x[v] - solutions_gt_[s][v]) << std::endl;
+        }
+      }
     }
   }
   
@@ -82,11 +99,12 @@ main(int argc, char **argv)
 
   // ---------------------------------------------------------------------------
   // test_final_solve_against_ground_truth(solutions);
-  // optional: filter solutions using positive depth, etc.
+  // optional: filter solutions using problem-specific inequalities and
+  // additional information
   if (ground_truth_ || profile_) {
     // TODO(juliana) should we has_valid_solutions here? 
     unsigned sol_id;
-    bool found = io::probe_all_solutions(solutions, data::sols_gt_, &sol_id);
+    bool found = io::probe_all_solutions(solutions, data::solutions_gt_, &sol_id);
     if (found) {
       LOG("found solution at index: " << sol_id);
       LOG("number of iterations of solution: " << solutions[sol_id].num_steps);

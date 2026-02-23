@@ -17,14 +17,14 @@ main(int argc, char **argv)
   
   process_args(argc, argv);
 
-  if (image_data_) {
+  if (input_data_) {
     LOG("param: input is image pixel data");
     if (ground_truth_)
-      LOG("param: reading ground truth appended to input pixel data");
+      LOG("param: reading ground truth appended to input target problem data (in pixels)");
   }
   if (profile_)
     LOG("Running default solve for profiling");
-  if (stdio_)
+  else if (stdio_) 
     LOG("reading from stdio");
   else
     LOG("reading from " << input_ << " writing to " << output_);
@@ -33,17 +33,17 @@ main(int argc, char **argv)
 
   minus_cmd_io cmd;
 
-  if (!profile_) { // read files: either stdio or physical
+  if (!profile_) { // Read files: either stdio or physical
     cmd.init_input(input_, inp);
-    if (image_data_) {  // read image pixel-based I/O parameters
-      if (!iread<Float>(*inp))
+    if (input_data_) {          // Read target problem data, which is then converted to
+      if (!iread<Float>(*inp))  // the internally used problem parameters
         return 1;
       data::params_ = data::params_start_target_;
-    } else {  // read raw I/O homotopy parameters (to be used as engine)
-      if (!cmd.mread<Float>(*inp))  // reads into global params_
+    } else {  // Read raw start+target homotopy parameters, possibly randomized. (To be used as engine)
+      if (!cmd.mread<Float>(*inp))  // Reads into global params_
         return 1;
     }
-  }
+  } // else, profile: the homotopy data is already hardcoded in data::params_
   
   alignas(64) static M::solution solutions[M::nsols];
   {
@@ -112,7 +112,7 @@ main(int argc, char **argv)
     LOG("\033[0;33mReading second problem B\e[m\n");
     // Now read problem B & extract parameters into 2nd half of
     // params_start_target_
-    if (image_data_) {  // read image pixel-based I/O parameters
+    if (input_data_) {  // read image pixel-based I/O parameters
       if (!iread<Float>(*inp))
         return 1;
       data::params_ = data::params_start_target_;
@@ -163,7 +163,8 @@ main(int argc, char **argv)
 
   // ---------------------------------------------------------------------------
   // test_final_solve_against_ground_truth(solutions);
-  // optional: filter solutions using positive depth, etc.
+  // optional: filter solutions using problem-specific inequalities and
+  // additional information
   if (ground_truth_ || profile_) {
     // TODO(juliana) should we has_valid_solutions here? 
     io::RC_to_QT_format(data::cameras_gt_, data::cameras_gt_quat_);

@@ -107,8 +107,11 @@ const std::complex<F> * minus_data<linecircle2a,F>::
 // params_= default_params_start_target_gammified_;
 params_= params_start_target_;
 
-
-// Input parameters corresponding to the above gammified homotopy parameters
+// Target solutions corersponding to the above gammified homotopy parameters
+//
+// These should be exactly numerically the same solutions we expect from the homotopy,
+// e.g. as prototyped in Macaulay2. Note that there can be multiple different
+// representations to the same solutions of a problem, e.g. homogeneous coordinates
 template <typename F>
 C<F> minus_data<linecircle2a,F>::
 solutions_gt_[M::nve] = {

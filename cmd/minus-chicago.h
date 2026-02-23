@@ -56,12 +56,12 @@ print_usage()
                "  minus input_file solutions_file\n"
                "  minus <input_file >solutions_file\n"
                "  minus -g       # (or --profile) : performs a default solve for profiling\n"
-               "  minus -i       # (or --image_data) : reads point-tangents from stdin\n"
+               "  minus -i       # (or --input_data) : reads point-tangents from stdin\n"
                "  minus -h       # (or --help) : print this help message\n"
                // "  minus -r       # (or --real)  :  outputs only real solutions\n"
                "  minus -AB      # (or --two_problems) : continue between 2 given problems\n"
             <<
-  R"(-i | --image_data usage:
+  R"(-i | --input_data usage:
  
   Input format (indexing goes _view_points_coords. any number of spaces and newlines optional. can be in
   one row or one column as well). This input format assumes tangent data for
@@ -148,7 +148,7 @@ print_usage()
 bool ground_truth_ = false;
 bool two_problems_given_ = false;
 bool reading_first_point_ = true;
-bool image_data_ = false;
+bool input_data_ = false;
 bool profile_ = false;   // run some default solves for profiling
 M::track_settings settings_; // general homotopy settings
 M::f::settings ssettings_;   // specific settings (formulation-specific)
@@ -229,8 +229,9 @@ process_args(int argc, char **argv)
   // switches that can show up only in 1st position
   
   enum {
-    INITIAL_ARGS, AFTER_INITIAL_ARGS, IMAGE_DATA, MAX_CORR_STEPS, 
-    EPSILON, FILTER_DEGENERACY
+    INITIAL_ARGS, AFTER_INITIAL_ARGS, 
+    INPUT_DATA /* input is problem/user data representation */, 
+    MAX_CORR_STEPS, EPSILON, FILTER_DEGENERACY
   } argstate = INITIAL_ARGS;
   bool incomplete = false;
   std::string arg;
@@ -242,10 +243,20 @@ process_args(int argc, char **argv)
       profile_ = true;
       argstate = AFTER_INITIAL_ARGS;
       --argc; ++argv;
-    } else if (arg == "-i" || arg == "--image_data") {
-      image_data_ = true; 
-      argstate = IMAGE_DATA;
+    } else if (arg == "-i" || arg == "--input_data" || arg == "--input_data") {
+      input_data_ = true; 
+      argstate = INPUT_DATA;
       --argc; ++argv;
+      // Input is just the data specifying the target system to be solved.
+      // 
+      // Without this flag, the input is the full homotopy parameters comprising
+      // of the concatenaded start and end system parameters, possibly
+      // randomized. This is used if you want to set or randomize the
+      // parameters outside MINUS, possibly together with setting your own start
+      // solutions, or if you want to debug MINUS bypassing parameter
+      // construction from the user's input representation (e.g., image points).
+      // 
+      // See print_usage() 
     } else if (arg[0] != '-') {
       if (argc == 2) {
           input_ = argv[1];
@@ -262,17 +273,17 @@ process_args(int argc, char **argv)
       LOG("parsing arg " + arg);
       
       // argstate >= AFTER_INITIAL_ARGS ----------------------------------------
-      if (argstate == IMAGE_DATA) {
+      if (argstate == INPUT_DATA) {
         if (arg == "-gt") {
           ground_truth_ = true;
           --argc; ++argv;
-          argstate = IMAGE_DATA;
+          argstate = INPUT_DATA;
           continue;
         }
-        if (arg == "-AB") {
+        if (arg == "-AB") { // TODO: move to separate commandline utility
           two_problems_given_ = true;
           --argc; ++argv;
-          argstate = IMAGE_DATA;
+          argstate = INPUT_DATA;
           continue;
         }
         argstate = AFTER_INITIAL_ARGS;
@@ -310,6 +321,12 @@ process_args(int argc, char **argv)
         continue;
       }
       if (arg == "--prefilter_degeneracy=yes") {
+        // Flag to discard degenerate data with cheap rules (collinear points, etc).
+        // 
+        // Use with caution, since homotopy continuation is excellent at solving
+        // nearly degenerate systems. Often the concern is not that HC may fail,
+        // but that it may be slow.
+        // 
         --argc; ++argv;
         ssettings_.prefilter_degeneracy_ = true;
         argstate = AFTER_INITIAL_ARGS;

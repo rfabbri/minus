@@ -5137,6 +5137,18 @@ const double line_complex[5][9] =
 0 0 0 0 0 0 0 0 0]
  * */
 
+// Target solutions corersponding to the above gammified homotopy parameters
+//
+// These should be exactly numerically the same solutions we expect from the homotopy,
+// e.g. as prototyped in Macaulay2. Note that there can be multiple different
+// solution representations to the same problem, e.g. homogeneous coordinates.
+template <typename F>
+C<F> minus_data<chicago14a,F>::
+solutions_gt_[M::nve] = {
+  {-.83999999999999997, -.38032880511473233},
+  {30000000000000006e-1, -.11409864153441969}
+};
+
 } // namespace minus
 
 #endif   // chicago14a_default_data_hxx_
