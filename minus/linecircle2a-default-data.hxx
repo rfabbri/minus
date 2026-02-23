@@ -66,9 +66,6 @@ params_start_target_[2*M::f::nparams] = {
   // ...j
 };
 
-#if 0
-// Pro -------------------------------------------------------------------------
-// 
 // Example randomized parameters for a specific given input for testing
 // 
 // Used for testing and comparing to M2
@@ -83,12 +80,15 @@ params_start_target_[2*M::f::nparams] = {
 template <typename F>
 alignas(64) std::complex<F> minus_data<linecircle2a,F>::
 default_params_start_target_gammified_[2*M::f::nparams] = {
-  {-.54232002300332649, .84017200182443086},
-  {-.50519558694885758, -.86300487769618039},
-  {.78557292739942153, -.61876908110950668},
-  {-.22606308570353237, -.9741126635467775},
-  {.98518486450687703, .17149572223984591},
-  {-.15952718229455548, .98719353629830842},
+  // 1st half is same as params_start_target_
+  // since in this case we are not randomizing/gammifying
+  // PRO: randomize
+  {.88881367728739857, -.458268749825746},
+  {-.90958124762797854, .41552611706549814},
+  {.55992250117654629, .82854498530629017},
+  {-.96824002271365794, -.25002251581698631},
+  {-.91443211037109806, -.40473931798413143},
+  {.80682944155872807e-1, .99673981686413049}
   // plus nparams we dont statically initialize and fill later
   // in this case a b c d e and f for the line-circle eq
   {2, 0},
@@ -98,8 +98,6 @@ default_params_start_target_gammified_[2*M::f::nparams] = {
   {-2, 0},
   {5.1, 0}
 };
-
-#endif
 
 template <typename F>
 const std::complex<F> * minus_data<linecircle2a,F>::
