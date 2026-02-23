@@ -10,9 +10,8 @@ if [ "$#" -ne 0 -a "$#" -ne 6 -a "$#" -ne 8 -a "$#" -ne 16 ]; then
   echo '  Usage A-B: synthdata frame1A frame2A frame3A file_line1A file_line2A file_line3A id0A id1A frame1B frame2B frame3B file_line1B file_line2B file_line3B id0B id1B' 1>&2; 
   exit 2
 fi
-
 # echoerr() { echo "LOG $@" 1>&2; }
-echoerr() { printf "LOG %s\n" "$*" >&2; }
+echoerr() { printf "LOG(synthdata) %s\n" "$*" >&2; }
 #echoerr() { printf "LOG %s\n" "$*" >/dev/null; }
 
 # frames are 0-indexed

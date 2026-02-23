@@ -136,6 +136,7 @@ track(const track_settings &s, const C<F> s_sols_u[f::nve*f::nsols], const C<F> 
     char predictor_successes = 0;
 
     // track H(x,t) for t in [0,1]
+    // TODO: due to precision, it is best from 1 to 0 as Bertini/Wampler suggests
     while (likely(t_s->status == PROCESSING && 1. - *t0 > the_smallest_number)) {
       if (unlikely(t_s->num_steps == s.max_num_steps_)) {
         t_s->status = MAX_NUM_STEPS_FAIL; // failed to reach solution in the available step budget

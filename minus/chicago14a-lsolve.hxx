@@ -1,4 +1,11 @@
 // Specific to Chicago
+// Solves Ax = b
+//
+// That is:
+//
+// given input m = [A | b]
+// produces output x such that Ax = b
+//
 template <problem P, typename F>
 __attribute__((always_inline)) inline void
 lsolve(

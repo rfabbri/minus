@@ -1,3 +1,5 @@
+-- Integrated into ~/tutorial/
+-- 
 -- code for generating various evaluators 
 restart
 needsPackage "SLPexpressions"

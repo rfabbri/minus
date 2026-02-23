@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# extracts the desired trinocular data for Chicago
+# from synthetic data  files
+# This is for openmvg sequential_SfM_test etc
+#
+
+cd /Users/rfabbri/lib/data/synthcurves-multiview-3d-dataset/spherical-ascii-100_views-perturb-radius_sigma10-normal_sigma0_01rad-minsep_15deg-no_two_cams_colinear_with_object-aspect_ratio1
+
+
+# openmvg sequential ground truth
+frames="42 54 62 07"
+lines="621 1010 3013 3390 4874"
+
+# off by one mistake by hongyi:
+#lines="3011 3389 620"
+#set -x
+for i in $frames; do
+  echo "// 2D points for frame $i"
+  echo "{"
+  for l in $lines; do
+    mystr=`sed -n "${l}p" frame_00$i-pts-2d.txt|sed 's/\ /,\ /g'`
+    echo "{$mystr},"
+  done
+  echo "},"
+done
+
+for i in $frames; do
+  echo "// 2D tangents for frame $i"
+  echo "{"
+  for l in $lines; do
+    mystr=`sed -n "${l}p" frame_00$i-tgts-2d.txt|sed 's/\ /,\ /g'`
+    echo "{$mystr},"
+  done
+  echo "},"
+done
+
+echo "// 3D points"
+for l in $lines; do
+  mystr=`sed -n "${l}p" crv-3D-pts.txt|sed 's/\ /,\ /g'`
+  echo "{$mystr},"
+done
+
+echo "// 3D tangents"
+for l in $lines; do
+  mystr=`sed -n "${l}p" crv-3D-tgts.txt|sed 's/\ /,\ /g'`
+  echo "{$mystr},"
+done
+
+for i in $frames; do
+  echo "// extrinsics for frame $i"
+  echo "{"
+  mystr=`sed '
+  /^$/d
+  s/^/\{/g
+  s/$/\},/g
+  s/\ /,\ /g
+  ' frame_00$i.extrinsic`
+  echo "$mystr"
+  echo "},"
+done

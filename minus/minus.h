@@ -117,7 +117,7 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   static void evaluate_HxH_constants_all_sols(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
 };
 
-// TODO: make these static
+// TODO: make these static after fine-tuning to your end application
 template <problem P, typename F>
 struct minus_core<P, F>::track_settings {
   track_settings():

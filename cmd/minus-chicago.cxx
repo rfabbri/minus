@@ -153,7 +153,8 @@ bool image_data_ = false;
 bool profile_ = false;   // run some default solves for profiling
 const char *input_ = "stdin";
 const char *output_ = "stdout";
-M::track_settings settings_;
+M::track_settings settings_; // general homotopy settings
+M::f::settings ssettings_;   // specific settings (formulation-specific)
 
 void
 print_num_steps(M::solution solutions[M::nsols])
@@ -289,12 +290,15 @@ iread(std::istream &in)
     LOG("reading ground truth cams");
     if (ground_truth_ && !read_block(in, (F *) data::cameras_gt_, io::pp::nviews*4*3))
       return false;
-    io::point_tangents2params_img(data::p_, data::tgt_, tgt_ids[0], tgt_ids[1],
-        data::K_, data::params_start_target_);
+    if (!io::point_tangents2params_img(ssettings_, data::p_, data::tgt_, tgt_ids[0], tgt_ids[1],
+        data::K_, data::params_start_target_)) {
+      LOG("Data configuration close to degenerate, discarding");
+      return false;
+    }
     reading_first_point_ = false;
   } else { // when reading second point B, do not gammify A again
     static constexpr bool gammify_target_problem = false;
-    io::point_tangents2params_img(data::p_, data::tgt_, tgt_ids[0], tgt_ids[1],
+    io::point_tangents2params_img(ssettings_, data::p_, data::tgt_, tgt_ids[0], tgt_ids[1],
         data::K_, data::params_start_target_, gammify_target_problem);
   }
   return true;
@@ -354,6 +358,7 @@ void
 print_settings(const M::track_settings &settings)
 {
   #ifdef M_VERBOSE
+  {
   std::cerr << "Track settings ------------------------------------------------\n";
   const char *names[10] = {
     "init_dt_",
@@ -371,9 +376,23 @@ print_settings(const M::track_settings &settings)
   for (int i=0; i < 7; ++i)
     std::cerr << names[i] << " = " << *ptr++ << std::endl;
   std::cerr << names[7] << " = " << settings.max_num_steps_ << std::endl;
-  std::cerr << names[8] << " = " << settings.num_successes_before_increase_ << std::endl;
-  std::cerr << names[9] << " = " << settings.max_corr_steps_ << std::endl;
+  std::cerr << names[8] << " = " << (int)settings.num_successes_before_increase_ << std::endl;
+  std::cerr << names[9] << " = " << (int)settings.max_corr_steps_ << std::endl;
+  }
+  
+  std::cerr << "Formulation-specific settings ---------------------------------\n";
+  {
+  const char *names[10] = {
+    "prefilter_degeneracy_",
+    "prefilter_area_degeneracy_eps_",
+    "prefilter_angle_degeneracy_eps_"
+  };
+  std::cerr << names[0] << " = " << ssettings_.prefilter_degeneracy_ << std::endl;
+  Float *ptr = (Float *) &settings;
+  for (int i=1; i < 3; ++i)
+    std::cerr << names[i] << " = " << *ptr++ << std::endl;
   std::cerr << "---------------------------------------------------------------\n";
+  }
   #endif 
 }
 
@@ -381,10 +400,14 @@ void
 process_args(int argc, char **argv)
 {
   settings_ = M::DEFAULT;
+  ssettings_ = M::f::DEFAULT;
   --argc; ++argv;
   // switches that can show up only in 1st position
   
-  enum {INITIAL_ARGS, AFTER_INITIAL_ARGS, IMAGE_DATA, MAX_CORR_STEPS, EPSILON} argstate = INITIAL_ARGS;
+  enum {
+    INITIAL_ARGS, AFTER_INITIAL_ARGS, IMAGE_DATA, MAX_CORR_STEPS, 
+    EPSILON, FILTER_DEGENERACY
+  } argstate = INITIAL_ARGS;
   bool incomplete = false;
   std::string arg;
   if (argc) {
@@ -460,6 +483,20 @@ process_args(int argc, char **argv)
         --argc; ++argv;
         argstate = EPSILON;
         incomplete = true;
+        continue;
+      }
+      if (arg == "--prefilter_degeneracy=yes") {
+        --argc; ++argv;
+        ssettings_.prefilter_degeneracy_ = true;
+        argstate = AFTER_INITIAL_ARGS;
+        incomplete = false;
+        continue;
+      }
+      if (arg == "--prefilter_degeneracy=no") {
+        --argc; ++argv;
+        ssettings_.prefilter_degeneracy_ = false;
+        argstate = AFTER_INITIAL_ARGS;
+        incomplete = false;
         continue;
       }
       std::cerr << "minus: \033[1;91m error\e[m\n - unrecognized argument " << arg << std::endl;;
