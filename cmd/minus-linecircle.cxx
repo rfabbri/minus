@@ -18,15 +18,13 @@ main(int argc, char **argv)
   process_args(argc, argv);
 
   if (input_data_) {
-    LOG("param: input is problem data ");
-    // by parameters we mean coefficients,direct problem data or more general
-    // parameters, as opposed to the  XXX
+    LOG("input is problem data (image pixel data) of the problem to be solved (target problem)"); // as opposed to start/target parameters
     if (ground_truth_)
-      LOG("param: reading ground truth appended to input target problem data");
+      LOG("reading ground truth appended to input target problem data");
   }
   if (profile_)
     LOG("Running default solve for profiling");
-  else if (stdio_) 
+  else if (stdio_)
     LOG("reading from stdio");
   else
     LOG("reading from " << input_ << " writing to " << output_);
@@ -72,13 +70,12 @@ main(int argc, char **argv)
     #endif
   }
 
-  if (profile_) {
+  if (profile_) { // data::compare_to_hardcoded_gt(sols);
     // compare solutions to certain hardcoded values from M2
-
     bool solutions_bad = false;
-    for (unsigned s=0; s < M::nsols; ++s)
+    for (unsigned s=0; s < data::n_gt_sols_; ++s)
       for (unsigned v=0; v < M::nve; ++v)
-        if (std::abs(solutions[s].x[v] - solutions_gt_[s][v]) > tol) {
+        if (std::abs(solutions[data::gt_sol_id_[s]].x[v] - data::gt_sols[s][v]) > tol) {
           solutions_bad = true;
           goto not_ok;
         }
@@ -86,10 +83,10 @@ main(int argc, char **argv)
     not_ok: 
     if (solutions_bad) {
       std::cerr << "LOG \033[1;91merror:\e[m solutions dont match hardcoded ground-truth exactly (could be a normalization issue). Errors: ";
-      for (unsigned s=0; s < M::nsols; ++s) {
+      for (unsigned s=0; s < n_sols_to_test; ++s) {
         std::cerr << "Solution id " << s << ", errors as pairs (variable id, error): " << std::endl;
         for (unsigned v=0; v < M::nve; ++v) {
-          std::cerr << "\t" << v << "\t" << std::abs(solutions[s].x[v] - solutions_gt_[s][v]) << std::endl;
+          std::cerr << "\t" << v << "\t" << std::abs(solutions[data::gt_sol_id_[s]].x[v] - data::gt_sols[s][v]) << std::endl;
         }
       }
     }

@@ -1,4 +1,4 @@
-#include "Eigen/LU" // Noob XXX TODO: only include if necessary
+#include "Eigen/LU"
 
 #define P linecircle2a
 namespace MiNuS {

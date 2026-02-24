@@ -44,9 +44,9 @@ start_sols_[M::nve*M::nsols] = {
 // Non-gammified (non-randomized)
 // Start - target system parameters
 //
-// P0 || trash
+// p0 || trash
 //
-// Where P0 are the system parameters associated with the start solution
+// Where p0 are the system parameters associated with the start solution
 //
 //                                  actually just the start M::nparams
 //                                  are initialized here, but we use 
@@ -56,41 +56,53 @@ start_sols_[M::nve*M::nsols] = {
 template <typename F>
 alignas(64) std::complex<F> minus_data<linecircle2a,F>::
 params_start_target_[2*M::f::nparams] = {
-  {.88881367728739857, -.458268749825746},
+  {.88881367728739857, -.458268749825746}, // start solutions
   {-.90958124762797854, .41552611706549814},
   {.55992250117654629, .82854498530629017},
   {-.96824002271365794, -.25002251581698631},
   {-.91443211037109806, -.40473931798413143},
   {.80682944155872807e-1, .99673981686413049}
+  // ---------------------------------------------------------------------------
   // plus nparams we dont statically initialize and fill later
   // ...j
 };
 
-// Example randomized parameters for a specific given input for testing
+// Example randomized homotopy parameters for a specific input for testing and
+// profiling.
 // 
-// Used for testing and comparing to M2
-//
-// This is the line 
+// A basic test case is to compare directly against Macaulay2 prototype when
+// 8
+// coding the optimized solver. A more complete time test is the -g profiling
+// option of MINUS commands.
+// 
+// This is
 //  P01 = p0 || transpose p1;
-//
 //  toExternalString(point P01)
+// e.g., in tutorial/linecircle-end.m2 example, where:
+// 
+// p0: parameters describing the start system, and is the same as
+// params_start_target_ 1st half, possibly randomized in PRO-level solvers.
+// 
+// p1: parameters describing a default target system to run when
+// profiling. We usually pick a hard/slow system here.
 //
-// In tutorial/linecircle-end.m2 example 
+// PRO: These are usually randomized/gammified in pro-level solvers.
 //
+// TODO: remove suffix _gammified
+// -----------------------------------------------------------------------------
+// Specific documentation for linecircle2a
+//
+// p0 and p1 are each the parameters of the linecircle2a problem, see linecircle2a.h
+// Each hold the six parameters giving the coefficients of the equations 
 template <typename F>
 alignas(64) std::complex<F> minus_data<linecircle2a,F>::
 default_params_start_target_gammified_[2*M::f::nparams] = {
-  // 1st half is same as params_start_target_
-  // since in this case we are not randomizing/gammifying
-  // PRO: randomize
   {.88881367728739857, -.458268749825746},
   {-.90958124762797854, .41552611706549814},
   {.55992250117654629, .82854498530629017},
   {-.96824002271365794, -.25002251581698631},
   {-.91443211037109806, -.40473931798413143},
-  {.80682944155872807e-1, .99673981686413049}
-  // plus nparams we dont statically initialize and fill later
-  // in this case a b c d e and f for the line-circle eq
+  {.80682944155872807e-1, .99673981686413049},
   {2, 0},
   {3, 0},
   {4, 0},
@@ -105,16 +117,23 @@ const std::complex<F> * minus_data<linecircle2a,F>::
 // params_= default_params_start_target_gammified_;
 params_= params_start_target_;
 
-// Target solutions corersponding to the above gammified homotopy parameters
+// Target solutions corresponding to default_params_start_target_gammified_
 //
 // These should be exactly numerically the same solutions we expect from the homotopy,
 // e.g. as prototyped in Macaulay2. Note that there can be multiple different
 // representations to the same solutions of a problem, e.g. homogeneous coordinates
 template <typename F>
-C<F> minus_data<linecircle2a,F>::
-solutions_gt_[M::nve] = {
+alignas(64) std::complex<F> minus_data<linecircle2a,F>::
+gt_sols_[n_gt_sols_] = {
   {-.83999999999999997, -.38032880511473233},
   {30000000000000006e-1, -.11409864153441969}
+};
+
+template <typename F>
+const unsigned minus_data<linecircle2a,F>::
+id_gt_sols_[minus_data<linecircle2a,F>::n_gt_sols_] = { // Id of the sols to test
+ 0, 1                               // internal solve. May compare just a few 
+                                    // when there may be too many to hardcode.
 };
 
 // Ground-truth solutions in your data format could be here.

@@ -4715,9 +4715,9 @@ start_sols_[M::nve*M::nsols] = {
 // Start - target system parameters
 //
 // In solve chicago this is
-// P0 || trash
+// p0 || trash
 //
-// Where P0 are the system parameters associated with the start solution
+// Where p0 are the system parameters associated with the start solution
 //
 // start_sols_
 //
@@ -4789,16 +4789,33 @@ params_start_target_[2*M::f::nparams] = {
   {.6890260043220745,.52555620035489847}
 };
 
-// Example specialized homotopy for a specific given input
-// these take almost 1min in Macaulay2
-// Used for testing.
-// Gammified (randomized)
-//
-// Internal note: in m2, function solveChicagoM2
+
+// Example randomized homotopy parameters for a specific input for testing and
+// profiling.
 // 
-//  P01 := (gammify P0)||(gammify P1); 
+// A basic test case is to compare directly against Macaulay2 prototype when
+// coding the optimized solver. A more complete time test is the -g profiling
+// option of MINUS commands.
+// 
+// This is
+//  P01 = p0 || transpose p1;
+//  toExternalString(point P01)
+// e.g., in tutorial/linecircle-end.m2 example, where:
+// 
+// p0: parameters describing the start system, and is the same as
+// params_start_target_ 1st half, possibly randomized in PRO-level solvers.
+// 
+// p1: parameters describing a default target system to run when
+// profiling. We usually pick a hard/slow system here.
 //
-// The point-tangent inputs giving rise to this are given below
+// PRO: These are usually randomized/gammified in pro-level solvers.
+//
+// -----------------------------------------------------------------------------
+// Specific documentation for chicago14a 
+//
+// p0 and p1 are each the parameters of the chicago problem, see chicago14a.h
+//
+// This specific star-target pair and randomization takes about 1min in Macaulay2
 template <typename F>
 alignas(64) std::complex<F> minus_data<chicago14a,F>::
 default_params_start_target_gammified_[2*M::f::nparams] = { // start-target param pairs, P01 in chicago.m2
@@ -5137,7 +5154,7 @@ const double line_complex[5][9] =
 0 0 0 0 0 0 0 0 0]
  * */
 
-// Target solutions corersponding to the above gammified homotopy parameters
+// Target solutions corersponding to default_params_start_target_gammified_
 //
 // These should be exactly numerically the same solutions we expect from the homotopy,
 // e.g. as prototyped in Macaulay2. Note that there can be multiple different
@@ -5148,6 +5165,8 @@ solutions_gt_[M::nve] = {
   {-.83999999999999997, -.38032880511473233},
   {30000000000000006e-1, -.11409864153441969}
 };
+
+
 
 } // namespace minus
 

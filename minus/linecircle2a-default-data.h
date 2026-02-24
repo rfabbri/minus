@@ -14,10 +14,11 @@ struct minus_data<linecircle2a,F> {
   typedef std::complex<F> complex;
   static const complex start_sols_[M::nve*M::nsols];
   alignas (64) static complex params_start_target_[2*M::f::nparams];
-  // Pro: ----------------------------------------------------------------------
-  // alignas (64) static complex default_params_start_target_gammified_[2*M::f::nparams];
+  alignas (64) static complex default_params_start_target_gammified_[2*M::f::nparams];
   static const complex *params_;
-  static complex solutions_gt_[M::nve];
+  static constexpr unsigned n_gt_sols_ = 2; // how many ground-truth sols we hardcode
+  static complex gt_sols_[n_gt_sols_];
+  static const unsigned id_gt_sols_[n_gt_sols_]; // id of gt-sol among all NVE
 };
 
 } // namespace minus

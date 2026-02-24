@@ -1,4 +1,3 @@
-// 
 // \author Ricardo Fabbri based on original code by Anton Leykin 
 // \date February 2019-2026
 // 
@@ -18,9 +17,9 @@ main(int argc, char **argv)
   process_args(argc, argv);
 
   if (input_data_) {
-    LOG("param: input is image pixel data");
+    LOG("input is problem data (image pixel data) of the problem to be solved (target problem)"); // as opposed to start/target parameters
     if (ground_truth_)
-      LOG("param: reading ground truth appended to input target problem data (in pixels)");
+      LOG("reading ground truth appended to input target problem data (in pixels)");
   }
   if (profile_)
     LOG("Running default solve for profiling");
@@ -147,6 +146,8 @@ main(int argc, char **argv)
   }
   
   if (profile_) {
+    // override default data::compare_to_hardcoded_gt(sols);
+    // 
     // compare solutions to certain values from M2
     // two random entries
     if (std::abs(solutions[1].x[1] - complex(-.25177177692982444e1, -.84845195030295639)) <= tol &&
