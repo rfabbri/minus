@@ -49,7 +49,7 @@ template <problem P, typename F=double>
 class minus_core { // fully static, not to be instantiated - just used for templating
   public: // ----------- Data structures --------------------------------------
   
-  // Tracker parameters
+  // Tracker prameters
   // Default values obtained in M2 by doing 
   // eg DEFAULT#tStep
   // or peek DEFAULT

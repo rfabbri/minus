@@ -124,14 +124,17 @@ params_= params_start_target_;
 // representations to the same solutions of a problem, e.g. homogeneous coordinates
 template <typename F>
 alignas(64) std::complex<F> minus_data<linecircle2a,F>::
-gt_sols_[n_gt_sols_] = {
-  {-.83999999999999997, -.38032880511473233},
-  {30000000000000006e-1, -.11409864153441969}
+gt_sols_[n_gt_sols_][M::nve] = {
+  { // solution 1
+  {-.83999999999999997, -.38032880511473233},  // x
+  {30000000000000006e-1, -.11409864153441969}  // y
+  }
+  // we dont include more sols now, just want it to find the real one above
 };
 
 template <typename F>
 const unsigned minus_data<linecircle2a,F>::
-id_gt_sols_[minus_data<linecircle2a,F>::n_gt_sols_] = { // Id of the sols to test
+gt_sols_id_[minus_data<linecircle2a,F>::n_gt_sols_] = { // Id of the sols to test
  0, 1                               // internal solve. May compare just a few 
                                     // when there may be too many to hardcode.
 };

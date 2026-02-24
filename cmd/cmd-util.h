@@ -6,12 +6,15 @@
 
 namespace MiNuS {
   
+// class with the maximum that is completely universal to all commands/problems 
 template <typename F>
 struct minus_cmd_io {
   bool stdio_ = true;  // by default read/write from stdio
   std::ifstream infp_;
   const char *input_ = "stdin";
   const char *output_ = "stdout";
+  
+  // ----------------------------------------------------------------------------
   
   // Output solutions in ASCII matlab format
   //
@@ -69,8 +72,8 @@ struct minus_cmd_io {
   }
   
   // Try to read n elements, filling in p in row-major order.
-  bool
-  read_block(std::istream &in, F *p, unsigned n) const
+  static bool
+  read_block(std::istream &in, F *p, unsigned n)
   {
     LOG("reading");
     const F *end = p + n;

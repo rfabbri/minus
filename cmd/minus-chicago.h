@@ -26,6 +26,7 @@ using namespace std::chrono;
 // on this header
 #include <minus/debug-util.h>
 #include "cmd-util.h"
+typedef minus_cmd_io<Float> cmd;
 
 // exit code. Conventions:
 // 0 (Zero)	Success
@@ -153,7 +154,7 @@ bool profile_ = false;   // run some default solves for profiling
 M::track_settings settings_; // general homotopy settings
 M::f::settings ssettings_;   // specific settings (formulation-specific)
 
-// print specialized settings
+// print specialized settings, if any
 void
 print_ssettings(const M::f::settings &ssettings) {
   #ifdef M_VERBOSE
@@ -190,21 +191,21 @@ static bool
 iread(std::istream &in)
 {
   LOG("reading p_");
-  if (!read_block(in, (F *)data::p_, io::pp::nviews*io::pp::npoints*io::ncoords2d))
+  if (!cmd::read_block(in, (F *)data::p_, io::pp::nviews*io::pp::npoints*io::ncoords2d))
     return false;
   LOG("reading tgt_");
-  if (!read_block(in, (F *)data::tgt_, io::pp::nviews*io::pp::npoints*io::ncoords2d))
+  if (!cmd::read_block(in, (F *)data::tgt_, io::pp::nviews*io::pp::npoints*io::ncoords2d))
     return false;
   unsigned tgt_ids[2];
   LOG("reading tgt_ids");
-  if (!read_block<unsigned>(in, tgt_ids, 2))
+  if (!minus_cmd_io<unsigned>::read_block(in, tgt_ids, 2))
     return false;
   if (reading_first_point_) {
     LOG("reading K_");
-    if (!read_block(in, (F *) data::K_, io::ncoords2d*io::ncoords2d_h))
+    if (!cmd::read_block(in, (F *) data::K_, io::ncoords2d*io::ncoords2d_h))
       return false;
     LOG("reading ground truth cams");
-    if (ground_truth_ && !read_block(in, (F *) data::cameras_gt_, io::pp::nviews*4*3))
+    if (ground_truth_ && !cmd::read_block(in, (F *) data::cameras_gt_, io::pp::nviews*4*3))
       return false;
     if (!io::point_tangents2params_img(ssettings_, data::p_, data::tgt_, tgt_ids[0], tgt_ids[1],
         data::K_, data::params_start_target_)) {
@@ -221,7 +222,7 @@ iread(std::istream &in)
 }
 
 void
-process_args(int argc, char **argv)
+process_args(minus_cmd_io<Float> &cmd, int argc, char **argv)
 {
   settings_ = M::DEFAULT;
   ssettings_ = M::f::DEFAULT;
@@ -243,10 +244,7 @@ process_args(int argc, char **argv)
       profile_ = true;
       argstate = AFTER_INITIAL_ARGS;
       --argc; ++argv;
-    } else if (arg == "-i" || arg == "--input_data" || arg == "--input_data") {
-      input_data_ = true; 
-      argstate = INPUT_DATA;
-      --argc; ++argv;
+    } else if (arg == "-i" || arg == "--input_data") {
       // Input is just the data specifying the target system to be solved.
       // 
       // Without this flag, the input is the full homotopy parameters comprising
@@ -257,11 +255,14 @@ process_args(int argc, char **argv)
       // construction from the user's input representation (e.g., image points).
       // 
       // See print_usage() 
-    } else if (arg[0] != '-') {
+      input_data_ = true; 
+      argstate = INPUT_DATA;
+      --argc; ++argv;
+    } else if (arg[0] != '-') { // if not a flag then two file names
       if (argc == 2) {
-          input_ = argv[1];
-          output_ = argv[2];
-          stdio_ = false;
+          cmd.input_ = argv[1];
+          cmd.output_ = argv[2];
+          cmd.stdio_ = false;
       } else {
           std::cerr << "minus: \033[1;91m error\e[m\n";
           print_usage();

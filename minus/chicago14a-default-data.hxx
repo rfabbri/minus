@@ -5046,7 +5046,7 @@ cameras_gt_[io::pp::nviews][4][3] = {
 };
 
 // this is more similar to the format in M::solution::x
-// ie, minus_io_shapping::solution_shape,
+// ie, minus_io_shaping::solution_shape,
 // for each other view relative to the first
 template <typename F>
 F minus_data<chicago14a,F>::
@@ -5159,12 +5159,12 @@ const double line_complex[5][9] =
 // These should be exactly numerically the same solutions we expect from the homotopy,
 // e.g. as prototyped in Macaulay2. Note that there can be multiple different
 // solution representations to the same problem, e.g. homogeneous coordinates.
-template <typename F>
-C<F> minus_data<chicago14a,F>::
-solutions_gt_[M::nve] = {
-  {-.83999999999999997, -.38032880511473233},
-  {30000000000000006e-1, -.11409864153441969}
-};
+//template <typename F>
+//C<F> minus_data<chicago14a,F>::
+//solutions_gt_[M::nve] = {
+//  {-.83999999999999997, -.38032880511473233},
+//  {30000000000000006e-1, -.11409864153441969}
+//};
 
 
 

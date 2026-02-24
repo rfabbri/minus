@@ -30,6 +30,7 @@ using namespace std::chrono;
 // on this header
 #include <minus/debug-util.h>
 #include "cmd-util.h"
+typedef minus_cmd_io<Float> cmd;
 
 
 // exit code. Conventions:
@@ -84,6 +85,7 @@ print_usage()
 }
 
 bool ground_truth_ = false;
+bool input_data_ = false;
 bool profile_ = false;   // run some default solves for profiling
 M::track_settings settings_;
 M::f::settings ssettings_;   // specific settings (formulation-specific)
@@ -115,15 +117,15 @@ iread(std::istream &in)
   LOG("reading parameters a b c d e f directly."); // for other problems you may
                                                    // have to read data and
                                                    // convert to params
-  if (!read_block(in, (F *)data::params_start_target_+M::f::nparams, M::f::nparams))
+  if (!read_block(in, (F *)(data::params_start_target_+M::f::nparams), 2*M::f::nparams /*complex numbers*/))
     return false;
   LOG("reading ground truth solutions");
-  if (ground_truth_ && !read_block(in, (F *)data::solutions_gt_, M::f::nsols))
+  if (ground_truth_ && !read_block(in, (F *)data::gt_sols_, 2*data::n_gt_sols_ /*complex numbers */))
     return false;
 }
 
 void
-process_args(int argc, char **argv)
+process_args(minus_cmd_io<Float> &cmd, int argc, char **argv)
 {
   settings_ = M::DEFAULT;
   --argc; ++argv;
@@ -156,13 +158,13 @@ process_args(int argc, char **argv)
       // 
       // See print_usage() 
       input_data_ = true; 
-      argstate = param_data;
+      argstate = INPUT_DATA;
       --argc; ++argv;
-    } else if (arg[0] != '-') { // not a flag -> two file names
+    } else if (arg[0] != '-') { // if not a flag then two file names
       if (argc == 2) {
-          input_ = argv[1];
-          output_ = argv[2];
-          stdio_ = false;
+          cmd.input_ = argv[1];
+          cmd.output_ = argv[2];
+          cmd.stdio_ = false;
       } else {
           std::cerr << "minus: \033[1;91m error\e[m\n";
           print_usage();

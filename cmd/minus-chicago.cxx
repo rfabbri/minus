@@ -13,8 +13,9 @@ int
 main(int argc, char **argv)
 {
   std::istream *inp = &std::cin;
+  cmd c;
   
-  process_args(argc, argv);
+  process_args(c, argc, argv);
 
   if (input_data_) {
     LOG("input is problem data (image pixel data) of the problem to be solved (target problem)"); // as opposed to start/target parameters
@@ -23,23 +24,21 @@ main(int argc, char **argv)
   }
   if (profile_)
     LOG("Running default solve for profiling");
-  else if (stdio_) 
+  else if (c.stdio_) 
     LOG("reading from stdio");
   else
-    LOG("reading from " << input_ << " writing to " << output_);
+    LOG("reading from " << c.input_ << " writing to " << c.output_);
 
   print_all_settings(settings_, ssettings_);
 
-  minus_cmd_io cmd;
-
   if (!profile_) { // Read files: either stdio or physical
-    cmd.init_input(input_, inp);
+    c.init_input(c.input_, inp);
     if (input_data_) {          // Read target problem data, which is then converted to
       if (!iread<Float>(*inp))  // the internally used problem parameters
         return 1;
       data::params_ = data::params_start_target_;
     } else {  // Read raw start+target homotopy parameters, possibly randomized. (To be used as engine)
-      if (!cmd.mread<Float>(*inp))  // Reads into global params_
+      if (!c.mread(*inp))  // Reads into global params_
         return 1;
     }
   } // else, profile: the homotopy data is already hardcoded in data::params_
@@ -160,7 +159,7 @@ main(int argc, char **argv)
     }
   }
   
-  if (!cmd.mwrite<Float>(solutions, output_)) return 2;
+  if (!c.mwrite(solutions, output_)) return 2;
 
   // ---------------------------------------------------------------------------
   // test_final_solve_against_ground_truth(solutions);

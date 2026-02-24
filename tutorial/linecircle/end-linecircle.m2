@@ -86,14 +86,14 @@ print "Reading start system startSys."
 p1 = matrix{{2, 3, 4, 6, -2, 5.1}};
 -- recall parameters from equations file
 
--- Ground-truth solutions we know before hand, just for validation
-sols1gt = matrix{{
+-- Ground-truth solution we know before hand, just for validation
+sol1gt = matrix{{
   -.83999999999999997p53 -.38032880511473233p53*ii,
   30000000000000006p53e-1 -.11409864153441969p53e1*ii
-}}; -- ground truth solutions of target system
+}};
 
 print "Ground-truth solution to target parameters p1 should be 0:"
-evalresults = evaluate(GS,p1,sols1gt) -- should be 0
+evalresults = evaluate(GS,p1,sol1gt) -- should be 0
 print evalresults
 
 --
