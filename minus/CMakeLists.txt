@@ -5,11 +5,13 @@ set(minus_sources
   minus.hxx minus.h 
 #
   chicago14a.h chicago-default.h chicago14a-default-data.h chicago14a-io.h
-  chicago14a.hxx chicago14a-default-data.hxx 
+  chicago14a.hxx chicago14a-HxH.hxx chicago14a-Hxt.hxx chicago14a-default-data.hxx chicago14a-lsolve.hxx
 
+  
   linecircle2a.h linecircle-default.h linecircle2a-default-data.h linecircle2a-io.h
-  linecircle2a.hxx linecircle2a-default-data.hxx 
+  linecircle2a.hxx linecircle2a-HxH.hxx linecircle2a-Hxt.hxx linecircle2a-default-data.hxx linecircle2a-lsolve.hxx
 
+  
   internal-util.h internal-util.hxx debug-util.h 
 
 #
