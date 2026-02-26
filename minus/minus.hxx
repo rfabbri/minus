@@ -304,6 +304,44 @@ has_valid_solutions(const typename M::solution solutions[M::nsols])
 }
 
 //
+// Searches for probe_solution among solutions directly.
+// 
+// A match will occur if every coordinte is within tolerance of the probe,
+// independently if it is real or not. 
+//
+// Multiple matches are ignored. If you need to get the minimum value, see the
+// probe_solutions implementation
+// 
+// This default implementation is exact, meaning:the exact numerical value is
+// sought. No normalizations to equivalent standard representations (eg,
+// homogeneous representative) are performed.
+// 
+// This is the generic default implementation. It may be specialized for each
+// problem tag to compare e.g. groups of variables as rotations
+// 
+//
+template <problem P, typename F>
+inline bool
+minus_io<P, F>::
+probe_solutions(
+    const typename M::solution solutions[M::nsols], 
+    C<F> probe_solution[M::nve])
+{
+  for (s = 0; s < M::nsols; ++s)  {
+    bool possible_match = true;
+    for (v = 0; v < M::nve; ++v) {
+      if (std::abs(solutions[s][v] - probe_solution[v]) > eps) {
+        possible_match = false;
+        break
+      }
+    }
+    if (possible_match)
+      return true;
+  }
+  return false;
+}
+
+//
 // Searches for probe_solution among solutions.
 // 
 // This default implementation is exact, meaning: the exact numerical value is
@@ -312,14 +350,14 @@ has_valid_solutions(const typename M::solution solutions[M::nsols])
 //
 // A match will occur if the solution is real and every coordinte is within tolerance of the probe. 
 //
-// In case of multiple matches, the solution with minimum error is returned.
+// _all_ means: In case of multiple matches, the solution with minimum error is returned.
 // 
 // Safe: this guarantees a sensibly similar match numerically, but may not be
 // the fastest way to do it for your application. We coded it as efficiently as
 // possible, but it is likely overkill semantically. It does not affect the main
 // engine, that is why it is in a separate I/O class.
 // 
-// This is the generic implementation. It may be specialized for each problem
+// This is the generic default implementation. It may be specialized for each problem
 // tag to compare e.g. groups of variables as rotations
 // 
 template <problem P, typename F>
@@ -392,9 +430,6 @@ probe_all_solutions(
   if (!already_found)
     return false;
       
-  if (solutions[*solution_index].status != M::REGULAR)
-    std::cerr << "Debug: found solution but it is not flagged as regular. This may happen often.\n";
-  
   return true;
 }
 

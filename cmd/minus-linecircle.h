@@ -121,6 +121,8 @@ iread(std::istream &in)
     return false;
   LOG("reading ground truth solutions");
   if (ground_truth_ && !read_block(in, (F *)data::gt_sols_, 2*data::n_gt_sols_ /*complex numbers */))
+                                                            // your specific application may read just
+                                                            // real numbers you are interested in
     return false;
 }
 

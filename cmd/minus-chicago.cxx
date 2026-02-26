@@ -159,7 +159,7 @@ main(int argc, char **argv)
     }
   }
   
-  if (!c.mwrite(solutions, output_)) return 2;
+  if (!c.mwrite(solutions, c.output_)) return 2;
 
   // ---------------------------------------------------------------------------
   // test_final_solve_against_ground_truth(solutions);

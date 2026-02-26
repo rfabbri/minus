@@ -324,6 +324,8 @@ struct minus_io : public minus_io_common<F> {
   static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
   static bool probe_all_solutions(const typename M::solution solutions[M::nsols], 
                                   F probe_solution[M::nve], unsigned *solution_index);
+  static bool probe_solutions_exact(const typename M::solution solutions[M::nsols], 
+                                    F probe_solution[M::nve]);
 };
 
 // Highlevel API ---------------------------------------------------------------

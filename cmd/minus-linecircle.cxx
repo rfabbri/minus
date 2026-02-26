@@ -70,13 +70,13 @@ main(int argc, char **argv)
   }
 
   if (profile_) { // data::compare_to_hardcoded_gt(sols);
-    if (probe_solutions_exact(solutions, data::gt_sols_[0])
+    if (probe_solutions(solutions, data::gt_sols_[0])
       std::cerr << "LOG solutions look OK\n";
     else
       std::cerr << "LOG \033[1;91merror:\e[m solutions dont match hardcoded ground-truth numerically (hint: could be a normalization issue if it says found below).\n";
   }
   
-  if (!c.mwrite(solutions, output_)) return 2;
+  if (!c.mwrite(solutions, c.output_)) return 2;
 
   // ---------------------------------------------------------------------------
   // test_final_solve_against_ground_truth(solutions);
@@ -84,19 +84,34 @@ main(int argc, char **argv)
   // additional information
   if (ground_truth_ || profile_) {
     unsigned sol_id;
-    // searches for ground-truth among solutions, possibly with normalizations
-    bool found = io::probe_all_solutions(solutions, data::gt_sols_[0], &sol_id);
-    if (found) {
-      LOG("found solution at index: " << sol_id);
-      LOG("number of iterations of solution: " << solutions[sol_id].num_steps);
-      if (solutions[sol_id].status != M::REGULAR)
-        LOG("PROBLEM found ground truth but it is not REGULAR: " << sol_id);
-    } else {
-      LOG("\033[1;91mFAIL:\e[m  ground-truth not found among solutions");
-      return SOLVER_FAILURE; 
-      // you can detect solver failure by checking this exit code.
-      // if you use shell, see:
-      // https://www.thegeekstuff.com/2010/03/bash-shell-exit-status
+    // searches for ground-truth among solutions, possibly with normalizations and specific rules
+    v::get_real(data::gt_sols_[0], real_gt_sol);
+    if (!is_gt_real) {
+      LOG("WARNING: groud-truth is _not_ real, this is not the intended use for MINUS, only for debugging");
+      // in the non-real case we run a generic solution matcher
+      // PRO: remove this and keep only the real-specific part
+      if (ground_truth_) {
+        if (probe_solutions(solutions, gt_sols)) {
+          LOG("found complex ground-truth solution, even though MINUS is intended for real ground-truth");
+        } else {
+          LOG("\033[1;91mFAIL:\e[m  complex ground-truth not found among solutions");
+          return SOLVER_FAILURE; 
+        }
+      }
+    } else { // real ground-truth: we run faster and more complete solution matcher
+      bool found = io::probe_all_solutions(solutions, real_gt_sol, &sol_id);
+      if (found) {
+        LOG("found solution at index: " << sol_id);
+        LOG("number of iterations of solution: " << solutions[sol_id].num_steps);
+        if (solutions[sol_id].status != M::REGULAR)
+          LOG("PROBLEM found ground truth but it is not REGULAR: " << sol_id);
+      } else {
+        LOG("\033[1;91mFAIL:\e[m  ground-truth not found among solutions");
+        return SOLVER_FAILURE; 
+        // you can detect solver failure by checking this exit code.
+        // if you use shell, see:
+        // https://www.thegeekstuff.com/2010/03/bash-shell-exit-status
+      }
     }
   } else if (!io::has_valid_solutions(solutions)) { // if no ground-truth is provided, it will return error if
     LOG("\033[1;91mFAIL:\e[m  no valid solutions"); // it can detect that the solver failed by generic tests
