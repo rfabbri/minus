@@ -285,7 +285,7 @@ all_regular_solutions(typename M::solution raw_solutions[M::nsols], C<F> regular
 
 //
 // Performs tests to see if there are potentially valid solutions,
-// without making use of ground truth. 
+// without making use of ground truth using generic tests, e.g., no real roots 
 //
 // This is the generic implementation. It may be specialized for each 
 // problem tag
@@ -301,6 +301,110 @@ has_valid_solutions(const typename M::solution solutions[M::nsols])
     if (solutions[sol].status == M::REGULAR && v::get_real(solutions[sol].x, real_solution))
       return true;
   return false;
+}
+
+
+//
+// Searches for probe_solution among solutions.
+// 
+// 'exact' means: the exact numerical value is sought. No normalizations to
+// equivalent standard representations (eg, homogeneous representative) are performed.
+// 
+template <problem P, typename F>
+inline bool
+minus_io<P, F>::
+probe_solutions_exact(const typename M::solution solutions[M::nsols], F probe_solution[M::nve])
+{
+    static constexpr F eps = 1e-3;
+    // compare solutions to certain hardcoded values from M2
+    for (unsigned s=0; s < data::n_gt_sols_; ++s)
+      for (unsigned v=0; v < M::nve; ++v)
+        if (std::abs(solutions[data::gt_sols_id_[s]].x[v] - probe_solution[v]) > eps)
+          goto not_ok;
+    return true;
+    not_ok: 
+#ifndef NDEBUG
+      std::cerr << "\tErrors: \n";
+      for (unsigned s=0; s < data::n_gt_sols_; ++s) {
+        std::cerr << "Solution id " << s << ", errors as pairs (variable id, error): " << std::endl;
+        for (unsigned v=0; v < M::nve; ++v) {
+          std::cerr << "\t" << v << "\t" << std::abs(solutions[data::gt_sols_id_[s]].x[v] - data::gt_sols_[s][v]) << std::endl;
+        }
+      }
+#endif
+      return false;
+}
+
+//
+// Searches for probe_solution among solutions.
+// 
+// 'exact' means: the exact numerical value is sought. No normalizations to
+// equivalent standard representations (eg, homogeneous representative) are performed.
+// 
+template <problem P, typename F>
+inline bool
+minus_io<P, F>::
+probe_all_solutions(const typename M::solution solutions[M::nsols], F probe_solution[M::nve])
+{
+  typedef minus_array<M::nve,F> v; typedef minus_util<F> u;
+  static constexpr F eps = 1e-3;
+  F real_solution[M::nve];
+  bool already_found = false;
+  F min_error;
+  // Try to find the solution with minimum error
+  for (unsigned sol = 0; sol < M::nsols; ++sol) {
+    if (!v::get_real(solutions[sol].x, real_solution))
+      continue
+
+    // for speed, we only screeen the first variable for minimum error, only 
+    // if it passes we test the rest
+    F error = std::abs(real_solution[0] - probe_solution[0]);
+    
+    if (error < eps) {
+      if (already_found) {
+#ifndef NDEBUG
+        std::cerr << "Found another similar solution at " << sol << std::endl;
+        std::cerr << "Error: " << error << std::endl;
+#endif
+        if (error < min_error) {
+          min_error = error;
+          *solution_index = sol;
+        }
+      } else { // not already found
+#ifndef NDEBUG
+        std::cerr << "Found a solution at " << sol << std::endl;
+        std::cerr << "Error: " << rerror << std::endl;
+#endif
+        min_error = error;
+        *solution_index = sol;
+      }
+      already_found = true;
+    } else { // not a possible solution depsite being real
+#ifndef NDEBUG
+        std::cerr << "Solution is real but not close (sol,isvalid)" << sol << "," << solutions[sol].status << std::endl;
+#endif
+    }
+  }
+  
+  if (!already_found)
+    return false
+      
+  if (!solutions[sol].status == M::REGULAR)
+      std::cerr << "WARNING: found solution but it is not REGULAR\n";
+  
+  // check the remaining parts of the solutions also match, not just the first
+  v::get_real(solutions[*solution_index].x, real_solution);
+  
+  for (unsigned v = 1; v < M::nve; ++v) {
+    F error = std::abs(real_solution[v] - probe_solution[v]);
+    if (error > eps) {
+#ifndef NDEBUG
+          std::cerr << "probe: real solution to variable [0] found, but [" << v << "] does not match\n";
+#endif
+      return false;
+    }
+  }
+  return true;
 }
 
 //
@@ -363,22 +467,6 @@ probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *
 #include "debug-util.h"
 #endif
 
-/*
-template <problem P, typename F>
-inline bool 
-minus_io_14a<P, F>::
-probe_all_solutions(const typename M::solution solutions[M::nsols], solution_shape *probe_cameras,
-    unsigned *solution_index)
-{
-  complex vsolutions[M::nve][M::nsols];
-  
-  // populate standard format solutions_v from solutions (path info)
-  solutions_struct2vector(solutions, vsolutions);
-    
-  return probe_all_solutions(vsolutions, probe_cameras, solution_index);
-}
-*/
-
 // like probe_solutions but tests all M::nsols in case more than one is close to
 // the probe. Use this for debugging / investigation
 template <problem P, typename F>
@@ -390,7 +478,7 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
   typedef minus_array<M::nve,F> v; typedef minus_util<F> u;
   static constexpr F eps = 1e-3;
   F real_solution[M::nve];
-  bool found=false;
+  bool found = false;
   F min_rerror;
   for (unsigned sol = 0; sol < M::nsols; ++sol)  {
     if (!v::get_real(solutions[sol].x, real_solution))
@@ -398,7 +486,7 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
     u::normalize_quat(real_solution);
     F rerror = u::rotation_error(real_solution, probe_cameras->q01);
     if (rerror < eps) {
-      if (found == true) {
+      if (found) {
 #ifndef NDEBUG
         std::cerr << "Found another similar solution at " << sol << std::endl;
         std::cerr << "Error: " << rerror << std::endl;

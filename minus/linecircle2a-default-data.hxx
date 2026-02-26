@@ -56,7 +56,7 @@ start_sols_[M::nve*M::nsols] = {
 template <typename F>
 alignas(64) std::complex<F> minus_data<linecircle2a,F>::
 params_start_target_[2*M::f::nparams] = {
-  {.88881367728739857, -.458268749825746}, // start solutions
+  {.88881367728739857, -.458268749825746}, // start parameters corresponding to start_sols_
   {-.90958124762797854, .41552611706549814},
   {.55992250117654629, .82854498530629017},
   {-.96824002271365794, -.25002251581698631},
@@ -71,7 +71,6 @@ params_start_target_[2*M::f::nparams] = {
 // profiling.
 // 
 // A basic test case is to compare directly against Macaulay2 prototype when
-// 8
 // coding the optimized solver. A more complete time test is the -g profiling
 // option of MINUS commands.
 // 
@@ -129,7 +128,8 @@ gt_sols_[n_gt_sols_][M::nve] = {
   {-.83999999999999997, -.38032880511473233},  // x
   {30000000000000006e-1, -.11409864153441969}  // y
   }
-  // we dont include more sols now, just want it to find the real one above
+  // we dont include more sols now, just want it to find the one above
+  // TODO: make it real for your problem, to be more realistic in profiling
 };
 
 template <typename F>

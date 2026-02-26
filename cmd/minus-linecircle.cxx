@@ -70,25 +70,10 @@ main(int argc, char **argv)
   }
 
   if (profile_) { // data::compare_to_hardcoded_gt(sols);
-    // compare solutions to certain hardcoded values from M2
-    bool solutions_bad = false;
-    for (unsigned s=0; s < data::n_gt_sols_; ++s)
-      for (unsigned v=0; v < M::nve; ++v)
-        if (std::abs(solutions[data::gt_sols_id_[s]].x[v] - data::gt_sols_[s][v]) > tol) {
-          solutions_bad = true;
-          goto not_ok;
-        }
-    std::cerr << "LOG solutions look OK\n";
-    not_ok: 
-    if (solutions_bad) {
-      std::cerr << "LOG \033[1;91merror:\e[m solutions dont match hardcoded ground-truth exactly (could be a normalization issue). Errors: ";
-      for (unsigned s=0; s < data::n_gt_sols_; ++s) {
-        std::cerr << "Solution id " << s << ", errors as pairs (variable id, error): " << std::endl;
-        for (unsigned v=0; v < M::nve; ++v) {
-          std::cerr << "\t" << v << "\t" << std::abs(solutions[data::gt_sols_id_[s]].x[v] - data::gt_sols_[s][v]) << std::endl;
-        }
-      }
-    }
+    if (probe_solutions_exact(solutions, data::gt_sols_[0])
+      std::cerr << "LOG solutions look OK\n";
+    else
+      std::cerr << "LOG \033[1;91merror:\e[m solutions dont match hardcoded ground-truth numerically (hint: could be a normalization issue if it says found below).\n";
   }
   
   if (!c.mwrite(solutions, output_)) return 2;
@@ -99,7 +84,8 @@ main(int argc, char **argv)
   // additional information
   if (ground_truth_ || profile_) {
     unsigned sol_id;
-    bool found = io::probe_all_solutions(solutions, data::gt_sols_, &sol_id);
+    // searches with normalizations
+    bool found = io::probe_all_solutions(solutions, data::gt_sols_[0], &sol_id);
     if (found) {
       LOG("found solution at index: " << sol_id);
       LOG("number of iterations of solution: " << solutions[sol_id].num_steps);
@@ -112,9 +98,9 @@ main(int argc, char **argv)
       // if you use shell, see:
       // https://www.thegeekstuff.com/2010/03/bash-shell-exit-status
     }
-  } else if (!io::has_valid_solutions(solutions)) { // if no ground-truth is provided, it will return error
-    LOG("\033[1;91mFAIL:\e[m  no valid solutions");
-    return SOLVER_FAILURE;                    // if it can detect that the solver failed by generic tests
+  } else if (!io::has_valid_solutions(solutions)) { // if no ground-truth is provided, it will return error if
+    LOG("\033[1;91mFAIL:\e[m  no valid solutions"); // it can detect that the solver failed by generic tests
+    return SOLVER_FAILURE;                          // without using ground-truth, e.g., no real roots
   }
   return 0;
 }

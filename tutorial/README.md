@@ -78,7 +78,16 @@ sections.
 
 ## Solving your own system
 
-Give your new problem a name, say `problem1`. 
+Give your new problem a name, say `problem1`. The goal is to build a highly
+efficient code by hand with tried-and-true optimization techniques, once you
+deemed your problem important enough for the investment. We assume you want to
+solve the problem for any new system. 
+
+The solver will be optimized for:
+- The use-case where the system to be solved has at least one real solution. If
+it doesn't the system will report failure as early and efficiently as possible.
+- Square systems
+
 
 ### 1 build generic Macaulay2 scrips for your polynomial system
 You should first

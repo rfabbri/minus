@@ -542,6 +542,10 @@ Place this between code:
 
 use/adapt the script `scripts/minus-disassemble`
 
+## Additional information
+
+- see the tutorial/README.md for further explanation on how to add your new
+problem.
 
 ## Authors
 

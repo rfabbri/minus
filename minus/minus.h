@@ -311,7 +311,7 @@ struct minus_io : public minus_io_common<F> {
   static void gammify(C<F> * __restrict params/*[ chicago: M::nparams]*/);
   // Output --------------------------------------------------------------------
   // --
-  // Utilities
+  // Utilities --
 
   static void all_regular_solutions(
       typename M::solution raw_solutions[M::nsols], 
@@ -322,6 +322,8 @@ struct minus_io : public minus_io_common<F> {
                      unsigned id_sols[M::nsols], unsigned *nsols_real);
   
   static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
+  static bool probe_all_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
+      unsigned *solution_index);
 };
 
 // Highlevel API ---------------------------------------------------------------
