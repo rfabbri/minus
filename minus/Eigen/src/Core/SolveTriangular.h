@@ -19,7 +19,7 @@ namespace internal {
 template<typename LhsScalar, typename RhsScalar, typename Index, int Side, int Mode, bool Conjugate, int StorageOrder>
 struct triangular_solve_vector;
 
-template <typename Scalar, typename Index, int Side, int Mode, bool Conjugate, int TriStorageOrder, int OtherStorageOrder>
+template <typename Scalar, typename Index, int Side, int Mode, bool Conjugate, int TriStorageOrder, int OtherStorageOrder, int OtherInnerStride>
 struct triangular_solve_matrix;
 
 // small helper struct extracting some traits on the underlying solver operation
@@ -54,7 +54,7 @@ struct triangular_solver_selector<Lhs,Rhs,Side,Mode,NoUnrolling,1>
   typedef blas_traits<Lhs> LhsProductTraits;
   typedef typename LhsProductTraits::ExtractType ActualLhsType;
   typedef Map<Matrix<RhsScalar,Dynamic,1>, Aligned> MappedRhs;
-  static __attribute__((always_inline)) void run(const Lhs& lhs, Rhs& rhs)
+  static void run(const Lhs& lhs, Rhs& rhs)
   {
     ActualLhsType actualLhs = LhsProductTraits::extract(lhs);
 
@@ -85,7 +85,7 @@ struct triangular_solver_selector<Lhs,Rhs,Side,Mode,NoUnrolling,Dynamic>
   typedef blas_traits<Lhs> LhsProductTraits;
   typedef typename LhsProductTraits::DirectLinearAccessType ActualLhsType;
 
-  static __attribute__((always_inline)) void run(const Lhs& lhs, Rhs& rhs)
+  static void run(const Lhs& lhs, Rhs& rhs)
   {
     typename internal::add_const_on_value_type<ActualLhsType>::type actualLhs = LhsProductTraits::extract(lhs);
 
@@ -98,8 +98,8 @@ struct triangular_solver_selector<Lhs,Rhs,Side,Mode,NoUnrolling,Dynamic>
     BlockingType blocking(rhs.rows(), rhs.cols(), size, 1, false);
 
     triangular_solve_matrix<Scalar,Index,Side,Mode,LhsProductTraits::NeedToConjugate,(int(Lhs::Flags) & RowMajorBit) ? RowMajor : ColMajor,
-                               (Rhs::Flags&RowMajorBit) ? RowMajor : ColMajor>
-      ::run(size, othersize, &actualLhs.coeffRef(0,0), actualLhs.outerStride(), &rhs.coeffRef(0,0), rhs.outerStride(), blocking);
+                               (Rhs::Flags&RowMajorBit) ? RowMajor : ColMajor, Rhs::InnerStrideAtCompileTime>
+      ::run(size, othersize, &actualLhs.coeffRef(0,0), actualLhs.outerStride(), &rhs.coeffRef(0,0), rhs.innerStride(), rhs.outerStride(), blocking);
   }
 };
 
@@ -118,7 +118,7 @@ struct triangular_solver_unroller<Lhs,Rhs,Mode,LoopIndex,Size,false> {
     DiagIndex  = IsLower ? LoopIndex : Size - LoopIndex - 1,
     StartIndex = IsLower ? 0         : DiagIndex+1
   };
-  static __attribute__((always_inline)) void run(const Lhs& lhs, Rhs& rhs)
+  static void run(const Lhs& lhs, Rhs& rhs)
   {
     if (LoopIndex>0)
       rhs.coeffRef(DiagIndex) -= lhs.row(DiagIndex).template segment<LoopIndex>(StartIndex).transpose()
@@ -133,18 +133,18 @@ struct triangular_solver_unroller<Lhs,Rhs,Mode,LoopIndex,Size,false> {
 
 template<typename Lhs, typename Rhs, int Mode, int LoopIndex, int Size>
 struct triangular_solver_unroller<Lhs,Rhs,Mode,LoopIndex,Size,true> {
-  static void __attribute__((always_inline)) run(const Lhs&, Rhs&) {}
+  static void run(const Lhs&, Rhs&) {}
 };
 
 template<typename Lhs, typename Rhs, int Mode>
 struct triangular_solver_selector<Lhs,Rhs,OnTheLeft,Mode,CompleteUnrolling,1> {
-  static void __attribute__((always_inline)) run(const Lhs& lhs, Rhs& rhs)
+  static void run(const Lhs& lhs, Rhs& rhs)
   { triangular_solver_unroller<Lhs,Rhs,Mode,0,Rhs::SizeAtCompileTime>::run(lhs,rhs); }
 };
 
 template<typename Lhs, typename Rhs, int Mode>
 struct triangular_solver_selector<Lhs,Rhs,OnTheRight,Mode,CompleteUnrolling,1> {
-  static void __attribute__((always_inline)) run(const Lhs& lhs, Rhs& rhs)
+  static void run(const Lhs& lhs, Rhs& rhs)
   {
     Transpose<const Lhs> trLhs(lhs);
     Transpose<Rhs> trRhs(rhs);
@@ -164,14 +164,14 @@ struct triangular_solver_selector<Lhs,Rhs,OnTheRight,Mode,CompleteUnrolling,1> {
 #ifndef EIGEN_PARSED_BY_DOXYGEN
 template<typename MatrixType, unsigned int Mode>
 template<int Side, typename OtherDerived>
-EIGEN_DEVICE_FUNC __attribute__((always_inline)) void TriangularViewImpl<MatrixType,Mode,Dense>::solveInPlace(const MatrixBase<OtherDerived>& _other) const
+void TriangularViewImpl<MatrixType,Mode,Dense>::solveInPlace(const MatrixBase<OtherDerived>& _other) const
 {
   OtherDerived& other = _other.const_cast_derived();
   eigen_assert( derived().cols() == derived().rows() && ((Side==OnTheLeft && derived().cols() == other.rows()) || (Side==OnTheRight && derived().cols() == other.cols())) );
   eigen_assert((!(Mode & ZeroDiag)) && bool(Mode & (Upper|Lower)));
   // If solving for a 0x0 matrix, nothing to do, simply return.
-  // if (derived().cols() == 0)
-  //  return;
+  if (derived().cols() == 0)
+    return;
 
   enum { copy = (internal::traits<OtherDerived>::Flags & RowMajorBit)  && OtherDerived::IsVectorAtCompileTime && OtherDerived::SizeAtCompileTime!=1};
   typedef typename internal::conditional<copy,

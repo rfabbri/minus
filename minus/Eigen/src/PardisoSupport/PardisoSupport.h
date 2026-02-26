@@ -123,7 +123,6 @@ class PardisoImpl : public SparseSolverBase<Derived>
     };
 
     PardisoImpl()
-      : m_analysisIsOk(false), m_factorizationIsOk(false), m_pt(0)
     {
       eigen_assert((sizeof(StorageIndex) >= sizeof(_INTEGER_t) && sizeof(StorageIndex) <= 8) && "Non-supported index type");
       m_iparm.setZero();
@@ -141,7 +140,7 @@ class PardisoImpl : public SparseSolverBase<Derived>
   
     /** \brief Reports whether previous computation was successful.
       *
-      * \returns \c Success if computation was successful,
+      * \returns \c Success if computation was succesful,
       *          \c NumericalIssue if the matrix appears to be negative.
       */
     ComputationInfo info() const
@@ -193,7 +192,8 @@ class PardisoImpl : public SparseSolverBase<Derived>
     void pardisoInit(int type)
     {
       m_type = type;
-      bool symmetric = std::abs(m_type) < 10;
+      EIGEN_USING_STD(abs);
+      bool symmetric = abs(m_type) < 10;
       m_iparm[0] = 1;   // No solver default
       m_iparm[1] = 2;   // use Metis for the ordering
       m_iparm[2] = 0;   // Reserved. Set to zero. (??Numbers of processors, value of OMP_NUM_THREADS??)

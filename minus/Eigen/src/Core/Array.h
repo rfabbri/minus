@@ -178,46 +178,6 @@ class Array
       Base::_check_template_params();
       this->template _init2<T0,T1>(val0, val1);
     }
-
-    #if EIGEN_HAS_CXX11
-    /** \copydoc PlainObjectBase(const Scalar& a0, const Scalar& a1, const Scalar& a2, const Scalar& a3, const ArgTypes&... args)
-     *
-     * Example: \include Array_variadic_ctor_cxx11.cpp
-     * Output: \verbinclude Array_variadic_ctor_cxx11.out
-     *
-     * \sa Array(const std::initializer_list<std::initializer_list<Scalar>>&)
-     * \sa Array(Scalar), Array(Scalar,Scalar)
-     */
-    template <typename... ArgTypes>
-    EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE
-    Array(const Scalar& a0, const Scalar& a1, const Scalar& a2, const Scalar& a3, const ArgTypes&... args)
-      : Base(a0, a1, a2, a3, args...) {}
-
-    /** \brief Constructs an array and initializes it from the coefficients given as initializer-lists grouped by row. \cpp11
-      * 
-      * In the general case, the constructor takes a list of rows, each row being represented as a list of coefficients:
-      * 
-      * Example: \include Array_initializer_list_23_cxx11.cpp
-      * Output: \verbinclude Array_initializer_list_23_cxx11.out
-      * 
-      * Each of the inner initializer lists must contain the exact same number of elements, otherwise an assertion is triggered.
-      * 
-      * In the case of a compile-time column 1D array, implicit transposition from a single row is allowed.
-      * Therefore <code> Array<int,Dynamic,1>{{1,2,3,4,5}}</code> is legal and the more verbose syntax
-      * <code>Array<int,Dynamic,1>{{1},{2},{3},{4},{5}}</code> can be avoided:
-      * 
-      * Example: \include Array_initializer_list_vector_cxx11.cpp
-      * Output: \verbinclude Array_initializer_list_vector_cxx11.out
-      * 
-      * In the case of fixed-sized arrays, the initializer list sizes must exactly match the array sizes,
-      * and implicit transposition is allowed for compile-time 1D arrays only.
-      * 
-      * \sa Array(const Scalar& a0, const Scalar& a1, const Scalar& a2, const Scalar& a3, const ArgTypes&... args)
-      */
-    EIGEN_DEVICE_FUNC
-    EIGEN_STRONG_INLINE Array(const std::initializer_list<std::initializer_list<Scalar> >& list) : Base(list) {}
-    #endif // end EIGEN_HAS_CXX11
-
     #else
     /** \brief Constructs a fixed-sized array initialized with coefficients starting at \a data */
     EIGEN_DEVICE_FUNC explicit Array(const Scalar *data);
@@ -229,8 +189,7 @@ class Array
       */
     EIGEN_DEVICE_FUNC
     EIGEN_STRONG_INLINE explicit Array(Index dim);
-    /** constructs an initialized 1x1 Array with the given coefficient
-      * \sa const Scalar& a0, const Scalar& a1, const Scalar& a2, const Scalar& a3, const ArgTypes&... args */
+    /** constructs an initialized 1x1 Array with the given coefficient */
     Array(const Scalar& value);
     /** constructs an uninitialized array with \a rows rows and \a cols columns.
       *
@@ -238,14 +197,11 @@ class Array
       * it is redundant to pass these parameters, so one should use the default constructor
       * Array() instead. */
     Array(Index rows, Index cols);
-    /** constructs an initialized 2D vector with given coefficients
-      * \sa Array(const Scalar& a0, const Scalar& a1, const Scalar& a2, const Scalar& a3, const ArgTypes&... args) */
+    /** constructs an initialized 2D vector with given coefficients */
     Array(const Scalar& val0, const Scalar& val1);
-    #endif  // end EIGEN_PARSED_BY_DOXYGEN 
+    #endif
 
-    /** constructs an initialized 3D vector with given coefficients
-      * \sa Array(const Scalar& a0, const Scalar& a1, const Scalar& a2, const Scalar& a3, const ArgTypes&... args)
-      */
+    /** constructs an initialized 3D vector with given coefficients */
     EIGEN_DEVICE_FUNC
     EIGEN_STRONG_INLINE Array(const Scalar& val0, const Scalar& val1, const Scalar& val2)
     {
@@ -255,9 +211,7 @@ class Array
       m_storage.data()[1] = val1;
       m_storage.data()[2] = val2;
     }
-    /** constructs an initialized 4D vector with given coefficients
-      * \sa Array(const Scalar& a0, const Scalar& a1, const Scalar& a2, const Scalar& a3, const ArgTypes&... args)
-      */
+    /** constructs an initialized 4D vector with given coefficients */
     EIGEN_DEVICE_FUNC
     EIGEN_STRONG_INLINE Array(const Scalar& val0, const Scalar& val1, const Scalar& val2, const Scalar& val3)
     {

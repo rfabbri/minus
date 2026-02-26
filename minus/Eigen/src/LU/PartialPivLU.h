@@ -19,7 +19,6 @@ template<typename _MatrixType> struct traits<PartialPivLU<_MatrixType> >
 {
   typedef MatrixXpr XprKind;
   typedef SolverStorage StorageKind;
-  typedef int StorageIndex;
   typedef traits<_MatrixType> BaseTraits;
   enum {
     Flags = BaseTraits::Flags & RowMajorBit,
@@ -80,9 +79,8 @@ template<typename _MatrixType> class PartialPivLU
 
     typedef _MatrixType MatrixType;
     typedef SolverBase<PartialPivLU> Base;
-    friend class SolverBase<PartialPivLU>;
-
     EIGEN_GENERIC_PUBLIC_INTERFACE(PartialPivLU)
+    // FIXME StorageIndex defined in EIGEN_GENERIC_PUBLIC_INTERFACE should be int
     enum {
       MaxRowsAtCompileTime = MatrixType::MaxRowsAtCompileTime,
       MaxColsAtCompileTime = MatrixType::MaxColsAtCompileTime
@@ -154,7 +152,6 @@ template<typename _MatrixType> class PartialPivLU
       return m_p;
     }
 
-    #ifdef EIGEN_PARSED_BY_DOXYGEN
     /** This method returns the solution x to the equation Ax=b, where A is the matrix of which
       * *this is the LU decomposition.
       *
@@ -172,10 +169,14 @@ template<typename _MatrixType> class PartialPivLU
       *
       * \sa TriangularView::solve(), inverse(), computeInverse()
       */
+    // FIXME this is a copy-paste of the base-class member to add the isInitialized assertion.
     template<typename Rhs>
     inline const Solve<PartialPivLU, Rhs>
-    solve(const MatrixBase<Rhs>& b) const;
-    #endif
+    solve(const MatrixBase<Rhs>& b) const
+    {
+      eigen_assert(m_isInitialized && "PartialPivLU is not initialized.");
+      return Solve<PartialPivLU, Rhs>(*this, b.derived());
+    }
 
     /** \returns an estimate of the reciprocal condition number of the matrix of which \c *this is
         the LU decomposition.
@@ -230,6 +231,8 @@ template<typename _MatrixType> class PartialPivLU
       * Step 3: replace c by the solution x to Ux = c.
       */
 
+      eigen_assert(rhs.rows() == m_lu.rows());
+
       // Step 1
       dst = permutationP() * rhs;
 
@@ -243,21 +246,26 @@ template<typename _MatrixType> class PartialPivLU
     template<bool Conjugate, typename RhsType, typename DstType>
     EIGEN_DEVICE_FUNC
     void _solve_impl_transposed(const RhsType &rhs, DstType &dst) const {
-     /* The decomposition PA = LU can be rewritten as A^T = U^T L^T P.
+     /* The decomposition PA = LU can be rewritten as A = P^{-1} L U.
       * So we proceed as follows:
-      * Step 1: compute c as the solution to L^T c = b
-      * Step 2: replace c by the solution x to U^T x = c.
-      * Step 3: update  c = P^-1 c.
+      * Step 1: compute c = Pb.
+      * Step 2: replace c by the solution x to Lx = c.
+      * Step 3: replace c by the solution x to Ux = c.
       */
 
       eigen_assert(rhs.rows() == m_lu.cols());
 
-      // Step 1
-      dst = m_lu.template triangularView<Upper>().transpose()
-                .template conjugateIf<Conjugate>().solve(rhs);
-      // Step 2
-      m_lu.template triangularView<UnitLower>().transpose()
-          .template conjugateIf<Conjugate>().solveInPlace(dst);
+      if (Conjugate) {
+        // Step 1
+        dst = m_lu.template triangularView<Upper>().adjoint().solve(rhs);
+        // Step 2
+        m_lu.template triangularView<UnitLower>().adjoint().solveInPlace(dst);
+      } else {
+        // Step 1
+        dst = m_lu.template triangularView<Upper>().transpose().solve(rhs);
+        // Step 2
+        m_lu.template triangularView<UnitLower>().transpose().solveInPlace(dst);
+      }
       // Step 3
       dst = permutationP().transpose() * dst;
     }
@@ -412,8 +420,8 @@ struct partial_lu_impl
     * \returns The index of the first pivot which is exactly zero if any, or a negative number otherwise.
     *
     * \note This very low level interface using pointers, etc. is to:
-    *   1 - reduce the number of instantiations to the strict minimum
-    *   2 - avoid infinite recursion of the instantiations with Block<Block<Block<...> > >
+    *   1 - reduce the number of instanciations to the strict minimum
+    *   2 - avoid infinite recursion of the instanciations with Block<Block<Block<...> > >
     */
   static Index blocked_lu(Index rows, Index cols, Scalar* lu_data, Index luStride, PivIndex* row_transpositions, PivIndex& nb_transpositions, Index maxBlockSize=256)
   {
