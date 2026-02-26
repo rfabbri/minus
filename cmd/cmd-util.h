@@ -4,6 +4,8 @@
 // Header to be included in minus-*.cxx commands, after the appropriate defines
 // 
 
+#include <minus/internal-util.h>
+
 namespace MiNuS {
   
 // class with the maximum that is completely universal to all commands/problems 

@@ -117,11 +117,12 @@ iread(std::istream &in)
   LOG("reading parameters a b c d e f directly."); // for other problems you may
                                                    // have to read data and
                                                    // convert to params
-  if (!read_block(in, (F *)(data::params_start_target_+M::f::nparams), 2*M::f::nparams /*complex numbers*/))
+  if (!cmd::read_block(in, (F *)(data::params_start_target_+M::f::nparams), 2*M::f::nparams /*complex numbers*/))
     return false;
   LOG("reading ground truth solutions");
-  if (ground_truth_ && !read_block(in, (F *)data::gt_sols_, 2*data::n_gt_sols_ /*complex numbers */))
+  if (ground_truth_ && !cmd::read_block(in, (F *)data::gt_sols_, 2*data::n_gt_sols_ /*complex numbers */))
     return false;    // PRO: your specific application may read just real numbers
+  return true;
 }
 
 void
