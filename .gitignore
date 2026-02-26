@@ -112,6 +112,7 @@ tests/2openmvg
 tests/o
 algo/cmd/expminus-chicago
 cmd/minus-cleveland
+cmd/minus-linecircle
 scripts/minus-chicago
 scripts/tst
 tags
