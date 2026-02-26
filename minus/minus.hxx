@@ -277,7 +277,7 @@ all_regular_solutions(typename M::solution raw_solutions[M::nsols], C<F> regular
   id_sols[*nsols_regular] = 0;
   for (unsigned sol=0; sol < M::nsols; ++sol) {
     if (raw_solutions[sol].status == M::REGULAR) {
-      minus_array<M::f::nve,F>::copy(raw_solutions[sol].x, regular_solutions[id_sols[*nsols_regular]]);
+      v::copy(raw_solutions[sol].x, regular_solutions[id_sols[*nsols_regular]]);
       id_sols[(*nsols_regular)++] = sol;
     }
   }
@@ -369,9 +369,8 @@ probe_all_solutions(
     F probe_solution[M::nve],
     unsigned *solution_index)
 {
-  typedef minus_array<M::nve,F> v; typedef minus_util<F> u;
+  typedef minus_array<M::nve,F> v;
   static constexpr F eps = 1e-3;
-  static constexpr F eps_NVE = eps*M::nve;
   F real_solution[M::nve];
   bool already_found = false;
   F error, min_error;
@@ -381,6 +380,7 @@ probe_all_solutions(
       continue;
 
     bool possible_match = true;
+    error = 0;
     for (unsigned k=0; k < M::nve; ++k) {
       // the testing in this function is strict, no RMS but strictly each
       // coordinate within tolerance, even though the tolerance itself 
@@ -406,7 +406,7 @@ probe_all_solutions(
       } else { // not already found
 #ifndef NDEBUG
         std::cerr << "DEBUG: Found a solution at " << sol << std::endl;
-        std::cerr << "DEBUG: Error: " << rerror << std::endl;
+        std::cerr << "DEBUG: Error: " << error << std::endl;
 #endif
         min_error = error;
         *solution_index = sol;
