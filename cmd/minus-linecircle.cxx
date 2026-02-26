@@ -73,7 +73,7 @@ main(int argc, char **argv)
     if (probe_solutions(solutions, data::gt_sols_[0])
       std::cerr << "LOG solutions look OK\n";
     else
-      std::cerr << "LOG \033[1;91merror:\e[m solutions dont match hardcoded ground-truth numerically (hint: could be a normalization issue if it says found below).\n";
+      std::cerr << "LOG \033[1;91merror:\e[m solutions dont match hardcoded ground-truth numerically (hint: could be a normalization issue).\n";
   }
   
   if (!c.mwrite(solutions, c.output_)) return 2;
@@ -85,20 +85,11 @@ main(int argc, char **argv)
   if (ground_truth_ || profile_) {
     unsigned sol_id;
     // searches for ground-truth among solutions, possibly with normalizations and specific rules
-    v::get_real(data::gt_sols_[0], real_gt_sol);
-    if (!is_gt_real) {
-      LOG("WARNING: groud-truth is _not_ real, this is not the intended use for MINUS, only for debugging");
-      // in the non-real case we run a generic solution matcher
-      // PRO: remove this and keep only the real-specific part
-      if (ground_truth_) {
-        if (probe_solutions(solutions, gt_sols)) {
-          LOG("found complex ground-truth solution, even though MINUS is intended for real ground-truth");
-        } else {
-          LOG("\033[1;91mFAIL:\e[m  complex ground-truth not found among solutions");
-          return SOLVER_FAILURE; 
-        }
-      }
-    } else { // real ground-truth: we run faster and more complete solution matcher
+    F real_gt_sol[M::nve];
+    
+    if (v::get_real(data::gt_sols_[0], real_gt_sol)) {
+      // real ground-truth: we run a custom, faster and more complete solution matcher 
+      // PRO: just enconde your specific ground-truth as real to begin with
       bool found = io::probe_all_solutions(solutions, real_gt_sol, &sol_id);
       if (found) {
         LOG("found solution at index: " << sol_id);
@@ -111,6 +102,18 @@ main(int argc, char **argv)
         // you can detect solver failure by checking this exit code.
         // if you use shell, see:
         // https://www.thegeekstuff.com/2010/03/bash-shell-exit-status
+      }
+    } else {
+      LOG("WARNING: ground-truth is _not_ real, this is not the intended use for MINUS, only for debugging");
+      // in the non-real case we run a generic solution matcher
+      // PRO: remove this and keep only the real-specific part
+      if (ground_truth_) {
+        if (probe_solutions(solutions, data::gt_sols_[0])) {
+          LOG("found complex ground-truth solution, even though MINUS is intended for real ground-truth");
+        } else {
+          LOG("\033[1;91mFAIL:\e[m  complex ground-truth not found among solutions");
+          return SOLVER_FAILURE; 
+        }
       }
     }
   } else if (!io::has_valid_solutions(solutions)) { // if no ground-truth is provided, it will return error if

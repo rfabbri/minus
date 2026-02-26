@@ -327,12 +327,13 @@ probe_solutions(
     const typename M::solution solutions[M::nsols], 
     C<F> probe_solution[M::nve])
 {
-  for (s = 0; s < M::nsols; ++s)  {
+  static constexpr F eps = 1e-3;
+  for (unsigned s = 0; s < M::nsols; ++s)  {
     bool possible_match = true;
-    for (v = 0; v < M::nve; ++v) {
-      if (std::abs(solutions[s][v] - probe_solution[v]) > eps) {
+    for (unsigned v = 0; v < M::nve; ++v) {
+      if (std::abs(solutions[s].x[v] - probe_solution[v]) > eps) {
         possible_match = false;
-        break
+        break;
       }
     }
     if (possible_match)
