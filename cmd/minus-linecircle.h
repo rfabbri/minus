@@ -160,8 +160,7 @@ process_args(minus_cmd_io<Float> &cmd, int argc, char **argv)
       // See print_usage() 
       input_data_ = true; 
       argstate = INPUT_DATA;
-      --argc; ++argv;
-    } else if (arg[0] != '-') { // if not a flag then two file names
+      --argc; ++argv; } else if (arg[0] != '-') { // if not a flag then two file names
       if (argc == 2) {
           cmd.input_ = argv[1];
           cmd.output_ = argv[2];
@@ -250,5 +249,16 @@ process_args(minus_cmd_io<Float> &cmd, int argc, char **argv)
       print_usage();
     }
   }
+  if (input_data_) {
+    LOG("input is problem data (image pixel data) of the problem to be solved (target problem)"); // as opposed to start/target parameters
+    if (ground_truth_)
+      LOG("reading ground truth appended to input target problem data");
+  }
+  if (profile_)
+    LOG("Running default solve for profiling");
+  else if (cmd.stdio_)
+    LOG("reading from stdio");
+  else
+    LOG("reading from " << cmd.input_ << " writing to " << cmd.output_);
 }
 #endif  // minus_linecircle_h_

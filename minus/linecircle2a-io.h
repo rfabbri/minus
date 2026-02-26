@@ -12,7 +12,7 @@ template <typename F>
 struct minus_io<linecircle2a, F> : public minus_io<linecircle2a, F> {
   typedef problem_parameters<linecircle2a> pp;
   typedef minus_core<linecircle2a, F> M;
-  typedef minus_io_common<F> io;
+  typedef minus_io_common<linecircle2a,F> io;
   // Input ---------------------------------------------------------------------
   // static void gammify(C<F> * __restrict params/*[ M::nparams]*/);
   // problem-specific input

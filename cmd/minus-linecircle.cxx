@@ -85,19 +85,6 @@ main(int argc, char **argv)
   cmd c;
   
   process_args(c, argc, argv);
-
-  if (input_data_) {
-    LOG("input is problem data (image pixel data) of the problem to be solved (target problem)"); // as opposed to start/target parameters
-    if (ground_truth_)
-      LOG("reading ground truth appended to input target problem data");
-  }
-  if (profile_)
-    LOG("Running default solve for profiling");
-  else if (c.stdio_)
-    LOG("reading from stdio");
-  else
-    LOG("reading from " << c.input_ << " writing to " << c.output_);
-
   print_all_settings(settings_, ssettings_);
 
   if (!profile_) { // Read files: either stdio or physical
@@ -116,11 +103,11 @@ main(int argc, char **argv)
 
   run_solver(solutions);
 
-  if (profile_) { // data::find_hardcoded_gt(sols);
-    if (io::probe_solutions(solutions, data::gt_sols_[0]))
+  if (profile_) {
+    if (io::probe_solutions(solutions, data::gt_sols_[0])) // find exactly without normalizing
       std::cerr << "LOG solutions look OK\n";
     else
-      std::cerr << "LOG \033[1;91merror:\e[m solutions dont match hardcoded ground-truth numerically (hint: could be a normalization issue).\n";
+      std::cerr << "LOG \033[1;91merror:\e[m solutions dont match hardcoded ground-truth numerically.\n";
   }
   
   if (!c.mwrite(solutions, c.output_)) return 2;

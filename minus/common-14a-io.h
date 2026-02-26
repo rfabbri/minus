@@ -6,10 +6,10 @@
 // This is not specialized to a problem in the implementation,
 // but contains common implementations to all problems using 14a formulation
 template <problem P, typename F=double>
-struct minus_io_14a : public minus_io_common<F> {
+struct minus_io_14a : public minus_io_common<P,F> {
   typedef minus_core<P, F> M;
   typedef problem_parameters<P> pp;
-  typedef minus_io_common<F> io;
+  typedef minus_io_common<P,F> io;
   typedef struct M::solution solution;
   // cast to this to interpret real M::solution::x order
   // internal note: this order is eg  in parser.m2 l 68

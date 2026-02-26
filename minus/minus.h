@@ -250,7 +250,7 @@ struct minus_data {
 
 // I/O -------------------------------------------------------------------------
 // Generic I/O routines and defs common to all problems
-template <typename F=double>
+template <problem P, typename F=double>
 struct minus_io_common {
   // Variables and types -------------------------------------------------------
   static constexpr unsigned ncoords2d = 2;  // a documented name for the number of inhomog coordinates
@@ -269,6 +269,14 @@ struct minus_io_common {
     l[0] /= nrm; l[1] /= nrm; l[2] /= nrm;
   }
   static void normalize_lines(F lines[][ncoords2d_h], unsigned nlines);
+
+  // Parts that depend on problems ------------------------------------------------
+
+  
+  typedef problem_parameters<P> pp;
+  typedef minus_core<P, F> M;
+  typedef minus_io_common<P,F> io;
+  static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
 };
 
 #include "common-14a-io.h"
@@ -302,11 +310,11 @@ struct minus_io_multiview : public minus_io_common<F> {
 // Feel free to ignore anything in this generic template in the specialization
 // to your problem.
 template <problem P, typename F=double>
-struct minus_io : public minus_io_common<F> {
+struct minus_io : public minus_io_common<P,F> {
   // template specialization defined in problem-internals.h
   typedef problem_parameters<P> pp;
   typedef minus_core<P, F> M;
-  typedef minus_io_common<F> io;
+  typedef minus_io_common<P,F> io;
   // Input ---------------------------------------------------------------------
   static void gammify(C<F> * __restrict params/*[ chicago: M::nparams]*/);
   // Output --------------------------------------------------------------------
@@ -321,7 +329,6 @@ struct minus_io : public minus_io_common<F> {
   static void all_real_solutions(typename M::solution raw_solutions[M::nsols], F real_solutions[M::nsols][M::nve], 
                      unsigned id_sols[M::nsols], unsigned *nsols_real);
   
-  static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
   static bool probe_all_solutions(const typename M::solution solutions[M::nsols], 
                                   F probe_solution[M::nve], unsigned *solution_index);
   static bool probe_solutions( const typename M::solution solutions[M::nsols], C<F> probe_solution[M::nve]);

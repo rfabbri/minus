@@ -292,7 +292,7 @@ all_regular_solutions(typename M::solution raw_solutions[M::nsols], C<F> regular
 // 
 template <problem P, typename F>
 inline bool 
-minus_io<P, F>::
+minus_io_common<P, F>::
 has_valid_solutions(const typename M::solution solutions[M::nsols])
 {
   typedef minus_array<M::nve,F> v;
@@ -810,9 +810,9 @@ probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], F probe_ca
 
 // For speed, assumes input point implicitly has 3rd homog coordinate is 1
 // 
-template <typename F>
+template <problem P, typename F>
 inline void 
-minus_io_common<F>::
+minus_io_common<P,F>::
 invert_intrinsics(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const double pix_coords[][ncoords2d], double normalized_coords[][ncoords2d], unsigned npts)
 {
   for (unsigned p=0; p < npts; ++p) {
@@ -825,9 +825,9 @@ invert_intrinsics(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const d
 
 // For speed, assumes input point implicitly has 3rd homog coordinate is 1
 // 
-template <typename F>
+template <problem P, typename F>
 inline void 
-minus_io_common<F>::
+minus_io_common<P,F>::
 invert_intrinsics_tgt(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], const double pix_tgt_coords[][ncoords2d], double normalized_tgt_coords[][ncoords2d], unsigned npts)
 {
   for (unsigned p=0; p < npts; ++p) {
@@ -841,9 +841,9 @@ invert_intrinsics_tgt(const F K[/*3 or 2 ignoring last line*/][ncoords2d_h], con
 // Not sure if really necessary.
 // Seemed to be important for numerics / error scales at some point.
 // Normalizes line normals to unit
-template <typename F>
+template <problem P, typename F>
 inline void 
-minus_io_common<F>::
+minus_io_common<P,F>::
 normalize_lines(F lines[][ncoords2d_h], unsigned nlines)
 {
   for (unsigned l=0; l < nlines; ++l)
