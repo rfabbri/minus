@@ -71,6 +71,17 @@ run_solver(M::solution solutions[M::nsols])
   #endif
 }
 
+// exact means the exact numerical value, without normalizing, for trying to
+// reproduce a specific numeric behavior
+void
+probe_solutions_with_gt_exact(M::solution solutions[M::nsols])
+{
+  if (io::probe_solutions(solutions, data::gt_sols_[0])) // find exactly without normalizing
+    std::cerr << "LOG solutions look OK\n";
+  else
+    std::cerr << "LOG \033[1;91merror:\e[m solutions dont match hardcoded ground-truth numerically.\n";
+}
+
 
 // Simplest possible command to compute the linecircle problem
 // of intersecting a line and a circle 
@@ -103,24 +114,16 @@ main(int argc, char **argv)
 
   run_solver(solutions);
 
-  if (profile_) {
-    if (io::probe_solutions(solutions, data::gt_sols_[0])) // find exactly without normalizing
-      std::cerr << "LOG solutions look OK\n";
-    else
-      std::cerr << "LOG \033[1;91merror:\e[m solutions dont match hardcoded ground-truth numerically.\n";
-  }
+  if (profile_) 
+    probe_solutions_with_gt_exact(solutions);
   
   if (!c.mwrite(solutions, c.output_)) return 2;
 
-  // ---------------------------------------------------------------------------
-  // test_final_solve_against_ground_truth(solutions);
-  // optional: filter solutions using problem-specific inequalities and
-  // additional information
   if (ground_truth_ || profile_)
     return find_ground_truth(solutions);
   else if (!io::has_valid_solutions(solutions)) {   // if no ground-truth is provided, it will return error if
     LOG("\033[1;91mFAIL:\e[m  no valid solutions"); // it can detect that the solver failed by generic tests
     return SOLVER_FAILURE;                          // without using ground-truth, e.g., no real roots
-  }
+  }                                                 // or problem-specific inequalities
   return 0;
 }

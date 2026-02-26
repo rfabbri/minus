@@ -350,5 +350,16 @@ process_args(minus_cmd_io<Float> &cmd, int argc, char **argv)
       print_usage();
     }
   }
+  if (input_data_) {
+    LOG("input is problem data (image pixel data) of the problem to be solved (target problem)"); // as opposed to start/target parameters
+    if (ground_truth_)
+      LOG("reading ground truth appended to input target problem data (in pixels)");
+  }
+  if (profile_)
+    LOG("Running default solve for profiling");
+  else if (cmd.stdio_) 
+    LOG("reading from stdio");
+  else
+    LOG("reading from " << cmd.input_ << " writing to " << cmd.output_);
 }
 #endif  // minus_chicago_h
