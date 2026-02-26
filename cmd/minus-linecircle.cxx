@@ -84,7 +84,7 @@ main(int argc, char **argv)
   // additional information
   if (ground_truth_ || profile_) {
     unsigned sol_id;
-    // searches with normalizations
+    // searches for ground-truth among solutions, possibly with normalizations
     bool found = io::probe_all_solutions(solutions, data::gt_sols_[0], &sol_id);
     if (found) {
       LOG("found solution at index: " << sol_id);

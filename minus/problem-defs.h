@@ -31,6 +31,7 @@ struct minus <P, F> {
       unsigned nthreads=4);
 };
 #undef P
+#if 0
 #define P cleveland14a
 template <typename F>
 struct minus <P, F> {
@@ -56,6 +57,7 @@ struct minus <P, F> {
       unsigned *nsols_final);
 };
 #undef P
+#endif
 #define P linecircle2a
 template <typename F>
 struct minus <P, F> {

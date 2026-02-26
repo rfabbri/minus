@@ -26,11 +26,11 @@ template <typename F>
 using C = typename std::complex<F>;
 
 // The problem solvers that this solver template currently supports
-enum problem {chicago14a, chicago6a, cleveland14a, phoenix10a, linecircle2a /*, standard*/};
+enum problem {chicago14a, chicago6a/*, cleveland14a, phoenix10a*/, linecircle2a /*, standard*/};
 
 // The current best formulations for each problem
 constexpr problem chicago = problem::chicago14a;
-constexpr problem cleveland = problem::cleveland14a;
+//constexpr problem cleveland = problem::cleveland14a;
 constexpr problem linecircle = problem::linecircle2a;
 // You can now use solver<chicago> to default to the best formulation
 
@@ -322,8 +322,8 @@ struct minus_io : public minus_io_common<F> {
                      unsigned id_sols[M::nsols], unsigned *nsols_real);
   
   static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
-  static bool probe_all_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
-      unsigned *solution_index);
+  static bool probe_all_solutions(const typename M::solution solutions[M::nsols], 
+                                  F probe_solution[M::nve], unsigned *solution_index);
 };
 
 // Highlevel API ---------------------------------------------------------------

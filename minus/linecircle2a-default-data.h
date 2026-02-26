@@ -19,7 +19,7 @@ struct minus_data<linecircle2a,F> {
   static constexpr unsigned n_gt_sols_ = M::f::nsols; // How many ground-truth sols we hardcode. 
   // Use less than M::f::nsols if you want to deal with a large number of
   // ground-truth solutions but just want to test some                           
-  static complex gt_sols_[n_gt_sols_];
+  static complex gt_sols_[n_gt_sols_][M::nve];
   static const unsigned gt_sols_id_[n_gt_sols_]; // id of gt-sol among all NVE
 };
 
