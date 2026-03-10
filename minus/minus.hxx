@@ -33,6 +33,7 @@ namespace MiNuS {
 //    raw_solutions: compute solutions sol_min...sol_max-1 within all nsols
 // 
 template <problem P, typename F> void 
+__attribute__((no_sanitize("address")))
 minus_core<P, F>::
 track(const track_settings &s, 
       const C<F> s_sols_u[f::nve*f::nsols], 

@@ -7,13 +7,14 @@
 //      For this implementation, the parameters are just coefficients. 
 //        
 template <typename F>
-inline __attribute__((always_inline)) void 
+inline __attribute__((always_inline)) void
 eval<linecircle2a, F>::
 Hxt(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>* __restrict uy /*Hxt*/) 
 {
   const C<F> *params = reinterpret_cast<C<F> *> (__builtin_assume_aligned(uparams,64));
   const C<F> *x = reinterpret_cast<C<F> *> (__builtin_assume_aligned(ux,64));
   C<F> *y = reinterpret_cast<C<F> *> (__builtin_assume_aligned(uy,64));
+  __builtin_prefetch(x);
 
   const C<F> &X0 = x[0]; // x
   const C<F> &X1 = x[1]; // y
