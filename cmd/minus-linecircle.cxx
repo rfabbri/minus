@@ -52,16 +52,18 @@ run_solver(M::solution solutions[M::nsols])
   #ifdef M_VERBOSE
   std::cerr << "LOG \033[0;33mStarting path tracker from random initial solution to given problem\e[m\n" << std::endl;
   #endif 
-  std::thread t[4];
+//  std::thread t[4];
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
+
+  M::track(settings_, data::start_sols_, data::params_, solutions, 0, M::nsols);
   //  unsigned retval = 
   //  ptrack(&MINUS_DEFAULT, start_sols_, params_, solutions);
   {
-    t[0] = std::thread(M::track, settings_, data::start_sols_, data::params_, solutions, 0, 78);
-    t[1] = std::thread(M::track, settings_, data::start_sols_, data::params_, solutions, 78, 78*2);
-    t[2] = std::thread(M::track, settings_, data::start_sols_, data::params_, solutions, 78*2, 78*3);
-    t[3] = std::thread(M::track, settings_, data::start_sols_, data::params_, solutions, 78*3, 78*4);
-    t[0].join(); t[1].join(); t[2].join(); t[3].join();
+//    t[0] = std::thread(M::track, settings_, data::start_sols_, data::params_, solutions, 0, 78);
+//    t[1] = std::thread(M::track, settings_, data::start_sols_, data::params_, solutions, 78, 78*2);
+//    t[2] = std::thread(M::track, settings_, data::start_sols_, data::params_, solutions, 78*2, 78*3);
+//    t[3] = std::thread(M::track, settings_, data::start_sols_, data::params_, solutions, 78*3, 78*4);
+//    t[0].join(); t[1].join(); t[2].join(); t[3].join();
   }
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   auto duration = duration_cast<milliseconds>(t2 - t1).count();
