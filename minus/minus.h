@@ -98,7 +98,6 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   public: // ----------- Functions --------------------------------------------
   
   ///// THE MEAT /////
-  // __attribute__((no_sanitize("address")))
   static void track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], 
       const C<F> params[2*f::nparams], solution raw_solutions[f::nsols], unsigned sol_min, unsigned sol_max);
   
@@ -112,9 +111,7 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   static constexpr unsigned NVEPLUS2 = f::nve+2;
   static constexpr unsigned NVE2 = f::nve*f::nve;
   // force-inlining this makes it slower
-  // __attribute__((no_sanitize("address")))
   static void evaluate_Hxt(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
-  // __attribute__((no_sanitize("address")))
   static void evaluate_HxH(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
   static void evaluate_Hxt_constants(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
   static void evaluate_HxH_constants(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
@@ -191,9 +188,7 @@ struct minus_core<P, F>::track_settings {
 // 
 template <problem P, typename F>
 struct eval {
-  // __attribute__((no_sanitize("address")))
   static void Hxt(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y);
-  // __attribute__((no_sanitize("address")))
   static void HxH(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y);
   // optional memoization of constants and intermediate values:
   static void Hxt_constants(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y);
@@ -205,14 +200,12 @@ struct eval {
 
 // TODO: double-check these inline in asm
 template <problem P, typename F>
-// __attribute__((no_sanitize("address")))
 void minus_core<P, F>::evaluate_Hxt(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * __restrict y)
 {
   eval<P,F>::Hxt(x, params, y);
 }
 
 template <problem P, typename F>
-// __attribute__((no_sanitize("address")))
 void minus_core<P, F>::evaluate_HxH(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * __restrict y)
 {
   eval<P,F>::HxH(x, params, y);

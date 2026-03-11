@@ -113,8 +113,8 @@ default_params_start_target_gammified_[2*M::f::nparams] = {
 template <typename F>
 const std::complex<F> * minus_data<linecircle2a,F>::
 // Pro: 
-// params_= default_params_start_target_gammified_;
-params_= params_start_target_;
+params_= default_params_start_target_gammified_;
+// params_= params_start_target_;
 
 // Target solutions corresponding to default_params_start_target_gammified_
 //
