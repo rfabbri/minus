@@ -77,7 +77,7 @@ Hxt(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   const C<F> G39 = C1 * X8;
   const C<F> G40 = G39 + X14;
   const C<F> G41 = G38 + G40;
-  y[0] = G10; // NVExNVEPLUS1 matrix [Hx|Ht] as a 1D vector
+  y[0] = G10; // NVExNVEPLUS1 matrix [Hx|Ht] as a 1D col-major vector
   y[1] = G13;
   y[2] = G15;
   y[3] = G18;

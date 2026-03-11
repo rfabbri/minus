@@ -61,7 +61,8 @@ track(const track_settings &s,
   C<F> *const dx4 = dx;
   F    *const dt = (F *)(dxdt + f::nve);
   C<F> *const HxH=Hxt;
-  Map<Matrix<C<F>, f::nve, NVEPLUS1>,Aligned> AA((C<F> *)Hxt,f::nve,NVEPLUS1);
+  Map < Matrix<C<F>, f::nve, NVEPLUS1 >, Aligned>
+      AA((C<F> *)Hxt, f::nve, NVEPLUS1); // Full Jacobian matrix in Eigen format
   static constexpr F the_smallest_number = 1e-13; // XXX BENCHMARK THIS
   typedef minus_array<f::nve,F> v;
   typedef numeric_subroutines<P,F> numerics;
@@ -106,7 +107,7 @@ track(const track_settings &s,
       // dx1
       // evaluate_Hxt_constants(xt, params, ycHxt);
       memoize_Hxt(Hxt);/*, ycHxt);*/
-      evaluate_Hxt(xt, params, Hxt); // Outputs Hxt
+      evaluate_Hxt(xt, params, Hxt); // Outputs full Jacobian matrix Hxt
       // dx4_eigen = lu.compute(AA).solve(bb);
       numerics::lsolve(AA, dx4);
       

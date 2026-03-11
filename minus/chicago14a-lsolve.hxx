@@ -8,7 +8,7 @@ struct numeric_subroutines<P, F> {
 };
 
 // Specific to Chicago
-// Solves Ax = b
+// Solves Ax = b  about 2x faster than generic Eigen PartialPiv LU
 //
 // That is:
 //
