@@ -1,27 +1,27 @@
--- END-LINECIRCLE                     Homotopy Continuation Tutorial                   
+-- END-LINEPOINT                      Homotopy Continuation Tutorial                   
 --
 -- NAME
---      Fast HC Code Inteligencer - exactly how to craft your fast HC
+--      Fast HC Code Tutorial - exactly how to craft your fast HC
 --      Module: Final, fast solver. 
 --
 -- DESCRIPTION
 --
 --      This script shows how to craft a fast solver for your problem
 --
---      It is broken down into Generic and Pro blocks, the pro blocks you can
---      and adapt if needed
+--      It is broken down into generic and Pro blocks. The pro blocks you can
+--      and adapt if needed.
 --
 --      The design-goal of the file is to closely match what will be in the fast C++
 --      solver, so you can start with a generic and incrementally craft and test out the pro features
 --      
 --      The file is not based on generic tutorial scripts. Rather, it is rather technical
 --      based on techniques that originally solved a very hard problem and for the
---      first time ever before, trifical pose from points and tangents Fabbri, etal, CVPR'10.
---      It is important to keep in mind that, while there are novelties in the -- associated m2 
+--      first time ever before, trifical pose from points and tangents Fabbri, etal, CVPR'20.
+--      It is important to keep in mind that, while there are novelties in the associated m2 
 --      scripts of PLMP, this version of them is the definitive account
 --      of what matterscarefully for writing a fast C++ solver
 --    
---      Run noob-start first once
+--      Run start-*.m2 first, once
 --
 -- LEGEND
 --      - Noob and Pro marked bellow mean Example (simple) and Pro (fast)
@@ -46,7 +46,8 @@ load "equations-linepoint.m2"
 --
 -- Set online tracker options here
 -- 
--- Usually the same as for the start system monodromy
+-- Usually the same as for the start system monodromy, but can be more
+-- aggressive as it needs to run fast.
 -- 
 -- 'null' indicates default value, use getDefault(parameterName) to see it
 -- scan({CorrectorTolerance=>1e-4,
@@ -67,9 +68,9 @@ load "equations-linepoint.m2"
 -- setDefault(CorrectorTolerance=>1e-8) -- XXX is it used in the tracker or monodromy?
 --
 
-
 -- Noob and Pro ----------------------------------------------------------------
 -- Read start system
+print "Reading start system startSys."
 (p0,sols0) = readStartSys "startSys";
 
 -- Pro -------------------------------------------------------------------------
@@ -81,31 +82,32 @@ load "equations-linepoint.m2"
 -- Reads from file
 -- p1 = data2parameters("target_system_data.txt'); 
 
+-- Parameters defining the target system we want to solve
 p1 = matrix{{1,-1 + 0*ii}};
+-- Ground-truth solutions we know before hand, just for validation
 sols1gt = matrix{{
         1 + 0*ii, 
         1 + 0*ii
 }}; -- ground truth solutions of target system
 
+print "Ground-truth solution to target parameters p1 should be 0:"
+evalresults = evaluate(GS,p1,sols1gt) -- should be 0
+print evalresults
 
-evaluate(GS,p1,sols1gt) -- should be 0
-
--- p1 = {a, b, c, d, e, f};
--- where {a*(x^2+y^2)+b*x+c, d*x+e*y+f}
 --
 -- Pro -------------------------------------------------------------------------
 -- Convert your physical data to the parameters here.
 -- p1 := data2parameters targetData; -- XXX just put any abcdef here
 
-P01 = p0 || transpose p1;
+P01 = p0 || transpose p1; -- cat start and end parameters 
 
 -- Pro -------------------------------------------------------------------------
 -- P01 := (gammify p0)||(gammify p1); -- include Noob and Pro gammify
--- XXX suggest how to write gammify function 
+-- TODO suggest how to write gammify function
 
 -- Noob and Pro ----------------------------------------------------------------
-H01 = specialize(PH, P01);
-sols1 = trackHomotopy(H01, sols0)
+H01   = specialize(PH, P01);
+sols1 = trackHomotopy(H01, sols0) -- solve system defined by parameters p1
 
 -- Pro
 -- Pass options as 3rd argument that will override what was set with setDefault
@@ -114,13 +116,12 @@ sols1 = trackHomotopy(H01, sols0)
 -- Evaluate check
 -- 
 
-print "Target found solutions should evaluate to 0:"
+print "\nTarget found solutions should evaluate to 0:"
 print(apply(sols1, x -> evaluate(GS, point p1, x)))
 
-print "Start solutions should evaluate to 0:"
+print "\nStart solutions should evaluate to 0:"
 sols0 = point \ sols0 -- convert to list of list
 print(apply(sols0, x -> evaluate(GS, point p0, x)))
-
 
 -- Pro -------------------------------------------------------------------------
 -- J0 = evaluate(J,sols0||p0); -- Evaluates Jacobian if desired

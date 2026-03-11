@@ -30,9 +30,9 @@ struct formulation_parameters<chicago14a>::settings {
   // Very important to tune this as it will save a lot of time if trash is
   // early-detected
   // 
-    prefilter_degeneracy_(true),
-    prefilter_area_degeneracy_eps_(1e-4),
-    prefilter_angle_degeneracy_eps_(1e-4)
+  prefilter_degeneracy_(true),
+  prefilter_area_degeneracy_eps_(1e-4),
+  prefilter_angle_degeneracy_eps_(1e-4)
   // Postfilter Parameters ------------------------------------------------------
   // 
   // TODO Epsilon for converting complex to real solutions etc.
@@ -40,6 +40,7 @@ struct formulation_parameters<chicago14a>::settings {
   bool prefilter_degeneracy_; // prefilter degeneracy?
   double prefilter_area_degeneracy_eps_;
   double prefilter_angle_degeneracy_eps_;
+  // print() as a separate function in minus/cmd/cmd-util.h
 };
 
 template <>

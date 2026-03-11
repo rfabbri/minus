@@ -38,18 +38,13 @@ restart -- only useful for debugging
 needs "../MinusUtility.m2"
 load "equations-linepoint.m2"
 
--- Pro 
--- random seeds for reproducible runs
--- setRandomSeed H#CLBlocks
-
--- Noob and Pro ------------------------------------------------------------------
-PH = parametricSegmentHomotopy GS
-
 -- Pro ---------------------------------------------------------------------------
 
 -- Set Monodromy tracker options here
 -- 
 -- This is for both monodromy and online tracking. You may want to use different
+-- ones for each.
+--
 -- null indicates default value 
 -- 
 -- TODO: show how to get default values here
@@ -94,13 +89,13 @@ PH = parametricSegmentHomotopy GS
 
 -------------------------------------------------------------------------------
 
--- HxHt
+-- write out HxHt evaluator code to be used in C++
 symbols = flatten entries vars GS
-h=cCode(--"HxHt.cxx",
+h=cCode("HxHt.cxx",
         transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"Ht"),
         gateMatrix{symbols|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters})
 
--- HxH
+-- write out HxH evaluator code to be used in C++
 h=cCode("HxH.cxx",
         transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),
         gateMatrix{symbols|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters})
@@ -108,8 +103,8 @@ h=cCode("HxH.cxx",
 -- Maybe useful
 -- cCode PH
 
--- Noob 1 --------------------------------------------------------------------------
--- monodromy needs an initial pair of parameter, solution
+-- Noob 1 ----------------------------------------------------------------------
+-- Monodromy needs an initial pair of parameter, solution
 -- the command below won't work for most use cases
 -- except for e.g. linear in parameters
 -- Here you can write a random generator from parameters 
@@ -121,7 +116,7 @@ p0 = matrix {{1+0*ii,1+0*ii}}
 sols0 = matrix {{-1+0*ii,1+0*ii}}
 print(evaluate(GS,p0,sols0))
 
--- Pro 1 -----------------------------------------------------
+-- Pro 1 -----------------------------------------------------------------------
 --
 -- YOU
 --    - write a specialized function to sample from the parameter space
@@ -172,30 +167,40 @@ print(evaluate(GS,p0,sols0))
 -- --    << "residual: " << resid << endl;
 --     (resid > 1e-4)
 --     )
--- filterEval(p0,sols0)  ----------------------------------------------------------
+-- filterEval(p0,sols0)  ----------------------------------------------------
 
--- Noob 2
-(V,np) = monodromySolve(GS,point p0,{point sols0},Verbose=>true,NumberOfNodes=>5) -- first try with default NumberOfNodes
+-- Noob 2 -------------------------------------------------------------------
+print "\nComputing all complex solutions of GS at p0 continuing from sols0:"
+-- (V,np) = monodromySolve(GS,point p0,{point sols0},Verbose=>true,NumberOfNodes=>5) -- first try with default NumberOfNodes
+(V,np) = monodromySolve(GS,p0,{sols0},Verbose=>true,NumberOfNodes=>5) -- first try with default NumberOfNodes
 
--- Pro 2 -------------------------------------------------------------------
+-- Pro 2 --------------------------------------------------------------------
 -- elapsedTime (V,np)= monodromySolve(PH, 
 --     point p0, {point sols0},Verbose=>true,
 --     FilterCondition=>filterEval,TargetSolutionCount=>312,SelectEdgeAndDirection=>selectBestEdgeAndDirection,
 --     Potential=>potentialE, Randomizer=>gammify)
--------------------------------------------------------------------------------
+
+-- Pro May want to inspect basepoint used for the initial solutions
+-- V.BasePoint;
+-----------------------------------------------------------------------------
 
 
 -- Noob 3 -------------------------------------------------------------------
--- Pro
--- May want to inspect basepoint used for the initial solutions
--- V.BasePoint;
 -- corresponding solutions
-points V.PartialSols 
-sols = solutionsWithMultiplicity points V.PartialSols; -- solutionsWithMultiplicity only a safe option, can try remove
-                                                         -- it might speed up if removed
+points V.PartialSols   -- Despite the name "partial", should have them all.
+sols = solutionsWithMultiplicity points V.PartialSols;
+-- solutionsWithMultiplicity replaces clusters of approximately equal points 
+-- by single points with multiplicity
+-- 
+-- NOTE: solutionsWithMultiplicity is only a safe option, can try removing it.
+-- It might speed up if removed.
 
--- Pro 3 --------------------------------------------------------------
+-- Pro 3 --------------------------------------------------------------------
 -- quality check
+-- This may be used e.g. to force a recomputation / re-randomization to make sure
+-- the conditioning is as best as possible (smallest). To generate fast solvers
+-- one might want a well-conditioned start system
+-- 
 -- L = (sols/(x -> (
 -- 	o := (transpose matrix x) ||
 -- 	   (transpose matrix V.BasePoint);
@@ -204,4 +209,5 @@ sols = solutionsWithMultiplicity points V.PartialSols; -- solutionsWithMultiplic
 -- 	)));
 -- summary L -------------------------------------------------------------------
 
+print "\nWriting start sols for system parameters V.BasePoint in startSys"
 writeStartSys(V.BasePoint, sols, Filename => "startSys")

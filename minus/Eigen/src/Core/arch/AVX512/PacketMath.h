@@ -55,8 +55,6 @@ template<> struct packet_traits<float>  : default_packet_traits
     size = 16,
     HasHalfPacket = 1,
     HasBlend = 0,
-    HasSin = EIGEN_FAST_MATH,
-    HasCos = EIGEN_FAST_MATH,
 #if EIGEN_GNUC_AT_LEAST(5, 3) || (!EIGEN_COMP_GNUC_STRICT)
 #ifdef EIGEN_VECTORIZE_AVX512DQ
     HasLog = 1,
@@ -102,19 +100,19 @@ struct unpacket_traits<Packet16f> {
   typedef float type;
   typedef Packet8f half;
   typedef Packet16i integer_packet;
-  enum { size = 16, alignment=Aligned64, vectorizable=true };
+  enum { size = 16, alignment=Aligned64 };
 };
 template <>
 struct unpacket_traits<Packet8d> {
   typedef double type;
   typedef Packet4d half;
-  enum { size = 8, alignment=Aligned64, vectorizable=true };
+  enum { size = 8, alignment=Aligned64 };
 };
 template <>
 struct unpacket_traits<Packet16i> {
   typedef int type;
   typedef Packet8i half;
-  enum { size = 16, alignment=Aligned64, vectorizable=false };
+  enum { size = 16, alignment=Aligned64 };
 };
 
 template <>
@@ -131,17 +129,12 @@ EIGEN_STRONG_INLINE Packet16i pset1<Packet16i>(const int& from) {
 }
 
 template <>
-EIGEN_STRONG_INLINE Packet16f pset1frombits<Packet16f>(unsigned int from) {
-  return _mm512_castsi512_ps(_mm512_set1_epi32(from));
-}
-
-template <>
 EIGEN_STRONG_INLINE Packet16f pload1<Packet16f>(const float* from) {
   return _mm512_broadcastss_ps(_mm_load_ps1(from));
 }
 template <>
 EIGEN_STRONG_INLINE Packet8d pload1<Packet8d>(const double* from) {
-  return _mm512_broadcastsd_pd(_mm_load_pd1(from));
+  return _mm512_set1_pd(*from);
 }
 
 template <>
@@ -167,6 +160,11 @@ EIGEN_STRONG_INLINE Packet8d padd<Packet8d>(const Packet8d& a,
                                             const Packet8d& b) {
   return _mm512_add_pd(a, b);
 }
+template <>
+EIGEN_STRONG_INLINE Packet16i padd<Packet16i>(const Packet16i& a,
+                                              const Packet16i& b) {
+  return _mm512_add_epi32(a, b);
+}
 
 template <>
 EIGEN_STRONG_INLINE Packet16f psub<Packet16f>(const Packet16f& a,
@@ -177,6 +175,11 @@ template <>
 EIGEN_STRONG_INLINE Packet8d psub<Packet8d>(const Packet8d& a,
                                             const Packet8d& b) {
   return _mm512_sub_pd(a, b);
+}
+template <>
+EIGEN_STRONG_INLINE Packet16i psub<Packet16i>(const Packet16i& a,
+                                              const Packet16i& b) {
+  return _mm512_sub_epi32(a, b);
 }
 
 template <>
@@ -210,6 +213,11 @@ template <>
 EIGEN_STRONG_INLINE Packet8d pmul<Packet8d>(const Packet8d& a,
                                             const Packet8d& b) {
   return _mm512_mul_pd(a, b);
+}
+template <>
+EIGEN_STRONG_INLINE Packet16i pmul<Packet16i>(const Packet16i& a,
+                                              const Packet16i& b) {
+  return _mm512_mul_epi32(a, b);
 }
 
 template <>
@@ -283,56 +291,23 @@ EIGEN_STRONG_INLINE Packet16f cat256(Packet8f a, Packet8f b) {
 }
 #endif
 
-template<> EIGEN_STRONG_INLINE Packet16f pcmp_le(const Packet16f& a, const Packet16f& b) {
-  __mmask16 mask = _mm512_cmp_ps_mask(a, b, _CMP_LE_OQ);
-  return _mm512_castsi512_ps(
-      _mm512_mask_set1_epi32(_mm512_set1_epi32(0), mask, 0xffffffffu));
-}
-
-template<> EIGEN_STRONG_INLINE Packet16f pcmp_lt(const Packet16f& a, const Packet16f& b) {
-  __mmask16 mask = _mm512_cmp_ps_mask(a, b, _CMP_LT_OQ);
-  return _mm512_castsi512_ps(
-      _mm512_mask_set1_epi32(_mm512_set1_epi32(0), mask, 0xffffffffu));
-}
-
-template<> EIGEN_STRONG_INLINE Packet16f pcmp_lt_or_nan(const Packet16f& a, const Packet16f& b) {
-  __mmask16 mask = _mm512_cmp_ps_mask(a, b, _CMP_NGT_UQ);
-  return _mm512_castsi512_ps(
-      _mm512_mask_set1_epi32(_mm512_set1_epi32(0), mask, 0xffffffffu));
-}
-
-template<> EIGEN_STRONG_INLINE Packet16i pcmp_eq(const Packet16i& a, const Packet16i& b) {
-  __mmask16 mask = _mm512_cmp_epi32_mask(a, b, _CMP_EQ_OQ);
-  return _mm512_mask_set1_epi32(_mm512_set1_epi32(0), mask, 0xffffffffu);
-}
-
-template <>
-EIGEN_STRONG_INLINE Packet16f pcmp_eq(const Packet16f& a, const Packet16f& b) {
-  __mmask16 mask = _mm512_cmp_ps_mask(a, b, _CMP_EQ_OQ);
-  return _mm512_castsi512_ps(
-      _mm512_mask_set1_epi32(_mm512_set1_epi32(0), mask, 0xffffffffu));
-}
-
-template <>
-EIGEN_STRONG_INLINE Packet8d pcmp_eq(const Packet8d& a, const Packet8d& b) {
-  __mmask8 mask = _mm512_cmp_pd_mask(a, b, _CMP_EQ_OQ);
-  return _mm512_castsi512_pd(
-      _mm512_mask_set1_epi64(_mm512_set1_epi64(0), mask, 0xffffffffffffffffu));
-}
-
-template <>
-EIGEN_STRONG_INLINE Packet16i ptrue<Packet16i>(const Packet16i& /*a*/) {
-  return _mm512_set1_epi32(0xffffffffu);
-}
-
-template <>
-EIGEN_STRONG_INLINE Packet16f ptrue<Packet16f>(const Packet16f& a) {
-  return _mm512_castsi512_ps(ptrue<Packet16i>(_mm512_castps_si512(a)));
-}
-
-template <>
-EIGEN_STRONG_INLINE Packet8d ptrue<Packet8d>(const Packet8d& a) {
-  return _mm512_castsi512_pd(ptrue<Packet16i>(_mm512_castpd_si512(a)));
+// Helper function for bit packing snippet of low precision comparison.
+// It packs the flags from 32x16 to 16x16.
+EIGEN_STRONG_INLINE __m256i Pack32To16(Packet16f rf) {
+  // Split data into small pieces and handle with AVX instructions
+  // to guarantee internal order of vector.
+  // Operation:
+  //   dst[15:0]    := Saturate16(rf[31:0])
+  //   dst[31:16]   := Saturate16(rf[63:32])
+  //   ...
+  //   dst[255:240] := Saturate16(rf[255:224])
+  __m256i lo = _mm256_castps_si256(extract256<0>(rf));
+  __m256i hi = _mm256_castps_si256(extract256<1>(rf));
+  __m128i result_lo = _mm_packs_epi32(_mm256_extractf128_si256(lo, 0),
+                                      _mm256_extractf128_si256(lo, 1));
+  __m128i result_hi = _mm_packs_epi32(_mm256_extractf128_si256(hi, 0),
+                                      _mm256_extractf128_si256(hi, 1));
+  return _mm256_insertf128_si256(_mm256_castsi128_si256(result_lo), result_hi, 1);
 }
 
 template <>
@@ -363,9 +338,7 @@ EIGEN_STRONG_INLINE Packet8d pand<Packet8d>(const Packet8d& a,
 
   Packet4d lane1_a = _mm512_extractf64x4_pd(a, 1);
   Packet4d lane1_b = _mm512_extractf64x4_pd(b, 1);
-  res = _mm512_insertf64x4(res, _mm256_and_pd(lane1_a, lane1_b), 1);
-
-  return res;
+  return _mm512_insertf64x4(res, _mm256_and_pd(lane1_a, lane1_b), 1);
 #endif
 }
 
@@ -438,7 +411,15 @@ EIGEN_STRONG_INLINE Packet8d pandnot<Packet8d>(const Packet8d& a,const Packet8d&
 #endif
 }
 
-template<int N> EIGEN_STRONG_INLINE Packet16i pshiftleft(Packet16i a) {
+template<int N> EIGEN_STRONG_INLINE Packet16i parithmetic_shift_right(Packet16i a) {
+  return _mm512_srai_epi32(a, N);
+}
+
+template<int N> EIGEN_STRONG_INLINE Packet16i plogical_shift_right(Packet16i a) {
+  return _mm512_srli_epi32(a, N);
+}
+
+template<int N> EIGEN_STRONG_INLINE Packet16i plogical_shift_left(Packet16i a) {
   return _mm512_slli_epi32(a, N);
 }
 
@@ -511,21 +492,17 @@ EIGEN_STRONG_INLINE Packet8d ploaddup<Packet8d>(const double* from) {
 // {a0, a0  a0, a0, a1, a1, a1, a1, a2, a2, a2, a2, a3, a3, a3, a3}
 template <>
 EIGEN_STRONG_INLINE Packet16f ploadquad<Packet16f>(const float* from) {
-  Packet16f tmp = _mm512_undefined_ps();
-  tmp = _mm512_insertf32x4(tmp, _mm_load_ps1(from), 0);
-  tmp = _mm512_insertf32x4(tmp, _mm_load_ps1(from + 1), 1);
-  tmp = _mm512_insertf32x4(tmp, _mm_load_ps1(from + 2), 2);
-  tmp = _mm512_insertf32x4(tmp, _mm_load_ps1(from + 3), 3);
-  return tmp;
+  Packet16f tmp = _mm512_castps128_ps512(ploadu<Packet4f>(from));
+  const Packet16i scatter_mask = _mm512_set_epi32(3,3,3,3, 2,2,2,2, 1,1,1,1, 0,0,0,0);
+  return _mm512_permutexvar_ps(scatter_mask, tmp);
 }
+
 // Loads 2 doubles from memory a returns the packet
 // {a0, a0  a0, a0, a1, a1, a1, a1}
 template <>
 EIGEN_STRONG_INLINE Packet8d ploadquad<Packet8d>(const double* from) {
-  __m128d tmp0 = _mm_load_pd1(from);
-  __m256d lane0 = _mm256_broadcastsd_pd(tmp0);
-  __m128d tmp1 = _mm_load_pd1(from + 1);
-  __m256d lane1 = _mm256_broadcastsd_pd(tmp1);
+  __m256d lane0 = _mm256_set1_pd(*from);
+  __m256d lane1 = _mm256_set1_pd(*(from+1));
   __m512d tmp = _mm512_undefined_pd();
   tmp = _mm512_insertf64x4(tmp, lane0, 0);
   return _mm512_insertf64x4(tmp, lane1, 1);
@@ -680,196 +657,6 @@ EIGEN_STRONG_INLINE Packet8d pabs(const Packet8d& a) {
   OUTPUT = _mm512_insertf32x4(OUTPUT, _mm256_extractf128_ps(INPUTB, 0), 2); \
   OUTPUT = _mm512_insertf32x4(OUTPUT, _mm256_extractf128_ps(INPUTB, 1), 3);
 #endif
-template<> EIGEN_STRONG_INLINE Packet16f preduxp<Packet16f>(const Packet16f*
-vecs)
-{
-  EIGEN_EXTRACT_8f_FROM_16f(vecs[0], vecs0);
-  EIGEN_EXTRACT_8f_FROM_16f(vecs[1], vecs1);
-  EIGEN_EXTRACT_8f_FROM_16f(vecs[2], vecs2);
-  EIGEN_EXTRACT_8f_FROM_16f(vecs[3], vecs3);
-  EIGEN_EXTRACT_8f_FROM_16f(vecs[4], vecs4);
-  EIGEN_EXTRACT_8f_FROM_16f(vecs[5], vecs5);
-  EIGEN_EXTRACT_8f_FROM_16f(vecs[6], vecs6);
-  EIGEN_EXTRACT_8f_FROM_16f(vecs[7], vecs7);
-  EIGEN_EXTRACT_8f_FROM_16f(vecs[8], vecs8);
-  EIGEN_EXTRACT_8f_FROM_16f(vecs[9], vecs9);
-  EIGEN_EXTRACT_8f_FROM_16f(vecs[10], vecs10);
-  EIGEN_EXTRACT_8f_FROM_16f(vecs[11], vecs11);
-  EIGEN_EXTRACT_8f_FROM_16f(vecs[12], vecs12);
-  EIGEN_EXTRACT_8f_FROM_16f(vecs[13], vecs13);
-  EIGEN_EXTRACT_8f_FROM_16f(vecs[14], vecs14);
-  EIGEN_EXTRACT_8f_FROM_16f(vecs[15], vecs15);
-
-  __m256 hsum1 = _mm256_hadd_ps(vecs0_0, vecs1_0);
-  __m256 hsum2 = _mm256_hadd_ps(vecs2_0, vecs3_0);
-  __m256 hsum3 = _mm256_hadd_ps(vecs4_0, vecs5_0);
-  __m256 hsum4 = _mm256_hadd_ps(vecs6_0, vecs7_0);
-
-  __m256 hsum5 = _mm256_hadd_ps(hsum1, hsum1);
-  __m256 hsum6 = _mm256_hadd_ps(hsum2, hsum2);
-  __m256 hsum7 = _mm256_hadd_ps(hsum3, hsum3);
-  __m256 hsum8 = _mm256_hadd_ps(hsum4, hsum4);
-
-  __m256 perm1 = _mm256_permute2f128_ps(hsum5, hsum5, 0x23);
-  __m256 perm2 = _mm256_permute2f128_ps(hsum6, hsum6, 0x23);
-  __m256 perm3 = _mm256_permute2f128_ps(hsum7, hsum7, 0x23);
-  __m256 perm4 = _mm256_permute2f128_ps(hsum8, hsum8, 0x23);
-
-  __m256 sum1 = _mm256_add_ps(perm1, hsum5);
-  __m256 sum2 = _mm256_add_ps(perm2, hsum6);
-  __m256 sum3 = _mm256_add_ps(perm3, hsum7);
-  __m256 sum4 = _mm256_add_ps(perm4, hsum8);
-
-  __m256 blend1 = _mm256_blend_ps(sum1, sum2, 0xcc);
-  __m256 blend2 = _mm256_blend_ps(sum3, sum4, 0xcc);
-
-  __m256 final = _mm256_blend_ps(blend1, blend2, 0xf0);
-
-  hsum1 = _mm256_hadd_ps(vecs0_1, vecs1_1);
-  hsum2 = _mm256_hadd_ps(vecs2_1, vecs3_1);
-  hsum3 = _mm256_hadd_ps(vecs4_1, vecs5_1);
-  hsum4 = _mm256_hadd_ps(vecs6_1, vecs7_1);
-
-  hsum5 = _mm256_hadd_ps(hsum1, hsum1);
-  hsum6 = _mm256_hadd_ps(hsum2, hsum2);
-  hsum7 = _mm256_hadd_ps(hsum3, hsum3);
-  hsum8 = _mm256_hadd_ps(hsum4, hsum4);
-
-  perm1 = _mm256_permute2f128_ps(hsum5, hsum5, 0x23);
-  perm2 = _mm256_permute2f128_ps(hsum6, hsum6, 0x23);
-  perm3 = _mm256_permute2f128_ps(hsum7, hsum7, 0x23);
-  perm4 = _mm256_permute2f128_ps(hsum8, hsum8, 0x23);
-
-  sum1 = _mm256_add_ps(perm1, hsum5);
-  sum2 = _mm256_add_ps(perm2, hsum6);
-  sum3 = _mm256_add_ps(perm3, hsum7);
-  sum4 = _mm256_add_ps(perm4, hsum8);
-
-  blend1 = _mm256_blend_ps(sum1, sum2, 0xcc);
-  blend2 = _mm256_blend_ps(sum3, sum4, 0xcc);
-
-  final = _mm256_add_ps(final, _mm256_blend_ps(blend1, blend2, 0xf0));
-
-  hsum1 = _mm256_hadd_ps(vecs8_0, vecs9_0);
-  hsum2 = _mm256_hadd_ps(vecs10_0, vecs11_0);
-  hsum3 = _mm256_hadd_ps(vecs12_0, vecs13_0);
-  hsum4 = _mm256_hadd_ps(vecs14_0, vecs15_0);
-
-  hsum5 = _mm256_hadd_ps(hsum1, hsum1);
-  hsum6 = _mm256_hadd_ps(hsum2, hsum2);
-  hsum7 = _mm256_hadd_ps(hsum3, hsum3);
-  hsum8 = _mm256_hadd_ps(hsum4, hsum4);
-
-  perm1 = _mm256_permute2f128_ps(hsum5, hsum5, 0x23);
-  perm2 = _mm256_permute2f128_ps(hsum6, hsum6, 0x23);
-  perm3 = _mm256_permute2f128_ps(hsum7, hsum7, 0x23);
-  perm4 = _mm256_permute2f128_ps(hsum8, hsum8, 0x23);
-
-  sum1 = _mm256_add_ps(perm1, hsum5);
-  sum2 = _mm256_add_ps(perm2, hsum6);
-  sum3 = _mm256_add_ps(perm3, hsum7);
-  sum4 = _mm256_add_ps(perm4, hsum8);
-
-  blend1 = _mm256_blend_ps(sum1, sum2, 0xcc);
-  blend2 = _mm256_blend_ps(sum3, sum4, 0xcc);
-
-  __m256 final_1 = _mm256_blend_ps(blend1, blend2, 0xf0);
-
-  hsum1 = _mm256_hadd_ps(vecs8_1, vecs9_1);
-  hsum2 = _mm256_hadd_ps(vecs10_1, vecs11_1);
-  hsum3 = _mm256_hadd_ps(vecs12_1, vecs13_1);
-  hsum4 = _mm256_hadd_ps(vecs14_1, vecs15_1);
-
-  hsum5 = _mm256_hadd_ps(hsum1, hsum1);
-  hsum6 = _mm256_hadd_ps(hsum2, hsum2);
-  hsum7 = _mm256_hadd_ps(hsum3, hsum3);
-  hsum8 = _mm256_hadd_ps(hsum4, hsum4);
-
-  perm1 = _mm256_permute2f128_ps(hsum5, hsum5, 0x23);
-  perm2 = _mm256_permute2f128_ps(hsum6, hsum6, 0x23);
-  perm3 = _mm256_permute2f128_ps(hsum7, hsum7, 0x23);
-  perm4 = _mm256_permute2f128_ps(hsum8, hsum8, 0x23);
-
-  sum1 = _mm256_add_ps(perm1, hsum5);
-  sum2 = _mm256_add_ps(perm2, hsum6);
-  sum3 = _mm256_add_ps(perm3, hsum7);
-  sum4 = _mm256_add_ps(perm4, hsum8);
-
-  blend1 = _mm256_blend_ps(sum1, sum2, 0xcc);
-  blend2 = _mm256_blend_ps(sum3, sum4, 0xcc);
-
-  final_1 = _mm256_add_ps(final_1, _mm256_blend_ps(blend1, blend2, 0xf0));
-
-  __m512 final_output;
-
-  EIGEN_INSERT_8f_INTO_16f(final_output, final, final_1);
-  return final_output;
-}
-
-template<> EIGEN_STRONG_INLINE Packet8d preduxp<Packet8d>(const Packet8d* vecs)
-{
-  Packet4d vecs0_0 = _mm512_extractf64x4_pd(vecs[0], 0);
-  Packet4d vecs0_1 = _mm512_extractf64x4_pd(vecs[0], 1);
-
-  Packet4d vecs1_0 = _mm512_extractf64x4_pd(vecs[1], 0);
-  Packet4d vecs1_1 = _mm512_extractf64x4_pd(vecs[1], 1);
-
-  Packet4d vecs2_0 = _mm512_extractf64x4_pd(vecs[2], 0);
-  Packet4d vecs2_1 = _mm512_extractf64x4_pd(vecs[2], 1);
-
-  Packet4d vecs3_0 = _mm512_extractf64x4_pd(vecs[3], 0);
-  Packet4d vecs3_1 = _mm512_extractf64x4_pd(vecs[3], 1);
-
-  Packet4d vecs4_0 = _mm512_extractf64x4_pd(vecs[4], 0);
-  Packet4d vecs4_1 = _mm512_extractf64x4_pd(vecs[4], 1);
-
-  Packet4d vecs5_0 = _mm512_extractf64x4_pd(vecs[5], 0);
-  Packet4d vecs5_1 = _mm512_extractf64x4_pd(vecs[5], 1);
-
-  Packet4d vecs6_0 = _mm512_extractf64x4_pd(vecs[6], 0);
-  Packet4d vecs6_1 = _mm512_extractf64x4_pd(vecs[6], 1);
-
-  Packet4d vecs7_0 = _mm512_extractf64x4_pd(vecs[7], 0);
-  Packet4d vecs7_1 = _mm512_extractf64x4_pd(vecs[7], 1);
-
-  Packet4d tmp0, tmp1;
-
-  tmp0 = _mm256_hadd_pd(vecs0_0, vecs1_0);
-  tmp0 = _mm256_add_pd(tmp0, _mm256_permute2f128_pd(tmp0, tmp0, 1));
-
-  tmp1 = _mm256_hadd_pd(vecs2_0, vecs3_0);
-  tmp1 = _mm256_add_pd(tmp1, _mm256_permute2f128_pd(tmp1, tmp1, 1));
-
-  __m256d final_0 = _mm256_blend_pd(tmp0, tmp1, 0xC);
-
-  tmp0 = _mm256_hadd_pd(vecs0_1, vecs1_1);
-  tmp0 = _mm256_add_pd(tmp0, _mm256_permute2f128_pd(tmp0, tmp0, 1));
-
-  tmp1 = _mm256_hadd_pd(vecs2_1, vecs3_1);
-  tmp1 = _mm256_add_pd(tmp1, _mm256_permute2f128_pd(tmp1, tmp1, 1));
-
-  final_0 = _mm256_add_pd(final_0, _mm256_blend_pd(tmp0, tmp1, 0xC));
-
-  tmp0 = _mm256_hadd_pd(vecs4_0, vecs5_0);
-  tmp0 = _mm256_add_pd(tmp0, _mm256_permute2f128_pd(tmp0, tmp0, 1));
-
-  tmp1 = _mm256_hadd_pd(vecs6_0, vecs7_0);
-  tmp1 = _mm256_add_pd(tmp1, _mm256_permute2f128_pd(tmp1, tmp1, 1));
-
-  __m256d final_1 = _mm256_blend_pd(tmp0, tmp1, 0xC);
-
-  tmp0 = _mm256_hadd_pd(vecs4_1, vecs5_1);
-  tmp0 = _mm256_add_pd(tmp0, _mm256_permute2f128_pd(tmp0, tmp0, 1));
-
-  tmp1 = _mm256_hadd_pd(vecs6_1, vecs7_1);
-  tmp1 = _mm256_add_pd(tmp1, _mm256_permute2f128_pd(tmp1, tmp1, 1));
-
-  final_1 = _mm256_add_pd(final_1, _mm256_blend_pd(tmp0, tmp1, 0xC));
-
-  __m512d final_output = _mm512_castpd256_pd512(final_0);
-
-  return _mm512_insertf64x4(final_output, final_1, 1);
-}
 
 template <>
 EIGEN_STRONG_INLINE float predux<Packet16f>(const Packet16f& a) {
@@ -899,26 +686,26 @@ EIGEN_STRONG_INLINE double predux<Packet8d>(const Packet8d& a) {
 }
 
 template <>
-EIGEN_STRONG_INLINE Packet8f predux_half_dowto4<Packet16f>(const Packet16f& a) {
+EIGEN_STRONG_INLINE Packet8f predux_downto4<Packet16f>(const Packet16f& a) {
 #ifdef EIGEN_VECTORIZE_AVX512DQ
-  __m256 lane0 = _mm512_extractf32x8_ps(a, 0);
-  __m256 lane1 = _mm512_extractf32x8_ps(a, 1);
-  return _mm256_add_ps(lane0, lane1);
+  Packet8f lane0 = _mm512_extractf32x8_ps(a, 0);
+  Packet8f lane1 = _mm512_extractf32x8_ps(a, 1);
+  return padd(lane0, lane1);
 #else
-  __m128 lane0 = _mm512_extractf32x4_ps(a, 0);
-  __m128 lane1 = _mm512_extractf32x4_ps(a, 1);
-  __m128 lane2 = _mm512_extractf32x4_ps(a, 2);
-  __m128 lane3 = _mm512_extractf32x4_ps(a, 3);
-  __m128 sum0 = _mm_add_ps(lane0, lane2);
-  __m128 sum1 = _mm_add_ps(lane1, lane3);
+  Packet4f lane0 = _mm512_extractf32x4_ps(a, 0);
+  Packet4f lane1 = _mm512_extractf32x4_ps(a, 1);
+  Packet4f lane2 = _mm512_extractf32x4_ps(a, 2);
+  Packet4f lane3 = _mm512_extractf32x4_ps(a, 3);
+  Packet4f sum0 = padd(lane0, lane2);
+  Packet4f sum1 = padd(lane1, lane3);
   return _mm256_insertf128_ps(_mm256_castps128_ps256(sum0), sum1, 1);
 #endif
 }
 template <>
-EIGEN_STRONG_INLINE Packet4d predux_half_dowto4<Packet8d>(const Packet8d& a) {
-  __m256d lane0 = _mm512_extractf64x4_pd(a, 0);
-  __m256d lane1 = _mm512_extractf64x4_pd(a, 1);
-  __m256d res = _mm256_add_pd(lane0, lane1);
+EIGEN_STRONG_INLINE Packet4d predux_downto4<Packet8d>(const Packet8d& a) {
+  Packet4d lane0 = _mm512_extractf64x4_pd(a, 0);
+  Packet4d lane1 = _mm512_extractf64x4_pd(a, 1);
+  Packet4d res = padd(lane0, lane1);
   return res;
 }
 
@@ -990,59 +777,196 @@ EIGEN_STRONG_INLINE double predux_max<Packet8d>(const Packet8d& a) {
   return pfirst(_mm256_max_pd(res, _mm256_shuffle_pd(res, res, 1)));
 }
 
-template<> EIGEN_STRONG_INLINE bool predux_any(const Packet16f& x)
+template<> EIGEN_STRONG_INLINE Packet16f preduxp<Packet16f>(const Packet16f* vecs)
 {
-  Packet16i xi = _mm512_castps_si512(x);
-  __mmask16 tmp = _mm512_test_epi32_mask(xi,xi);
-  return !_mm512_kortestz(tmp,tmp);
+  EIGEN_EXTRACT_8f_FROM_16f(vecs[0], vecs0);
+  EIGEN_EXTRACT_8f_FROM_16f(vecs[1], vecs1);
+  EIGEN_EXTRACT_8f_FROM_16f(vecs[2], vecs2);
+  EIGEN_EXTRACT_8f_FROM_16f(vecs[3], vecs3);
+  EIGEN_EXTRACT_8f_FROM_16f(vecs[4], vecs4);
+  EIGEN_EXTRACT_8f_FROM_16f(vecs[5], vecs5);
+  EIGEN_EXTRACT_8f_FROM_16f(vecs[6], vecs6);
+  EIGEN_EXTRACT_8f_FROM_16f(vecs[7], vecs7);
+  EIGEN_EXTRACT_8f_FROM_16f(vecs[8], vecs8);
+  EIGEN_EXTRACT_8f_FROM_16f(vecs[9], vecs9);
+  EIGEN_EXTRACT_8f_FROM_16f(vecs[10], vecs10);
+  EIGEN_EXTRACT_8f_FROM_16f(vecs[11], vecs11);
+  EIGEN_EXTRACT_8f_FROM_16f(vecs[12], vecs12);
+  EIGEN_EXTRACT_8f_FROM_16f(vecs[13], vecs13);
+  EIGEN_EXTRACT_8f_FROM_16f(vecs[14], vecs14);
+  EIGEN_EXTRACT_8f_FROM_16f(vecs[15], vecs15);
+
+  __m256 hsum1 = _mm256_hadd_ps(vecs0_0, vecs1_0);
+  __m256 hsum2 = _mm256_hadd_ps(vecs2_0, vecs3_0);
+  __m256 hsum3 = _mm256_hadd_ps(vecs4_0, vecs5_0);
+  __m256 hsum4 = _mm256_hadd_ps(vecs6_0, vecs7_0);
+
+  __m256 hsum5 = _mm256_hadd_ps(hsum1, hsum1);
+  __m256 hsum6 = _mm256_hadd_ps(hsum2, hsum2);
+  __m256 hsum7 = _mm256_hadd_ps(hsum3, hsum3);
+  __m256 hsum8 = _mm256_hadd_ps(hsum4, hsum4);
+
+  __m256 perm1 = _mm256_permute2f128_ps(hsum5, hsum5, 0x23);
+  __m256 perm2 = _mm256_permute2f128_ps(hsum6, hsum6, 0x23);
+  __m256 perm3 = _mm256_permute2f128_ps(hsum7, hsum7, 0x23);
+  __m256 perm4 = _mm256_permute2f128_ps(hsum8, hsum8, 0x23);
+
+  __m256 sum1 = _mm256_add_ps(perm1, hsum5);
+  __m256 sum2 = _mm256_add_ps(perm2, hsum6);
+  __m256 sum3 = _mm256_add_ps(perm3, hsum7);
+  __m256 sum4 = _mm256_add_ps(perm4, hsum8);
+
+  __m256 blend1 = _mm256_blend_ps(sum1, sum2, 0xcc);
+  __m256 blend2 = _mm256_blend_ps(sum3, sum4, 0xcc);
+
+  __m256 final = _mm256_blend_ps(blend1, blend2, 0xf0);
+
+  hsum1 = _mm256_hadd_ps(vecs0_1, vecs1_1);
+  hsum2 = _mm256_hadd_ps(vecs2_1, vecs3_1);
+  hsum3 = _mm256_hadd_ps(vecs4_1, vecs5_1);
+  hsum4 = _mm256_hadd_ps(vecs6_1, vecs7_1);
+
+  hsum5 = _mm256_hadd_ps(hsum1, hsum1);
+  hsum6 = _mm256_hadd_ps(hsum2, hsum2);
+  hsum7 = _mm256_hadd_ps(hsum3, hsum3);
+  hsum8 = _mm256_hadd_ps(hsum4, hsum4);
+
+  perm1 = _mm256_permute2f128_ps(hsum5, hsum5, 0x23);
+  perm2 = _mm256_permute2f128_ps(hsum6, hsum6, 0x23);
+  perm3 = _mm256_permute2f128_ps(hsum7, hsum7, 0x23);
+  perm4 = _mm256_permute2f128_ps(hsum8, hsum8, 0x23);
+
+  sum1 = _mm256_add_ps(perm1, hsum5);
+  sum2 = _mm256_add_ps(perm2, hsum6);
+  sum3 = _mm256_add_ps(perm3, hsum7);
+  sum4 = _mm256_add_ps(perm4, hsum8);
+
+  blend1 = _mm256_blend_ps(sum1, sum2, 0xcc);
+  blend2 = _mm256_blend_ps(sum3, sum4, 0xcc);
+
+  final = padd(final, _mm256_blend_ps(blend1, blend2, 0xf0));
+
+  hsum1 = _mm256_hadd_ps(vecs8_0, vecs9_0);
+  hsum2 = _mm256_hadd_ps(vecs10_0, vecs11_0);
+  hsum3 = _mm256_hadd_ps(vecs12_0, vecs13_0);
+  hsum4 = _mm256_hadd_ps(vecs14_0, vecs15_0);
+
+  hsum5 = _mm256_hadd_ps(hsum1, hsum1);
+  hsum6 = _mm256_hadd_ps(hsum2, hsum2);
+  hsum7 = _mm256_hadd_ps(hsum3, hsum3);
+  hsum8 = _mm256_hadd_ps(hsum4, hsum4);
+
+  perm1 = _mm256_permute2f128_ps(hsum5, hsum5, 0x23);
+  perm2 = _mm256_permute2f128_ps(hsum6, hsum6, 0x23);
+  perm3 = _mm256_permute2f128_ps(hsum7, hsum7, 0x23);
+  perm4 = _mm256_permute2f128_ps(hsum8, hsum8, 0x23);
+
+  sum1 = _mm256_add_ps(perm1, hsum5);
+  sum2 = _mm256_add_ps(perm2, hsum6);
+  sum3 = _mm256_add_ps(perm3, hsum7);
+  sum4 = _mm256_add_ps(perm4, hsum8);
+
+  blend1 = _mm256_blend_ps(sum1, sum2, 0xcc);
+  blend2 = _mm256_blend_ps(sum3, sum4, 0xcc);
+
+  __m256 final_1 = _mm256_blend_ps(blend1, blend2, 0xf0);
+
+  hsum1 = _mm256_hadd_ps(vecs8_1, vecs9_1);
+  hsum2 = _mm256_hadd_ps(vecs10_1, vecs11_1);
+  hsum3 = _mm256_hadd_ps(vecs12_1, vecs13_1);
+  hsum4 = _mm256_hadd_ps(vecs14_1, vecs15_1);
+
+  hsum5 = _mm256_hadd_ps(hsum1, hsum1);
+  hsum6 = _mm256_hadd_ps(hsum2, hsum2);
+  hsum7 = _mm256_hadd_ps(hsum3, hsum3);
+  hsum8 = _mm256_hadd_ps(hsum4, hsum4);
+
+  perm1 = _mm256_permute2f128_ps(hsum5, hsum5, 0x23);
+  perm2 = _mm256_permute2f128_ps(hsum6, hsum6, 0x23);
+  perm3 = _mm256_permute2f128_ps(hsum7, hsum7, 0x23);
+  perm4 = _mm256_permute2f128_ps(hsum8, hsum8, 0x23);
+
+  sum1 = _mm256_add_ps(perm1, hsum5);
+  sum2 = _mm256_add_ps(perm2, hsum6);
+  sum3 = _mm256_add_ps(perm3, hsum7);
+  sum4 = _mm256_add_ps(perm4, hsum8);
+
+  blend1 = _mm256_blend_ps(sum1, sum2, 0xcc);
+  blend2 = _mm256_blend_ps(sum3, sum4, 0xcc);
+
+  final_1 = padd(final_1, _mm256_blend_ps(blend1, blend2, 0xf0));
+
+  __m512 final_output;
+
+  EIGEN_INSERT_8f_INTO_16f(final_output, final, final_1);
+  return final_output;
 }
 
-template <int Offset>
-struct palign_impl<Offset, Packet16f> {
-  static EIGEN_STRONG_INLINE void run(Packet16f& first,
-                                      const Packet16f& second) {
-    if (Offset != 0) {
-      __m512i first_idx = _mm512_set_epi32(
-          Offset + 15, Offset + 14, Offset + 13, Offset + 12, Offset + 11,
-          Offset + 10, Offset + 9, Offset + 8, Offset + 7, Offset + 6,
-          Offset + 5, Offset + 4, Offset + 3, Offset + 2, Offset + 1, Offset);
+template<> EIGEN_STRONG_INLINE Packet8d preduxp<Packet8d>(const Packet8d* vecs)
+{
+  Packet4d vecs0_0 = _mm512_extractf64x4_pd(vecs[0], 0);
+  Packet4d vecs0_1 = _mm512_extractf64x4_pd(vecs[0], 1);
 
-      __m512i second_idx =
-          _mm512_set_epi32(Offset - 1, Offset - 2, Offset - 3, Offset - 4,
-                           Offset - 5, Offset - 6, Offset - 7, Offset - 8,
-                           Offset - 9, Offset - 10, Offset - 11, Offset - 12,
-                           Offset - 13, Offset - 14, Offset - 15, Offset - 16);
+  Packet4d vecs1_0 = _mm512_extractf64x4_pd(vecs[1], 0);
+  Packet4d vecs1_1 = _mm512_extractf64x4_pd(vecs[1], 1);
 
-      unsigned short mask = 0xFFFF;
-      mask <<= (16 - Offset);
+  Packet4d vecs2_0 = _mm512_extractf64x4_pd(vecs[2], 0);
+  Packet4d vecs2_1 = _mm512_extractf64x4_pd(vecs[2], 1);
 
-      first = _mm512_permutexvar_ps(first_idx, first);
-      Packet16f tmp = _mm512_permutexvar_ps(second_idx, second);
-      first = _mm512_mask_blend_ps(mask, first, tmp);
-    }
-  }
-};
-template <int Offset>
-struct palign_impl<Offset, Packet8d> {
-  static EIGEN_STRONG_INLINE void run(Packet8d& first, const Packet8d& second) {
-    if (Offset != 0) {
-      __m512i first_idx = _mm512_set_epi32(
-          0, Offset + 7, 0, Offset + 6, 0, Offset + 5, 0, Offset + 4, 0,
-          Offset + 3, 0, Offset + 2, 0, Offset + 1, 0, Offset);
+  Packet4d vecs3_0 = _mm512_extractf64x4_pd(vecs[3], 0);
+  Packet4d vecs3_1 = _mm512_extractf64x4_pd(vecs[3], 1);
 
-      __m512i second_idx = _mm512_set_epi32(
-          0, Offset - 1, 0, Offset - 2, 0, Offset - 3, 0, Offset - 4, 0,
-          Offset - 5, 0, Offset - 6, 0, Offset - 7, 0, Offset - 8);
+  Packet4d vecs4_0 = _mm512_extractf64x4_pd(vecs[4], 0);
+  Packet4d vecs4_1 = _mm512_extractf64x4_pd(vecs[4], 1);
 
-      unsigned char mask = 0xFF;
-      mask <<= (8 - Offset);
+  Packet4d vecs5_0 = _mm512_extractf64x4_pd(vecs[5], 0);
+  Packet4d vecs5_1 = _mm512_extractf64x4_pd(vecs[5], 1);
 
-      first = _mm512_permutexvar_pd(first_idx, first);
-      Packet8d tmp = _mm512_permutexvar_pd(second_idx, second);
-      first = _mm512_mask_blend_pd(mask, first, tmp);
-    }
-  }
-};
+  Packet4d vecs6_0 = _mm512_extractf64x4_pd(vecs[6], 0);
+  Packet4d vecs6_1 = _mm512_extractf64x4_pd(vecs[6], 1);
+
+  Packet4d vecs7_0 = _mm512_extractf64x4_pd(vecs[7], 0);
+  Packet4d vecs7_1 = _mm512_extractf64x4_pd(vecs[7], 1);
+
+  Packet4d tmp0, tmp1;
+
+  tmp0 = _mm256_hadd_pd(vecs0_0, vecs1_0);
+  tmp0 = _mm256_add_pd(tmp0, _mm256_permute2f128_pd(tmp0, tmp0, 1));
+
+  tmp1 = _mm256_hadd_pd(vecs2_0, vecs3_0);
+  tmp1 = _mm256_add_pd(tmp1, _mm256_permute2f128_pd(tmp1, tmp1, 1));
+
+  __m256d final_0 = _mm256_blend_pd(tmp0, tmp1, 0xC);
+
+  tmp0 = _mm256_hadd_pd(vecs0_1, vecs1_1);
+  tmp0 = _mm256_add_pd(tmp0, _mm256_permute2f128_pd(tmp0, tmp0, 1));
+
+  tmp1 = _mm256_hadd_pd(vecs2_1, vecs3_1);
+  tmp1 = _mm256_add_pd(tmp1, _mm256_permute2f128_pd(tmp1, tmp1, 1));
+
+  final_0 = padd(final_0, _mm256_blend_pd(tmp0, tmp1, 0xC));
+
+  tmp0 = _mm256_hadd_pd(vecs4_0, vecs5_0);
+  tmp0 = _mm256_add_pd(tmp0, _mm256_permute2f128_pd(tmp0, tmp0, 1));
+
+  tmp1 = _mm256_hadd_pd(vecs6_0, vecs7_0);
+  tmp1 = _mm256_add_pd(tmp1, _mm256_permute2f128_pd(tmp1, tmp1, 1));
+
+  __m256d final_1 = _mm256_blend_pd(tmp0, tmp1, 0xC);
+
+  tmp0 = _mm256_hadd_pd(vecs4_1, vecs5_1);
+  tmp0 = _mm256_add_pd(tmp0, _mm256_permute2f128_pd(tmp0, tmp0, 1));
+
+  tmp1 = _mm256_hadd_pd(vecs6_1, vecs7_1);
+  tmp1 = _mm256_add_pd(tmp1, _mm256_permute2f128_pd(tmp1, tmp1, 1));
+
+  final_1 = padd(final_1, _mm256_blend_pd(tmp0, tmp1, 0xC));
+
+  __m512d final_output = _mm512_insertf64x4(final_output, final_0, 0);
+
+  return _mm512_insertf64x4(final_output, final_1, 1);
+}
+ 
 
 
 #define PACK_OUTPUT(OUTPUT, INPUT, INDEX, STRIDE) \
@@ -1318,26 +1242,6 @@ EIGEN_STRONG_INLINE Packet8d pblend(const Selector<8>& ifPacket,
   return _mm512_mask_blend_pd(m, elsePacket, thenPacket);
 }
 
-template<> EIGEN_STRONG_INLINE Packet16f pinsertfirst(const Packet16f& a, float b)
-{
-  return _mm512_mask_broadcastss_ps(a, (1), _mm_load_ss(&b));
-}
-
-template<> EIGEN_STRONG_INLINE Packet8d pinsertfirst(const Packet8d& a, double b)
-{
-  return _mm512_mask_broadcastsd_pd(a, (1), _mm_load_sd(&b));
-}
-
-template<> EIGEN_STRONG_INLINE Packet16f pinsertlast(const Packet16f& a, float b)
-{
-  return _mm512_mask_broadcastss_ps(a, (1<<15), _mm_load_ss(&b));
-}
-
-template<> EIGEN_STRONG_INLINE Packet8d pinsertlast(const Packet8d& a, double b)
-{
-  return _mm512_mask_broadcastsd_pd(a, (1<<7), _mm_load_sd(&b));
-}
-
 template<> EIGEN_STRONG_INLINE Packet16i pcast<Packet16f, Packet16i>(const Packet16f& a) {
   return _mm512_cvttps_epi32(a);
 }
@@ -1346,13 +1250,53 @@ template<> EIGEN_STRONG_INLINE Packet16f pcast<Packet16i, Packet16f>(const Packe
   return _mm512_cvtepi32_ps(a);
 }
 
-template<> EIGEN_STRONG_INLINE Packet16i preinterpret<Packet16i,Packet16f>(const Packet16f& a) {
-  return _mm512_castps_si512(a);
-}
+template <int Offset>
+struct palign_impl<Offset, Packet16f> {
+  static EIGEN_STRONG_INLINE void run(Packet16f& first,
+                                      const Packet16f& second) {
+    if (Offset != 0) {
+      __m512i first_idx = _mm512_set_epi32(
+          Offset + 15, Offset + 14, Offset + 13, Offset + 12, Offset + 11,
+          Offset + 10, Offset + 9, Offset + 8, Offset + 7, Offset + 6,
+          Offset + 5, Offset + 4, Offset + 3, Offset + 2, Offset + 1, Offset);
 
-template<> EIGEN_STRONG_INLINE Packet16f preinterpret<Packet16f,Packet16i>(const Packet16i& a) {
-  return _mm512_castsi512_ps(a);
-}
+      __m512i second_idx =
+          _mm512_set_epi32(Offset - 1, Offset - 2, Offset - 3, Offset - 4,
+                           Offset - 5, Offset - 6, Offset - 7, Offset - 8,
+                           Offset - 9, Offset - 10, Offset - 11, Offset - 12,
+                           Offset - 13, Offset - 14, Offset - 15, Offset - 16);
+
+      unsigned short mask = 0xFFFF;
+      mask <<= (16 - Offset);
+
+      first = _mm512_permutexvar_ps(first_idx, first);
+      Packet16f tmp = _mm512_permutexvar_ps(second_idx, second);
+      first = _mm512_mask_blend_ps(mask, first, tmp);
+    }
+  }
+};
+template <int Offset>
+struct palign_impl<Offset, Packet8d> {
+  static EIGEN_STRONG_INLINE void run(Packet8d& first, const Packet8d& second) {
+    if (Offset != 0) {
+      __m512i first_idx = _mm512_set_epi32(
+          0, Offset + 7, 0, Offset + 6, 0, Offset + 5, 0, Offset + 4, 0,
+          Offset + 3, 0, Offset + 2, 0, Offset + 1, 0, Offset);
+
+      __m512i second_idx = _mm512_set_epi32(
+          0, Offset - 1, 0, Offset - 2, 0, Offset - 3, 0, Offset - 4, 0,
+          Offset - 5, 0, Offset - 6, 0, Offset - 7, 0, Offset - 8);
+
+      unsigned char mask = 0xFF;
+      mask <<= (8 - Offset);
+
+      first = _mm512_permutexvar_pd(first_idx, first);
+      Packet8d tmp = _mm512_permutexvar_pd(second_idx, second);
+      first = _mm512_mask_blend_pd(mask, first, tmp);
+    }
+  }
+};
+
 
 } // end namespace internal
 

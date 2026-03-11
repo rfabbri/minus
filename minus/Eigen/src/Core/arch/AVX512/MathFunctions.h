@@ -15,7 +15,7 @@ namespace Eigen {
 namespace internal {
 
 // Disable the code for older versions of gcc that don't support many of the required avx512 instrinsics.
-#if EIGEN_GNUC_AT_LEAST(5, 3) || EIGEN_COMP_CLANG
+#if EIGEN_GNUC_AT_LEAST(5, 3)
 
 #define _EIGEN_DECLARE_CONST_Packet16f(NAME, X) \
   const Packet16f p16f_##NAME = pset1<Packet16f>(X)
@@ -28,6 +28,7 @@ namespace internal {
 
 #define _EIGEN_DECLARE_CONST_Packet8d_FROM_INT64(NAME, X) \
   const Packet8d p8d_##NAME = _mm512_castsi512_pd(_mm512_set1_epi64(X))
+
 
 // Natural logarithm
 // Computes log(x) as log(2^e * m) = C*e + log(m), where the constant C =log(2)
@@ -128,6 +129,7 @@ plog<Packet16f>(const Packet16f& _x) {
               p16f_nan),
             p16f_minus_inf);
 }
+
 #endif
 
 // Exponential function. Works by writing "x = m*log(2) + r" where
@@ -379,19 +381,6 @@ EIGEN_STRONG_INLINE Packet16f prsqrt<Packet16f>(const Packet16f& x) {
 }
 #endif
 #endif
-
-
-template <>
-EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet16f
-psin<Packet16f>(const Packet16f& _x) {
-  return psin_float(_x);
-}
-
-template <>
-EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet16f
-pcos<Packet16f>(const Packet16f& _x) {
-  return pcos_float(_x);
-}
 
 }  // end namespace internal
 

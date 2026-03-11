@@ -391,6 +391,22 @@ Now recompile minus and simply run it.  If nothing happens, you're golden. In
 the event of any memleak, there will be a colorful output showing where it came
 from, specially under Linux.
 
+WARNING: since automatically-generated evaluators can be big, they may overflow
+the stack, specially when using -fsanitize=address, and specially under Mac OS
+and BSD where secondary threads have a small 512KB limit. In this case you will
+see some sanitizer results that are senseless, related to Hxt or HxH evaluators,
+and even Minus::track which easily get too big when instrumented by the address
+sanitizer. In this case, you can sanitize other functions outside track,
+which is usually what you need anyways (specially I/O functions) since track and
+the evaluators are usually safe code, either automated or already tested.  To do
+this for solving big problems, you can uncomment certain lines in the code
+that have 
+```
+__attribute__((no_sanitize("address")))
+```
+And skip these big functions. See also the section on stacksize below.
+
+
 ### Profiling
 
 #### Kcachegrid
@@ -542,6 +558,29 @@ Place this between code:
 
 use/adapt the script `scripts/minus-disassemble`
 
+## Stacksize
+
+Some problems will have very large evaluators. In this case, the stack may be
+overflown in Hxt, HxH, or Minus::track. Here is how you can test if these stack
+frames pass the system limit. For instance,
+compile with `-Wframe-larger-than=524288` in mac os to see if the stack frame
+for your large evaluators is being overflown. If it is, it may cause silent
+errors and crashes. In that case you may want to switch to static thread_local
+variables:
+
+```
+  alignas(64) static thread_local C<double> G[3440];  // gate variables without spending the stack
+```
+
+Or preallocate on the heap (always testing to see if the timing is not compromised).
+However, if you can avoid that, it is best. Including `static thread_local` in evaluators makes
+MINUS lose 1-2 hundred ms on a 500ms run.
+
+
+## Additional information
+
+- see the tutorial/README.md for further explanation on how to add your new
+problem.
 
 ## Authors
 

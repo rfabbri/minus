@@ -1,3 +1,12 @@
+#define P chicago14a
+namespace MiNuS {
+template <typename F>
+struct numeric_subroutines<P, F> {
+ static void lsolve(
+    Map<Matrix<C<F>, minus_core<P,F>::f::nve, minus_core<P,F>::f::nve +1>,Aligned> & __restrict m, 
+    C<F> __restrict *ux);
+};
+
 // Specific to Chicago
 // Solves Ax = b
 //
@@ -6,8 +15,9 @@
 // given input m = [A | b]
 // produces output x such that Ax = b
 //
-template <problem P, typename F>
-__attribute__((always_inline)) inline void
+template <typename F>
+inline __attribute__((always_inline)) void
+numeric_subroutines<P,F>::
 lsolve(
     Map<Matrix<C<F>, minus_core<P,F>::f::nve, minus_core<P,F>::f::nve +1>,Aligned> & __restrict m, 
     C<F> __restrict *ux)
@@ -64,3 +74,5 @@ lsolve(
   x[1]  -= (m(1,2)*x[2]+m(1,3)*x[3]+m(1,4)*x[4]+m(1,5)*x[5]+m(1,6)*x[6]+m(1,7)*x[7]+m(1,8)*x[8]+m(1,9)*x[9]+m(1,10)*x[10]+m(1,11)*x[11]+m(1,12)*x[12]+m(1,13)*x[13]); x[1] /= m(1,1);
   x[0]  -= (m(0,1)*x[1]+m(0,2)*x[2]+m(0,3)*x[3]+m(0,4)*x[4]+m(0,5)*x[5]+m(0,6)*x[6]+m(0,7)*x[7]+m(0,8)*x[8]+m(0,9)*x[9]+m(0,10)*x[10]+m(0,11)*x[11]+m(0,12)*x[12]+m(0,13)*x[13]); x[0] /= m(0,0);
 }
+} // namespace minus
+#undef P

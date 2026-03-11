@@ -26,4 +26,3 @@ GS = gateSystem(
 -- setRandomSeed H#CLBlocks
 
 PH = parametricSegmentHomotopy GS
-

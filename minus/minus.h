@@ -26,11 +26,12 @@ template <typename F>
 using C = typename std::complex<F>;
 
 // The problem solvers that this solver template currently supports
-enum problem {chicago14a, chicago6a, cleveland14a, phoenix10a /*, standard*/};
+enum problem {chicago14a, chicago6a/*, cleveland14a, phoenix10a*/, linecircle2a /*, standard*/};
 
 // The current best formulations for each problem
 constexpr problem chicago = problem::chicago14a;
-constexpr problem cleveland = problem::cleveland14a;
+//constexpr problem cleveland = problem::cleveland14a;
+constexpr problem linecircle = problem::linecircle2a;
 // You can now use solver<chicago> to default to the best formulation
 
 // Each problem specializes this in their specific .h
@@ -48,7 +49,7 @@ template <problem P, typename F=double>
 class minus_core { // fully static, not to be instantiated - just used for templating
   public: // ----------- Data structures --------------------------------------
   
-  // Tracker parameters
+  // Tracker prameters
   // Default values obtained in M2 by doing 
   // eg DEFAULT#tStep
   // or peek DEFAULT
@@ -97,6 +98,7 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   public: // ----------- Functions --------------------------------------------
   
   ///// THE MEAT /////
+  // __attribute__((no_sanitize("address")))
   static void track(const track_settings &s, const C<F> s_sols[f::nve*f::nsols], 
       const C<F> params[2*f::nparams], solution raw_solutions[f::nsols], unsigned sol_min, unsigned sol_max);
   
@@ -110,11 +112,15 @@ class minus_core { // fully static, not to be instantiated - just used for templ
   static constexpr unsigned NVEPLUS2 = f::nve+2;
   static constexpr unsigned NVE2 = f::nve*f::nve;
   // force-inlining this makes it slower
+  // __attribute__((no_sanitize("address")))
   static void evaluate_Hxt(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
+  // __attribute__((no_sanitize("address")))
   static void evaluate_HxH(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
   static void evaluate_Hxt_constants(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
   static void evaluate_HxH_constants(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
   static void evaluate_HxH_constants_all_sols(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y /*HxH*/);
+  static void memoize_Hxt(C<F> __restrict *block/*, C<F> * __restrict memo*/ /* constants */);
+  static void memoize_HxH(C<F> __restrict *block/*, C<F> * __restrict memo*/ /* constants */);
 };
 
 // TODO: make these static after fine-tuning to your end application
@@ -142,6 +148,7 @@ struct minus_core<P, F>::track_settings {
   unsigned max_num_steps_; // maximum number of steps per track.  Each step takes roughly 1 microseconds (tops)
   char num_successes_before_increase_; // m2 numberSuccessesBeforeIncrease
   char max_corr_steps_;  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
+  // print() as a separate function in minus/cmd/cmd-util.h
 };
 // Original settings from Tim: Fri Feb 22 12:00:06 -03 2019 Git 0ec3340
 // o9 = MutableHashTable{AffinePatches => DynamicPatch     }
@@ -178,23 +185,34 @@ struct minus_core<P, F>::track_settings {
 // The user specializes this to their problem inside problem.hxx
 // Needed to create this class since functions do not always support partial
 // specialization
+//
+// Internal note: if adding functions here, you must currently add their signature to
+// every problem.hxx
+// 
 template <problem P, typename F>
 struct eval {
+  // __attribute__((no_sanitize("address")))
   static void Hxt(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y);
+  // __attribute__((no_sanitize("address")))
   static void HxH(const C<F> * __restrict x /*x and t*/, const C<F> * __restrict params, C<F> * __restrict y);
   // optional memoization of constants and intermediate values:
   static void Hxt_constants(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y);
   static void HxH_constants(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y);
   static void HxH_constants_all_sols(const C<F> * __restrict x /*x, t*/,    const C<F> * __restrict params, C<F> * __restrict y);
+  static void Hxt_memoize(C<F> __restrict *block/*, C<F> * __restrict memo*/ /* constants */);
+  static void HxH_memoize(C<F> __restrict *block/*, C<F> * __restrict memo*/ /* constants */);
 };
 
+// TODO: double-check these inline in asm
 template <problem P, typename F>
+// __attribute__((no_sanitize("address")))
 void minus_core<P, F>::evaluate_Hxt(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * __restrict y)
 {
   eval<P,F>::Hxt(x, params, y);
 }
 
 template <problem P, typename F>
+// __attribute__((no_sanitize("address")))
 void minus_core<P, F>::evaluate_HxH(const C<F> * __restrict x /*x, t*/, const C<F> * __restrict params, C<F> * __restrict y)
 {
   eval<P,F>::HxH(x, params, y);
@@ -218,6 +236,19 @@ void minus_core<P, F>::evaluate_HxH_constants_all_sols(const C<F> * __restrict x
   eval<P,F>::HxH_constants_all_sols(x, params, y);
 }
 
+template <problem P, typename F>
+void minus_core<P, F>::memoize_Hxt(C<F> __restrict *block/*, C<F> * __restrict memo*/ /* constants */)
+{
+  eval<P,F>::Hxt_memoize(block);
+}
+
+template <problem P, typename F>
+void minus_core<P, F>::memoize_HxH(C<F> __restrict *block/*, C<F> * __restrict memo*/ /* constants */)
+{
+  eval<P,F>::HxH_memoize(block);
+}
+
+
 // Internal data ---------------------------------------------------------------
 // Data every problem has to declare by specializing this template
 template <problem P, typename F=double>
@@ -226,7 +257,7 @@ struct minus_data {
 
 // I/O -------------------------------------------------------------------------
 // Generic I/O routines and defs common to all problems
-template <typename F=double>
+template <problem P, typename F=double>
 struct minus_io_common {
   // Variables and types -------------------------------------------------------
   static constexpr unsigned ncoords2d = 2;  // a documented name for the number of inhomog coordinates
@@ -245,72 +276,29 @@ struct minus_io_common {
     l[0] /= nrm; l[1] /= nrm; l[2] /= nrm;
   }
   static void normalize_lines(F lines[][ncoords2d_h], unsigned nlines);
-};
 
-// Basic I/O function common to formulations that use
-// 14 variables = 2* (quaternion + translation)
-// This is not specialized to a problem in the implementation,
-// but contains common implementations to all problems using 14a formulation
-template <problem P, typename F=double>
-struct minus_io_14a : public minus_io_common<F> {
-  typedef minus_core<P, F> M;
+  // Parts that depend on problems ------------------------------------------------
+
+  
   typedef problem_parameters<P> pp;
-  typedef minus_io_common<F> io;
-  typedef struct M::solution solution;
-  // cast to this to interpret real M::solution::x order
-  // internal note: this order is eg  in parser.m2 l 68
-  struct solution_shape {
-    F q01[4];
-    F q02[4];
-    F t01[3];
-    F t02[3];
-  };
-  // Output --------------------------------------------------------------------
-  static void RC_to_QT_format(const F rc[pp::nviews][4][3], F qt[M::nve]);
-  static void all_solutions2cams(solution raw_solutions[M::nsols], F cameras[M::nsols][2][4][3], unsigned id_sols[M::nsols], unsigned *nsols_final);
-  static void solution2cams(F rs[M::f::nve], F cameras[2][4][3])
-  {
-    typedef minus_util<F> u;
-    // camera 0 (2nd camera relative to 1st)
-    u::quat2rotm(rs, (F *) cameras[0]);
-    const F n = sqrt(rs[8]*rs[8] + rs[9]*rs[9] + rs[10]*rs[10]) + sqrt(rs[11]*rs[11] + rs[12]*rs[12] + rs[13]*rs[13]);
-    cameras[0][3][0] = rs[8]/n;
-    cameras[0][3][1] = rs[9]/n;
-    cameras[0][3][2] = rs[10]/n;
-    
-    // camera 1 (3rd camera relative to 1st)
-    u::quat2rotm(rs+4, (F *) cameras[1]);
-    cameras[1][3][0] = rs[11]/n;
-    cameras[1][3][1] = rs[12]/n;
-    cameras[1][3][2] = rs[13]/n;
-
-    // quat12 rs(0:3), quat12 rs(4:7)
-    //  T12 = solutions(9:11);
-    //  T13 = solutions(12:14);
-    //  R12 = quat2rotm(transpose(quat12));
-    //  R13 = quat2rotm(transpose(quat13));
-  }
-
-  static bool probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *probe_cameras,
-      unsigned *solution_index);
-  static bool probe_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
-      unsigned *solution_index);
-  static bool probe_all_solutions(const typename M::solution solutions[M::nsols], solution_shape *probe_cameras,
-      unsigned *solution_index);
-  static bool probe_all_solutions(const typename M::solution solutions[M::nsols], F probe_cameras[M::nve],
-      unsigned *solution_index);
-  static bool probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], solution_shape *probe_cameras,
-    unsigned nsols, unsigned *solution_index);
-  static bool probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], F probe_cameras[M::nve],
-    unsigned nsols, unsigned *solution_index);
-  // TODO: move this to generic minus_io - useful for all problems
-  static void solutions_struct2vector(const typename M::solution solutions[M::nsols], C<F> sols_v[M::nsols][M::nve])
-  {
-    for (unsigned s=0; s < M::nsols; ++s)
-      for (unsigned var=0; var < M::nve; ++var)
-        sols_v[s][var] = solutions[s].x[var];
-  }
+  typedef minus_core<P, F> M;
+  typedef minus_io_common<P,F> io;
+  static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
 };
+
+#include "common-14a-io.h"
+
+// Common IO class for solvers that have nviews, npoints
+/*
+template <problem P, typename F=double>
+struct minus_io_multiview : public minus_io_common<F> {
+  // template specialization defined in problem-internals.h
+  typedef problem_parameters<P> pp;
+  // shortcuts to the problem parameters
+  static constexpr unsigned  nviews = pp::nviews;
+  static constexpr unsigned  npoints = pp::npoints;
+}
+*/
 
 // IO shaping: not used in tracker, but only for shaping user data
 // The user specializes this to their problem inside problem.hxx
@@ -329,18 +317,28 @@ struct minus_io_14a : public minus_io_common<F> {
 // Feel free to ignore anything in this generic template in the specialization
 // to your problem.
 template <problem P, typename F=double>
-struct minus_io : public minus_io_common<F> {
+struct minus_io : public minus_io_common<P,F> {
   // template specialization defined in problem-internals.h
   typedef problem_parameters<P> pp;
   typedef minus_core<P, F> M;
-  typedef minus_io_common<F> io;
-  // shortcuts to the problem parameters
-  static constexpr unsigned  nviews = pp::nviews;
-  static constexpr unsigned  npoints = pp::npoints;
+  typedef minus_io_common<P,F> io;
   // Input ---------------------------------------------------------------------
   static void gammify(C<F> * __restrict params/*[ chicago: M::nparams]*/);
   // Output --------------------------------------------------------------------
-  static bool has_valid_solutions(const typename M::solution solutions[M::nsols]);
+  // --
+  // Utilities --
+
+  static void all_regular_solutions(
+      typename M::solution raw_solutions[M::nsols], 
+      C<F> regular_solutions[M::nsols][M::nve], 
+      unsigned id_sols[M::nsols], unsigned *nsols_regular);
+
+  static void all_real_solutions(typename M::solution raw_solutions[M::nsols], F real_solutions[M::nsols][M::nve], 
+                     unsigned id_sols[M::nsols], unsigned *nsols_real);
+  
+  static bool probe_all_solutions(const typename M::solution solutions[M::nsols], 
+                                  F probe_solution[M::nve], unsigned *solution_index);
+  static bool probe_solutions( const typename M::solution solutions[M::nsols], C<F> probe_solution[M::nve]);
 };
 
 // Highlevel API ---------------------------------------------------------------

@@ -9,6 +9,7 @@
 namespace MiNuS {
   
 template class minus_core<chicago14a, double>;
+template struct minus_io_common<chicago14a, double>;
 template struct minus_io_14a<chicago14a, double>;
 template struct minus_io<chicago14a, double>;
 template struct minus<chicago14a, double>;

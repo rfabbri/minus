@@ -1,18 +1,19 @@
-// Evaluates Hx and H at the same time, reusing expressions.
 // 
-// Map from a multivariate poly with x 127-dimensional to y NVExNVEPLUS1 dimensional
-// Where 127 = 14 for x, 1 for t, 2*56 total parameters. Returns where y = [Hx|H]
+// Generic documentation: -------------------------------------------------------
+//    See HxH-doc.md
 // 
-// cCode(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H",gateMatrix{cameraVars})
-// (Ask Tim for the way to use cCode so that the input orders are like this.
 template <typename F>
-inline __attribute__((always_inline)) void 
+inline
+__attribute__((always_inline))
+__attribute__((no_sanitize("address")))
+void
 eval<chicago14a, F>::
 HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>* __restrict uy /*HxH*/) 
 {
   const C<F> *params = reinterpret_cast<C<F> *> (__builtin_assume_aligned(uparams,64));
   const C<F> *x = reinterpret_cast<C<F> *> (__builtin_assume_aligned(ux,64));
   C<F> *y = reinterpret_cast<C<F> *> (__builtin_assume_aligned(uy,64));
+  __builtin_prefetch(x);
 
   const C<F> &X0 = x[0];    // q0
   const C<F> &X1 = x[1];    // q1
@@ -2984,7 +2985,7 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   const C<F> G2834 = t * X126;
   const C<F> G2835 = G2833 + G2834;
   const C<F> G2836 = G2829 + G2830 + G2831 + G2832 + G2835;
-  y[0] = G104;
+  y[0] = G104; // NVExNVEPLUS1 matrix [Hx|H] as a 1D vector, col-major
   y[1] = G135;
   y[2] = G195;
   y[3] = G214;
@@ -3172,13 +3173,6 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   y[151] = G2428;
 }
 
-// Evaluates Hx and H at the same time, reusing expressions.
-// 
-// Map from a multivariate poly with x 127-dimensional to y NVExNVEPLUS1 dimensional
-// Where 127 = 14 for x, 1 for t, 2*56 total parameters. Returns where y = [Hx|H]
-// 
-// cCode(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H",gateMatrix{cameraVars})
-// (Ask Tim for the way to use cCode so that the input orders are like this.
 template <typename F>
 inline __attribute__((always_inline)) void 
 eval<chicago14a, F>::
@@ -6377,13 +6371,6 @@ HxH_constants(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict upa
 #endif
 }
 
-// Evaluates Hx and H at the same time, reusing expressions.
-// 
-// Map from a multivariate poly with x 127-dimensional to y NVExNVEPLUS1 dimensional
-// Where 127 = 14 for x, 1 for t, 2*56 total parameters. Returns where y = [Hx|H]
-// 
-// cCode(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H",gateMatrix{cameraVars})
-// (Ask Tim for the way to use cCode so that the input orders are like this.
 template <typename F>
 inline __attribute__((always_inline)) void 
 eval<chicago14a, F>::
@@ -9575,4 +9562,34 @@ HxH_constants_all_sols(const C<F>* __restrict ux /*x and t*/, const C<F> * __res
 //  yc[14] = -G2828;
 //  yc[15] = -G2836;
 #endif
+}
+
+template <typename F>
+__attribute__((always_inline)) inline void
+eval<chicago14a, F>::
+HxH_memoize(C<F> __restrict *block/*, C<F> * __restrict memo*/ /* constants */)
+{
+  C<F> *const y = reinterpret_cast<C<F> *> (__builtin_assume_aligned(block,64));
+//  C<F> *const yc = reinterpret_cast<C<F> *> (__builtin_assume_aligned(memo,64));
+
+  y[11]=y[13]=y[25]=y[27]=y[39]=y[41]=y[53]=y[55]=y[67]=
+        y[68]=y[81]=y[82]=y[95]=y[96]=y[109]=y[110]=y[124]=
+        y[125]=y[138]=y[139]=y[152]=y[153]=y[166]=y[167]=
+        y[180]=y[181]=y[194]=y[195]=0;
+//  y[26]  = yc[0];
+//  y[40]  = yc[1];
+//  y[54]  = yc[2];
+//  y[69]  = yc[3];
+//  y[83]  = yc[4];
+//  y[97]  = yc[5];
+//  y[111] = yc[6];
+//  y[123] = yc[7];
+//  y[137] = yc[8];
+//  y[151] = yc[9];
+//  y[165] = yc[10];
+//  y[179] = yc[11];
+//  y[193] = yc[12];
+//  y[207] = yc[13];
+//  y[208] = yc[14];
+//  y[209] = yc[15];
 }
