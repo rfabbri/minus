@@ -1,3 +1,8 @@
+// UNDER DEVELOPMENT -----------------------------------------------------------
+// 
+// FINAL TESTS TAKINNG PLACE march 2026
+// 
+//------------------------------------------------------------------------------
 #ifndef minus_linecircle_h_
 #define minus_linecircle_h_
 // 

@@ -1,4 +1,9 @@
+// UNDER DEVELOPMENT -----------------------------------------------------------
 // 
+// FINAL TESTS TAKINNG PLACE march 2026
+// 
+//------------------------------------------------------------------------------
+//
 // \author Ricardo Fabbri based on original code by Anton Leykin 
 // \date February 2019-2026
 // 
@@ -94,6 +99,7 @@ probe_solutions_with_gt_exact(M::solution solutions[M::nsols])
 int
 main(int argc, char **argv)
 {
+  std::cout << " UNDER DEVELOPMENT -----------------------------------------------------------\n";
   std::istream *inp = &std::cin;
   cmd c;
   
@@ -127,5 +133,6 @@ main(int argc, char **argv)
     LOG("\033[1;91mFAIL:\e[m  no valid solutions"); // it can detect that the solver failed by generic tests
     return SOLVER_FAILURE;                          // without using ground-truth, e.g., no real roots
   }                                                 // or problem-specific inequalities
+  std::cout << " UNDER DEVELOPMENT -----------------------------------------------------------\n";
   return 0;
 }
