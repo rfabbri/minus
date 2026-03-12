@@ -25,7 +25,7 @@
        such as randomization of start and end systems. 
 
 ## OUTPUT 
-   y: NVExNVEPLUS1 matrix `[Hx|Ht]` as a col-major 1D vector
+   y: NVExNVEPLUS1 full Jacobian matrix `[Hx|Ht]` as a col-major 1D vector
 
 ## SEE ALSO
    see `tutorial/*/start-*.m2` or `scripts/eval_monodromy_demo.m2` to see how to

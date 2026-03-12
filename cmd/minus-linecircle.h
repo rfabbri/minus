@@ -18,6 +18,7 @@
 #include <iomanip>
 #include <chrono>
 #include <thread>
+#define  M_VERBOSE  // display verbose messages and telemetry logging
 #include <minus/minus.h>
 #include <minus/linecircle2a-io.h>
 #include <minus/linecircle-default.h>
@@ -30,7 +31,6 @@ typedef std::complex<Float> complex;
 using namespace std::chrono;
 
 
-#define  M_VERBOSE 1     // display verbose messages
 // comment this out plus the printouts if you prefer no debug and no dependency
 // on this header
 #include <minus/debug-util.h>
