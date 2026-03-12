@@ -65,7 +65,7 @@ track(const track_settings &s,
   F    *const dt = (F *)(dxdt + f::nve);
   C<F> *const HxH=Hxt;
   Map < Matrix<C<F>, f::nve, NVEPLUS1 >, Aligned>
-      AA((C<F> *)Hxt, f::nve, NVEPLUS1); // Full Jacobian matrix in Eigen format
+      AA((C<F> *)Hxt, f::nve, NVEPLUS1); // Full Jacobian matrix (also reused for [Hx|H]) in Eigen format
   static constexpr F the_smallest_number = 1e-13; // XXX BENCHMARK THIS
   typedef minus_array<f::nve,F> v;
   typedef numeric_subroutines<P,F> numerics;
@@ -83,8 +83,35 @@ track(const track_settings &s,
     bool end_zone = false;
     v::copy(s_s, x0);
     *t0 = 0; *dt = t_step;
+    
+#ifdef M_VERBOSE
+    LLOG("H must evaluate to 0 at start solution\n"); 
+    evaluate_HxH(x0t0, params, HxH);
+    std::cerr << AA << std::endl;
+    
+    C<F> gt[f::nve*f::nsols] = { // linecircle debug
+      // solution 1
+      {-.83999999999999997, -.38032880511473233},  // x
+      {30000000000000006e-1, -.11409864153441969}  // y
+      // we dont include more sols now, just want it to find the one above
+      // TODO: make it real for your problem, to be more realistic in profiling
+    };
+    
+    LLOG("H|t=1 must evaluate to 0 at GT solution\n"); 
+    v::copy(gt, x0);
+    *t0 = 1;
+    LLOG("x0t0\n"); 
+    pprint((F *)x0t0, f::nve*2+1, true);
+    LLOG("H\n"); 
+    evaluate_HxH(x0t0, params, HxH);
+    std::cerr << AA << std::endl;
+
+    *t0 = 0;
+    // evaluate_HxH(x0t0, params, HxH);
+#endif
+    
     char predictor_successes = 0;
-    // XXX testt iif eval H is zero at the start, and print the values of H
+    // XXX print the values of H
     // everywhere
 
     // track H(x,t) for t in [0,1]
