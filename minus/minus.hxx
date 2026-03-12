@@ -6,11 +6,15 @@
 // \date Created: Fri Feb  8 17:42:49 EST 2019
 // 
 #include <cstdio>
-#include <iostream>
 #include <iomanip>
 #include <cstring>
 #include "minus.h"
 #include "internal-util.hxx"
+
+
+//#define M_VERBOSE  // TODO: move this to a cmake option like INTERNAL TELEMETRY ON
+
+#include "debug-util.h"
 
 // TODO: perhaps move inside problem.hxx
 #include "chicago14a-lsolve.hxx"
@@ -27,7 +31,7 @@ namespace MiNuS {
 //    s_sols: start sols      
 //    params: parameters of the homotopy between start and end system. This is currently the
 //            parameters of the start system, followed by that of of target system as
-//            specialized homotopy params (P01 in SolveChicago)
+//            specialized homotopy params (P01 in tutorial and SolveChicago)
 //    
 // OUTPUT
 //    raw_solutions: compute solutions sol_min...sol_max-1 within all nsols
@@ -43,6 +47,7 @@ track(const track_settings &s,
 {
   const C<F> *s_sols = reinterpret_cast<C<F> *> (__builtin_assume_aligned(s_sols_u,64));
   const C<F> *params = reinterpret_cast<C<F> *> (__builtin_assume_aligned(params_u,64));
+
   solution *raw_solutions = reinterpret_cast<solution *> (__builtin_assume_aligned(raw_solutions_u,64));
   assert(sol_min <= sol_max && sol_max <= f::nsols);
   alignas(64) C<F> Hxt[NVEPLUS1 * f::nve]; 
@@ -81,6 +86,8 @@ track(const track_settings &s,
     v::copy(s_s, x0);
     *t0 = 0; *dt = t_step;
     char predictor_successes = 0;
+    // XXX testt iif eval H is zero at the start, and print the values of H
+    // everywhere
 
     // track H(x,t) for t in [0,1]
     // TODO: due to precision, it is best from 1 to 0 as Bertini/Wampler suggests
@@ -95,8 +102,11 @@ track(const track_settings &s,
       if (unlikely(end_zone)) {
           if (unlikely(*dt > 1. - *t0)) *dt = 1 - *t0;
       } else if (unlikely(*dt > 1. - s.end_zone_factor_ - *t0)) *dt = 1. - s.end_zone_factor_ - *t0;
-      /// PREDICTOR /// in: x0t0,dt out: dx
-      /*  top-level code for Runge-Kutta-4
+      /// PREDICTOR ------------------------------------------------------------
+      //    in: x0t0, dt 
+      //    out: dx
+      //    
+      /*  high-level code for Runge-Kutta-4
           dx1 := solveHxTimesDXequalsminusHt(x0,t0);
           dx2 := solveHxTimesDXequalsminusHt(x0+(1/2)*dx1*dt,t0+(1/2)*dt);
           dx3 := solveHxTimesDXequalsminusHt(x0+(1/2)*dx2*dt,t0+(1/2)*dt);
@@ -104,18 +114,16 @@ track(const track_settings &s,
           (1/6)*dt*(dx1+2*dx2+2*dx3+dx4) */
       v::fcopy(x0t0, xt);
 
-      // dx1
+      // dx1 ----
       // evaluate_Hxt_constants(xt, params, ycHxt);
       memoize_Hxt(Hxt);/*, ycHxt);*/
       evaluate_Hxt(xt, params, Hxt); // Outputs full Jacobian matrix Hxt
       // dx4_eigen = lu.compute(AA).solve(bb);
       numerics::lsolve(AA, dx4);
       
-      // dx2
+      // dx2 ----
       const F one_half_dt = *dt*0.5;
-
       v::multiply_scalar_to_self(dx4, one_half_dt);
-
       v::add_to_self(xt, dx4);
       v::multiply_scalar_to_self(dx4, 2.);
       *t += one_half_dt;  // t0+.5dt
@@ -123,7 +131,7 @@ track(const track_settings &s,
       memoize_Hxt(Hxt);/*, ycHxt);*/
       numerics::lsolve(AA, dxi);
 
-      // dx3
+      // dx3 ----
       v::multiply_scalar_to_self(dxi, one_half_dt);
       v::copy(x0t0, xt);
       v::add_to_self(xt, dxi);
@@ -133,7 +141,7 @@ track(const track_settings &s,
       memoize_Hxt(Hxt);/*, ycHxt);*/
       numerics::lsolve(AA, dxi);
 
-      // dx4
+      // dx4 ----
       v::multiply_scalar_to_self(dxi, *dt);
       v::fcopy(x0t0, xt);
       v::add_to_self(xt, dxi);
@@ -150,35 +158,40 @@ track(const track_settings &s,
       // "dx1" = .5*dx1*dt, "dx2" = .5*dx2*dt, "dx3" = dx3*dt. Eigen vectorizes this:
       // dx4_eigen = (dx4_eigen* *dt + dx1_eigen*2 + dx2_eigen*4 + dx3_eigen*2)*(1./6.);
       
+      LLOG("Solution starting point " << std::endl);
+      LLOG("\t x0\n");
+      pprint(x0t0, f::nve, true);
+      LLOG("\t t0 " << *t0 << std::endl);
+      
       // make prediction
       v::fcopy(x0t0, x1t1);
       v::fadd_to_self((double *)x1t1, (double *)dxdt);
 
-      
-      /// CORRECTOR ///
+      LLOG("Prediction" << std::endl);
+      LLOG("\t x1\n");
+      pprint(x1t1, f::nve, true);
+      LLOG("\t t1 " << *t0 << std::endl);
+
+      /// CORRECTOR ------------------------------------------------------------
       char n_corr_steps = 0;
       bool is_successful;
       //if (t_s->num_steps ==0)
       //evaluate_HxH_constants_all_sols(x1t1, params, ycHxH);
       //evaluate_HxH_constants(x1t1, params, ycHxH);
-      /*
-      {
-        static std::mutex lock;
-        const std::lock_guard<std::mutex> guard(lock);
-         
-        if ( t_s->num_steps > 1)
-          for (unsigned i=0; i < 13; ++i) {
-            F err = std::norm(ycHxH[i]-previous[i]);
-            if (err > 1e-15) {
-              std::cerr << "Different " << i << " -------------------------------------------- " << err << std::endl;
-              std::cerr << "\tnow: " << ycHxH[i] << " previous: " << previous[i] << std::endl;
-            }
-          }
-        for (unsigned i=0; i < 13; ++i)
-          previous[i] = ycHxH[i];
-      }
-      */
-
+      /* {
+            static std::mutex lock;
+            const std::lock_guard<std::mutex> guard(lock);
+            if ( t_s->num_steps > 1)
+              for (unsigned i=0; i < 13; ++i) {
+                F err = std::norm(ycHxH[i]-previous[i]);
+                if (err > 1e-15) {
+                  LLOG("Different " << i << " -------------------------------------------- " << err << std::endl);
+                  LLOG("\tnow: " << ycHxH[i] << " previous: " << previous[i] << std::endl);
+                }
+              }
+            for (unsigned i=0; i < 13; ++i)
+              previous[i] = ycHxH[i];
+         } */
       do {
         ++n_corr_steps;
         evaluate_HxH(x1t1, params, HxH);
@@ -208,6 +221,8 @@ track(const track_settings &s,
     } // while (t loop)
     memcpy(t_s, x0t0, (f::nve*2+1)*sizeof(F));
     if (t_s->status == PROCESSING) t_s->status = REGULAR;
+
+    LLOG("Solution status " << (int)t_s->status << std::endl);
     ++t_s; s_s += f::nve;
   } // outer solution loop
 }
@@ -397,33 +412,27 @@ probe_all_solutions(
     
     if (possible_match) {
       if (already_found) {
-#ifndef NDEBUG
-        std::cerr << "DEBUG: Found another similar solution at " << sol << std::endl;
-        std::cerr << "DEBUG: Error: " << error << std::endl;
-#endif
+        LLOG("DEBUG: Found another similar solution at " << sol << std::endl);
+        LLOG("DEBUG: Error: " << error << std::endl);
         if (error < min_error) {
           min_error = error;
           *solution_index = sol;
         }
       } else { // not already found
-#ifndef NDEBUG
-        std::cerr << "DEBUG: Found a solution at " << sol << std::endl;
-        std::cerr << "DEBUG: Error: " << error << std::endl;
-#endif
+        LLOG("DEBUG: Found a solution at " << sol << std::endl);
+        LLOG("DEBUG: Error: " << error << std::endl);
         min_error = error;
         *solution_index = sol;
       }
       already_found = true;
     } else { // not a possible solution depsite being real
-#ifndef NDEBUG
-      std::cerr << "DEBUG: Found a real solution but it is not close to ground truth: (sol,isvalid)" << sol << "," << solutions[sol].status << std::endl;
-#endif
+      LLOG("DEBUG: Found a real solution but it is not close to ground truth: (sol,isvalid)" << sol << "," << solutions[sol].status << std::endl);
 #if 0
-      std::cerr << "\tErrors: \n";
+      LLOG("\tErrors: \n");
       for (unsigned s=0; s < data::n_gt_sols_; ++s) {
-        std::cerr << "Solution id " << s << ", errors as pairs (variable id, error): " << std::endl;
+        LLOG("Solution id " << s << ", errors as pairs (variable id, error): " << std::endl);
         for (unsigned v=0; v < M::nve; ++v) {
-          std::cerr << "\t" << v << "\t" << std::abs(solutions[data::gt_sols_id_[s]].x[v] - data::gt_sols_[s][v]) << std::endl;
+          LLOG("\t" << v << "\t" << std::abs(solutions[data::gt_sols_id_[s]].x[v] - data::gt_sols_[s][v]) << std::endl);
         }
       }
 #endif
@@ -492,9 +501,9 @@ probe_solutions(const typename M::solution solutions[M::nsols], solution_shape *
 
 // #undef NDEBUG
 
-#ifndef NDEBUG
-#include "debug-util.h"
-#endif
+//#ifndef NDEBUG
+//#include "debug-util.h"
+//#endif
 
 // like probe_solutions but tests all M::nsols in case more than one is close to
 // the probe. Use this for debugging / investigation
@@ -516,28 +525,22 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
     F rerror = u::rotation_error(real_solution, probe_cameras->q01);
     if (rerror < eps) {
       if (found) {
-#ifndef NDEBUG
-        std::cerr << "Found another similar solution at " << sol << std::endl;
-        std::cerr << "Error: " << rerror << std::endl;
-#endif
+        LLOG("Found another similar solution at " << sol << std::endl);
+        LLOG("Error: " << rerror << std::endl);
         if (rerror < min_rerror) {
           min_rerror = rerror;
           *solution_index = sol;
         }
         
       } else {
-#ifndef NDEBUG
-        std::cerr << "Found a solution at " << sol << std::endl;
-        std::cerr << "Error: " << rerror << std::endl;
-#endif
+        LLOG("Found a solution at " << sol << std::endl);
+        LLOG("Error: " << rerror << std::endl);
         min_rerror = rerror;
         *solution_index = sol;
       }
       found = true;
     } else {
-#ifndef NDEBUG
-        std::cerr << "Solution is real but not close (sol,isvalid)" << sol << "," << solutions[sol].status << std::endl;
-#endif
+        LLOG("Solution is real but not close (sol,isvalid)" << sol << "," << solutions[sol].status << std::endl);
     }
   }
 
@@ -549,9 +552,7 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
   u::normalize_quat(real_solution+4);
   F rerror = u::rotation_error(real_solution+4, probe_cameras->q02);
   if (rerror < eps) {
-#ifndef NDEBUG
-    std::cerr << "probe: Rotation 02 also match\n";
-#endif
+    LLOG("probe: Rotation 02 also match\n");
     found = true;
   } else
     found = false;
@@ -572,24 +573,18 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
   dt[2] = s->t01[2] - probe_cameras->t01[2]/scale_probe;
   
   if (minus_3d<F>::dot(dt, dt) < eps*eps) {
-#ifndef NDEBUG
-    std::cerr << "probe: translation 01 also match\n";
-#endif
+    LLOG("probe: translation 01 also match\n");
     found = true;
   } else {
     dt[0] = s->t01[0] + probe_cameras->t01[0]/scale_probe;
     dt[1] = s->t01[1] + probe_cameras->t01[1]/scale_probe;
     dt[2] = s->t01[2] + probe_cameras->t01[2]/scale_probe;
     if (minus_3d<F>::dot(dt, dt) < eps*eps) {
-#ifndef NDEBUG
-      std::cerr << "probe: translation 01 also match\n";
-#endif
+      LLOG("probe: translation 01 also match\n");
       found = true;
     } else {
       found = false;
-#ifndef NDEBUG
-      std::cerr << "probe: translation 01 DO NOT match\n";
-#endif
+      LLOG("probe: translation 01 DO NOT match\n");
     }
   }
   }
@@ -605,33 +600,27 @@ probe_all_solutions(const typename M::solution solutions[M::nsols], solution_sha
   dt[2] = s->t02[2] - probe_cameras->t02[2]/scale_probe;
   
   if (minus_3d<F>::dot(dt, dt) < eps*eps) {
-#ifndef NDEBUG
-    std::cerr << "probe: translation 02 also match\n";
-#endif
+    LLOG("probe: translation 02 also match\n");
     found = true;
   } else {
-    //    std::cerr << "dt fail atttempt 1 " << std::endl;
-    //    print(dt,3);
-    //    std::cerr << "t02 fail atttempt 1 " << std::endl;
-    //    print(s->t02,3);
-    //    std::cerr << "probe t02 fail atttempt 1 " << std::endl;
-    // print(probe_cameras->t02,3);
+    //    LLOG("dt fail atttempt 1 " << std::endl);
+    //    pprint(dt,3);
+    //    LLOG("t02 fail atttempt 1 " << std::endl);
+    //    pprint(s->t02,3);
+    //    LLOG("probe t02 fail atttempt 1 " << std::endl);
+    // pprint(probe_cameras->t02,3);
     
     dt[0] = s->t02[0] + probe_cameras->t02[0]/scale_probe;
     dt[1] = s->t02[1] + probe_cameras->t02[1]/scale_probe;
     dt[2] = s->t02[2] + probe_cameras->t02[2]/scale_probe;
     if (minus_3d<F>::dot(dt, dt) < eps*eps) {
-#ifndef NDEBUG
-      std::cerr << "probe: translation 02 also match\n";
-#endif
+      LLOG("probe: translation 02 also match\n");
       found = true;
     } else {
       found = false;
-#ifndef NDEBUG
-      std::cerr << "probe: translation 02 DO NOT match\n";
-      std::cerr << "dt" << std::endl;
-      print(dt,3);
-#endif
+      LLOG("probe: translation 02 DO NOT match\n");
+      LLOG("dt" << std::endl);
+      pprint(dt,3);
     }
   }
   }
@@ -649,10 +638,8 @@ minus_io_14a<P, F>::
 probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], solution_shape *probe_cameras,
     unsigned nsols, unsigned *solution_index)
 {
-#ifndef NDEBUG
-  std::cerr << "Test xxxxxxxxxxx" << std::endl;
-  std::cerr << "Nsols" <<  nsols << std::endl;
-#endif
+  LLOG("Test xxxxxxxxxxx" << std::endl);
+  LLOG("Nsols" <<  nsols << std::endl);
   typedef minus_util<F> u;
   static constexpr F eps = 1e-3;
   F real_solution[M::nve];
@@ -664,20 +651,16 @@ probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], solution_s
     F rerror = u::rotation_error(real_solution, probe_cameras->q01);
     if (rerror < eps) {
       if (found == true) {
-#ifndef NDEBUG
-        std::cerr << "Found another similar solution at " << sol << std::endl;
-        std::cerr << "Error: " << rerror << std::endl;
-#endif
+        LLOG("Found another similar solution at " << sol << std::endl);
+        LLOG("Error: " << rerror << std::endl);
         if (rerror < min_rerror) {
           min_rerror = rerror;
           *solution_index = sol;
         }
         
       } else {
-#ifndef NDEBUG
-        std::cerr << "Found a solution at " << sol << std::endl;
-        std::cerr << "Error: " << rerror << std::endl;
-#endif
+        LLOG("Found a solution at " << sol << std::endl);
+        LLOG("Error: " << rerror << std::endl);
         min_rerror = rerror;
         *solution_index = sol;
       }
@@ -693,9 +676,7 @@ probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], solution_s
   u::normalize_quat(real_solution+4);
   F rerror = u::rotation_error(real_solution+4, probe_cameras->q02);
   if (rerror < eps) {
-#ifndef NDEBUG
-    std::cerr << "probe: Rotation 02 also match\n";
-#endif
+    LLOG("probe: Rotation 02 also match\n");
     found = true;
   } else
     found = false;
@@ -716,24 +697,18 @@ probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], solution_s
   dt[2] = s->t01[2] - probe_cameras->t01[2]/scale_probe;
   
   if (minus_3d<F>::dot(dt, dt) < eps*eps) {
-#ifndef NDEBUG
-    std::cerr << "probe: translation 01 also match\n";
-#endif
+    LLOG("probe: translation 01 also match\n");
     found = true;
   } else {
     dt[0] = s->t01[0] + probe_cameras->t01[0]/scale_probe;
     dt[1] = s->t01[1] + probe_cameras->t01[1]/scale_probe;
     dt[2] = s->t01[2] + probe_cameras->t01[2]/scale_probe;
     if (minus_3d<F>::dot(dt, dt) < eps*eps) {
-#ifndef NDEBUG
-      std::cerr << "probe: translation 01 also match\n";
-#endif
+      LLOG("probe: translation 01 also match\n");
       found = true;
     } else {
       found = false;
-#ifndef NDEBUG
-      std::cerr << "probe: translation 01 DO NOT match\n";
-#endif
+      LLOG("probe: translation 01 DO NOT match\n");
     }
   }
   }
@@ -749,33 +724,27 @@ probe_all_solutions_quat(const F solutions_cameras[M::nsols][M::nve], solution_s
   dt[2] = s->t02[2] - probe_cameras->t02[2]/scale_probe;
   
   if (minus_3d<F>::dot(dt, dt) < eps*eps) {
-#ifndef NDEBUG
-    std::cerr << "probe: translation 02 also match\n";
-#endif
+    LLOG("probe: translation 02 also match\n");
     found = true;
   } else {
-    //    std::cerr << "dt fail atttempt 1 " << std::endl;
-    //    print(dt,3);
-    //    std::cerr << "t02 fail atttempt 1 " << std::endl;
-    //    print(s->t02,3);
-    //    std::cerr << "probe t02 fail atttempt 1 " << std::endl;
-    // print(probe_cameras->t02,3);
+    //    LLOG("dt fail atttempt 1 " << std::endl);
+    //    pprint(dt,3);
+    //    LLOG("t02 fail atttempt 1 " << std::endl);
+    //    pprint(s->t02,3);
+    //    LLOG("probe t02 fail atttempt 1 " << std::endl);
+    // pprint(probe_cameras->t02,3);
     
     dt[0] = s->t02[0] + probe_cameras->t02[0]/scale_probe;
     dt[1] = s->t02[1] + probe_cameras->t02[1]/scale_probe;
     dt[2] = s->t02[2] + probe_cameras->t02[2]/scale_probe;
     if (minus_3d<F>::dot(dt, dt) < eps*eps) {
-#ifndef NDEBUG
-      std::cerr << "probe: translation 02 also match\n";
-#endif
+      LLOG("probe: translation 02 also match\n");
       found = true;
     } else {
       found = false;
-#ifndef NDEBUG
-      std::cerr << "probe: translation 02 DO NOT match\n";
-      // std::cerr << "dt" << std::endl;
-      // print(dt,3);
-#endif
+      LLOG("probe: translation 02 DO NOT match\n");
+      // LLOG("dt" << std::endl);
+      // pprint(dt,3);
     }
   }
   }
