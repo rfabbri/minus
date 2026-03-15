@@ -168,6 +168,22 @@ const C<F> &X3 = x[3]; // HERE: replace x[3] with params [0]
 
 TODO We could provide our own version of cCode for that.
 
+##### 3.5.1 PRO: Micro-optimization: negate Ht or H explicitly
+
+In HxHt and HxH, the Ht and H are both negated so that the linear solves
+in MINUS already get the RHS directly withou having to negate Hx or H.
+You might want to substitute some gates that simply negate this last column
+by negating directly the variables. This means:
+
+In linecircle2a, the last lines have - bult in into them, like so:
+```C
+  y[4] = -G29;
+  y[5] = -G37;
+```
+rather than using separate const gates just to multiply these last columns of y
+to -1 in the evaluators.
+
+
 #### 3.6 write basic functions used in I/O
 - Adapt linecircle2a-io.h to your problem
 - Fill in default data in linecircle2a-default-data.h

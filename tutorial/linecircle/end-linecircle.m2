@@ -87,9 +87,12 @@ p1 = matrix{{2, 3, 4, 6, -2, 5.1}};
 -- recall parameters from equations file
 
 -- Ground-truth solution we know before hand, just for validation
+-- You can get these by hand or a quick way is just rerunning generateseedpair
+-- in start-linecircle to get another solution point. This won't work for more
+-- complicated systems, which require us to synthesize parameter-solution pairs
 sol1gt = matrix{{
-  -.83999999999999997p53 -.38032880511473233p53*ii,
-  30000000000000006p53e-1 -.11409864153441969p53e1*ii
+-.8399999999999715-.3803288051147313*ii,
+.03000000000008518-1.140986415344194*ii
 }};
 
 print "Ground-truth solution to target parameters p1 should be 0:"

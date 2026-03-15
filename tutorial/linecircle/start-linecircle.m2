@@ -90,14 +90,18 @@ load "equations-linecircle.m2"
 -------------------------------------------------------------------------------
 
 -- write out HxHt evaluator code to be used in C++
+-- this computes [Hx -Ht] which is the full Jacobian matrix, with the
+-- derivatives in t negated since that is the RHS used in Minus
 symbols = flatten entries vars GS
 h=cCode("HxHt.cxx",
-        transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"Ht"),
+        transpose(PH.GateHomotopy#"Hx" | - PH.GateHomotopy#"Ht"),
         gateMatrix{symbols|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters})
 
 -- write out HxH evaluator code to be used in C++
+-- this computes [Hx -H] which is the Jacobian matrix in x, with the
+-- evaluation of the homootopy H, negated since that is the RHS used in Minus
 h=cCode("HxH.cxx",
-        transpose(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H"),
+        transpose(PH.GateHomotopy#"Hx" | - PH.GateHomotopy#"H"),
         gateMatrix{symbols|{PH.GateHomotopy#"T"}|flatten entries PH#Parameters})
 
 -- Maybe useful

@@ -6,20 +6,25 @@
 
 # DESCRIPTION
    Maps from a multivariate polynomial whose variables and t are stored in 
-   `x = [x_1,..,x_NVE, t]` and parameters are `params`, to `y = [Hx|H]`, where Hx is the Jacobian
+   `x = [x_1,..,x_NVE, t]` and parameters are `params`, to `y = [Hx|-H]`, where Hx is the Jacobian
    matrix of the homotopy equations with respect to the x variables `[x_1,...,x_NVE]`, 
    and H evaluates the homotopy equations themselves with parameters params at x (and t),
-   `H = [f_1(x,t,params),...,f_NVE(x,t,params)]`. Some just put everything in one
-   x (because all parameters are really all like variables), then we write
-   `H(x) = [f_1(x),...,f_NVE(x)]`.
+   `H = [f_1(x,t,params),...,f_NVE(x,t,params)]`. 
+   
+   Some might wish to just put everything in one x (because all parameters are
+   really all like variables), then we write `H(x) = [f_1(x),...,f_NVE(x)]`.
 
 # INPUT 
    x, params: see documentation in the corresponding Hxt file and Hxt-doc.md
 
 # OUTPUT 
-   y: NVExNVEPLUS1 matrix [Hx|H] as a col-major 1D vector
+   y: NVExNVEPLUS1 matrix [Hx|-H] as a col-major 1D vector. 
+   
+   The last column is negated since it is what is needed for the linear solves in MINUS.
 
 ```Macaulay2
-    cCode(PH.GateHomotopy#"Hx"|PH.GateHomotopy#"H",gateMatrix{cameraVars})
+    -- something like:
+    cCode(PH.GateHomotopy#"Hx"| - PH.GateHomotopy#"H",gateMatrix{cameraVars})
     -- we may transpose to get the right C/C++ order Minus expects
+    -- see the correct working code in tutorial/linecircle/linecircle-start.m2
 ```
