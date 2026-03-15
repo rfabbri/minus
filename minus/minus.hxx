@@ -79,6 +79,7 @@ track(const track_settings &s,
   solution *t_s = raw_solutions + sol_min;  // current target solution
   const C<F>* __restrict s_s = s_sols + sol_min*f::nve;    // current start solution
   for (unsigned sol_n = sol_min; sol_n < sol_max; ++sol_n) { // solution loop
+    LLOG("solution  id " << sol_n << "---------------------------------------------------\n"); 
     t_s->status = PROCESSING;
     bool end_zone = false;
     v::copy(s_s, x0);
@@ -87,16 +88,17 @@ track(const track_settings &s,
 #ifdef M_VERBOSE
     LLOG("H must evaluate to 0 at start solution\n"); 
     evaluate_HxH(x0t0, params, HxH);
-    std::cerr << AA << std::endl;
+    LLOG(AA << std::endl);
     
+#if 0
     C<F> gt[f::nve*f::nsols] = { // linecircle debug
       // solution 1
-      {-.83999999999999997, -.38032880511473233},  // x
-      {30000000000000006e-1, -.11409864153441969}  // y
+      {-.8399999999999715, -.3803288051147313}, // x
+      {.03000000000008518, -1.140986415344194}  // y
       // we dont include more sols now, just want it to find the one above
       // TODO: make it real for your problem, to be more realistic in profiling
     };
-    
+   j 
     LLOG("H|t=1 must evaluate to 0 at GT solution\n"); 
     v::copy(gt, x0);
     *t0 = 1;
@@ -108,6 +110,7 @@ track(const track_settings &s,
 
     *t0 = 0;
     // evaluate_HxH(x0t0, params, HxH);
+#endif
 #endif
     
     char predictor_successes = 0;

@@ -125,8 +125,8 @@ template <typename F>
 alignas(64) std::complex<F> minus_data<linecircle2a,F>::
 gt_sols_[n_gt_sols_][M::nve] = {
   { // solution 1
-  {-.83999999999999997, -.38032880511473233},  // x
-  {30000000000000006e-1, -.11409864153441969}  // y
+  {-.8399999999999715, -.3803288051147313}, // x
+  {.03000000000008518, -1.140986415344194}  // y
   }
   // we dont include more sols now, just want it to find the one above
   // TODO: make it real for your problem, to be more realistic in profiling

@@ -70,8 +70,8 @@ HxH(const C<F>* __restrict ux /*x and t*/, const C<F> * __restrict uparams, C<F>
   y[1] = G13;
   y[2] = G15;
   y[3] = G18;
-  y[4] = G28;
-  y[5] = G35;
+  y[4] = -G28;
+  y[5] = -G35;
 }
 
 template <typename F>
