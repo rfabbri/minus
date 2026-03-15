@@ -11,7 +11,7 @@
 #include "minus.h"
 #include "internal-util.hxx"
 
-#define M_VERBOSE  // TODO: cmake option like INTERNAL TELEMETRY ON
+//#define M_VERBOSE  // TODO: cmake option like INTERNAL TELEMETRY ON
 #include "debug-util.h"
 
 // TODO: perhaps move inside problem.hxx
