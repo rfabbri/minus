@@ -8,6 +8,16 @@ All notable changes to MiNuS will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 20260315
+
+### Added
+- MILESTONE: Tutorial for adding your own problem fully working and tested (see tutorial/README.md)
+- commands in cmd/ modularized (easier to maintain and understand)
+- better documetation for evaluators HxHt and HxH
+- LLOG directives to print information that is shown only when compiling in
+  Debug mode, while documeting functionality
+- AGENTS.md and GEMINI.md files for coding with AI
+
 ## 20250717 Commit caef5e51e48ee95f10f4d90e128b5e4770cfb345
 
 ### Added
