@@ -102,7 +102,7 @@ print evalresults
 --
 -- Pro -------------------------------------------------------------------------
 -- Convert your physical data to the parameters here.
--- p1 := data2parameters targetData; -- XXX just put any abcdef here
+-- p1 := data2parameters targetData;
 
 P01 = p0 || transpose p1; -- cat start and end parameters 
 
