@@ -285,6 +285,18 @@ For developers: the start system is compiled and don't need to be input
 
 ## Hacking
 
+### Tutorial
+
+See tutorial/README.md for a step-by-step procedure on how to add your own
+minimal problem
+
+
+### Hacking information
+
+See AGENTS.md or GEMINI.md for information also useful for humans,
+such as folder structure and coding style an.
+
+
 ### Template internals
 
 The code:
