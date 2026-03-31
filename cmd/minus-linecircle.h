@@ -255,7 +255,7 @@ process_args(minus_cmd_io<Float> &cmd, int argc, char **argv)
     }
   }
   if (input_data_) {
-    LOG("input is problem data (image pixel data) of the problem to be solved (target problem)"); // as opposed to start/target parameters
+    LOG("input is problem data (like target pixel data or target coefficients) of the problem to be solved (target problem)");
     if (ground_truth_)
       LOG("reading ground truth appended to input target problem data");
   }
