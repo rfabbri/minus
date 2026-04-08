@@ -1,11 +1,36 @@
 #!/bin/bash
-set -x
+#set -x
 minus_linecircle=$HOME/cprg/vxlprg/lemsvpe/minus-bin/bin/minus-linecircle
 # synthdata $* | ${minus_chicago} --image_data -gt $minus_args; solver_fail="${PIPESTATUS[1]}"
 
 
+# ANSI escape codes for colors
+WHITE_FG="\e[97m"  # Bright white foreground
+RED_BG="\e[41m"    # Red background
+GREEN_BG="\e[42m"  # Green background
+RESET_COLOR="\e[0m" # Reset to default colors
+
+success="${WHITE_FG}${GREEN_BG}TEST PASS -------------------------------------------------------------${RESET_COLOR}"
+fail="${WHITE_FG}${RED_BG}TEST FAIL -------------------------------------------------------------${RESET_COLOR}"
+
+pt() {
+  if [[ "$solver_fail" -ne 0 ]]; then
+    solver_fail=1;
+  fi
+    
+  if [[ "$solver_fail" == "$desired_outcome" ]]; then
+    echo -e "$success"
+  else
+    echo -e "$fail"
+  fi
+}
+
+# outcom 0 ok, nonzero fail
+
 # Test 1 -----------------------------------------------------------------------
 
+
+desired_outcome=0
 # a b c  (real and imaginary)
 # d e f
 # x      (ground truth x, y)
@@ -17,6 +42,24 @@ echo '
 1 0
 ' | $minus_linecircle -i -gt;     solver_fail="${PIPESTATUS[1]}"
 
+pt
+
+
+desired_outcome=1
+# a b c  (real and imaginary)
+# d e f
+# x      (ground truth x, y)
+# y
+echo '
+1 0 0 0 -1 0
+1 0 0 0  0 0
+0 0
+0 0
+' | $minus_linecircle -i -gt;     solver_fail="${PIPESTATUS[1]}"
+
+pt
+
+desired_outcome=0
 # a b c  (real and imaginary)
 # d e f
 # x      (ground truth x, y)
@@ -28,5 +71,4 @@ echo '
 -1 0
 ' | $minus_linecircle -i -gt;     solver_fail="${PIPESTATUS[1]}"
 
-
-exit $solver_fail
+pt
