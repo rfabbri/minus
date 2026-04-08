@@ -1,0 +1,32 @@
+#!/bin/bash
+set -x
+minus_linecircle=$HOME/cprg/vxlprg/lemsvpe/minus-bin/bin/minus-linecircle
+# synthdata $* | ${minus_chicago} --image_data -gt $minus_args; solver_fail="${PIPESTATUS[1]}"
+
+
+# Test 1 -----------------------------------------------------------------------
+
+# a b c  (real and imaginary)
+# d e f
+# x      (ground truth x, y)
+# y
+echo '
+1 0 0 0 -1 0
+1 0 0 0  0 0
+0 0
+1 0
+' | $minus_linecircle -i -gt;     solver_fail="${PIPESTATUS[1]}"
+
+# a b c  (real and imaginary)
+# d e f
+# x      (ground truth x, y)
+# y
+echo '
+1 0 0 0 -1 0
+1 0 0 0  0 0
+0 0
+-1 0
+' | $minus_linecircle -i -gt;     solver_fail="${PIPESTATUS[1]}"
+
+
+exit $solver_fail
