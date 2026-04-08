@@ -17,11 +17,13 @@ find_ground_truth(M::solution solutions[M::nsols])
   unsigned sol_id;
   // searches for ground-truth among solutions, possibly with normalizations and specific rules
   Float real_gt_sol[M::nve];
+  bool fail = false;
   
   // NOOB: We test all gt solutions
-  //       If any fail, we dont test the rest
-  // PRO: reduce this to only one ground truth solution, the desired solution for the
-  // physical problem
+  // PRO: 
+  //  - reduce this to only one ground truth solution, the desired solution for the
+  //    physical problem
+  //  - if a ground truth is not found fail, dont test the rest
   for (unsigned s=0; s < data::n_gt_sols_; ++s) {
     LOG("Looking for ground truth solution id: " << s);
     if (v::get_real(data::gt_sols_[s], real_gt_sol)) {
@@ -35,7 +37,7 @@ find_ground_truth(M::solution solutions[M::nsols])
           LOG("PROBLEM found ground truth but it is not REGULAR: " << sol_id);
       } else {
         LOG("\033[1;91mFAIL:\e[m  ground-truth not found among solutions");
-        return SOLVER_FAILURE; 
+        fail = true;
         // you can detect solver failure by checking this exit code.
         // if you use shell, see:
         // https://www.thegeekstuff.com/2010/03/bash-shell-exit-status
@@ -49,11 +51,13 @@ find_ground_truth(M::solution solutions[M::nsols])
           LOG("found complex ground-truth solution, even though MINUS is intended for real ground-truth");
         } else {
           LOG("\033[1;91mFAIL:\e[m  complex ground-truth not found among solutions");
-          return SOLVER_FAILURE; 
+          fail = true;
         }
       }
     }
   }
+  if (fail)
+    return SOLVER_FAILURE; 
   return 0;
 }
 

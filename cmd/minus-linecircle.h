@@ -84,7 +84,12 @@ print_usage()
   # first solution (x0,y0)
   x0real x0imag y0real y0imag            
   # second solution (x1,y1)
-  x1real x1imag y1real y1imag)";
+  x1real x1imag y1real y1imag)
+
+  # You can also find example usage with ground truth in minus/scripts/synthdata/minus-linecircle-test
+  # This input file format is build for speed and inter process communication, so other processes
+  # can efficiently call this process with pipes and easy in-memory transfer of parameters
+   ";
 
   exit(1);
 }
