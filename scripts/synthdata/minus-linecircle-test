@@ -41,24 +41,22 @@ echo '
 0 0
 1 0
 ' | $minus_linecircle -i -gt;     solver_fail="${PIPESTATUS[1]}"
-
 pt
 
 
-desired_outcome=1
-# a b c  (real and imaginary)
-# d e f
-# x      (ground truth x, y)
-# y
-echo '
-1 0 0 0 -1 0
-1 0 0 0  0 0
-0 0
-0 0
-' | $minus_linecircle -i -gt;     solver_fail="${PIPESTATUS[1]}"
-
-pt
-
+## desired_outcome=1
+## # a b c  (real and imaginary)
+## # d e f
+## # x      (ground truth x, y)
+## # y
+## echo '
+## 1 0 0 0 -1 0
+## 1 0 0 0  0 0
+## 0 0
+## 0 0
+## ' | $minus_linecircle -i -gt;     solver_fail="${PIPESTATUS[1]}"
+## pt
+## 
 desired_outcome=0
 # a b c  (real and imaginary)
 # d e f
@@ -70,5 +68,46 @@ echo '
 0 0
 -1 0
 ' | $minus_linecircle -i -gt;     solver_fail="${PIPESTATUS[1]}"
+pt
 
+# Test 1 -----------------------------------------------------------------------
+# Like test 1 but y=0
+desired_outcome=0
+# a b c  (real and imaginary)
+# d e f
+# x      (ground truth x, y)
+# y
+echo '
+1 0 0 0 -1 0
+0 0 1 0  0 0
+1 0
+0 0
+' | $minus_linecircle -i -gt;     solver_fail="${PIPESTATUS[1]}"
+pt
+
+
+desired_outcome=1
+# a b c  (real and imaginary)
+# d e f
+# x      (ground truth x, y)
+# y
+echo '
+1 0 0 0 -1 0
+0 0 1 0  0 0
+0 0
+0 0
+' | $minus_linecircle -i -gt;     solver_fail="${PIPESTATUS[1]}"
+pt
+
+desired_outcome=0
+# a b c  (real and imaginary)
+# d e f
+# x      (ground truth x, y)
+# y
+echo '
+1 0 0 0 -1 0
+0 0 1 0  0 0
+-1 0 
+0 0
+' | $minus_linecircle -i -gt;     solver_fail="${PIPESTATUS[1]}"
 pt

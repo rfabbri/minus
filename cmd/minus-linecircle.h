@@ -125,7 +125,7 @@ iread(std::istream &in)
   if (!cmd::read_block(in, (F *)(data::params_start_target_+M::f::nparams), 2*M::f::nparams /*complex numbers*/))
     return false;
   LOG("reading ground truth solutions");
-  if (ground_truth_ && !cmd::read_block(in, (F *)data::gt_sols_, 2*data::n_gt_sols_ /*complex numbers */))
+  if (ground_truth_ && !cmd::read_block(in, (F *)data::gt_sols_, 2*data::n_gt_sols_*M::f::nve /*complex numbers */))
     return false;    // PRO: your specific application may read just real numbers
   return true;
 }
