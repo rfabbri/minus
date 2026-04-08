@@ -18,10 +18,12 @@ find_ground_truth(M::solution solutions[M::nsols])
   // searches for ground-truth among solutions, possibly with normalizations and specific rules
   Float real_gt_sol[M::nve];
   
-  // NOOB: we test all gt solutions
-  // PRO: reduce this to only one solution, the desired solution for the
+  // NOOB: We test all gt solutions
+  //       If any fail, we dont test the rest
+  // PRO: reduce this to only one ground truth solution, the desired solution for the
   // physical problem
-  for (unsigned s=0; s < data::n_gt_sols_; ++i) {
+  for (unsigned s=0; s < data::n_gt_sols_; ++s) {
+    LOG("Looking for ground truth solution id: " << s);
     if (v::get_real(data::gt_sols_[s], real_gt_sol)) {
       // real ground-truth: we run a custom, faster and more complete solution matcher 
       // PRO: just enconde your specific ground-truth as real to begin with
