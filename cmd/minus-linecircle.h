@@ -88,8 +88,7 @@ print_usage()
 
   # You can also find example usage with ground truth in minus/scripts/synthdata/minus-linecircle-test
   # This input file format is build for speed and inter process communication, so other processes
-  # can efficiently call this process with pipes and easy in-memory transfer of parameters
-   ";
+  # can efficiently call this process with pipes and easy in-memory transfer of parameters)";
 
   exit(1);
 }
