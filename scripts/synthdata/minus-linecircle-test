@@ -1,0 +1,191 @@
+#!/bin/bash
+#
+# This is a basic test on the minus-linecircle commandline
+# This should run on the cloud continuously, before the detailed benchmarking
+# As well as any time you make a change
+#
+#set -x
+minus_linecircle=$HOME/cprg/vxlprg/lemsvpe/minus-bin/bin/minus-linecircle
+#minus_linecircle=$HOME/cprg/vxlprg/lemsvpe/minus-bin-rel/bin/minus-linecircle
+# synthdata $* | ${minus_chicago} --image_data -gt $minus_args; solver_fail="${PIPESTATUS[1]}"
+
+
+# ANSI escape codes for colors
+WHITE_FG="\e[97m"  # Bright white foreground
+RED_BG="\e[41m"    # Red background
+GREEN_BG="\e[42m"  # Green background
+RESET_COLOR="\e[0m" # Reset to default colors
+
+success="${WHITE_FG}${GREEN_BG}TEST PASS -------------------------------------------------------------${RESET_COLOR}"
+fail="${WHITE_FG}${RED_BG}TEST FAIL -------------------------------------------------------------${RESET_COLOR}"
+
+pt() {
+  if [[ "$solver_fail" -ne 0 ]]; then
+    solver_fail=1;
+  fi
+    
+  if [[ "$solver_fail" == "$desired_outcome" ]]; then
+    echo -e "$success"
+  else
+    echo -e "$fail"
+  fi
+}
+
+# outcom 0 ok, nonzero fail
+
+# Test 1 -----------------------------------------------------------------------
+
+
+desired_outcome=0
+# a b c  (real and imaginary)
+# d e f
+# x      (ground truth x, y)
+# y
+echo '
+1 0 0 0 -1 0
+1 0 0 0  0 0
+0 0
+1 0
+0 0
+-1 0
+' | $minus_linecircle -i -gt;     solver_fail="${PIPESTATUS[1]}"
+pt
+
+
+desired_outcome=1
+# a b c  (real and imaginary)
+# d e f
+# x      (ground truth x, y)
+# y
+echo '
+1 0 0 0 -1 0
+1 0 0 0  0 0
+0 0
+0 0
+0 0
+0 0
+' | $minus_linecircle -i -gt;     solver_fail="${PIPESTATUS[1]}"
+pt
+
+# first point ok but not second
+desired_outcome=1
+# a b c  (real and imaginary)
+# d e f
+# x      (ground truth x, y)
+# y
+echo '
+1 0 0 0 -1 0
+1 0 0 0  0 0
+0 0
+1 0
+0 0
+0 -1
+' | $minus_linecircle -i -gt;     solver_fail="${PIPESTATUS[1]}"
+pt
+
+
+# Test 2 -----------------------------------------------------------------------
+# Like test 1 but y=0
+desired_outcome=0
+# a b c  (real and imaginary)
+# d e f
+# x      (ground truth x, y)
+# y
+echo '
+1 0 0 0 -1 0
+0 0 1 0  0 0
+1 0
+0 0
+-1 0
+0 0
+' | $minus_linecircle -i -gt 2>/tmp/bla;     solver_fail="${PIPESTATUS[1]}"
+pt
+nfound=`grep "found solution at" /tmp/bla|wc -l`
+nwant=2
+if [[ "$nfound" -eq "$nwant" ]]; then
+  echo "NSOLS PASS ---------------------------------------------------------------";
+fi
+pt
+
+desired_outcome=1
+# a b c  (real and imaginary)
+# d e f
+# x      (ground truth x, y)
+# y
+echo '
+1 0 0 0 -1 0
+0 0 1 0  0 0
+0 0
+0 0
+0 0
+0 -1 
+' | $minus_linecircle -i -gt;     solver_fail="${PIPESTATUS[1]}"
+pt
+
+# Test 3 -----------------------------------------------------------------------
+# Mixed good gt root, bad gt root
+
+# Like test 1 but y=0
+desired_outcome=1
+# a b c  (real and imaginary)
+# d e f
+# x      (ground truth x, y)
+# y
+echo '
+1 0 0 0 -1 0
+0 0 1 0  0 0
+1 -5
+0 0
+-1 0
+0 0
+' | $minus_linecircle -i -gt 2>/tmp/bla;     solver_fail="${PIPESTATUS[1]}"
+nfound=`grep "found solution at" /tmp/bla|wc -l`
+nwant=1
+if [[ "$nfound" -eq "$nwant" ]]; then
+  echo "NSOLS PASS ---------------------------------------------------------------";
+fi
+pt
+
+
+
+desired_outcome=1
+# a b c  (real and imaginary)
+# d e f
+# x      (ground truth x, y)
+# y
+echo '
+1 0 0 0 -1 0
+0 0 1 0  0 0
+1 -5
+0 0
+-1 0
+0 -3
+' | $minus_linecircle -i -gt 2>/tmp/bla;     solver_fail="${PIPESTATUS[1]}"
+nfound=`grep "found solution at" /tmp/bla|wc -l`
+nwant=0
+if [[ "$nfound" -eq "$nwant" ]]; then
+  echo "NSOLS PASS ---------------------------------------------------------------";
+fi
+pt
+
+
+desired_outcome=1
+# a b c  (real and imaginary)
+# d e f
+# x      (ground truth x, y)
+# y
+echo '
+1 0 0 0 -1 0
+0 0 1 0  0 0
+1 0
+0 0
+-1 0
+0 -3
+' | $minus_linecircle -i -gt 2>/tmp/bla;     solver_fail="${PIPESTATUS[1]}"
+nfound=`grep "found solution at" /tmp/bla|wc -l`
+nwant=1
+if [[ "$nfound" -eq "$nwant" ]]; then
+  echo "NSOLS PASS ---------------------------------------------------------------";
+fi
+pt
+
