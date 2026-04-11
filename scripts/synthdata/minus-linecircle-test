@@ -6,6 +6,7 @@
 #
 #set -x
 minus_linecircle=$HOME/cprg/vxlprg/lemsvpe/minus-bin/bin/minus-linecircle
+#minus_linecircle=$HOME/cprg/vxlprg/lemsvpe/minus-bin-rel/bin/minus-linecircle
 # synthdata $* | ${minus_chicago} --image_data -gt $minus_args; solver_fail="${PIPESTATUS[1]}"
 
 
@@ -102,7 +103,7 @@ pt
 nfound=`grep "found solution at" /tmp/bla|wc -l`
 nwant=2
 if [[ "$nfound" -eq "$nwant" ]]; then
-  echo "NSOLS OK ---------------------------------------------------------------";
+  echo "NSOLS PASS ---------------------------------------------------------------";
 fi
 pt
 
@@ -141,7 +142,7 @@ echo '
 nfound=`grep "found solution at" /tmp/bla|wc -l`
 nwant=1
 if [[ "$nfound" -eq "$nwant" ]]; then
-  echo "NSOLS OK ---------------------------------------------------------------";
+  echo "NSOLS PASS ---------------------------------------------------------------";
 fi
 pt
 
@@ -163,7 +164,7 @@ echo '
 nfound=`grep "found solution at" /tmp/bla|wc -l`
 nwant=0
 if [[ "$nfound" -eq "$nwant" ]]; then
-  echo "NSOLS OK ---------------------------------------------------------------";
+  echo "NSOLS PASS ---------------------------------------------------------------";
 fi
 pt
 
@@ -184,7 +185,7 @@ echo '
 nfound=`grep "found solution at" /tmp/bla|wc -l`
 nwant=1
 if [[ "$nfound" -eq "$nwant" ]]; then
-  echo "NSOLS OK ---------------------------------------------------------------";
+  echo "NSOLS PASS ---------------------------------------------------------------";
 fi
 pt
 
