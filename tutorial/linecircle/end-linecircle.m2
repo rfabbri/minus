@@ -50,18 +50,19 @@ load "equations-linecircle.m2"
 -- aggressive as it needs to run fast.
 -- 
 -- 'null' indicates default value, use getDefault(parameterName) to see it
-scan({CorrectorTolerance=>1e-4,
-	EndZoneFactor=>2e-1,
-	InfinityThreshold => 1e6, 
-	maxCorrSteps => 3, 
-	numberSuccessesBeforeIncrease => 2,
-	Precision => null,
-	Predictor => RungeKutta4,
-	stepIncreaseFactor => 2,
-	tStep => 5e-2,
-	tStepMin => 1e-9
-	}, 
-    opt -> setDefault(opt)) -- check if originally we used 'null' XXX
+-- scan({CorrectorTolerance=>1e-4,
+-- 	EndZoneFactor=>2e-1,
+-- 	InfinityThreshold => 1e6, 
+-- 	maxCorrSteps => 3, 
+-- 	noOutput => true,
+-- 	numberSuccessesBeforeIncrease => 2,
+-- 	Precision => null,
+-- 	Predictor => RungeKutta4,
+-- 	stepIncreaseFactor => 2,
+-- 	tStep => 5e-2,
+-- 	tStepMin => 1e-5
+-- 	}, 
+--     opt -> setDefault(opt)) -- check if originally we used 'null' XXX
 -- 
 -- 
 -- setDefault(CorrectorTolerance=>1e-8) -- XXX is it used in the tracker or monodromy?
@@ -75,19 +76,14 @@ print "Reading start system startSys."
 -- Pro -------------------------------------------------------------------------
 -- verify options are set as desired
 -- netList((keys options trackHomotopy)/(opt ->(opt, getDefault opt)))
-NAGtrace 3
+-- NAGtrace 3
 -- setRandomSeed 0
 -- 
 -- Reads from file
 -- p1 = data2parameters("target_system_data.txt'); 
 
 -- Parameters defining the target system we want to solve
--- p1 = matrix{{2, 3, 4, 6, -2, 5.1}};
-p1 = matrix{{43.2791724282098, -4231.74135919786, 180846142.794321, 2.38407393718674, 5.55345331760358, -190.605487662164}}
-
--- p1 = matrix{{
--- 2.393148770523231e-07, -2.339967717205162e-05, 1.000000000000000e+00, 1.318288518820212e-08, 3.070816569153816e-08, -1.053964904736411e-06
--- }}
+p1 = matrix{{2, 3, 4, 6, -2, 5.1}};
 
 -- recall parameters from equations file
 
@@ -95,13 +91,9 @@ p1 = matrix{{43.2791724282098, -4231.74135919786, 180846142.794321, 2.3840739371
 -- You can get these by hand or a quick way is just rerunning generateseedpair
 -- in start-linecircle to get another solution point. This won't work for more
 -- complicated systems, which require us to synthesize parameter-solution pairs
--- sol1gt = matrix{{
--- -.8399999999999715-.3803288051147313*ii,
--- .03000000000008518-1.140986415344194*ii
--- }};
--- , 50.9456787706435, 12.4512116584466
 sol1gt = matrix{{
-56.4991320882471, 10.0671377212599 
+-.8399999999999715-.3803288051147313*ii,
+.03000000000008518-1.140986415344194*ii
 }};
 
 print "Ground-truth solution evaluated on target parameters p1 should be 0:"
