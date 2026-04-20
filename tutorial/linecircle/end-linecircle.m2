@@ -128,6 +128,12 @@ print "\nStart solutions should also evaluate to 0:"
 sols0 = point \ sols0 -- convert to list of list
 print(apply(sols0, x -> evaluate(GS, point p0, x)))
 
+print "\nTarget solutions in variable sols1."
+-- Uncomment if you want to show solutions with high precision:
+--
+-- printingPrecision = 53
+-- sols1
+
 -- Pro -------------------------------------------------------------------------
 -- J0 = evaluate(J,sols0||p0); -- Evaluates Jacobian if desired
 

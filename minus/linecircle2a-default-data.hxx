@@ -127,9 +127,12 @@ gt_sols_[n_gt_sols_][M::nve] = {
   { // solution 1
   {-.8399999999999715, -.3803288051147313}, // x
   {.03000000000008518, -1.140986415344194}  // y
+  },
+  { // solution 2
+  {-.84, +.3803288051147322},              // x
+  {.02999999999999995,+.140986415344197}  // y
   }
-  // we dont include more sols now, just want it to find the one above
-  // TODO: make it real for your problem, to be more realistic in profiling
+  // TODO: make it real for your problem, and only one desired root, to be more realistic in profiling
 };
 
 template <typename F>
