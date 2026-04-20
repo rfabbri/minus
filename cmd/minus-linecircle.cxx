@@ -46,7 +46,7 @@ find_ground_truth(M::solution solutions[M::nsols])
       LOG("WARNING: ground-truth is _not_ real, this is not the intended use for MINUS, only for debugging");
       // in the non-real case we run a generic solution matcher
       // PRO: remove this and keep only the real-specific part
-      if (ground_truth_) {
+      if (ground_truth_||profile_) {
         if (io::probe_solutions(solutions, data::gt_sols_[s])) {
           LOG("found complex ground-truth solution, even though MINUS is intended for real ground-truth");
         } else {
@@ -141,7 +141,7 @@ main(int argc, char **argv)
   if (ground_truth_ || profile_)
     return find_ground_truth(solutions);
   else if (!io::has_valid_solutions(solutions)) {   // if no ground-truth is provided, it will return error if
-    LOG("\033[1;91mFAIL:\e[m  no valid solutions"); // it can detect that the solver failed by generic tests
+    LOG("\033[1;91mFAIL:\e[m no valid solutions (regular,real)"); // it can detect that the solver failed by generic tests
     return SOLVER_FAILURE;                          // without using ground-truth, e.g., no real roots
   }                                                 // or problem-specific inequalities
   std::cout << " UNDER DEVELOPMENT -----------------------------------------------------------\n";

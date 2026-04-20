@@ -124,12 +124,15 @@ params_= default_params_start_target_gammified_;
 template <typename F>
 alignas(64) std::complex<F> minus_data<linecircle2a,F>::
 gt_sols_[n_gt_sols_][M::nve] = {
-  { // solution 1
+  { // solution 0
   {-.8399999999999715, -.3803288051147313}, // x
   {.03000000000008518, -1.140986415344194}  // y
+  },
+  { // solution 1
+  {-.84, +.3803288051147322},              // x
+  {.02999999999999995,+1.140986415344197}  // y
   }
-  // we dont include more sols now, just want it to find the one above
-  // TODO: make it real for your problem, to be more realistic in profiling
+  // TODO: make it real for your problem, and only one desired root, to be more realistic in profiling
 };
 
 template <typename F>
