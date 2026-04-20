@@ -132,7 +132,7 @@ struct minus_core<P, F>::track_settings {
     dt_decrease_factor_(1./dt_increase_factor_),  // m2 stepDecreaseFactor not existent in DEFAULT, using what is in track.m2:77 
     infinity_threshold2_(1e7 * 1e7), // m2 InfinityThreshold^2
     max_num_steps_(500),
-    num_successes_before_increase_(5), // m2 numberSuccessesBeforeIncrease
+    num_successes_before_increase_(20), // m2 numberSuccessesBeforeIncrease
     max_corr_steps_(4)  // m2 maxCorrSteps (track.m2 param of rawSetParametersPT corresp to max_corr_steps in NAG.cpp)
   { }
   F init_dt_;   // m2 tStep, t_step, raw interface code initDt
