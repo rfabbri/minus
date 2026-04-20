@@ -1,0 +1,6 @@
+#!/bin/bash
+#set -x
+for i in `seq 1 10`; do 
+  (./synthdata 2>/dev/null) | /Users/rfabbri/cprg/vxlprg/lemsvpe/minus-bin-rel/bin/minus-chicago -i -gt 2>&1|grep 'total number'|cut -f 2 -d :|cut -f 2 -d ' ' ; 
+done |tee tmp-out-10
+echo med `st --median tmp-out-10`

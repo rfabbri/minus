@@ -363,7 +363,6 @@ has_valid_solutions(const typename M::solution solutions[M::nsols])
 // 
 // This is the generic default implementation. It may be specialized for each
 // problem tag to compare e.g. groups of variables as rotations
-// 
 //
 template <problem P, typename F>
 inline bool

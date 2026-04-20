@@ -19,7 +19,7 @@ find_ground_truth(M::solution solutions[M::nsols])
   Float real_gt_sol[M::nve];
   bool fail = false;
   
-  // NOOB: We test all gt solutions
+  // NOOB: test all gt solutions
   // PRO: 
   //  - reduce this to only one ground truth solution, the desired solution for the
   //    physical problem
