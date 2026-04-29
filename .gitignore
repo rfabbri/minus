@@ -199,3 +199,20 @@ tutorial/linepoint/s
 tutorial/linepoint/startSys
 tutorial/vids
 tutorial/tmp
+
+# Build files that souldn't be pushed
+CMakeCache.txt
+CMakeFiles/
+CTestTestfile.cmake
+DartConfiguration.tcl
+Makefile
+cmake_install.cmake
+cmd/CMakeFiles/
+cmd/CTestTestfile.cmake
+cmd/Makefile
+cmd/cmake_install.cmake
+lib/
+minus/CMakeFiles/
+minus/CTestTestfile.cmake
+minus/Makefile
+minus/cmake_install.cmake
