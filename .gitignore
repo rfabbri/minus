@@ -216,3 +216,4 @@ minus/CMakeFiles/
 minus/CTestTestfile.cmake
 minus/Makefile
 minus/cmake_install.cmake
+compile_commands.json
