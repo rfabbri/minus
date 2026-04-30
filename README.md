@@ -299,7 +299,7 @@ minimal problem
 ### Hacking information
 
 See AGENTS.md or GEMINI.md for information also useful for humans,
-such as folder structure and coding style an.
+such as folder structure and coding style.
 
 ### Template internals
 
