@@ -102,12 +102,17 @@ minus-chicago      # annihilates the Chicago problem!
 Do an initial test
 
 ```bash
-cd cmd
+cd bin
 ./minus-chicago -g         # -g profiles a predefined worst case, to get a time
+```
 
 Output:
-  LOG Time of solver: xxxms
 ```
+  ...
+  LOG Time of solver: xxxms
+  ...
+```  
+The solver writes only solutions to stdout and log message to stderr
 
 ### Running
 
