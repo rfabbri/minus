@@ -83,6 +83,12 @@ Location of script
 - /minus/tests/benchmark/chicago-benchmark/script-gammaotimo.sh
 - You may have to adjust the path to minus-chicago in the script
 
+How too run the script
+- create an experiments folder with a tag. At first, the tag is just 'tmp', eg, benchmarkdir/tmp, where benchmarkdir is defined inside the script
+- call the script like so
+    - ../script-gammaotimo.sh
+- before running, you might have to delete the tmp folder
+
 What I want from you
 - Run the benchmark
 - Output a summary on the screen (text): use 'st' command on sol_step to summarize the max, min, sum (start with just sum)
