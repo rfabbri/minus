@@ -83,15 +83,35 @@ Location of script
 - /minus/tests/benchmark/chicago-benchmark/script-gammaotimo.sh
 - You may have to adjust the path to minus-chicago in the script
 
-How too run the script
-- create an experiments folder with a tag. At first, the tag is just 'tmp', eg, benchmarkdir/tmp, where benchmarkdir is defined inside the script
-- call the script like so
-    - ../script-gammaotimo.sh
-- before running, you might have to delete the tmp folder
+workflow of how to run this benchmark
 
-What I want from you
-- Run the benchmark
-- Output a summary on the screen (text): use 'st' command on sol_step to summarize the max, min, sum (start with just sum)
-- Develop a javascript visualizer for this data. For version 1.0, just put this sum on a webpage.
+   0. create an experiments folder with a tag. At first, the tag is just 'tmp', eg, benchmarkdir/tmp, where benchmarkdir is defined inside the script
+   1. Navigate to your experiment folder (e.g. chicago-benchmark/tmp).
+   2. Run the script: ../script-gammaotimo.sh
+        - before running, you might have to delete the tmp folder
+   3. The script will automatically:
+      - Run minus-chicago over the configurations.
+      - Parse the temp.txt files correctly, stripping carriage returns cleanly.
+      - Aggregate all the statistics using st-console directly.
+      - Output both index.html (for your web browser) and summary.txt (for console/programmatic reading).
+
+What I want from you NOW
+- Build an awesome, good-looking, professional, advanced and interactive
+  javascript visualizer (currently this is index.html output from the script)
   We will then iterate until we get the full boxplot running, and then we can deploy to github
+    - Lets start with two configuations
+        - Box plot will show all configurations in the same plot.
+        - In the x axis, list the configuration id ($i in frpt-P$i)
+        - In the y axis, the number of steps/iterations
+        - For each x, a thin boxplot of the number of steps for that configuration
+        - I want in green a horizontal line for all configurations, the grand total medians as already in the index.html
+        - Looks
+            - A reference image is in @chicago-benchmark/reference-image-time_to_und_roots_mil.png
+              the image shows a plot with some outliers in light gray but the most imporant is the condensed boxplots
+        - Interactivity
+            - I want to click on a problem or a boxplot, and a display of that configuration comes up.
+              For now, only show me the string specifying of the problem (the sythdata line in the script tells you that)
+        - The boxplot is dynamically getting its information from text files. If I refresh the page, the data should
+          be refreshed, even if at least partially. You can hafve intermediate files as to not having to recompute everything
+          for the experiment.
 
