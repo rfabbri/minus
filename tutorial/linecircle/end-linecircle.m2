@@ -84,6 +84,7 @@ print "Reading start system startSys."
 
 -- Parameters defining the target system we want to solve
 p1 = matrix{{2, 3, 4, 6, -2, 5.1}};
+
 -- recall parameters from equations file
 
 -- Ground-truth solution we know before hand, just for validation
@@ -95,7 +96,7 @@ sol1gt = matrix{{
 .03000000000008518-1.140986415344194*ii
 }};
 
-print "Ground-truth solution to target parameters p1 should be 0:"
+print "Ground-truth solution evaluated on target parameters p1 should be 0:"
 evalresults = evaluate(GS,p1,sol1gt) -- should be 0
 print evalresults
 
@@ -127,6 +128,12 @@ print(apply(sols1, x -> evaluate(GS, point p1, x)))
 print "\nStart solutions should also evaluate to 0:"
 sols0 = point \ sols0 -- convert to list of list
 print(apply(sols0, x -> evaluate(GS, point p0, x)))
+
+print "\nTarget solutions in variable sols1."
+-- Uncomment if you want to show solutions with high precision:
+--
+-- printingPrecision = 53
+-- sols1
 
 -- Pro -------------------------------------------------------------------------
 -- J0 = evaluate(J,sols0||p0); -- Evaluates Jacobian if desired

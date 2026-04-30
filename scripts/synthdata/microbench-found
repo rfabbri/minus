@@ -1,0 +1,4 @@
+for i in `seq 1 10`; do 
+(./synthdata 2>/dev/null) | /Users/rfabbri/cprg/vxlprg/lemsvpe/minus-bin-rel/bin/minus-chicago -i -gt 2>&1|grep 'found sol'; 
+done |tee tmp-out-10-fund
+

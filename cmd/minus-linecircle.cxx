@@ -17,36 +17,47 @@ find_ground_truth(M::solution solutions[M::nsols])
   unsigned sol_id;
   // searches for ground-truth among solutions, possibly with normalizations and specific rules
   Float real_gt_sol[M::nve];
+  bool fail = false;
   
-  if (v::get_real(data::gt_sols_[0], real_gt_sol)) {
-    // real ground-truth: we run a custom, faster and more complete solution matcher 
-    // PRO: just enconde your specific ground-truth as real to begin with
-    bool found = io::probe_all_solutions(solutions, real_gt_sol, &sol_id);
-    if (found) {
-      LOG("found solution at index: " << sol_id);
-      LOG("number of iterations of solution: " << solutions[sol_id].num_steps);
-      if (solutions[sol_id].status != M::REGULAR)
-        LOG("PROBLEM found ground truth but it is not REGULAR: " << sol_id);
-    } else {
-      LOG("\033[1;91mFAIL:\e[m  ground-truth not found among solutions");
-      return SOLVER_FAILURE; 
-      // you can detect solver failure by checking this exit code.
-      // if you use shell, see:
-      // https://www.thegeekstuff.com/2010/03/bash-shell-exit-status
-    }
-  } else {
-    LOG("WARNING: ground-truth is _not_ real, this is not the intended use for MINUS, only for debugging");
-    // in the non-real case we run a generic solution matcher
-    // PRO: remove this and keep only the real-specific part
-    if (ground_truth_) {
-      if (io::probe_solutions(solutions, data::gt_sols_[0])) {
-        LOG("found complex ground-truth solution, even though MINUS is intended for real ground-truth");
+  // NOOB: test all gt solutions
+  // PRO: 
+  //  - reduce this to only one ground truth solution, the desired solution for the
+  //    physical problem
+  //  - if a ground truth is not found fail, dont test the rest
+  for (unsigned s=0; s < data::n_gt_sols_; ++s) {
+    LOG("Looking for ground truth solution id: " << s);
+    if (v::get_real(data::gt_sols_[s], real_gt_sol)) {
+      // real ground-truth: we run a custom, faster and more complete solution matcher 
+      // PRO: just enconde your specific ground-truth as real to begin with
+      bool found = io::probe_all_solutions(solutions, real_gt_sol, &sol_id);
+      if (found) {
+        LOG("found solution at index: " << sol_id);
+        LOG("number of iterations of solution: " << solutions[sol_id].num_steps);
+        if (solutions[sol_id].status != M::REGULAR)
+          LOG("PROBLEM found ground truth but it is not REGULAR: " << sol_id);
       } else {
-        LOG("\033[1;91mFAIL:\e[m  complex ground-truth not found among solutions");
-        return SOLVER_FAILURE; 
+        LOG("\033[1;91mFAIL:\e[m  ground-truth not found among solutions");
+        fail = true;
+        // you can detect solver failure by checking this exit code.
+        // if you use shell, see:
+        // https://www.thegeekstuff.com/2010/03/bash-shell-exit-status
+      }
+    } else {
+      LOG("WARNING: ground-truth is _not_ real, this is not the intended use for MINUS, only for debugging");
+      // in the non-real case we run a generic solution matcher
+      // PRO: remove this and keep only the real-specific part
+      if (ground_truth_||profile_) {
+        if (io::probe_solutions(solutions, data::gt_sols_[s])) {
+          LOG("found complex ground-truth solution, even though MINUS is intended for real ground-truth");
+        } else {
+          LOG("\033[1;91mFAIL:\e[m  complex ground-truth not found among solutions");
+          fail = true;
+        }
       }
     }
   }
+  if (fail)
+    return SOLVER_FAILURE; 
   return 0;
 }
 
@@ -130,7 +141,7 @@ main(int argc, char **argv)
   if (ground_truth_ || profile_)
     return find_ground_truth(solutions);
   else if (!io::has_valid_solutions(solutions)) {   // if no ground-truth is provided, it will return error if
-    LOG("\033[1;91mFAIL:\e[m  no valid solutions"); // it can detect that the solver failed by generic tests
+    LOG("\033[1;91mFAIL:\e[m no valid solutions (regular,real)"); // it can detect that the solver failed by generic tests
     return SOLVER_FAILURE;                          // without using ground-truth, e.g., no real roots
   }                                                 // or problem-specific inequalities
   std::cout << " UNDER DEVELOPMENT -----------------------------------------------------------\n";

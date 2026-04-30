@@ -84,7 +84,11 @@ print_usage()
   # first solution (x0,y0)
   x0real x0imag y0real y0imag            
   # second solution (x1,y1)
-  x1real x1imag y1real y1imag)";
+  x1real x1imag y1real y1imag)
+
+  # You can also find example usage with ground truth in minus/scripts/synthdata/minus-linecircle-test
+  # This input file format is build for speed and inter process communication, so other processes
+  # can efficiently call this process with pipes and easy in-memory transfer of parameters)";
 
   exit(1);
 }
@@ -125,7 +129,7 @@ iread(std::istream &in)
   if (!cmd::read_block(in, (F *)(data::params_start_target_+M::f::nparams), 2*M::f::nparams /*complex numbers*/))
     return false;
   LOG("reading ground truth solutions");
-  if (ground_truth_ && !cmd::read_block(in, (F *)data::gt_sols_, 2*data::n_gt_sols_ /*complex numbers */))
+  if (ground_truth_ && !cmd::read_block(in, (F *)data::gt_sols_, 2*data::n_gt_sols_*M::f::nve /*complex numbers */))
     return false;    // PRO: your specific application may read just real numbers
   return true;
 }
@@ -255,7 +259,7 @@ process_args(minus_cmd_io<Float> &cmd, int argc, char **argv)
     }
   }
   if (input_data_) {
-    LOG("input is problem data (image pixel data) of the problem to be solved (target problem)"); // as opposed to start/target parameters
+    LOG("input is problem data (like target pixel data or target coefficients) of the problem to be solved (target problem)");
     if (ground_truth_)
       LOG("reading ground truth appended to input target problem data");
   }
