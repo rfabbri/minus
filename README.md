@@ -35,13 +35,13 @@ For datasets and curve-based SfM code, see the [website](http://multiview-3d-dra
 ## Usage in C++ programs
 For use in your program, we provide a C++ header-only library.
 Simply do:
-```C
+```cpp
 #include <minus.hxx>
 using namespace MiNuS;
 ```
 
 And use `minus<chicago>` like so:
-```C
+```cpp
   minus<chicago>::solve(p, tgt, solutions_cameras, &nsols_final); 
 ```
 to solve a trifocal pose problem from lines at points ("Chicago"), using the default
@@ -59,12 +59,12 @@ formulation for the same problem instead.
 
 To solve another problem, say the `Cleveland` trifocal pose problem from mixed
 points and lines, simply use the problem tag:
-```C
+```cpp
   minus<cleveland>::solve(p, tgt, solutions_cameras, &nsols_final);
 ```
 
 If your measurements are in pixels, use `solve_img` and pass your calibration matrix `K`:
-```C
+```cpp
   minus<cleveland>::solve_img(K, p, tgt, solutions_cameras, &nsols_final);
 ```
 
@@ -299,13 +299,13 @@ such as folder structure and coding style an.
 ### Template internals
 
 The code:
-```C
+```cpp
   #include <minus.hxx>
   ...
   minus_core<chicago14a>::track(..)
 ```
 Is shorthand for 
-```C
+```cpp
   #include <minus.hxx>
   ...
   minus_core<chicago14a, double>::track(...)
@@ -336,7 +336,7 @@ Steps:
 the beginning of `minus.h`. This is the table of problem tags of Minus.
 - Specify the __constant parameters__ for the problem and formulation:
     - In the file `parameters.h`, write another include line for your problem:
-```C
+```cpp
 #include<chicago6a.h>
 ```
     - Write the header `chicago6a.h` by copying chicago14a.h and filling in the
@@ -396,7 +396,8 @@ You can build release with it, no need for slow debug. This is very fast.
 Highly recommended for developing efficient code using vectors, pointers and buffers
 
 Add this to `MINUS_EXTRA_CMAKE_CXX_FLAGS`:
-```-fsanitize=address -fno-omit-frame-pointer
+```bash
+-fsanitize=address -fno-omit-frame-pointer
 ```
 Now recompile minus and simply run it.  If nothing happens, you're golden. In
 the event of any memleak, there will be a colorful output showing where it came
@@ -412,7 +413,7 @@ which is usually what you need anyways (specially I/O functions) since track and
 the evaluators are usually safe code, either automated or already tested.  To do
 this for solving big problems, you can uncomment certain lines in the code
 that have 
-```
+```cpp
 __attribute__((no_sanitize("address")))
 ```
 And skip these big functions. See also the section on stacksize below.
@@ -434,13 +435,16 @@ Follow these intructions to install valgrind.
 https://github.com/LouisBrunner/valgrind-macos
 
 Install qcachegrind
+```bash
 brew install qcachegrind
+```
 
 Use
+```bash
 valgrind --tool=callgrind minus-chicago -g
+```
 
 kcachegrind (or qcachegrind)
-
 
 
 #### GPerftools
@@ -462,9 +466,11 @@ I use `-L/usr/loca/lib -lprofiler` on `MINUS_EXTRA_CMAKE_EXE_LINKER_FLAGS`
 It will profile the program using interval timer (setitimer) and
 output profiling data to the filename, defined in CPUPROFILE env var. Then you
 can view profile data in command-line or with svg/web browser using pprof perl
-script from gperftools (pprof ./the_program profile01).
+script from gperftools (`pprof ./the_program profile01`).
 
+```bash
 pprof --pdf ./minus-chicago /tmp/prof >/tmp/p.pdf
+```
 
 
 #### Apple Instruments
@@ -548,8 +554,8 @@ https://www.naftaliharris.com/blog/2x-speedup-with-one-line-of-code/
 
 ### Struct padding and alignmen study
 
-Linux: pahole
-macOS: clang -Wpadded
+Linux: `pahole`
+macOS: `clang -Wpadded`
 
 ### Studying assembly output
 We refer to Eigen's documentation http://eigen.tuxfamily.org/index.php?title=Developer%27s_Corner#Studying_assembly_output 
@@ -579,7 +585,7 @@ for your large evaluators is being overflown. If it is, it may cause silent
 errors and crashes. In that case you may want to switch to static thread_local
 variables:
 
-```
+```cpp
   alignas(64) static thread_local C<double> G[3440];  // gate variables without spending the stack
 ```
 

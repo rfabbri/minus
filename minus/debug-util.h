@@ -4,7 +4,9 @@
 #define LOG(msg) do { } while (0)
 
 #ifdef M_VERBOSE
+#include <cstdio>
 #include <iostream>
+#include <iomanip>
 #endif
 
 template <typename F>
