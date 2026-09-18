@@ -23,14 +23,28 @@ see section Visualization.
 The main way to visualize is by running a web browser that
 will have a javascript plot of the results. This allows the user to interact with the data.
 
+TODO(next phase 0): 
+    - The toplevel webiste with results is fixed html and javascript at 
+         minus/tests/benchmark/www  (root folder of the project is minus)
+    - When benchmarks are run, this website points to the results via a path
+      hardcoded in the html
+        - It shows a thumbnail for each problem, upon clicking, it goes to the
+          index.html for each problem separately.
+        - Each separate benchmark also features its own separate index.html 
+
 #### Alternate visualizations
 If desired, the data can also be plotted / rendered into a .png or svg for static viewing.
-
 
 
 ## Architecture
 
 ### Highlevel description
+
+We have individual benchmarks for each problem/formulation (chicago, cleveland, linecircle, etc):
+    Folder individual/ 
+
+A toplevel folder shows benchmarks integrating across this
+    Folder toplevel/ 
 
 The benchmark works by running minus-chicago or minus-linecircle or minus-(problem name),
 which are programs whose sourcecode is located in minus/cmd, and binaries in minus/bin
@@ -49,53 +63,92 @@ across multiple nodes if the server farm has them
 
 #### Experiment 1
 
-Outcome
-- boxplots for n=140 problems, m=500 runs x axis id of the problem, y axis total number of iterations
-  for each problem I expect to see a very thin boxplot of the number of iterations
-- overlaid on all these boxplots, I want the median nuber of iterations across all problems
+##### Outcome
+- boxplots for 
+      n=configurations (140 for chicago14a and linecircle) (legacy term for this: problems, please prefer the term 'configurations'), 
+      m runs (500 for chicago, 1 for linecircle), 
+      x axis is id of the problem, 
+      y axis total number of iterations,
+      N=312 solutions per problem (default for chicago) 
+  for each problem (configuration) I expect to see a very thin boxplot of the number of iterations
+- overlaid on all these boxplots, I expect to see the median number of iterations across all problems (configurations)
 
-Input
-- Each of the n problems are described by inputs on each line of a text file named:
-minus/tests/benchmark/chicago-inputs/FRePTcorrigido.txt
-one problem per line.
-- Note that there are e.g. 970 lines, but only the first 140 are used.
+##### Input
+- Each of the n problems are described by inputs given on each line of a single text file named:
+        minus/tests/benchmark/individual/(PROBLEM_NAME)-inputs/configuration-spec/*
+    Example:
+        minus/tests/benchmark/individual/chicago-inputs/configuration-spec/FRePTcorrigido.txt
+        or 
+        minus/tests/benchmark/individual/linecircle-inputs/configuration-spec/CirLiNovo.txt
+    one problem per line.
+- For Chicago: note that there are e.g. 970 lines, but only the first 140 are used.
+- For Linecircle, we also have:
+        /minus/tests/benchmark/individual/linecircle-benchmark/inputs/ground-truth
+        each line being 2 complex numbers as 4 real numbers 
+        [ Re(root 1) Imag(root 1) Re(root 2) Imag(root 2) ]
+        thus both input files to Linecircle have the same number  = # of total configurations > n
+        
+##### Output of script
 
+Let ExptName be a string for the tag of the experiment/run
 
-Output of script
-
-Let ExptName be a string for the tag of the experint/run
-
-
-The script creates a ExptName/ folder,
-with one folder in there per problem $i.
+###### Chicago: The script creates an ExptName/ folder
+With one folder in there per configuration (problem) $i.
 In each folder, there are these data files (with suffix P$i, e.g., P1, P2, P3, ...):
 
-sol_step-P$i.txt: número de iterações para cada raiz --> main benchmark file; since it is m runs,
-                  we have n=312 number of iteration outputs for run 1, followed by n=312 number of iterations
-                  for run 2, and so on
-realsol-P$i.txt: índice das demais raizes reais que não são ground-truth. 
-       - for this file, there is a separator like 313,10  (313 = number of solutions + 1, 10 is just a code
-        that is beyond any root code / error code) to separa uma rodada da rodada seguinte - sao duas colunas
-gt_sol-P$i.txt: índice da ground truth solution. 313: quando não acha solução ótima
-frpt-P$i.txt: câmeras e pontos do problema - just for archival/inspection, not for benchmark
+    sol_step-P$i.txt: number of iterations for each root --> main benchmark file; since it is m runs, we have 
+                      N=312 number-of-iteration-outputs for run 1, followed by 
+                      N=312 number-of-iteration-outputs for run 2, and so on til run m
 
-Location of script
-- /minus/tests/benchmark/chicago-benchmark/script-gammaotimo.sh
-- You may have to adjust the path to minus-chicago in the script
+    gt_sol-P$i.txt: index of the ground-truth solution. 
+                    CODE 313: when ground-truth is not found 
+    
+    realsol-P$i.txt: index of remaining roots that are not ground-truth
+           - for this file, there is a separator like 313,10  (313 = number of solutions + 1, 10 is just a code
+            that is beyond any root code / error code) to separate a given run from the next - are two columns
 
-workflow of how to run this benchmark
+
+    frpt-P$i.txt: cameras and points of the problem - just for archival/inspection, not for benchmark
+
+###### Linecircle output
+
+    sol_step*.txt: 
+        number of iterations for each root --> main benchmark file; 
+        
+        mum_iter_root1  run 1
+        num_iter root2  run 1
+        mum_iter_root1  run 2
+        num_iter root2  run 2
+        ...
+        
+    found_sol0novo.txt    
+        1 or 0 per line depending on whether MINUS found any valid solution for configuration $i
+
+    gt_sol0novo.txt 
+        1 or 0 per line depending on whether MINUS found the ground-truth solution
+
+    Temp file:
+        configANDgt.txt  : just the input configuration and gt concatenated, each line = problem
+
+##### Location of script
+
+Individual scripts
+-/minus/tests/benchmark/individual/PROBLEM_NAME-benchmark/*sh
+- You may have to adjust the path to minus-chicago in the scripts
+
+##### workflow of how to run this benchmark
 
    0. create an experiments folder with a tag. At first, the tag is just 'tmp', eg, benchmarkdir/tmp, where benchmarkdir is defined inside the script
-   1. Navigate to your experiment folder (e.g. chicago-benchmark/tmp).
-   2. Run the script: ../script-gammaotimo.sh
+   1. Navigate to your benchmark folder (e.g. cd benchmarkdir or chicago-benchmark).
+   2. Run the script: ../*.sh
         - before running, you might have to delete the tmp folder
    3. The script will automatically:
-      - Run minus-chicago over the configurations.
+      - Run minus-chicago or minus-PROBLEM_NAME over the configurations.
       - Parse the temp.txt files correctly, stripping carriage returns cleanly.
       - Aggregate all the statistics using st-console directly.
       - Output both index.html (for your web browser) and summary.txt (for console/programmatic reading).
 
-What I want from you NOW
+##### What I want from AI agent NOW (mostly already done)
 - Build an awesome, good-looking, professional, advanced and interactive
   javascript visualizer (currently this is index.html output from the script)
   We will then iterate until we get the full boxplot running, and then we can deploy to github
@@ -111,7 +164,10 @@ What I want from you NOW
         - Interactivity
             - I want to click on a problem or a boxplot, and a display of that configuration comes up.
               For now, only show me the string specifying of the problem (the sythdata line in the script tells you that)
+            - TODO Next phase1 give me three images of the camera configurations
+            - TODO Next phase3 show on the viewsphere where the three cameras are located.
         - The boxplot is dynamically getting its information from text files. If I refresh the page, the data should
           be refreshed, even if at least partially. You can hafve intermediate files as to not having to recompute everything
           for the experiment.
-
+        
+- TODO Next phase 2: repeat for linecircle

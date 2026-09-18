@@ -6,13 +6,34 @@
 #MAIO 2025
 
 set -x
-minusdir=/home/juliana/Documents/doutorado/minus   # TODO: infer this automatically eg from cmake
+set -e
+
+#minusdir=/home/juliana/Documents/doutorado/minus   # TODO: infer this automatically eg from cmake
+minusdir=/Users/rfabbri/cprg/vxlprg/lemsvpe/minus # TODO: infer this automatically eg from cmake
 synthdata=$minusdir/scripts/synthdata/synthdata
 minus=$minusdir/bin/minus-chicago
-benchmarkdir=$minusdir/tests/benchmark
-configurations=$benchmarkdir/FRePTcorrigido.txt
+benchmarkdir=$minusdir/tests/benchmark/individual/chicago-benchmark
+configurations=$benchmarkdir/inputs/configuration-specs/*
 
-for i in $(seq 1 2)
+expname=tmp
+
+rm -rf $exp
+mkdir  $exp
+cd $exp
+
+# TODO: make sure st or st-console installed
+
+if [[ "`uname`" != Linux ]]; then
+  MYOS="OSX"
+  mysed=gsed
+  myst=st
+else
+  MYOS="Linux"
+  mysed=sed
+  myst=st-console
+fi
+
+for i in $(seq 1 2) # each configuration
 do 
     mkdir frpt-P$i
     fr1=$(cat $configurations | sed -n "$(($i))p" |cut -d' ' -f1)
@@ -23,20 +44,24 @@ do
     pt3=$(cat $configurations | sed -n "$(($i))p" |cut -d' ' -f6)
     for j in $(seq 1 5) # number of runs
     do 
+      if [[ "$MYOS" = Linux ]]; then
         script -c "$synthdata $fr1 $fr2 $fr3 $pt1 $pt2 $pt3 0 1 |$minus -i -gt  --prefilter_degeneracy=no > out.txt" temp.txt
-        sed -i 's/\r$//' temp.txt
+      else
+        script temp.txt bash -c "$synthdata $fr1 $fr2 $fr3 $pt1 $pt2 $pt3 0 1 |$minus -i -gt  --prefilter_degeneracy=no > out.txt" 
+      fi
+      $mysed -i 's/\r$//' temp.txt
 
-#	cat out.txt | cut -d '(' -f 2| cut -d ")" -f 1| sed -n '1,114p'>> frpt-P$i/vec_gamma-P$i.txt
-       grep -E "^LOG [0-9]+ " temp.txt | cut -d' ' -f 3 >> frpt-P$i/sol_step-P$i.txt
-       grep "isvalid)" temp.txt | cut -d')' -f2 >> frpt-P$i/realsol-P$i.txt
-       echo '313,10'>> frpt-P$i/realsol-P$i.txt
-       solution=$(grep index temp.txt | cut -d : -f 2)
-       if [ -z "$solution" ]
-       then
-           solution=313
-       fi
-       echo $solution>> frpt-P$i/gt_sol-P$i.txt
-       cat temp.txt | cut -d' ' -f 2-5| sed -n '2,3p' >> frpt-P$i/frpt-$i.txt
+#	cat ut.txt | cut -d '(' -f 2| cut -d ")" -f 1| sed -n '1,114p'>> frpt-P$i/vec_gamma-P$i.txt
+      grep -E "^LOG [0-9]+ " temp.txt | cut -d' ' -f 3 >> frpt-P$i/sol_step-P$i.txt
+      grep "isvalid)" temp.txt | cut -d')' -f2 >> frpt-P$i/realsol-P$i.txt
+      echo '313,10'>> frpt-P$i/realsol-P$i.txt
+      solution=$(grep index temp.txt | cut -d : -f 2)
+      if [ -z "$solution" ]
+      then
+          solution=313
+      fi
+      echo $solution>> frpt-P$i/gt_sol-P$i.txt
+      cat temp.txt | cut -d' ' -f 2-5| $mysed -n '2,3p' >> frpt-P$i/frpt-$i.txt
     done
 done
 
@@ -51,8 +76,8 @@ import subprocess
 import json
 
 def get_stats(file_path):
-    s = subprocess.check_output(["st-console", "--sum", "--no-header", file_path]).decode().strip()
-    m = subprocess.check_output(["st-console", "--median", "--no-header", file_path]).decode().strip()
+    s = subprocess.check_output(["$st", "--sum", "--no-header", file_path]).decode().strip()
+    m = subprocess.check_output(["$st", "--median", "--no-header", file_path]).decode().strip()
     return s, m
 
 txt = "MINUS Benchmark Results Summary\n"
@@ -99,7 +124,7 @@ for d in dirs:
         })
 
 # Grand Stats
-grand_median = subprocess.check_output(["st-console", "--median", "--no-header", "all_steps.txt"]).decode().strip()
+grand_median = subprocess.check_output(["$st", "--median", "--no-header", "all_steps.txt"]).decode().strip()
 
 txt += f"\nGrand Totals:\n"
 txt += f"Total Iteration Steps: {int(grand_sum)}\n"
@@ -272,4 +297,3 @@ EOF
 
 python3 update_html.py
 echo "Done! See index.html and summary.txt."
-
