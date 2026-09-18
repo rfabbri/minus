@@ -33,3 +33,11 @@ But you can detect this early-on and just discard this problem (say, in
 RANSAC):
 
 synthdata 35 99 75 1815 2558 3880 0 1 | minus-chicago -i --prefilter_degeneracy=yes
+
+## 20260430 
+
+### Added
+Compile flag -flto for link time optimization. The benefit seems a couple ms
+shavings on prelimuinary tests, but it is worth adding as it logically makes
+sense. It may slowdown Release compile time but we don't care about that,
+we want raw runtime speed.

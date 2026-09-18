@@ -5,8 +5,6 @@
 // \author Ricardo Fabbri based on original code by Anton Leykin 
 // \date Created: Fri Feb  8 17:42:49 EST 2019
 // 
-#include <cstdio>
-#include <iomanip>
 #include <cstring>
 #include "minus.h"
 #include "internal-util.hxx"
