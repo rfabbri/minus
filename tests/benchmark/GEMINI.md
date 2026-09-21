@@ -25,12 +25,32 @@ will have a javascript plot of the results. This allows the user to interact wit
 
 TODO(next phase 0): 
     - The toplevel webiste with results is fixed html and javascript at 
-         minus/tests/benchmark/www  (root folder of the project is minus)
+         minus/tests/benchmark/toplevel/www  (root folder of the project is minus)
     - When benchmarks are run, this website points to the results via a path
       hardcoded in the html
         - It shows a thumbnail for each problem, upon clicking, it goes to the
           index.html for each problem separately.
-        - Each separate benchmark also features its own separate index.html 
+        - Each separate benchmark in minus/tests/benchmark/individual/ also
+          features its own separate index.html in the experiments folder
+    - Further TODO (phase 0): 
+        - First lets make individual/chicago-benchmark/ work
+        - What is there currently is a previously working script I built with
+          you in the past, but I manually broke the monolith script into:
+            main -> the main shell script to run (see below for additional
+            info).
+        - The sub-script generate-site currently both generates a python script
+        to update the html from results that have already batch-run, and also
+        the python script simultaneously displays stats textually on the screeen
+            - TODO(phase 0) You must make the text display completely
+              independent of the html update, and the text display should work
+              in the shell script txt-stats (if you need power tools in addition
+              to standard UNIX shell scripting, you can use perl or python, but
+              keep this text file as independent as possible as it should run in
+              20 years if necessary - it should be very robust)
+            - TODO(phase 0.1) After we get the txt stats yanked out and working,
+            let us regenerate the website again (index.html) for that
+            individual/ experiment. 
+            
 
 #### Alternate visualizations
 If desired, the data can also be plotted / rendered into a .png or svg for static viewing.
@@ -59,6 +79,19 @@ ground-truth, etc.
 - the scripts may coordinate running these benchmarks with gnu parallel or simpy spawning multiple processes
 across multiple nodes if the server farm has them
 
+### Design choices
+- Robust tech: The textual benchmark as well as the web visualization should be as robust as
+  possible, meaning it should work in 10 years from now flawlessly and reliably.
+  Example: gitk is done using tcl/tk which is not a modern conventional UI but
+  it works for decades now. Similarly we have MOTIF UI for tooling that works
+  till this date. I'm not saying to use these techs, but choose the tech that
+  can implement the functionality asked beautifully, while being incredibly
+  robust to technology changes and upgrades. I know I can run it in a container,
+  but you can also choose robust tech if you can and minimize bloat if possible,
+  and use standardized tech as much as possible.  Of course priority is get the
+  web pages working robustly on most standardized platforms and
+  browsers.
+  
 ### Detailed description
 
 #### Experiment 1
@@ -132,8 +165,17 @@ In each folder, there are these data files (with suffix P$i, e.g., P1, P2, P3, .
 
 ##### Location of script
 
-Individual scripts
--/minus/tests/benchmark/individual/PROBLEM_NAME-benchmark/*sh
+Individual shell scripts
+-/minus/tests/benchmark/individual/PROBLEM_NAME-benchmark/
+    main
+        - runs the main benchmark
+        - generates text stats
+        - regenerates the website interactive html results
+
+    sub-scripts (can be run individually afte)
+        
+    txt-stats
+        - print stats on the screen
 - You may have to adjust the path to minus-chicago in the scripts
 
 ##### workflow of how to run this benchmark
