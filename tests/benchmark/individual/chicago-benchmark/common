@@ -1,6 +1,7 @@
 #!/bin/bash
 set -x
 set -e
+set -uo pipefail
 
 #minusdir=/home/juliana/Documents/doutorado/minus   # TODO: infer this automatically eg from cmake
 minusdir=/Users/rfabbri/cprg/vxlprg/lemsvpe/minus # TODO: infer this automatically eg from cmake

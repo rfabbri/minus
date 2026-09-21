@@ -1,20 +1,34 @@
 #!/bin/bash
 
-# Generate Version 2.0 Summaries
+# Generate Version 2.0.1 Summaries
 . common
 
 set +x
 
 cd "$exp" || exit 1
 
-dos2unix frpt-P*/sol_step-P*.txt 2>/dev/null
 cat frpt-P*/sol_step-P*.txt > all_steps.txt 2>/dev/null
 
 generate_stats() {
-    echo "MINUS Benchmark Results Summary"
+    is_color=$1
+    if [ "$is_color" == "color" ]; then
+        C_RESET="\e[0m"
+        C_TITLE="\e[1;37m"
+        C_ID="\e[1;36m"
+        C_SUM="\e[1;33m"
+        C_MED="\e[1;32m"
+    else
+        C_RESET=""
+        C_TITLE=""
+        C_ID=""
+        C_SUM=""
+        C_MED=""
+    fi
+
+    echo -e "${C_TITLE}MINUS Benchmark Results Summary${C_RESET}"
     echo "-------------------------------"
     echo ""
-    echo "Per Configuration:"
+    echo -e "${C_TITLE}Per Configuration:${C_RESET}"
 
     grand_sum=0
     # sort numerically by config id
@@ -26,17 +40,19 @@ generate_stats() {
             s=$(st --sum --no-header "$step_file" | awk '{print $1}')
             m=$(st --median --no-header "$step_file" | awk '{print $1}')
             
-            echo "  Config P${id} Steps: Sum = $s, Median = $m"
+            echo -e "  Config ${C_ID}P${id}${C_RESET} Steps: Sum = ${C_SUM}${s}${C_RESET}, Median = ${C_MED}${m}${C_RESET}"
             grand_sum=$(echo "$grand_sum + $s" | bc)
         fi
     done
 
     grand_median=$(st --median --no-header all_steps.txt | awk '{print $1}')
 
-    echo
-    echo "Grand Totals:"
-    echo "  Total Iteration Steps: ${grand_sum}"
-    echo "  Grand Median Steps: ${grand_median}"
+    echo ""
+    echo -e "${C_TITLE}Grand Totals:${C_RESET}"
+    echo -e "  Total Iteration Steps: ${C_SUM}${grand_sum}${C_RESET}"
+    echo -e "  Grand Median Steps: ${C_MED}${grand_median}${C_RESET}"
 }
 
-generate_stats | tee summary.txt
+echo "Generating txt statistics..."
+generate_stats plain > summary.txt
+generate_stats color
