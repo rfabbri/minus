@@ -12,11 +12,11 @@ cat frpt-P*/sol_step-P*.txt > all_steps.txt 2>/dev/null
 generate_stats() {
     is_color=$1
     if [ "$is_color" == "color" ]; then
-        C_RESET="\e[0m"
-        C_TITLE="\e[1;37m"
-        C_ID="\e[1;36m"
-        C_SUM="\e[1;33m"
-        C_MED="\e[1;32m"
+        C_RESET="\033[0m"
+        C_TITLE="\033[1;37m"
+        C_ID="\033[1;36m"
+        C_SUM="\033[1;33m"
+        C_MED="\033[1;32m"
     else
         C_RESET=""
         C_TITLE=""
@@ -25,10 +25,10 @@ generate_stats() {
         C_MED=""
     fi
 
-    echo -e "${C_TITLE}MINUS Benchmark Results Summary${C_RESET}"
+    printf "%b\n" "${C_TITLE}MINUS Benchmark Results Summary${C_RESET}"
     echo "-------------------------------"
     echo ""
-    echo -e "${C_TITLE}Per Configuration:${C_RESET}"
+    printf "%b\n" "${C_TITLE}Per Configuration:${C_RESET}"
 
     grand_sum=0
     # sort numerically by config id
@@ -40,7 +40,7 @@ generate_stats() {
             s=$(st --sum --no-header "$step_file" | awk '{print $1}')
             m=$(st --median --no-header "$step_file" | awk '{print $1}')
             
-            echo -e "  Config ${C_ID}P${id}${C_RESET} Steps: Sum = ${C_SUM}${s}${C_RESET}, Median = ${C_MED}${m}${C_RESET}"
+            printf "%b\n" "  Config ${C_ID}P${id}${C_RESET} Steps: Sum = ${C_SUM}${s}${C_RESET}, Median = ${C_MED}${m}${C_RESET}"
             grand_sum=$(echo "$grand_sum + $s" | bc)
         fi
     done
@@ -48,9 +48,9 @@ generate_stats() {
     grand_median=$(st --median --no-header all_steps.txt | awk '{print $1}')
 
     echo ""
-    echo -e "${C_TITLE}Grand Totals:${C_RESET}"
-    echo -e "  Total Iteration Steps: ${C_SUM}${grand_sum}${C_RESET}"
-    echo -e "  Grand Median Steps: ${C_MED}${grand_median}${C_RESET}"
+    printf "%b\n" "${C_TITLE}Grand Totals:${C_RESET}"
+    printf "%b\n" "  Total Iteration Steps: ${C_SUM}${grand_sum}${C_RESET}"
+    printf "%b\n" "  Grand Median Steps: ${C_MED}${grand_median}${C_RESET}"
 }
 
 echo "Generating txt statistics..."
