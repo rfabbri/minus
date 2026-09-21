@@ -13,7 +13,7 @@ template <typename F>
 inline void
 pprint(const F *v, unsigned n, bool newline=false)
 {
-#ifdef M_VERBOSE
+#if M_VERBOSE >= 2
   for (unsigned i=0; i < n; ++i)
     std::cout << v[i] << ((newline)? "\n" : " ");
   std::cout << std::endl;
@@ -24,7 +24,7 @@ template <typename F>
 inline void
 pprint(const F *v, unsigned nrows, unsigned ncols)
 {
-#ifdef M_VERBOSE
+#if M_VERBOSE >= 2
   for (unsigned i=0; i < nrows; ++i)
     print(v + i*ncols, ncols);
 #endif
@@ -36,16 +36,17 @@ pprint(const F *v, unsigned nrows, unsigned ncols)
 //
 // LLOG is Lowlevel Logging - usually for telemetry or debugging
 // 
+#define LLOG(x)
+
 #ifdef M_VERBOSE
   #undef LOG
   #define LOG(msg) do { \
     std::cerr << "LOG " << msg << std::endl; \
   } while(0)
-  
- #define LLOG(x) std::cerr << x // usage: LLOG("Message " << value);
-#else
- #define LLOG(x)
-#endif // M_VERBOSE
+  #if M_VERBOSE == 2
+    #define LLOG(x) std::cerr << x // usage: LLOG("Message " << value);
+  #endif
+#endif
 // #endif // NDEBUG
 
 

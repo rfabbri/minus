@@ -91,6 +91,9 @@ across multiple nodes if the server farm has them
   and use standardized tech as much as possible.  Of course priority is get the
   web pages working robustly on most standardized platforms and
   browsers.
+
+### Requirements
+- MINUS must be built with M_VERBOSE 1 (both on cmd/minus-*.cxx, and on minus/minus/minus.hxx)
   
 ### Detailed description
 

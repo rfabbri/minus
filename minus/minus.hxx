@@ -9,7 +9,8 @@
 #include "minus.h"
 #include "internal-util.hxx"
 
-//#define M_VERBOSE  // TODO: cmake option like INTERNAL TELEMETRY ON
+#define M_VERBOSE 1  // TODO: cmake option like INTERNAL TELEMETRY ON 
+                     // This is 1 for potentially useful info; 2 for debug details
 #include "debug-util.h"
 
 // TODO: perhaps move inside problem.hxx
@@ -83,7 +84,7 @@ track(const track_settings &s,
     v::copy(s_s, x0);
     *t0 = 0; *dt = t_step;
     
-#ifdef M_VERBOSE
+#if M_VERBOSE >= 2
     LLOG("H must evaluate to 0 at start solution\n"); 
     evaluate_HxH(x0t0, params, HxH);
     LLOG(AA << std::endl);
@@ -451,7 +452,7 @@ probe_all_solutions(
       }
       already_found = true;
     } else { // not a possible solution depsite being real
-      LLOG("DEBUG: Found a real solution but it is not close to ground truth: (sol,isvalid)" << sol << "," << solutions[sol].status << std::endl);
+      LOG("DEBUG: Found a real solution but it is not close to ground truth: (sol,isvalid)" << sol << "," << solutions[sol].status << std::endl);
 #if 0
       LLOG("\tErrors: \n");
       for (unsigned s=0; s < data::n_gt_sols_; ++s) {

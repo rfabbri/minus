@@ -18,7 +18,7 @@
 #include <iomanip>
 #include <chrono>
 #include <thread>
-#define  M_VERBOSE  // display verbose messages and telemetry logging
+#define  M_VERBOSE 1 // display verbose messages and telemetry logging
 #include <minus/minus.h>
 #include <minus/linecircle2a-io.h>
 #include <minus/linecircle-default.h>
