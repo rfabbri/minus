@@ -26,17 +26,17 @@ generate_stats() {
             s=$(st --sum --no-header "$step_file" | awk '{print $1}')
             m=$(st --median --no-header "$step_file" | awk '{print $1}')
             
-            echo "Config P${id}: Sum = $s, Median = $m"
+            echo "  Config P${id} Steps: Sum = $s, Median = $m"
             grand_sum=$(echo "$grand_sum + $s" | bc)
         fi
     done
 
     grand_median=$(st --median --no-header all_steps.txt | awk '{print $1}')
 
-    echo ""
+    echo
     echo "Grand Totals:"
-    echo "Total Iteration Steps: ${grand_sum}"
-    echo "Grand Median Steps: ${grand_median}"
+    echo "  Total Iteration Steps: ${grand_sum}"
+    echo "  Grand Median Steps: ${grand_median}"
 }
 
 generate_stats | tee summary.txt

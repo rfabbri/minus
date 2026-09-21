@@ -138,8 +138,6 @@ In each folder, there are these data files (with suffix P$i, e.g., P1, P2, P3, .
     
     realsol-P$i.txt: index of remaining roots that are not ground-truth
            - for this file, there is a separator like 313,10  (313 = number of solutions + 1, 10 is just a code
-            that is beyond any root code / error code) to separate a given run from the next - are two columns
-
 
     frpt-P$i.txt: cameras and points of the problem - just for archival/inspection, not for benchmark
 
