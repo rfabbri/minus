@@ -200,3 +200,5 @@ tutorial/linepoint/startSys
 tutorial/vids
 tutorial/tmp
 compile_commands.json
+README_INTERNAL_PRIVATE.md
+tmp/

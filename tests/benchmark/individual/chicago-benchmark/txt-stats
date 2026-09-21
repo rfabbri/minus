@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Generate Version 2.0 Summaries
+. common
+
+set +x
+
+cd "$exp" || exit 1
+
+dos2unix frpt-P*/sol_step-P*.txt 2>/dev/null
+cat frpt-P*/sol_step-P*.txt > all_steps.txt 2>/dev/null
+
+generate_stats() {
+    echo "MINUS Benchmark Results Summary"
+    echo "-------------------------------"
+    echo ""
+    echo "Per Configuration:"
+
+    grand_sum=0
+    # sort numerically by config id
+    dirs=$(ls -d frpt-P*/ 2>/dev/null | awk -F'[-/]' '{print $2}' | sed 's/P//' | sort -n)
+
+    for id in $dirs; do
+        step_file="frpt-P${id}/sol_step-P${id}.txt"
+        if [ -f "$step_file" ]; then
+            s=$(st --sum --no-header "$step_file" | awk '{print $1}')
+            m=$(st --median --no-header "$step_file" | awk '{print $1}')
+            
+            echo "Config P${id}: Sum = $s, Median = $m"
+            grand_sum=$(echo "$grand_sum + $s" | bc)
+        fi
+    done
+
+    grand_median=$(st --median --no-header all_steps.txt | awk '{print $1}')
+
+    echo ""
+    echo "Grand Totals:"
+    echo "Total Iteration Steps: ${grand_sum}"
+    echo "Grand Median Steps: ${grand_median}"
+}
+
+generate_stats | tee summary.txt

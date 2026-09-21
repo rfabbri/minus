@@ -1,0 +1,12 @@
+#!/bin/bash
+set -x
+set -e
+
+#minusdir=/home/juliana/Documents/doutorado/minus   # TODO: infer this automatically eg from cmake
+minusdir=/Users/rfabbri/cprg/vxlprg/lemsvpe/minus # TODO: infer this automatically eg from cmake
+synthdata=$minusdir/scripts/synthdata/synthdata
+minus=$minusdir/bin/minus-chicago
+benchmarkdir=$minusdir/tests/benchmark/individual/chicago-benchmark
+configurations=$benchmarkdir/inputs/configuration-spec/*
+
+exp=tmp
