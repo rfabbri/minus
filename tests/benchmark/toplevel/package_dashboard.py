@@ -150,11 +150,11 @@ def main():
                   }};
                   Plotly.newPlot('trendPlot', [trace], {{
                     title: '<b>Trend: Grand Median Steps per Commit</b>',
-                    margin: {{ t: 40, b: 40, l: 40, r: 20 }},
+                    margin: {{ t: 40, b: 50, l: 85, r: 30 }},
                     paper_bgcolor: 'rgba(0,0,0,0)',
                     plot_bgcolor: 'rgba(0,0,0,0)',
                     xaxis: {{ title: 'Commit Hash', type: 'category' }},
-                    yaxis: {{ title: 'Grand Median Steps' }}
+                    yaxis: {{ title: {{ text: 'Grand Median Steps', standoff: 20 }}, automargin: true }}
                   }});
               }}
             </script>
@@ -164,6 +164,18 @@ def main():
 
         dirs_to_process = [("tmp", commit_6)] + [(f"{h}-run", h) for h in valid_hashes]
         for d_name, d_hash in set(dirs_to_process):
+            # If historical run, synchronize grandMedian in data.js from history if recorded
+            h_entry = next((item for item in history if item.get("commit") == d_hash), None)
+            if h_entry and h_entry.get("medians") and h_entry["medians"].get(p) is not None:
+                rec_med = h_entry["medians"][p]
+                djs_path = os.path.join(p_dir, d_name, "data.js")
+                if os.path.exists(djs_path):
+                    with open(djs_path, "r") as f:
+                        djs = f.read()
+                    djs = re.sub(r'const grandMedian\s*=\s*[\d\.]+;', f'const grandMedian = {rec_med};', djs)
+                    with open(djs_path, "w") as f:
+                        f.write(djs)
+
             idx_path = os.path.join(p_dir, d_name, "index.html")
             if os.path.exists(idx_path):
                 with open(idx_path, "r") as f:
@@ -179,27 +191,137 @@ def main():
                 if "<body>" in html:
                     html = html.replace("<body>", "<body>\n" + top_nav, 1)
                 
-                # Upgrade green median line to hoverable trace if not already converted
-                if "Grand Median: ' + grandMedian" not in html and "Plotly.newPlot('myDiv'" in html:
-                    upgrade_script = """
-        if (typeof grandMedian !== 'undefined' && !traces.some(t => t.name === 'Grand Median') && typeof benchmarkData !== 'undefined' && benchmarkData.length > 0) {
-            traces.push({
-                x: benchmarkData.map(d => d.x),
-                y: benchmarkData.map(() => grandMedian),
-                mode: 'lines',
-                line: { color: 'lime', width: 3.5 },
-                name: 'Grand Median',
-                hoverinfo: 'text',
-                hovertext: benchmarkData.map(() => 'Grand Median: ' + grandMedian),
-                hoverlabel: { bgcolor: '#1b5e20', font: { color: '#ffffff', size: 14 } },
-                showlegend: false
-            });
-            if (typeof layout !== 'undefined' && layout.shapes) {
-                layout.shapes = layout.shapes.filter(s => !(s.line && s.line.color === 'lime'));
+                # Upgrade green median line to shape with continuous anywhere-hover and styled badge
+                html = re.sub(r'// UPGRADE_MEDIAN_START.*?// UPGRADE_MEDIAN_END\s*', '', html, flags=re.DOTALL)
+                html = re.sub(r'// MEDIAN_HOVER_LISTENER_START.*?// MEDIAN_HOVER_LISTENER_END\s*', '', html, flags=re.DOTALL)
+                html = re.sub(r'if \(typeof grandMedian !== \'undefined\' && !traces\.some.*?Plotly\.newPlot\(\'myDiv\'', "Plotly.newPlot('myDiv'", html, flags=re.DOTALL)
+                
+                upgrade_script = """// UPGRADE_MEDIAN_START
+        if (typeof grandMedian !== 'undefined') {
+            traces = traces.filter(t => t.name !== 'Grand Median');
+            if (typeof layout !== 'undefined') {
+                layout.shapes = (layout.shapes || []).filter(s => !(s.line && (s.line.color === 'lime' || s.line.color === 'rgb(0, 255, 0)' || s.line.color === '0, 255, 0')));
+                layout.shapes.push({
+                    type: 'line',
+                    xref: 'paper',
+                    x0: 0,
+                    x1: 1,
+                    yref: 'y',
+                    y0: grandMedian,
+                    y1: grandMedian,
+                    line: {
+                        color: 'lime',
+                        width: 3.5
+                    }
+                });
+                if (layout.annotations) {
+                    layout.annotations.forEach(ann => {
+                        if (ann.text && (ann.text.includes('Median') || ann.text.includes('median'))) {
+                            ann.text = '<b>Grand Median: ' + grandMedian + '</b>';
+                            ann.font = { size: 14, color: '#1b5e20' };
+                            ann.bgcolor = '#dcfce7';
+                            ann.bordercolor = '#22c55e';
+                            ann.borderwidth = 1.5;
+                        }
+                    });
+                }
             }
         }
+        // UPGRADE_MEDIAN_END
         Plotly.newPlot('myDiv'"""
-                    html = html.replace("Plotly.newPlot('myDiv'", upgrade_script, 1)
+                html = html.replace("Plotly.newPlot('myDiv'", upgrade_script, 1)
+
+                hover_script = """Plotly.newPlot('myDiv', traces, layout, {responsive: true});
+        // MEDIAN_HOVER_LISTENER_START
+        (function() {
+            const myPlot = document.getElementById('myDiv');
+            if (!myPlot) return;
+            let pointTip = document.getElementById('pointTooltip');
+            if (!pointTip) {
+                pointTip = document.createElement('div');
+                pointTip.id = 'pointTooltip';
+                pointTip.style.position = 'fixed';
+                pointTip.style.display = 'none';
+                pointTip.style.padding = '6px 12px';
+                pointTip.style.borderRadius = '6px';
+                pointTip.style.fontSize = '13px';
+                pointTip.style.fontFamily = 'monospace';
+                pointTip.style.pointerEvents = 'none';
+                pointTip.style.zIndex = '99999';
+                pointTip.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+                pointTip.style.whiteSpace = 'nowrap';
+                document.body.appendChild(pointTip);
+            }
+
+            function getMedianPath() {
+                const paths = myPlot.querySelectorAll('path');
+                for (let i = 0; i < paths.length; i++) {
+                    const p = paths[i];
+                    const s = (p.getAttribute('style') || '') + ' ' + (p.getAttribute('stroke') || '');
+                    if (s.includes('lime') || s.includes('0, 255, 0') || s.includes('0,255,0')) {
+                        return p;
+                    }
+                }
+                return null;
+            }
+
+            function updateMedianHover(e) {
+                if (typeof grandMedian === 'undefined' || !myPlot) return;
+                const medianPath = getMedianPath();
+                let lineY = null;
+                let leftX = 0, rightX = 0;
+                if (medianPath) {
+                    const r = medianPath.getBoundingClientRect();
+                    if (r.width > 0) {
+                        lineY = (r.top + r.bottom) / 2;
+                        leftX = r.left;
+                        rightX = r.right;
+                    }
+                }
+                if (lineY === null && myPlot._fullLayout && myPlot._fullLayout.yaxis) {
+                    const b = myPlot.getBoundingClientRect();
+                    const fl = myPlot._fullLayout;
+                    leftX = b.left + fl.margin.l;
+                    rightX = b.left + fl.width - fl.margin.r;
+                    lineY = b.top + fl.margin.t + fl.yaxis.c2p(grandMedian);
+                }
+                if (lineY === null) return;
+
+                const hitZone = 14;
+                if (e.clientX >= leftX && e.clientX <= rightX &&
+                    e.clientY >= (lineY - hitZone) && e.clientY <= (lineY + hitZone)) {
+                    pointTip.innerHTML = '<span style="font-weight:bold; font-size:14px; letter-spacing:0.3px;">Grand Median: ' + grandMedian + '</span>';
+                    pointTip.style.left = e.clientX + 'px';
+                    pointTip.style.top = (e.clientY - 35) + 'px';
+                    pointTip.style.transform = 'none';
+                    pointTip.style.background = '#1b5e20';
+                    pointTip.style.color = '#ffffff';
+                    pointTip.style.border = '1px solid #4ade80';
+                    pointTip.style.display = 'block';
+                    myPlot.style.cursor = 'pointer';
+                } else if (pointTip.innerHTML.includes('Grand Median:')) {
+                    pointTip.style.display = 'none';
+                    pointTip.style.transform = 'translate(12px, 12px)';
+                    pointTip.style.background = 'rgba(33, 37, 41, 0.92)';
+                    pointTip.style.border = 'none';
+                    myPlot.style.cursor = '';
+                }
+            }
+
+            myPlot.addEventListener('mousemove', updateMedianHover);
+            myPlot.addEventListener('mouseleave', function() {
+                if (pointTip.innerHTML.includes('Grand Median:')) {
+                    pointTip.style.display = 'none';
+                    pointTip.style.transform = 'translate(12px, 12px)';
+                    pointTip.style.background = 'rgba(33, 37, 41, 0.92)';
+                    pointTip.style.border = 'none';
+                    myPlot.style.cursor = '';
+                }
+            });
+        })();
+        // MEDIAN_HOVER_LISTENER_END"""
+                if "Plotly.newPlot('myDiv', traces, layout, {responsive: true});" in html:
+                    html = html.replace("Plotly.newPlot('myDiv', traces, layout, {responsive: true});", hover_script, 1)
                 
                 # Inject bottom UI before </body>
                 if "</body>" in html:

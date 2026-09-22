@@ -205,23 +205,6 @@ cat << 'EOF' > index.html
             });
         });
 
-        if (benchmarkData.length > 0) {
-            traces.push({
-                x: benchmarkData.map(d => d.x),
-                y: benchmarkData.map(() => grandMedian),
-                mode: 'lines',
-                line: {
-                    color: 'lime',
-                    width: 3.5
-                },
-                name: 'Grand Median',
-                hoverinfo: 'text',
-                hovertext: benchmarkData.map(() => 'Grand Median: ' + grandMedian),
-                hoverlabel: { bgcolor: '#1b5e20', font: { color: '#ffffff', size: 14 } },
-                showlegend: false
-            });
-        }
-
         const layout = {
             title: '<b>Time spent in paths leading to undesired roots</b>',
             titlefont: { size: 24 },
@@ -240,20 +223,35 @@ cat << 'EOF' > index.html
                 tickangle: -90,
                 tickfont: { size: 10 }
             },
-            shapes: [],
+            shapes: [
+                {
+                    type: 'line',
+                    xref: 'paper',
+                    x0: 0,
+                    x1: 1,
+                    yref: 'y',
+                    y0: grandMedian,
+                    y1: grandMedian,
+                    line: {
+                        color: 'lime',
+                        width: 3.5
+                    }
+                }
+            ],
             annotations: [
                 {
                     x: 1,
                     y: grandMedian,
                     xref: 'paper',
                     yref: 'y',
-                    text: 'Median time',
+                    text: '<b>Grand Median: ' + grandMedian + '</b>',
                     showarrow: false,
                     xanchor: 'right',
                     yanchor: 'bottom',
-                    font: { size: 16 },
-                    bgcolor: 'white',
-                    bordercolor: 'black'
+                    font: { size: 14, color: '#1b5e20' },
+                    bgcolor: '#dcfce7',
+                    bordercolor: '#22c55e',
+                    borderwidth: 1.5
                 }
             ],
             plot_bgcolor: 'white',
@@ -262,6 +260,92 @@ cat << 'EOF' > index.html
         };
 
         Plotly.newPlot('myDiv', traces, layout, {responsive: true});
+
+        (function() {
+            const myPlot = document.getElementById('myDiv');
+            let pointTip = document.getElementById('pointTooltip');
+            if (!pointTip) {
+                pointTip = document.createElement('div');
+                pointTip.id = 'pointTooltip';
+                pointTip.style.position = 'fixed';
+                pointTip.style.display = 'none';
+                pointTip.style.padding = '6px 12px';
+                pointTip.style.borderRadius = '6px';
+                pointTip.style.fontSize = '13px';
+                pointTip.style.fontFamily = 'monospace';
+                pointTip.style.pointerEvents = 'none';
+                pointTip.style.zIndex = '99999';
+                pointTip.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+                pointTip.style.whiteSpace = 'nowrap';
+                document.body.appendChild(pointTip);
+            }
+
+            function getMedianPath() {
+                const paths = myPlot.querySelectorAll('path');
+                for (let i = 0; i < paths.length; i++) {
+                    const p = paths[i];
+                    const s = (p.getAttribute('style') || '') + ' ' + (p.getAttribute('stroke') || '');
+                    if (s.includes('lime') || s.includes('0, 255, 0') || s.includes('0,255,0')) {
+                        return p;
+                    }
+                }
+                return null;
+            }
+
+            function updateMedianHover(e) {
+                if (typeof grandMedian === 'undefined' || !myPlot) return;
+                const medianPath = getMedianPath();
+                let lineY = null;
+                let leftX = 0, rightX = 0;
+                if (medianPath) {
+                    const r = medianPath.getBoundingClientRect();
+                    if (r.width > 0) {
+                        lineY = (r.top + r.bottom) / 2;
+                        leftX = r.left;
+                        rightX = r.right;
+                    }
+                }
+                if (lineY === null && myPlot._fullLayout && myPlot._fullLayout.yaxis) {
+                    const b = myPlot.getBoundingClientRect();
+                    const fl = myPlot._fullLayout;
+                    leftX = b.left + fl.margin.l;
+                    rightX = b.left + fl.width - fl.margin.r;
+                    lineY = b.top + fl.margin.t + fl.yaxis.c2p(grandMedian);
+                }
+                if (lineY === null) return;
+
+                const hitZone = 14;
+                if (e.clientX >= leftX && e.clientX <= rightX &&
+                    e.clientY >= (lineY - hitZone) && e.clientY <= (lineY + hitZone)) {
+                    pointTip.innerHTML = '<span style="font-weight:bold; font-size:14px; letter-spacing:0.3px;">Grand Median: ' + grandMedian + '</span>';
+                    pointTip.style.left = e.clientX + 'px';
+                    pointTip.style.top = (e.clientY - 35) + 'px';
+                    pointTip.style.transform = 'none';
+                    pointTip.style.background = '#1b5e20';
+                    pointTip.style.color = '#ffffff';
+                    pointTip.style.border = '1px solid #4ade80';
+                    pointTip.style.display = 'block';
+                    myPlot.style.cursor = 'pointer';
+                } else if (pointTip.innerHTML.includes('Grand Median:')) {
+                    pointTip.style.display = 'none';
+                    pointTip.style.transform = 'translate(12px, 12px)';
+                    pointTip.style.background = 'rgba(33, 37, 41, 0.92)';
+                    pointTip.style.border = 'none';
+                    myPlot.style.cursor = '';
+                }
+            }
+
+            myPlot.addEventListener('mousemove', updateMedianHover);
+            myPlot.addEventListener('mouseleave', function() {
+                if (pointTip.innerHTML.includes('Grand Median:')) {
+                    pointTip.style.display = 'none';
+                    pointTip.style.transform = 'translate(12px, 12px)';
+                    pointTip.style.background = 'rgba(33, 37, 41, 0.92)';
+                    pointTip.style.border = 'none';
+                    myPlot.style.cursor = '';
+                }
+            });
+        })();
 
         const colors = ['#e74c3c', '#3498db', '#2ecc71']; // Red, Blue, Green for points
         const vectorColors = ['#c0392b', '#2980b9', '#27ae60']; // Darker Red, Blue, Green for vectors
