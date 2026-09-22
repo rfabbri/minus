@@ -198,7 +198,11 @@ def main():
                 
                 upgrade_script = """// UPGRADE_MEDIAN_START
         if (typeof grandMedian !== 'undefined') {
-            traces = traces.filter(t => t.name !== 'Grand Median');
+            for (let __i = traces.length - 1; __i >= 0; __i--) {
+                if (traces[__i].name === 'Grand Median') {
+                    traces.splice(__i, 1);
+                }
+            }
             if (typeof layout !== 'undefined') {
                 layout.shapes = (layout.shapes || []).filter(s => !(s.line && (s.line.color === 'lime' || s.line.color === 'rgb(0, 255, 0)' || s.line.color === '0, 255, 0')));
                 layout.shapes.push({
