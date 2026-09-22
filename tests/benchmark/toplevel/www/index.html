@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINUS Benchmark Results Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 40px;
+        }
+        .dashboard-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .benchmark-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            width: 320px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+        .benchmark-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        .thumbnail {
+            width: 100%;
+            height: 200px;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid #eee;
+            font-size: 48px;
+            color: #adb5bd;
+        }
+        .card-content {
+            padding: 20px;
+        }
+        .card-content h2 {
+            margin: 0 0 10px 0;
+            font-size: 22px;
+            color: #34495e;
+        }
+        .card-content p {
+            margin: 0;
+            color: #7f8c8d;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .status {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 5px 10px;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>MINUS Benchmark Dashboard</h1>
+
+    <div class="dashboard-container">
+        
+        <!-- Chicago Benchmark -->
+        <a href="../../individual/chicago-benchmark/tmp/index.html" class="benchmark-card">
+            <div class="thumbnail">
+                <!-- Fallback icon/text since we don't have real images yet -->
+                📷
+            </div>
+            <div class="card-content">
+                <h2>Chicago</h2>
+                <p>Trifocal problem, 14x14 system with 312 degrees of nonlinearity. Tracks time spent in paths leading to undesired roots.</p>
+                <div class="status">Phase 0 Ready</div>
+            </div>
+        </a>
+
+        <!-- Linecircle Benchmark -->
+        <a href="../../individual/linecircle-benchmark/tmp/index.html" class="benchmark-card">
+            <div class="thumbnail">
+                ⭕
+            </div>
+            <div class="card-content">
+                <h2>Linecircle</h2>
+                <p>Minimal problem intersection solver tracking configurations and ground-truth validation across experiments.</p>
+                <div class="status">Phase 1 Ready (v2.1 alpha)</div>
+            </div>
+        </a>
+
+        <!-- Add more problem cards here as needed -->
+        
+    </div>
+
+</body>
+</html>

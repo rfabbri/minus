@@ -265,6 +265,13 @@ endif()
 #   target_link_libraries( bnld_algo bnld vnl_algo vil brent)
 # endif()
 
+# Configure script includes for benchmarks
+configure_file(
+    ${CMAKE_SOURCE_DIR}/tests/benchmark/common.incl.in
+    ${CMAKE_SOURCE_DIR}/tests/benchmark/common.incl
+    @ONLY
+)
+
 # Benchmark evaluation target (v3.1)
 add_custom_target(eval
     COMMAND ./main

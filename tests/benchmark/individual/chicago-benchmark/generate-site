@@ -13,7 +13,7 @@ import json
 
 plot_data = []
 
-synthdata_bin = os.environ.get("SYNTHDATA_BIN", "/Users/rfabbri/cprg/vxlprg/lemsvpe/minus/scripts/synthdata/synthdata")
+synthdata_bin = os.environ.get("SYNTHDATA_BIN", "synthdata")
 
 try:
     with open("../../inputs/configuration-spec/FRePTcorrigido.txt", "r") as frept_f:

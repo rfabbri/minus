@@ -4,7 +4,7 @@ set -e
 set -uo pipefail
 
 . ../../common.incl
-minus=$minusdir/bin/minus-linecircle
+minus=$minus_bindir/minus-linecircle
 benchmarkdir=$minusdir/tests/benchmark/individual/linecircle-benchmark
 configurations=$benchmarkdir/inputs/configuration-spec/CirLiNovo.txt
 ground_truth=$benchmarkdir/inputs/ground-truth/Pts_linecircleNovo.txt

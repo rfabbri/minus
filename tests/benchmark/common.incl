@@ -1,2 +1,0 @@
-minusdir=/Users/rfabbri/cprg/vxlprg/lemsvpe/minus # TODO: infer this automatically eg from cmake
-benchmarkdir=$minusdir/tests/benchmark
