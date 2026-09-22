@@ -109,13 +109,19 @@ def main():
             
             top_nav = f"""
             <!-- INJECTED_NAV_START -->
-            <div style="display:flex; justify-content:space-between; align-items:center; margin:0 0 25px 0; padding:12px 20px; background:white; border:1px solid #e2e8f0; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.04); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-              <a href="{top_href}" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; color:#1d4ed8; font-weight:600; font-size:14px; padding:6px 14px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; transition:background 0.2s;">
-                &larr; Back to Benchmark Dashboard
-              </a>
-              <span style="font-size:14px; color:#64748b;">
-                Problem: <strong style="color:#0f172a; text-transform:capitalize;">{p}</strong> &bull; Viewing Commit <code style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-weight:bold; color:#0f172a;">{current_view_hash}</code>
-              </span>
+            <div style="margin: 0 0 25px 0;">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 20px; background:white; border:1px solid #e2e8f0; border-radius:8px 8px 0 0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+                  <a href="{top_href}" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; color:#1d4ed8; font-weight:600; font-size:14px; padding:6px 14px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; transition:background 0.2s;">
+                    &larr; Back to Benchmark Dashboard
+                  </a>
+                  <span style="font-size:14px; color:#64748b;">
+                    Problem: <strong style="color:#0f172a; text-transform:capitalize;">{p}</strong> &bull; Viewing Commit <code style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-weight:bold; color:#0f172a;">{current_view_hash}</code>
+                  </span>
+                </div>
+                <div style="display:flex; justify-content:center; align-items:center; padding:12px 20px; background:#f8fafc; border:1px solid #e2e8f0; border-top:none; border-radius:0 0 8px 8px; box-shadow:0 4px 6px rgba(0,0,0,0.02); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+                    <span style="font-size:14px; margin-right:15px; color:#475569; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Compare Commits:</span>
+                    {btns_str}
+                </div>
             </div>
             <!-- INJECTED_NAV_END -->
             """
@@ -123,10 +129,6 @@ def main():
             bottom_ui = f"""
             <!-- INJECTED_UI_START -->
             <div style="margin:40px auto; max-width:1000px; padding:24px; background:white; border:1px solid #e2e8f0; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.05); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-              <div style="margin-bottom:20px; text-align:center;">
-                <span style="font-size:15px; margin-right:15px; color:#334155; font-weight:600;">Compare Commits:</span>
-                {btns_str}
-              </div>
               <div id="trendPlot" style="width:100%; height:320px;"></div>
             </div>
             <script>
