@@ -32,24 +32,6 @@ TODO(next phase 0):
           index.html for each problem separately.
         - Each separate benchmark in minus/tests/benchmark/individual/ also
           features its own separate index.html in the experiments folder
-    - Further TODO (phase 0): 
-        - First lets make individual/chicago-benchmark/ work
-        - What is there currently is a previously working script I built with
-          you in the past, but I manually broke the monolith script into:
-            main -> the main shell script to run (see below for additional
-            info).
-        - The sub-script generate-site currently both generates a python script
-        to update the html from results that have already batch-run, and also
-        the python script simultaneously displays stats textually on the screeen
-            - TODO(phase 0) You must make the text display completely
-              independent of the html update, and the text display should work
-              in the shell script txt-stats (if you need power tools in addition
-              to standard UNIX shell scripting, you can use perl or python, but
-              keep this text file as independent as possible as it should run in
-              20 years if necessary - it should be very robust)
-            - TODO(phase 0.1) After we get the txt stats yanked out and working,
-            let us regenerate the website again (index.html) for that
-            individual/ experiment. 
             
 
 #### Alternate visualizations
