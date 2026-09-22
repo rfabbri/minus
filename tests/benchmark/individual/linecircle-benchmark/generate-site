@@ -169,6 +169,8 @@ cat << 'EOF' > index.html
         </div>
     </div>
 
+    <div id="pointTooltip" style="position: fixed; display: none; background: rgba(33, 37, 41, 0.92); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-family: monospace; pointer-events: none; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.3); white-space: nowrap; transform: translate(12px, 12px);"></div>
+
     <script src="data.js"></script>
     <script>
         const traces = [];
@@ -312,6 +314,22 @@ cat << 'EOF' > index.html
             yAxis.setAttribute('stroke-dasharray', `${width * 0.01},${width * 0.01}`);
             svg.appendChild(yAxis);
 
+            // Tooltip controller
+            const tooltip = document.getElementById('pointTooltip');
+            function showTip(e, text) {
+                tooltip.innerHTML = text;
+                tooltip.style.left = e.clientX + 'px';
+                tooltip.style.top = e.clientY + 'px';
+                tooltip.style.display = 'block';
+            }
+            function moveTip(e) {
+                tooltip.style.left = e.clientX + 'px';
+                tooltip.style.top = e.clientY + 'px';
+            }
+            function hideTip() {
+                tooltip.style.display = 'none';
+            }
+
             // Draw circle: a(x^2 + y^2) + bx + c = 0
             const circleElem = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             circleElem.setAttribute('cx', xc);
@@ -320,6 +338,10 @@ cat << 'EOF' > index.html
             circleElem.setAttribute('fill', 'none');
             circleElem.setAttribute('stroke', '#2980b9');
             circleElem.setAttribute('stroke-width', width * 0.008);
+            circleElem.style.cursor = 'crosshair';
+            circleElem.addEventListener('mouseenter', (e) => showTip(e, `Circle: radius = ${r.toFixed(3)}, center = (${xc.toFixed(2)}, ${yc.toFixed(2)})`));
+            circleElem.addEventListener('mousemove', moveTip);
+            circleElem.addEventListener('mouseleave', hideTip);
             svg.appendChild(circleElem);
 
             // Draw straight line: dx + ey + f = 0
@@ -349,23 +371,54 @@ cat << 'EOF' > index.html
             lineElem.setAttribute('y2', ly2);
             lineElem.setAttribute('stroke', '#e74c3c');
             lineElem.setAttribute('stroke-width', width * 0.008);
+            lineElem.style.cursor = 'crosshair';
+            lineElem.addEventListener('mouseenter', (e) => showTip(e, `Line: (${d.toFixed(2)})x + (${e.toFixed(2)})y + (${f.toFixed(2)}) = 0`));
+            lineElem.addEventListener('mousemove', moveTip);
+            lineElem.addEventListener('mouseleave', hideTip);
             svg.appendChild(lineElem);
 
-            // Draw intersection ground truth points
+            // Draw intersection ground truth points with enlarged hit areas
             points.forEach((p, idx) => {
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.style.cursor = 'pointer';
+
+                // Transparent enlarged hit-target for instant and effortless hovering
+                const hitCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                hitCircle.setAttribute('cx', p.x);
+                hitCircle.setAttribute('cy', p.y);
+                hitCircle.setAttribute('r', Math.max(width * 0.06, 14));
+                hitCircle.setAttribute('fill', 'transparent');
+                hitCircle.setAttribute('pointer-events', 'all');
+                g.appendChild(hitCircle);
+
+                // Visible point circle
                 const ptElem = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                 ptElem.setAttribute('cx', p.x);
                 ptElem.setAttribute('cy', p.y);
-                ptElem.setAttribute('r', width * 0.02);
+                ptElem.setAttribute('r', Math.max(width * 0.025, 4));
                 ptElem.setAttribute('fill', idx === 0 ? '#27ae60' : '#8e44ad');
                 ptElem.setAttribute('stroke', '#fff');
-                ptElem.setAttribute('stroke-width', width * 0.004);
+                ptElem.setAttribute('stroke-width', Math.max(width * 0.005, 1));
+                g.appendChild(ptElem);
 
+                const label = `<strong>Point ${idx + 1}</strong>: [${p.x.toFixed(4)}, ${p.y.toFixed(4)}]`;
+
+                g.addEventListener('mouseenter', (e) => {
+                    ptElem.setAttribute('r', Math.max(width * 0.035, 6));
+                    showTip(e, label);
+                });
+                g.addEventListener('mousemove', moveTip);
+                g.addEventListener('mouseleave', () => {
+                    ptElem.setAttribute('r', Math.max(width * 0.025, 4));
+                    hideTip();
+                });
+
+                // Fallback native SVG title
                 const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
                 title.textContent = `P${idx + 1}: [${p.x.toFixed(4)}, ${p.y.toFixed(4)}]`;
-                ptElem.appendChild(title);
+                g.appendChild(title);
 
-                svg.appendChild(ptElem);
+                svg.appendChild(g);
             });
         }
 

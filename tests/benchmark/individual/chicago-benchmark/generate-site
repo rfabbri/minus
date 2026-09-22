@@ -148,6 +148,7 @@ cat << 'EOF' > index.html
             <svg class="view-canvas" id="view3" viewBox="0 0 500 400"></svg>
         </div>
     </div>
+    <div id="pointTooltip" style="position: fixed; display: none; background: rgba(33, 37, 41, 0.92); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-family: monospace; pointer-events: none; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.3); white-space: nowrap; transform: translate(12px, 12px);"></div>
 
     <script src="data.js"></script>
     <script>
@@ -313,19 +314,63 @@ cat << 'EOF' > index.html
                     svg.appendChild(line);
                 }
 
-                // Draw the point over it
+                // Tooltip controller
+                const tooltip = document.getElementById('pointTooltip');
+                function showTip(e, text) {
+                    tooltip.innerHTML = text;
+                    tooltip.style.left = e.clientX + 'px';
+                    tooltip.style.top = e.clientY + 'px';
+                    tooltip.style.display = 'block';
+                }
+                function moveTip(e) {
+                    tooltip.style.left = e.clientX + 'px';
+                    tooltip.style.top = e.clientY + 'px';
+                }
+                function hideTip() {
+                    tooltip.style.display = 'none';
+                }
+
+                // Point group
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.style.cursor = 'pointer';
+
+                // Transparent enlarged hit-target
+                const hitCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                hitCircle.setAttribute('cx', p.x);
+                hitCircle.setAttribute('cy', p.y);
+                hitCircle.setAttribute('r', 28);
+                hitCircle.setAttribute('fill', 'transparent');
+                hitCircle.setAttribute('pointer-events', 'all');
+                g.appendChild(hitCircle);
+
+                // Visible point circle
                 const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                 circle.setAttribute('cx', p.x);
                 circle.setAttribute('cy', p.y);
-                circle.setAttribute('r', 15); // Grown 2x size from previous `6`
+                circle.setAttribute('r', 15);
                 circle.setAttribute('fill', colors[cIdx]);
+                circle.setAttribute('stroke', '#fff');
+                circle.setAttribute('stroke-width', 2);
+                g.appendChild(circle);
 
-                // Hover functionality
+                const label = `<strong>Point ${idx}</strong>: [${p.x.toFixed(2)}, ${p.y.toFixed(2)}]`;
+
+                g.addEventListener('mouseenter', (e) => {
+                    circle.setAttribute('r', 19);
+                    showTip(e, label);
+                });
+                g.addEventListener('mousemove', moveTip);
+                g.addEventListener('mouseleave', () => {
+                    circle.setAttribute('r', 15);
+                    hideTip();
+                });
+
+                // Fallback title
                 const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
                 title.textContent = `Point ${idx}: [${p.x.toFixed(2)}, ${p.y.toFixed(2)}]`;
-                circle.appendChild(title);
+                g.appendChild(title);
                 
-                svg.appendChild(circle);
+                svg.appendChild(g);
             });
         }
 
