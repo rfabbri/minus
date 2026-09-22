@@ -80,11 +80,14 @@
 <body>
 
     <h1>MINUS Benchmark Dashboard</h1>
+    <p style="text-align:center; font-size:15px; color:#555; margin-top:-25px; margin-bottom:35px;">
+        Commit: <code style="background:#e2e8f0; padding:2px 6px; border-radius:4px; color:#1a202c; font-weight:bold;">{{COMMIT_SHA_6}}</code> &bull; Last updated: <span>{{LAST_UPDATED}}</span>
+    </p>
 
     <div class="dashboard-container">
         
         <!-- Chicago Benchmark -->
-        <a href="../../individual/chicago-benchmark/tmp/index.html" class="benchmark-card">
+        <a href="{{CHICAGO_HREF}}" class="benchmark-card">
             <div class="thumbnail">
                 <!-- Fallback icon/text since we don't have real images yet -->
                 📷
@@ -97,7 +100,8 @@
         </a>
 
         <!-- Linecircle Benchmark -->
-        <a href="../../individual/linecircle-benchmark/tmp/index.html" class="benchmark-card">
+        <a href="{{LINECIRCLE_HREF}}" class="benchmark-card">
+
             <div class="thumbnail">
                 ⭕
             </div>

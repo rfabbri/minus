@@ -33,6 +33,16 @@ jobs:
           path: build/bin/synthcurves-multiview-3d-dataset
           key: synthcurves-dataset-v1
 
+      - name: Cache benchmark history
+        uses: actions/cache@v4
+        with:
+          path: |
+            tests/benchmark/toplevel/history.json
+            tests/benchmark/individual/*-benchmark/*-run
+          key: benchmark-history-${{ github.sha }}
+          restore-keys: |
+            benchmark-history-
+
       - name: Build MINUS and Run Benchmarks
         run: |
           # Build out-of-source
@@ -44,15 +54,11 @@ jobs:
           make eval
 
       - name: Prepare Pages Layout
+        # The public directory was fully assembled during make eval by package_dashboard.py 
+        # This step is just meant to output what was generated for verification.
         run: |
-          mkdir -p public
-          
-          # Adjust the paths in the toplevel index to match the deployed folder structure
-          sed 's|../../individual/chicago-benchmark/tmp/|./chicago-benchmark/|g; s|../../individual/linecircle-benchmark/tmp/|./linecircle-benchmark/|g' tests/benchmark/toplevel/www/index.html > public/index.html
-          
-          # Copy outputs from the experiments into toplevel routing
-          cp -r tests/benchmark/individual/chicago-benchmark/tmp/ public/chicago-benchmark/
-          cp -r tests/benchmark/individual/linecircle-benchmark/tmp/ public/linecircle-benchmark/
+          ls -R public
+
           
       - name: Setup Pages
         uses: actions/configure-pages@v5

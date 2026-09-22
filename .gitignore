@@ -220,3 +220,10 @@ tests/benchmark/individual/chicago-benchmark/tmp2/
 tests/benchmark/individual/chicago-benchmark/txt-stats.bak
 tutorial/linecircle/end-linecircle-tmp.m2
 
+
+# Benchmark packaging outputs
+public/
+tests/benchmark/toplevel/history.json
+tests/benchmark/individual/*-benchmark/*-run
+tests/benchmark/toplevel/www/index.html
+
