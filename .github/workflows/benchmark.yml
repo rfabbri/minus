@@ -24,6 +24,9 @@ jobs:
       - name: Install Dependencies
         run: |
           echo "Dependencies loaded via macos-latest runner (cmake, make, python3 pre-installed)."
+          echo "Further needs: gnu-sed and st"
+          brew update
+          brew install gnu-sed st
 
       - name: Build MINUS and Run Benchmarks
         run: |
