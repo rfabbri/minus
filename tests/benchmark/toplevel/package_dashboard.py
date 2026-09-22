@@ -39,7 +39,7 @@ def main():
                     m = float(match.group(1))
         medians[p] = m
         
-    # 3. Load & Process History (keep 3 latest distinct hashes)
+    # 3. Load & Process History (keep up to 5 latest distinct hashes)
     history = []
     if os.path.exists(history_file):
         try:
@@ -55,7 +55,7 @@ def main():
         "date": update_date,
         "medians": medians
     })
-    history = history[:3] # keep max 3 commits
+    history = history[:5] # keep max 5 commits
     
     with open(history_file, 'w') as f:
         json.dump(history, f, indent=2)
@@ -83,36 +83,48 @@ def main():
                     old_path = os.path.join(p_dir, item)
                     shutil.rmtree(old_path)
                     
-        # 5. Inject Button Bar and Trend Plot into individual problem HTMLs
+        # 5. Inject Navigation, Button Bar and Trend Plot into individual problem HTMLs
         # Reversing history for plot (chronological: oldest to newest left to right)
         plot_history = list(reversed(history))
         x_data = [h["commit"] for h in plot_history]
         y_data = [h["medians"].get(p) or 0 for h in plot_history]
         
-        def get_injected_html(current_view_hash):
+        def get_injected_html(current_view_hash, top_href):
             buttons = []
             for h in history:
                 c = h["commit"]
                 badge = " (Latest)" if c == history[0]["commit"] else ""
                 is_active = (current_view_hash == c)
                 
-                style = "padding:5px 12px; margin-right:10px; font-weight:bold; background:#2196F3; color:white; border:none; border-radius:4px; cursor:pointer;"
-                disabled_style = "padding:5px 12px; margin-right:10px; font-weight:bold; background:#cbd5e1; color:#64748b; border:none; border-radius:4px; cursor:default;"
+                style = "padding:6px 14px; margin-right:10px; font-weight:bold; background:#2563eb; color:white; border:none; border-radius:6px; cursor:pointer; font-size:13px; text-decoration:none; display:inline-block;"
+                disabled_style = "padding:6px 14px; margin-right:10px; font-weight:bold; background:#e2e8f0; color:#64748b; border:none; border-radius:6px; cursor:default; font-size:13px; display:inline-block;"
                 
                 if is_active:
-                    buttons.append(f'<button style="{disabled_style}" disabled>{c}{badge}</button>')
+                    buttons.append(f'<span style="{disabled_style}">{c}{badge}</span>')
                 else:
-                    # Link points to `-run` variant explicitly to avoid circular/broken paths if browsing history locally
                     target_dir = f"{c}-run" if c != history[0]["commit"] else "tmp"
-                    buttons.append(f'<a href="../{target_dir}/index.html"><button style="{style}">{c}{badge}</button></a>')
+                    buttons.append(f'<a href="../{target_dir}/index.html" style="text-decoration:none;"><button style="{style}">{c}{badge}</button></a>')
                     
             btns_str = "".join(buttons)
             
-            return f"""
+            top_nav = f"""
+            <!-- INJECTED_NAV_START -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin:0 0 25px 0; padding:12px 20px; background:white; border:1px solid #e2e8f0; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.04); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+              <a href="{top_href}" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; color:#1d4ed8; font-weight:600; font-size:14px; padding:6px 14px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; transition:background 0.2s;">
+                &larr; Back to Benchmark Dashboard
+              </a>
+              <span style="font-size:14px; color:#64748b;">
+                Problem: <strong style="color:#0f172a; text-transform:capitalize;">{p}</strong> &bull; Viewing Commit <code style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-weight:bold; color:#0f172a;">{current_view_hash}</code>
+              </span>
+            </div>
+            <!-- INJECTED_NAV_END -->
+            """
+            
+            bottom_ui = f"""
             <!-- INJECTED_UI_START -->
-            <div style="margin:40px auto; max-width:1000px; padding:20px; background:white; border:1px solid #e2e8f0; border-radius:8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); font-family:sans-serif;">
+            <div style="margin:40px auto; max-width:1000px; padding:24px; background:white; border:1px solid #e2e8f0; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.05); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
               <div style="margin-bottom:20px; text-align:center;">
-                <span style="font-size:16px; margin-right:15px; color:#334155;"><strong>Compare Commits: </strong></span>
+                <span style="font-size:15px; margin-right:15px; color:#334155; font-weight:600;">Compare Commits:</span>
                 {btns_str}
               </div>
               <div id="trendPlot" style="width:100%; height:320px;"></div>
@@ -133,18 +145,22 @@ def main():
                     mode: 'lines+markers',
                     marker: {{size: 10, color: '#e74c3c'}},
                     line: {{width: 3, color: '#c0392b'}},
-                    name: 'Grand Median'
+                    name: 'Grand Median',
+                    hovertemplate: '<b>Commit %{{x}}</b><br>Grand Median: %{{y:.1f}}<extra></extra>'
                   }};
                   Plotly.newPlot('trendPlot', [trace], {{
                     title: '<b>Trend: Grand Median Steps per Commit</b>',
                     margin: {{ t: 40, b: 40, l: 40, r: 20 }},
                     paper_bgcolor: 'rgba(0,0,0,0)',
-                    plot_bgcolor: 'rgba(0,0,0,0)'
+                    plot_bgcolor: 'rgba(0,0,0,0)',
+                    xaxis: {{ title: 'Commit Hash', type: 'category' }},
+                    yaxis: {{ title: 'Grand Median Steps' }}
                   }});
               }}
             </script>
             <!-- INJECTED_UI_END -->
             """
+            return top_nav, bottom_ui
 
         dirs_to_process = [("tmp", commit_6)] + [(f"{h}-run", h) for h in valid_hashes]
         for d_name, d_hash in set(dirs_to_process):
@@ -154,14 +170,42 @@ def main():
                     html = f.read()
                 
                 # Strip old injections
+                html = re.sub(r'<!-- INJECTED_NAV_START -->.*?<!-- INJECTED_NAV_END -->', '', html, flags=re.DOTALL)
                 html = re.sub(r'<!-- INJECTED_UI_START -->.*?<!-- INJECTED_UI_END -->', '', html, flags=re.DOTALL)
                 
-                inj_html = get_injected_html(d_hash)
+                top_nav, bottom_ui = get_injected_html(d_hash, "../../../toplevel/www/index.html")
                 
+                # Inject top nav right after <body>
+                if "<body>" in html:
+                    html = html.replace("<body>", "<body>\n" + top_nav, 1)
+                
+                # Upgrade green median line to hoverable trace if not already converted
+                if "Grand Median: ' + grandMedian" not in html and "Plotly.newPlot('myDiv'" in html:
+                    upgrade_script = """
+        if (typeof grandMedian !== 'undefined' && !traces.some(t => t.name === 'Grand Median') && typeof benchmarkData !== 'undefined' && benchmarkData.length > 0) {
+            traces.push({
+                x: benchmarkData.map(d => d.x),
+                y: benchmarkData.map(() => grandMedian),
+                mode: 'lines',
+                line: { color: 'lime', width: 3.5 },
+                name: 'Grand Median',
+                hoverinfo: 'text',
+                hovertext: benchmarkData.map(() => 'Grand Median: ' + grandMedian),
+                hoverlabel: { bgcolor: '#1b5e20', font: { color: '#ffffff', size: 14 } },
+                showlegend: false
+            });
+            if (typeof layout !== 'undefined' && layout.shapes) {
+                layout.shapes = layout.shapes.filter(s => !(s.line && s.line.color === 'lime'));
+            }
+        }
+        Plotly.newPlot('myDiv'"""
+                    html = html.replace("Plotly.newPlot('myDiv'", upgrade_script, 1)
+                
+                # Inject bottom UI before </body>
                 if "</body>" in html:
-                    html = html.replace("</body>", inj_html + "\n</body>")
+                    html = html.replace("</body>", bottom_ui + "\n</body>")
                 else:
-                    html += inj_html
+                    html += bottom_ui
                     
                 with open(idx_path, "w") as f:
                     f.write(html)
@@ -196,16 +240,29 @@ def main():
         os.makedirs(pub_p, exist_ok=True)
         p_dir = os.path.join(repo_root, f"tests/benchmark/individual/{p}-benchmark")
         
+        # Copy tmp
         if os.path.exists(os.path.join(p_dir, "tmp")):
             shutil.copytree(os.path.join(p_dir, "tmp"), os.path.join(pub_p, "tmp"))
         
+        # Copy historic runs
         for h in valid_hashes:
             rname = f"{h}-run"
             if os.path.exists(os.path.join(p_dir, rname)):
                 shutil.copytree(os.path.join(p_dir, rname), os.path.join(pub_p, rname))
                 
+        # Fix public back links (replace local path with public root path)
+        for root, dirs, files in os.walk(pub_p):
+            for file in files:
+                if file == "index.html":
+                    fpath = os.path.join(root, file)
+                    with open(fpath, "r") as f:
+                        f_html = f.read()
+                    f_html = f_html.replace("../../../toplevel/www/index.html", "../../index.html")
+                    with open(fpath, "w") as f:
+                        f.write(f_html)
+                        
     print(f"Dashboard packaged successfully for Hash {commit_6}.")
-    print(f"Active History: {valid_hashes}")
+    print(f"Active History (up to 5): {valid_hashes}")
 
 if __name__ == "__main__":
     main()

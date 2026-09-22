@@ -223,6 +223,23 @@ cat << 'EOF' > index.html
             });
         });
 
+        if (benchmarkData.length > 0) {
+            traces.push({
+                x: benchmarkData.map(d => d.x),
+                y: benchmarkData.map(() => grandMedian),
+                mode: 'lines',
+                line: {
+                    color: 'lime',
+                    width: 3.5
+                },
+                name: 'Grand Median',
+                hoverinfo: 'text',
+                hovertext: benchmarkData.map(() => 'Grand Median: ' + grandMedian),
+                hoverlabel: { bgcolor: '#1b5e20', font: { color: '#ffffff', size: 14 } },
+                showlegend: false
+            });
+        }
+
         const layout = {
             title: '<b>Iterations per Root for Linecircle Problem</b>',
             titlefont: { size: 22 },
@@ -240,21 +257,7 @@ cat << 'EOF' > index.html
                 tickangle: -90,
                 tickfont: { size: 9 }
             },
-            shapes: [
-                {
-                    type: 'line',
-                    xref: 'paper',
-                    x0: 0,
-                    x1: 1,
-                    yref: 'y',
-                    y0: grandMedian,
-                    y1: grandMedian,
-                    line: {
-                        color: 'lime',
-                        width: 3
-                    }
-                }
-            ],
+            shapes: [],
             annotations: [
                 {
                     x: 1,
