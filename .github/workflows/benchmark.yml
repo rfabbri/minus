@@ -1,0 +1,59 @@
+name: Benchmark Evaluation
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build_and_eval:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+        
+      - name: Install Dependencies
+        run: |
+          echo "Dependencies loaded via macos-latest runner (cmake, make, python3 pre-installed)."
+
+      - name: Build MINUS and Run Benchmarks
+        run: |
+          # Build out-of-source
+          mkdir build && cd build
+          cmake ..
+          make -j4
+          
+          # Run the evaluation scripts
+          make eval
+
+      - name: Prepare Pages Layout
+        run: |
+          mkdir -p public
+          
+          # Adjust the paths in the toplevel index to match the deployed folder structure
+          sed 's|../../individual/chicago-benchmark/tmp/|./chicago-benchmark/|g; s|../../individual/linecircle-benchmark/tmp/|./linecircle-benchmark/|g' tests/benchmark/toplevel/www/index.html > public/index.html
+          
+          # Copy outputs from the experiments into toplevel routing
+          cp -r tests/benchmark/individual/chicago-benchmark/tmp/ public/chicago-benchmark/
+          cp -r tests/benchmark/individual/linecircle-benchmark/tmp/ public/linecircle-benchmark/
+          
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './public'
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
