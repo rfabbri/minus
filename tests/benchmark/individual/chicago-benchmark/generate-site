@@ -13,6 +13,8 @@ import json
 
 plot_data = []
 
+synthdata_bin = os.environ.get("SYNTHDATA_BIN", "/Users/rfabbri/cprg/vxlprg/lemsvpe/minus/scripts/synthdata/synthdata")
+
 try:
     with open("../../inputs/configuration-spec/FRePTcorrigido.txt", "r") as frept_f:
         frept_lines = [line.strip() for line in frept_f.readlines()]
@@ -35,13 +37,42 @@ for d in dirs:
             steps = [int(line.strip()) for line in sf if line.strip().isdigit()]
         
         config_str = "No config found"
+        point_data = {"f1": [], "f2": [], "f3": []}
+        
         if 0 < config_id <= len(frept_lines):
             config_str = frept_lines[config_id - 1]
+            try:
+                # Call synthdata to get points
+                args = config_str.split()
+                # Run synthdata
+                res = subprocess.check_output([synthdata_bin] + args, stderr=subprocess.STDOUT).decode('utf-8')
                 
+                # Parse 2D points from output
+                current_frame = None
+                frame_idx = 0
+                frames_keys = ["f1", "f2", "f3"]
+                
+                for line in res.splitlines():
+                    if "LOG(synthdata) 2D points for frame" in line:
+                        current_frame = frames_keys[frame_idx]
+                        frame_idx += 1
+                        continue
+                    if current_frame and ("LOG" not in line) and (line.strip() != ""):
+                        parts = line.strip().split()
+                        if len(parts) >= 2:
+                            x, y = float(parts[0]), float(parts[1])
+                            point_data[current_frame].append({"x": x, "y": y})
+                    if current_frame and ("LOG(synthdata) 2D tangents" in line or "LOG(synthdata) id" in line):
+                        current_frame = None
+
+            except Exception as e:
+                print(f"Error fetching synthdata for {config_name}: {e}")
+
         plot_data.append({
             "x": config_name,
             "y": steps,
-            "config": config_str
+            "config": config_str,
+            "points": point_data
         })
 
 try:
@@ -55,7 +86,8 @@ with open("data.js", "w") as f:
 
 EOF
 
-python3 update_data.py
+env SYNTHDATA_BIN="$synthdata" python3 update_data.py
+
 
 if [ ! -f index.html ]; then
   cat << 'EOF' > index.html
@@ -68,6 +100,17 @@ if [ ! -f index.html ]; then
         body { font-family: sans-serif; margin: 20px; background-color: #fafafa; }
         #myDiv { background-color: white; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         #infoPanel { margin-top: 20px; padding: 15px; background: white; border: 1px solid #ccc; display: none; }
+        .views-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .view-canvas {
+            border: 1px solid #333;
+            background-color: #f9f9f9;
+            width: 125px; /* ~1.3 inches based on standard DPI, scaled from 500 */
+            height: 100px; /* scaled from 400 */
+        }
     </style>
 </head>
 <body>
@@ -78,6 +121,11 @@ if [ ! -f index.html ]; then
         <h3>Configuration Details</h3>
         <p><strong>ID:</strong> <span id="configId"></span></p>
         <p><strong>Synthdata:</strong> <span id="configStr"></span></p>
+        <div class="views-container">
+            <svg class="view-canvas" id="view1" viewBox="0 0 500 400"></svg>
+            <svg class="view-canvas" id="view2" viewBox="0 0 500 400"></svg>
+            <svg class="view-canvas" id="view3" viewBox="0 0 500 400"></svg>
+        </div>
     </div>
 
     <script src="data.js"></script>
@@ -104,7 +152,7 @@ if [ ! -f index.html ]; then
                 }, 
                 fillcolor: 'blue',
                 hoverinfo: 'y',
-                customdata: [item.config]
+                customdata: [item.config, item.points]
             });
             
             // Calculate median to overlay the white/black dot
@@ -191,16 +239,41 @@ if [ ! -f index.html ]; then
 
         Plotly.newPlot('myDiv', traces, layout, {responsive: true});
 
+        const colors = ['red', 'blue', 'green'];
+
+        function renderPoints(svgId, pts) {
+            const svg = document.getElementById(svgId);
+            svg.innerHTML = '';
+            pts.forEach((p, idx) => {
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', p.x);
+                circle.setAttribute('cy', p.y);
+                circle.setAttribute('r', 6); // 6 units in 500x400 = 1.5px visual radius on 125x100 canvas (3pt thickness)
+                const c = colors[idx % colors.length];
+                circle.setAttribute('fill', c);
+                svg.appendChild(circle);
+            });
+        }
+
         // Add Interactivity
         document.getElementById('myDiv').on('plotly_click', function(data){
             if(data.points.length > 0) {
                 const pt = data.points[0];
                 const configId = pt.data.name;
-                const configStr = pt.data.customdata[0];
+                const custom = pt.data.customdata;
+                const configStr = custom[0];
+                const ptsData = custom[1];
                 
                 const panel = document.getElementById('infoPanel');
                 document.getElementById('configId').innerText = configId;
                 document.getElementById('configStr').innerText = configStr;
+                
+                if (ptsData) {
+                    renderPoints('view1', ptsData.f1 || []);
+                    renderPoints('view2', ptsData.f2 || []);
+                    renderPoints('view3', ptsData.f3 || []);
+                }
+                
                 panel.style.display = 'block';
             }
         });

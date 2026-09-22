@@ -25,7 +25,7 @@ fi
 #Script para rodar os primeiros 140 problemas aleatórios gerados a partir dos dados sintéticos
 #MAIO 2025
 
-for i in $(seq 1 140) # each configuration
+for i in $(seq 1 10) # each configuration
 do 
     mkdir frpt-P$i
     fr1=$(cat $configurations | sed -n "$(($i))p" |cut -d' ' -f1)
