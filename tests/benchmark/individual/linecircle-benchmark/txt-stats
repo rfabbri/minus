@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# Linecircle Benchmark Statistics Summary
+. common
+
+set +x
+
+cd "$exp" || exit 1
+
+cat licir-P*/sol_step-P*.txt > all_steps.txt 2>/dev/null
+
+generate_stats() {
+  is_color=$1
+  if [ "$is_color" == "color" ]; then
+    C_RESET="\033[0m"
+    C_TITLE="\033[1;37m"
+    C_ID="\033[1;36m"
+    C_SUM="\033[1;33m"
+    C_MED="\033[1;32m"
+  else
+    C_RESET=""
+    C_TITLE=""
+    C_ID=""
+    C_SUM=""
+    C_MED=""
+  fi
+
+  printf "%b\n" "${C_TITLE}MINUS Linecircle Benchmark Results Summary (v2.1 alpha)${C_RESET}"
+  echo "--------------------------------------------------------"
+  echo ""
+  printf "%b\n" "${C_TITLE}Per Configuration:${C_RESET}"
+
+  grand_sum=0
+  dirs=$(ls -d licir-P*/ 2>/dev/null | awk -F'[-/]' '{print $2}' | sed 's/P//' | sort -n)
+
+  for id in $dirs; do
+    step_file="licir-P${id}/sol_step-P${id}.txt"
+    if [ -f "$step_file" ]; then
+      read -r s m <<< $(awk '{sum+=$1; vals[NR]=$1} END {n=NR; if (n==0) {print 0, 0} else if (n%2==1) {print sum, vals[(n+1)/2]} else {print sum, (vals[n/2]+vals[n/2+1])/2}}' "$step_file")
+      printf "%b\n" "  Config ${C_ID}P${id}${C_RESET} Steps: Sum = ${C_SUM}${s}${C_RESET}, Median = ${C_MED}${m}${C_RESET}"
+      grand_sum=$((grand_sum + s))
+    fi
+  done
+
+  grand_median=$(sort -n all_steps.txt | awk '{vals[NR]=$1} END {n=NR; if (n==0) print 0; else if (n%2==1) print vals[(n+1)/2]; else print (vals[n/2]+vals[n/2+1])/2}')
+
+  echo ""
+  printf "%b\n" "${C_TITLE}Grand Totals:${C_RESET}"
+  printf "%b\n" "  Total Iteration Steps: ${C_SUM}${grand_sum}${C_RESET}"
+  printf "%b\n" "  Grand Median Steps: ${C_MED}${grand_median}${C_RESET}"
+}
+
+echo "Generating txt statistics..."
+generate_stats plain > summary.txt
+generate_stats color

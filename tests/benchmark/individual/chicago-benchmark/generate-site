@@ -38,32 +38,54 @@ for d in dirs:
         
         config_str = "No config found"
         point_data = {"f1": [], "f2": [], "f3": []}
+        tangent_data = {"f1": [], "f2": [], "f3": []}
         
         if 0 < config_id <= len(frept_lines):
             config_str = frept_lines[config_id - 1]
             try:
-                # Call synthdata to get points
                 args = config_str.split()
-                # Run synthdata
                 res = subprocess.check_output([synthdata_bin] + args, stderr=subprocess.STDOUT).decode('utf-8')
                 
-                # Parse 2D points from output
-                current_frame = None
-                frame_idx = 0
+                current_frame_pts = None
+                current_frame_tgt = None
+                frame_idx_pts = 0
+                frame_idx_tgt = 0
                 frames_keys = ["f1", "f2", "f3"]
                 
                 for line in res.splitlines():
                     if "LOG(synthdata) 2D points for frame" in line:
-                        current_frame = frames_keys[frame_idx]
-                        frame_idx += 1
+                        current_frame_tgt = None
+                        current_frame_pts = frames_keys[frame_idx_pts]
+                        frame_idx_pts += 1
                         continue
-                    if current_frame and ("LOG" not in line) and (line.strip() != ""):
+                    if "LOG(synthdata) 2D tangents for frame" in line:
+                        current_frame_pts = None
+                        current_frame_tgt = frames_keys[frame_idx_tgt]
+                        frame_idx_tgt += 1
+                        continue
+
+                    if current_frame_pts and ("LOG" not in line) and (line.strip() != ""):
                         parts = line.strip().split()
                         if len(parts) >= 2:
                             x, y = float(parts[0]), float(parts[1])
-                            point_data[current_frame].append({"x": x, "y": y})
-                    if current_frame and ("LOG(synthdata) 2D tangents" in line or "LOG(synthdata) id" in line):
-                        current_frame = None
+                            point_data[current_frame_pts].append({"x": x, "y": y})
+                            
+                    if current_frame_tgt and ("LOG" not in line) and (line.strip() != ""):
+                        parts = line.strip().split()
+                        if len(parts) >= 2:
+                            tx, ty = float(parts[0]), float(parts[1])
+                            tangent_data[current_frame_tgt].append({"x": tx, "y": ty})
+
+                    if "LOG(synthdata) id" in line or "LOG(synthdata) K" in line:
+                        current_frame_pts = None
+                        current_frame_tgt = None
+
+                # Zip tangents into points
+                for fk in frames_keys:
+                    for idx, pt in enumerate(point_data[fk]):
+                        if idx < len(tangent_data[fk]):
+                            pt["tx"] = tangent_data[fk][idx]["x"]
+                            pt["ty"] = tangent_data[fk][idx]["y"]
 
             except Exception as e:
                 print(f"Error fetching synthdata for {config_name}: {e}")
@@ -89,12 +111,11 @@ EOF
 env SYNTHDATA_BIN="$synthdata" python3 update_data.py
 
 
-if [ ! -f index.html ]; then
-  cat << 'EOF' > index.html
+cat << 'EOF' > index.html
 <!DOCTYPE html>
 <html>
 <head>
-    <title>MINUS Benchmark Results v2.0</title>
+    <title>MINUS Benchmark Results v2.1 alpha</title>
     <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
     <style>
         body { font-family: sans-serif; margin: 20px; background-color: #fafafa; }
@@ -114,7 +135,7 @@ if [ ! -f index.html ]; then
     </style>
 </head>
 <body>
-    <h1>MINUS Benchmark Results (Version 2.0)</h1>
+    <h1>MINUS Benchmark Results (Version 2.1 alpha)</h1>
     <div id="myDiv" style="width: 100%; height: 800px;"></div>
     
     <div id="infoPanel">
@@ -239,18 +260,71 @@ if [ ! -f index.html ]; then
 
         Plotly.newPlot('myDiv', traces, layout, {responsive: true});
 
-        const colors = ['red', 'blue', 'green'];
+        const colors = ['#e74c3c', '#3498db', '#2ecc71']; // Red, Blue, Green for points
+        const vectorColors = ['#c0392b', '#2980b9', '#27ae60']; // Darker Red, Blue, Green for vectors
 
-        function renderPoints(svgId, pts) {
+        function renderPoints(svgId, pts, activeTangents) {
             const svg = document.getElementById(svgId);
             svg.innerHTML = '';
+            
+            // Add arrow marker definition for the vectors
+            const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+            vectorColors.forEach((vc, idx) => {
+                const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+                marker.setAttribute('id', `arrow-${idx}`);
+                marker.setAttribute('viewBox', '0 0 10 10');
+                marker.setAttribute('refX', '5');
+                marker.setAttribute('refY', '5');
+                marker.setAttribute('markerWidth', '6');
+                marker.setAttribute('markerHeight', '6');
+                marker.setAttribute('orient', 'auto-start-reverse');
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
+                path.setAttribute('fill', vc);
+                path.setAttribute('fill-opacity', '0.5'); // Ensure arrowheads match 0.5 stroke alpha
+                marker.appendChild(path);
+                defs.appendChild(marker);
+            });
+            svg.appendChild(defs);
+
             pts.forEach((p, idx) => {
+                const cIdx = idx % colors.length;
+                
+                // If point has a tangent vector AND is inside active config (0, 1), draw it
+                if (p.tx !== undefined && p.ty !== undefined && activeTangents.includes(idx)) {
+                    // Length = 4x point radius size logic
+                    const ptRadiusConfigMap = 12; // Adjusted point radius sizing map matching visual target
+                    const vScale = ptRadiusConfigMap * 5; 
+                    
+                    const p1x = p.x;
+                    const p1y = p.y;
+                    const p2x = p.x + (p.tx * vScale);
+                    const p2y = p.y + (p.ty * vScale);
+                    
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', p1x);
+                    line.setAttribute('y1', p1y);
+                    line.setAttribute('x2', p2x);
+                    line.setAttribute('y2', p2y);
+                    line.setAttribute('stroke', vectorColors[cIdx]);
+                    line.setAttribute('stroke-width', '5');
+                    line.setAttribute('stroke-opacity', '0.4');
+                    line.setAttribute('marker-end', `url(#arrow-${cIdx})`);
+                    svg.appendChild(line);
+                }
+
+                // Draw the point over it
                 const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                 circle.setAttribute('cx', p.x);
                 circle.setAttribute('cy', p.y);
-                circle.setAttribute('r', 6); // 6 units in 500x400 = 1.5px visual radius on 125x100 canvas (3pt thickness)
-                const c = colors[idx % colors.length];
-                circle.setAttribute('fill', c);
+                circle.setAttribute('r', 15); // Grown 2x size from previous `6`
+                circle.setAttribute('fill', colors[cIdx]);
+
+                // Hover functionality
+                const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+                title.textContent = `Point ${idx}: [${p.x.toFixed(2)}, ${p.y.toFixed(2)}]`;
+                circle.appendChild(title);
+                
                 svg.appendChild(circle);
             });
         }
@@ -267,11 +341,21 @@ if [ ! -f index.html ]; then
                 const panel = document.getElementById('infoPanel');
                 document.getElementById('configId').innerText = configId;
                 document.getElementById('configStr').innerText = configStr;
+
+                // Extract active tangents from synthdata string
+                let activeTangents = [];
+                if (configStr) {
+                    const parts = configStr.trim().split(/\s+/);
+                    if (parts.length >= 2) {
+                        activeTangents.push(parseInt(parts[parts.length - 2], 10));
+                        activeTangents.push(parseInt(parts[parts.length - 1], 10));
+                    }
+                }
                 
                 if (ptsData) {
-                    renderPoints('view1', ptsData.f1 || []);
-                    renderPoints('view2', ptsData.f2 || []);
-                    renderPoints('view3', ptsData.f3 || []);
+                    renderPoints('view1', ptsData.f1 || [], activeTangents);
+                    renderPoints('view2', ptsData.f2 || [], activeTangents);
+                    renderPoints('view3', ptsData.f3 || [], activeTangents);
                 }
                 
                 panel.style.display = 'block';
@@ -281,6 +365,5 @@ if [ ! -f index.html ]; then
 </body>
 </html>
 EOF
-fi
 
 echo "Done! See index.html to view interactive charts. data.js has been updated."

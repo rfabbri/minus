@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# Linecircle Benchmark Worker
+# Runs 140 configurations through minus-linecircle
+
+. common
+
+rm -rf "$exp"
+mkdir "$exp"
+
+set +e
+
+for i in $(seq 1 10); do
+  cfg_dir="$exp/licir-P${i}"
+  mkdir -p "$cfg_dir"
+
+  # Extract line $i from configurations and ground-truth
+  cfg_line=$(sed -n "${i}p" "$configurations")
+  gt_line=$(sed -n "${i}p" "$ground_truth")
+
+  cir1=$(echo "$cfg_line" | awk '{print $1}')
+  cir2=$(echo "$cfg_line" | awk '{print $3}')
+  cir3=$(echo "$cfg_line" | awk '{print $5}')
+  li1=$(echo "$cfg_line" | awk '{print $7}')
+  li2=$(echo "$cfg_line" | awk '{print $9}')
+  li3=$(echo "$cfg_line" | awk '{print $11}')
+
+  pt1x=$(echo "$gt_line" | awk '{print $1}')
+  pt1y=$(echo "$gt_line" | awk '{print $2}')
+  pt2x=$(echo "$gt_line" | awk '{print $3}')
+  pt2y=$(echo "$gt_line" | awk '{print $4}')
+
+  input_str="$cir1 0 $cir2 0 $cir3 0 $li1 0 $li2 0 $li3 0 $pt1x 0 $pt1y 0 $pt2x 0 $pt2y 0"
+  echo "$input_str" > "$cfg_dir/configANDgt-P${i}.txt"
+
+  echo "$input_str" | "$minus" -i -gt > "$cfg_dir/out.txt" 2> "$cfg_dir/temp.txt"
+
+  # Extract step iterations for each root (0 and 1)
+  sed -n 's/.*LOG 0 \([0-9]*\).*/\1/p' "$cfg_dir/temp.txt" >> "$cfg_dir/sol_step-P${i}.txt"
+  sed -n 's/.*LOG 1 \([0-9]*\).*/\1/p' "$cfg_dir/temp.txt" >> "$cfg_dir/sol_step-P${i}.txt"
+
+  # Solution validity and ground truth detection
+  if grep -q "no valid solution" "$cfg_dir/temp.txt"; then
+    echo 0 > "$cfg_dir/found_sol-P${i}.txt"
+  else
+    echo 1 > "$cfg_dir/found_sol-P${i}.txt"
+  fi
+
+  if grep -q "ground-truth not found" "$cfg_dir/temp.txt"; then
+    echo 0 > "$cfg_dir/gt_sol-P${i}.txt"
+  else
+    echo 1 > "$cfg_dir/gt_sol-P${i}.txt"
+  fi
+done
+
+echo "Linecircle benchmark completed 140 configurations."

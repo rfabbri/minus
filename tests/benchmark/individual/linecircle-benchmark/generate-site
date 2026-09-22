@@ -1,0 +1,412 @@
+#!/bin/bash
+# Generate site for linecircle benchmark
+
+. common
+
+cd "$exp" || exit 1
+
+echo "Updating site data.js..."
+cat << 'EOF' > update_data.py
+import os
+import subprocess
+import json
+import math
+
+plot_data = []
+
+dirs = sorted([d for d in os.listdir('.') if d.startswith('licir-P')], key=lambda x: int(x.split('-P')[1]))
+
+for d in dirs:
+    config_name = d.split('-')[1]
+    config_id = int(config_name.replace('P', ''))
+    step_file = os.path.join(d, f"sol_step-{config_name}.txt")
+    cfg_file = os.path.join(d, f"configANDgt-{config_name}.txt")
+    
+    steps = []
+    if os.path.exists(step_file):
+        with open(step_file, 'r') as sf:
+            steps = [int(line.strip()) for line in sf if line.strip().isdigit()]
+
+    config_str = "No config found"
+    circle_data = {"a": 1, "b": 0, "c": 0, "xc": 0, "yc": 0, "r": 1}
+    line_data = {"d": 0, "e": 1, "f": 0}
+    pts_data = []
+
+    if os.path.exists(cfg_file):
+        with open(cfg_file, 'r') as cf:
+            config_str = cf.read().strip()
+        parts = config_str.split()
+        if len(parts) >= 20:
+            try:
+                # Format: cir1 0 cir2 0 cir3 0 li1 0 li2 0 li3 0 pt1x 0 pt1y 0 pt2x 0 pt2y 0
+                cir1 = float(parts[0])
+                cir2 = float(parts[2])
+                cir3 = float(parts[4])
+                li1 = float(parts[6])
+                li2 = float(parts[8])
+                li3 = float(parts[10])
+                pt1x = float(parts[12])
+                pt1y = float(parts[14])
+                pt2x = float(parts[16])
+                pt2y = float(parts[18])
+
+                xc = -cir2 / (2.0 * cir1) if cir1 != 0 else 0.0
+                yc = 0.0
+                r2 = (cir2 / (2.0 * cir1))**2 - (cir3 / cir1) if cir1 != 0 else 0.0
+                r = math.sqrt(r2) if r2 > 0 else 0.0
+
+                circle_data = {
+                    "a": cir1, "b": cir2, "c": cir3,
+                    "xc": xc, "yc": yc, "r": r
+                }
+                line_data = {
+                    "d": li1, "e": li2, "f": li3
+                }
+                pts_data = [
+                    {"x": pt1x, "y": pt1y},
+                    {"x": pt2x, "y": pt2y}
+                ]
+            except Exception as e:
+                print(f"Error parsing geometry for {config_name}: {e}")
+
+    plot_data.append({
+        "x": config_name,
+        "y": steps,
+        "config": config_str,
+        "circle": circle_data,
+        "line": line_data,
+        "points": pts_data
+    })
+
+grand_median = 0
+if os.path.exists("all_steps.txt"):
+    with open("all_steps.txt") as af:
+        steps_all = [int(l.strip()) for l in af if l.strip().isdigit()]
+    steps_all.sort()
+    if steps_all:
+        mid = len(steps_all) // 2
+        grand_median = steps_all[mid] if len(steps_all) % 2 == 1 else (steps_all[mid - 1] + steps_all[mid]) / 2.0
+
+with open("data.js", "w") as f:
+    f.write(f"const benchmarkData = {json.dumps(plot_data)};\n")
+    f.write(f"const grandMedian = {grand_median};\n")
+EOF
+
+python3 update_data.py
+
+cat << 'EOF' > index.html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MINUS Linecircle Benchmark Results v2.1 alpha</title>
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background-color: #fafafa; }
+        #myDiv { background-color: white; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        #infoPanel { margin-top: 20px; padding: 20px; background: white; border: 1px solid #ccc; border-radius: 8px; display: none; }
+        .config-layout {
+            display: flex;
+            gap: 30px;
+            margin-top: 15px;
+            align-items: flex-start;
+        }
+        .view-canvas {
+            border: 1px solid #333;
+            background-color: #fff;
+            width: 320px;
+            height: 320px;
+            border-radius: 4px;
+        }
+        .eq-box {
+            font-family: monospace;
+            background: #f4f6f8;
+            padding: 12px;
+            border-radius: 6px;
+            line-height: 1.6;
+        }
+        .legend-tag {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <h1>MINUS Linecircle Benchmark Results (Version 2.1 alpha)</h1>
+    <div id="myDiv" style="width: 100%; height: 700px;"></div>
+    
+    <div id="infoPanel">
+        <h3>Configuration Details</h3>
+        <p><strong>ID:</strong> <span id="configId"></span></p>
+        <div class="config-layout">
+            <div>
+                <svg class="view-canvas" id="geometryView"></svg>
+                <div style="margin-top: 8px; font-size: 13px; color: #555;">
+                    <span class="legend-tag" style="background:#2980b9;"></span>Circle: a(x&sup2;+y&sup2;) + bx + c = 0<br>
+                    <span class="legend-tag" style="background:#e74c3c;"></span>Line: dx + ey + f = 0<br>
+                    <span class="legend-tag" style="background:#27ae60;"></span>Intersection Points (Ground Truth)
+                </div>
+            </div>
+            <div style="flex: 1;">
+                <div class="eq-box">
+                    <strong>System Equations:</strong><br>
+                    <span id="circleEq"></span><br>
+                    <span id="lineEq"></span><br><br>
+                    <strong>Circle Geometry:</strong><br>
+                    Center: (<span id="circleCenter"></span>)<br>
+                    Radius: <span id="circleRadius"></span><br><br>
+                    <strong>Ground-Truth Intersections:</strong><br>
+                    P1: (<span id="gtP1"></span>)<br>
+                    P2: (<span id="gtP2"></span>)
+                </div>
+                <p style="margin-top: 10px; font-size: 12px; color: #777; word-break: break-all;">
+                    <strong>Raw Spec:</strong> <span id="configStr"></span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script>
+        const traces = [];
+        
+        benchmarkData.forEach(item => {
+            traces.push({
+                y: item.y,
+                name: item.x,
+                type: 'box',
+                boxpoints: 'all',
+                jitter: 0.3,
+                pointpos: 0,
+                width: 0.3,
+                marker: { 
+                    color: '#95a5a6', 
+                    size: 5, 
+                    symbol: 'circle' 
+                }, 
+                line: { 
+                    color: '#2980b9', 
+                    width: 1 
+                }, 
+                fillcolor: '#3498db',
+                hoverinfo: 'y',
+                customdata: [item.config, item.circle, item.line, item.points]
+            });
+            
+            // Calculate median for overlay dot
+            const sorted = [...item.y].sort((a,b) => a-b);
+            let med = 0;
+            if (sorted.length > 0) {
+                let mid = Math.floor(sorted.length / 2);
+                med = sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+            }
+            
+            traces.push({
+                x: [item.x],
+                y: [med],
+                mode: 'markers',
+                marker: {
+                    color: 'white',
+                    size: 8,
+                    line: {
+                        color: 'black',
+                        width: 1.5
+                    }
+                },
+                hoverinfo: 'skip',
+                showlegend: false
+            });
+        });
+
+        const layout = {
+            title: '<b>Iterations per Root for Linecircle Problem</b>',
+            titlefont: { size: 22 },
+            showlegend: false,
+            yaxis: {
+                title: 'Number of iterations per root',
+                titlefont: { size: 18 },
+                zeroline: false,
+                dtick: 50,
+                gridcolor: '#eee'
+            },
+            xaxis: {
+                title: 'Problem Configuration',
+                titlefont: { size: 18 },
+                tickangle: -90,
+                tickfont: { size: 9 }
+            },
+            shapes: [
+                {
+                    type: 'line',
+                    xref: 'paper',
+                    x0: 0,
+                    x1: 1,
+                    yref: 'y',
+                    y0: grandMedian,
+                    y1: grandMedian,
+                    line: {
+                        color: 'lime',
+                        width: 3
+                    }
+                }
+            ],
+            annotations: [
+                {
+                    x: 1,
+                    y: grandMedian,
+                    xref: 'paper',
+                    yref: 'y',
+                    text: 'Median time: ' + grandMedian,
+                    showarrow: false,
+                    xanchor: 'right',
+                    yanchor: 'bottom',
+                    font: { size: 14 },
+                    bgcolor: 'white',
+                    bordercolor: 'black'
+                }
+            ],
+            plot_bgcolor: 'white',
+            paper_bgcolor: '#fafafa',
+            margin: { l: 80, r: 50, b: 80, t: 80 }
+        };
+
+        Plotly.newPlot('myDiv', traces, layout, {responsive: true});
+
+        function renderGeometry(circle, line, points) {
+            const svg = document.getElementById('geometryView');
+            svg.innerHTML = '';
+
+            const xc = circle.xc;
+            const yc = circle.yc;
+            const r = circle.r > 0 ? circle.r : 10;
+
+            const margin = r * 0.45;
+            const minX = xc - r - margin;
+            const minY = yc - r - margin;
+            const width = 2 * (r + margin);
+            const height = 2 * (r + margin);
+
+            svg.setAttribute('viewBox', `${minX} ${minY} ${width} ${height}`);
+
+            // Draw grid axes
+            const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            xAxis.setAttribute('x1', minX);
+            xAxis.setAttribute('y1', 0);
+            xAxis.setAttribute('x2', minX + width);
+            xAxis.setAttribute('y2', 0);
+            xAxis.setAttribute('stroke', '#e0e0e0');
+            xAxis.setAttribute('stroke-width', width * 0.003);
+            xAxis.setAttribute('stroke-dasharray', `${width * 0.01},${width * 0.01}`);
+            svg.appendChild(xAxis);
+
+            const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            yAxis.setAttribute('x1', 0);
+            yAxis.setAttribute('y1', minY);
+            yAxis.setAttribute('x2', 0);
+            yAxis.setAttribute('y2', minY + height);
+            yAxis.setAttribute('stroke', '#e0e0e0');
+            yAxis.setAttribute('stroke-width', width * 0.003);
+            yAxis.setAttribute('stroke-dasharray', `${width * 0.01},${width * 0.01}`);
+            svg.appendChild(yAxis);
+
+            // Draw circle: a(x^2 + y^2) + bx + c = 0
+            const circleElem = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circleElem.setAttribute('cx', xc);
+            circleElem.setAttribute('cy', yc);
+            circleElem.setAttribute('r', r);
+            circleElem.setAttribute('fill', 'none');
+            circleElem.setAttribute('stroke', '#2980b9');
+            circleElem.setAttribute('stroke-width', width * 0.008);
+            svg.appendChild(circleElem);
+
+            // Draw straight line: dx + ey + f = 0
+            const d = line.d;
+            const e = line.e;
+            const f = line.f;
+
+            let lx1, ly1, lx2, ly2;
+            if (Math.abs(e) > Math.abs(d)) {
+                lx1 = minX;
+                ly1 = (-d * lx1 - f) / e;
+                lx2 = minX + width;
+                ly2 = (-d * lx2 - f) / e;
+            } else if (Math.abs(d) > 1e-12) {
+                ly1 = minY;
+                lx1 = (-e * ly1 - f) / d;
+                ly2 = minY + height;
+                lx2 = (-e * ly2 - f) / d;
+            } else {
+                lx1 = minX; ly1 = 0; lx2 = minX + width; ly2 = 0;
+            }
+
+            const lineElem = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            lineElem.setAttribute('x1', lx1);
+            lineElem.setAttribute('y1', ly1);
+            lineElem.setAttribute('x2', lx2);
+            lineElem.setAttribute('y2', ly2);
+            lineElem.setAttribute('stroke', '#e74c3c');
+            lineElem.setAttribute('stroke-width', width * 0.008);
+            svg.appendChild(lineElem);
+
+            // Draw intersection ground truth points
+            points.forEach((p, idx) => {
+                const ptElem = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                ptElem.setAttribute('cx', p.x);
+                ptElem.setAttribute('cy', p.y);
+                ptElem.setAttribute('r', width * 0.02);
+                ptElem.setAttribute('fill', idx === 0 ? '#27ae60' : '#8e44ad');
+                ptElem.setAttribute('stroke', '#fff');
+                ptElem.setAttribute('stroke-width', width * 0.004);
+
+                const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+                title.textContent = `P${idx + 1}: [${p.x.toFixed(4)}, ${p.y.toFixed(4)}]`;
+                ptElem.appendChild(title);
+
+                svg.appendChild(ptElem);
+            });
+        }
+
+        // Add Interactivity
+        document.getElementById('myDiv').on('plotly_click', function(data){
+            if (data.points.length > 0) {
+                const pt = data.points[0];
+                const configId = pt.data.name;
+                const custom = pt.data.customdata;
+                const configStr = custom[0];
+                const circle = custom[1];
+                const line = custom[2];
+                const points = custom[3];
+
+                const panel = document.getElementById('infoPanel');
+                document.getElementById('configId').innerText = configId;
+                document.getElementById('configStr').innerText = configStr;
+
+                document.getElementById('circleEq').innerText = 
+                    `${circle.a.toFixed(2)}(x² + y²) + (${circle.b.toFixed(2)})x + (${circle.c.toFixed(2)}) = 0`;
+                document.getElementById('lineEq').innerText = 
+                    `(${line.d.toFixed(2)})x + (${line.e.toFixed(2)})y + (${line.f.toFixed(2)}) = 0`;
+
+                document.getElementById('circleCenter').innerText = `${circle.xc.toFixed(3)}, ${circle.yc.toFixed(3)}`;
+                document.getElementById('circleRadius').innerText = circle.r.toFixed(3);
+
+                if (points && points.length >= 2) {
+                    document.getElementById('gtP1').innerText = `${points[0].x.toFixed(4)}, ${points[0].y.toFixed(4)}`;
+                    document.getElementById('gtP2').innerText = `${points[1].x.toFixed(4)}, ${points[1].y.toFixed(4)}`;
+                }
+
+                if (circle && line) {
+                    renderGeometry(circle, line, points || []);
+                }
+
+                panel.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
+EOF
+
+echo "Done! See index.html to view interactive charts. data.js has been updated."

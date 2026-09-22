@@ -1,0 +1,12 @@
+#!/bin/bash
+set -x
+set -e
+set -uo pipefail
+
+minusdir=/Users/rfabbri/cprg/vxlprg/lemsvpe/minus # TODO: infer this automatically eg from cmake
+minus=$minusdir/bin/minus-linecircle
+benchmarkdir=$minusdir/tests/benchmark/individual/linecircle-benchmark
+configurations=$benchmarkdir/inputs/configuration-spec/CirLiNovo.txt
+ground_truth=$benchmarkdir/inputs/ground-truth/Pts_linecircleNovo.txt
+
+exp=tmp

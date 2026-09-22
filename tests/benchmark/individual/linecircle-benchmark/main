@@ -1,0 +1,6 @@
+#!/bin/bash
+main_run_experiments=script-linecircle0novo
+
+./$main_run_experiments
+./txt-stats
+./generate-site
