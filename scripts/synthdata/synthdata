@@ -48,7 +48,40 @@ elif [ "$#" -ge 6 ]; then
 fi
 
 
-cd $HOME/lib/data/synthcurves-multiview-3d-dataset/spherical-ascii-100_views-perturb-radius_sigma10-normal_sigma0_01rad-minsep_15deg-no_two_cams_colinear_with_object
+dataset_subpath="synthcurves-multiview-3d-dataset/spherical-ascii-100_views-perturb-radius_sigma10-normal_sigma0_01rad-minsep_15deg-no_two_cams_colinear_with_object"
+hardcoded_dir="$HOME/lib/data/$dataset_subpath"
+
+if [ -d "$hardcoded_dir" ]; then
+  cd "$hardcoded_dir"
+else
+  if [ -n "${minus_bindir:-}" ] && [ -d "$minus_bindir" ]; then
+    bindir="$minus_bindir"
+  else
+    script_dir="$(cd "$(dirname "$0")" && pwd)"
+    if [ -d "$script_dir/../../bin" ]; then
+      bindir="$(cd "$script_dir/../../bin" && pwd)"
+    elif [ -d "$script_dir/../../../minus-bin/bin" ]; then
+      bindir="$(cd "$script_dir/../../../minus-bin/bin" && pwd)"
+    else
+      bindir="$script_dir"
+    fi
+  fi
+
+  dataset_target="$bindir/$dataset_subpath"
+  if [ ! -d "$dataset_target" ]; then
+    echoerr "Downloading synthcurves-multiview-3d-dataset to $bindir..."
+    mkdir -p "$bindir/synthcurves-multiview-3d-dataset"
+    curl -sL https://github.com/rfabbri/synthcurves-multiview-3d-dataset/archive/refs/heads/master.tar.gz | tar -xz -C "$bindir/synthcurves-multiview-3d-dataset" --strip-components=1
+  fi
+
+  if [ -d "$dataset_target" ]; then
+    cd "$dataset_target"
+  else
+    echoerr "Error: Could not locate or download dataset at $dataset_target"
+    exit 1
+  fi
+fi
+
 
 frame_id=""
 for i in $frames; do

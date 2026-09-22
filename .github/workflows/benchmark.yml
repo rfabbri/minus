@@ -27,6 +27,11 @@ jobs:
           echo "Further needs: gnu-sed and st"
           brew update
           brew install gnu-sed st
+      - name: Cache synthcurves dataset
+        uses: actions/cache@v4
+        with:
+          path: build/bin/synthcurves-multiview-3d-dataset
+          key: synthcurves-dataset-v1
 
       - name: Build MINUS and Run Benchmarks
         run: |
