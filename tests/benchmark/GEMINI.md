@@ -189,7 +189,6 @@ Individual shell scripts
 
 ##### What I want from AI agent NOW (mostly already done)
     - TODO: Deploy to github (milestone target v4.0)
-        - TODO(v3.1): a make eval command in cmake that runs each individual benchmark
         - When you do a git push, performance results will be built as a github
           action and performace plots are available at:
           https://homotopycontinuation.github.io/minus/benchmark
