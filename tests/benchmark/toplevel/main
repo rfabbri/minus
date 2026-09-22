@@ -1,0 +1,5 @@
+#!/bin/sh
+. ../common.incl
+(cd $benchmarkdir/individual/chicago-benchmark/ && ./main) &
+(cd $benchmarkdir/individual/linecircle-benchmark/ && ./main) &
+wait

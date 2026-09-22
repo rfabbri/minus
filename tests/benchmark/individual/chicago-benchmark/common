@@ -4,7 +4,7 @@ set -e
 set -uo pipefail
 
 #minusdir=/home/juliana/Documents/doutorado/minus   # TODO: infer this automatically eg from cmake
-minusdir=/Users/rfabbri/cprg/vxlprg/lemsvpe/minus # TODO: infer this automatically eg from cmake
+. ../../common.incl
 synthdata=$minusdir/scripts/synthdata/synthdata
 minus=$minusdir/bin/minus-chicago
 benchmarkdir=$minusdir/tests/benchmark/individual/chicago-benchmark

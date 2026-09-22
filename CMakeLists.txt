@@ -264,3 +264,10 @@ endif()
 #   message("FOUND NO")
 #   target_link_libraries( bnld_algo bnld vnl_algo vil brent)
 # endif()
+
+# Benchmark evaluation target (v3.1)
+add_custom_target(eval
+    COMMAND ./main
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tests/benchmark/toplevel
+    COMMENT "Running MINUS benchmark evaluations"
+)
