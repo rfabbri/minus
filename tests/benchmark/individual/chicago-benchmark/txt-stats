@@ -3,7 +3,7 @@
 # Generate Version 2.0.1 Summaries
 . common
 
-set +x
+set -x
 
 cd "$exp" || exit 1
 
@@ -30,7 +30,6 @@ generate_stats() {
     echo ""
     printf "%b\n" "${C_TITLE}Per Configuration:${C_RESET}"
 
-    grand_sum=0
     # sort numerically by config id
     dirs=$(ls -d frpt-P*/ 2>/dev/null | awk -F'[-/]' '{print $2}' | sed 's/P//' | sort -n)
 
@@ -41,10 +40,10 @@ generate_stats() {
             m=$(st --median --no-header "$step_file" | awk '{print $1}')
             
             printf "%b\n" "  Config ${C_ID}P${id}${C_RESET} Steps: Sum = ${C_SUM}${s}${C_RESET}, Median = ${C_MED}${m}${C_RESET}"
-            grand_sum=$(echo "$grand_sum + $s" | bc)
         fi
     done
 
+    grand_sum=`awk '{sum += $1} END {print sum}' all_steps.txt`
     grand_median=$(st --median --no-header all_steps.txt | awk '{print $1}')
 
     echo ""

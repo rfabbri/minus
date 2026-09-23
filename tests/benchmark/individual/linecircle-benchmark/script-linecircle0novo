@@ -2,6 +2,7 @@
 
 # Linecircle Benchmark Worker
 # Runs 140 configurations through minus-linecircle
+# Author: Juliana Ventura
 
 . common
 
@@ -10,7 +11,7 @@ mkdir "$exp"
 
 set +e
 
-for i in $(seq 1 10); do
+for i in $(seq 1 140); do
   cfg_dir="$exp/licir-P${i}"
   mkdir -p "$cfg_dir"
 
@@ -36,7 +37,7 @@ for i in $(seq 1 10); do
   echo "$input_str" | "$minus" -i -gt > "$cfg_dir/out.txt" 2> "$cfg_dir/temp.txt"
 
   # Extract step iterations for each root (0 and 1)
-  sed -n 's/.*LOG 0 \([0-9]*\).*/\1/p' "$cfg_dir/temp.txt" >> "$cfg_dir/sol_step-P${i}.txt"
+  sed -n 's/.*LOG 0 \([0-9]*\).*/\1/p' "$cfg_dir/temp.txt" > "$cfg_dir/sol_step-P${i}.txt"
   sed -n 's/.*LOG 1 \([0-9]*\).*/\1/p' "$cfg_dir/temp.txt" >> "$cfg_dir/sol_step-P${i}.txt"
 
   # Solution validity and ground truth detection
