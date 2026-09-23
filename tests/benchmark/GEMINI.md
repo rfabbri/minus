@@ -4,8 +4,8 @@
 
 This is a benchmark suite for testing fast homotopy continuation.
 
-TODO: It runs continuously on github, but 
-DONE: also can run locally upon request
+It runs continuously on github upon any push to master.
+It can also be ran and visualized locally.
 
 
 ### Running locally
@@ -26,6 +26,18 @@ will have a javascript plot of the results. This allows the user to interact wit
 
 - The toplevel webiste with results is fixed html and javascript at 
      minus/tests/benchmark/toplevel/www  (root folder of the project is minus)
+    
+    - Spec for the boxplots (DONE) 
+        - Box plot will show all configurations in the same plot.
+        - In the x axis, list the configuration id ($i in frpt-P$i)
+        - In the y axis, the number of steps/iterations
+        - For each x, a thin boxplot of the number of steps for that configuration
+        - I want in green a horizontal line for all configurations, the grand total medians as already in the index.html
+        - Looks
+            - A reference image is in @chicago-benchmark/reference-image-time_to_und_roots_mil.png
+              the image shows a plot with some outliers in light gray but the most imporant is the condensed boxplots
+        - Interactivity
+            - The usear may click on a problem or a boxplot, and a display of that configuration comes up.
 
      
 #### Visualization details
@@ -43,9 +55,15 @@ will have a javascript plot of the results. This allows the user to interact wit
 
 We have individual benchmarks for each problem/formulation (chicago, cleveland, linecircle, etc):
     Folder individual/ 
+        - Individual benchmarks create eg tmp/ folders for the currently
+          running benchmarks
 
 A toplevel folder shows benchmarks integrating across this
     Folder toplevel/ 
+        - **dashboard packaging**: the orchestrator
+        `tests/benchmark/toplevel/package_dashboard.py` finalizes the build. it
+        generates the toplevel index, manages history, injects ux enhancements,
+        and bundles the `public/` site and toplevel/www/ (TODO currently these are copies, perhaps only keep public/ in the future). Se below in Section Details
 
 The benchmark works by internally running minus-chicago or minus-linecircle or minus-(problem name),
 which are programs whose sourcecode is located in minus/cmd, and binaries in minus/bin
@@ -60,6 +78,7 @@ ground-truth, etc.
 - the scripts may coordinate running these benchmarks with gnu parallel or simpy spawning multiple processes
 across multiple nodes if the server farm has them
 
+
 ### Design choices
 - Robust tech: The textual benchmark as well as the web visualization should be as robust as
   possible, meaning it should work in 10 years from now flawlessly and reliably.
@@ -73,18 +92,39 @@ across multiple nodes if the server farm has them
   web pages working robustly on most standardized platforms and
   browsers.
 
-### Benchmark Architecture TODO(v 3.2)
+### Details (Humans can skip this)
+#### `package_dashboard.py` Pipeline
+This script acts as the post-processor and state manager:
+- **Rolling History:** The system automatically retains the 5 most recent `make eval` runs, indexed by their 6-character git SHA. History is tracked in `toplevel/history.json`.
+    - **Run Archival**: Copies the active `tmp/` benchmark environments into persistent `[SHA]-run/` folders. Purges any runs older than 5 commits.
+    - **Historical Accuracy:** `data.js` inside archival folders is strictly synchronized with `history.json` during packaging, ensuring historical medians remain locked.
+- **State Management (`history.json`)**: Maintains a FIFO rolling history of the last 5 commits, mapping commit SHA (`6-chars`) to their grand medians and timestamps.
+- **Historical Synchronization**: Overwrites `data.js` inside legacy `[SHA]-run/` folders using the median values locked in `history.json` to prevent historical plots from floating to current statistics.
+- **UI & UX Injection**:
+  - Dynamically rewrites all `index.html` (both `tmp/` and `[SHA]-run/` varieties) using regex injections.
+  - Injects a dual-row **Top Navigation Menu** (Back button, Problem ID, Active Commit) and the **Compare Commits** navigation buttons.
+  - Injects the **Trend Plot** at the bottom (Grand Median Steps vs Commit).
+  - Upgrades the static Plotly Grand Median scatter trace into a continuous, anywhere-hover SVG shape with sub-pixel mouse tracking over the entire chart width.
+- **Public Output**: Assembles the master `minus/public/` or minus/tests/benchmark/toplevel/www/ directory mirroring the environment for static hosting (e.g., GitHub Pages).
 
-The benchmark is plotted by default by a github action every time a new commit
-is pusshed. Github runs the benchmark on a standar computer, then outputs the
-resuls to the gh-pages branch, with data.js having the benchmark data.
-Currently the plot code is in index.html, and the plot can be accessed either
-by pulling the gh-pages branch after a benchmark and opening
+- **Injection Architecture:** Individual shell scripts (e.g., `generate-site`) output vanilla `tmp/index.html` pages. The Python script `package_dashboard.py` parses these files and injects advanced UI components:
+  - **Top Navigation Banner:** Appends "Back to Dashboard", the active commit, and historical "Compare Commits" buttons.
+  - **Grand Median Continuous Hover:** Replaces discrete Plotly data markers with a continuous horizontal SVG shape utilizing a custom `mousemove` listener for sub-pixel hit-testing across the entire screen width.
+  - **Trend Timeline Plot:** Appended at the bottom of the page showing historical medians tracking over time across commits.
+- **Deployment:** The finalized, fully injected benchmark suite is compiled into the `minus/public/` directory for static hosting.
+
+### Benchmark Architecture
+
+The benchmark is plotted by default by a Github action every time a new commit
+is pusshed. Github runs the benchmark on a standard computer (often faster than
+my own though!), with data.js having the benchmark data.
+The plot can be accessed either
+minus/public/index.html
 minus/tests/benchmark/toplevel/www/index.html in the browser, or by visualizing
 the plots in github at:
+          https://rfabbri.github.io/minus/benchmark
+OR an alias:
           https://homotopycontinuation.github.io/minus/benchmark
-
-TODO(v3.2) the travis.yml must be updated to run make eval in the end.
 
 ### Requirements
 
@@ -189,20 +229,3 @@ Individual shell scripts
       - Output both index.html (for your web browser) and summary.txt (for console/programmatic reading).
 
 ##### What I want from AI agent NOW (mostly already done)
-    - TODO: Deploy to github (milestone target v4.0)
-        - When you do a git push, performance results will be built as a github
-          action and performace plots are available at:
-          https://homotopycontinuation.github.io/minus/benchmark
-
-        
-    - Spec for the boxplots (DONE) 
-        - Box plot will show all configurations in the same plot.
-        - In the x axis, list the configuration id ($i in frpt-P$i)
-        - In the y axis, the number of steps/iterations
-        - For each x, a thin boxplot of the number of steps for that configuration
-        - I want in green a horizontal line for all configurations, the grand total medians as already in the index.html
-        - Looks
-            - A reference image is in @chicago-benchmark/reference-image-time_to_und_roots_mil.png
-              the image shows a plot with some outliers in light gray but the most imporant is the condensed boxplots
-        - Interactivity
-            - The usear may click on a problem or a boxplot, and a display of that configuration comes up.
