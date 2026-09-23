@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   build_and_eval:
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v4
