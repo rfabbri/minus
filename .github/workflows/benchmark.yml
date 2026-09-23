@@ -27,6 +27,7 @@ jobs:
           echo "Further needs: gnu-sed and st"
           brew update
           brew install gnu-sed st
+
       - name: Cache synthcurves dataset
         uses: actions/cache@v4
         with:
@@ -52,6 +53,13 @@ jobs:
           
           # Run the evaluation scripts
           make eval
+          
+      # Debug ------------------------------------------------------------------
+      - name: Setup Interactive SSH Debug Session
+        uses: mxschmitt/action-tmate@v3
+        # Optional: Timeout the session after 15 minutes so it doesn't run forever
+        timeout-minutes: 15 
+      # ------------------------------------------------------------------------
 
       - name: Prepare Pages Layout
         # The public directory was fully assembled during make eval by package_dashboard.py 
