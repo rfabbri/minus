@@ -55,10 +55,15 @@ jobs:
           make eval
           
       # Debug ------------------------------------------------------------------
+#       - name: Setup Interactive SSH Debug Session
+#         uses: mxschmitt/action-tmate@v3
+#         Optional: Timeout the session after 15 minutes so it doesn't run forever
+#         timeout-minutes: 15 
       - name: Setup Interactive SSH Debug Session
-        uses: mxschmitt/action-tmate@v3
-        # Optional: Timeout the session after 15 minutes so it doesn't run forever
-        timeout-minutes: 15 
+        uses: owenthereal/action-upterm@v1
+        with:
+          # Optional: limit access only to your GitHub user account
+          limit-access-to-actor: true 
       # ------------------------------------------------------------------------
 
       - name: Prepare Pages Layout
