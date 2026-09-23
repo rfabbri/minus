@@ -229,3 +229,16 @@ Individual shell scripts
       - Output both index.html (for your web browser) and summary.txt (for console/programmatic reading).
 
 ##### What I want from AI agent NOW (mostly already done)
+    - Milestone v6.0
+        - 5.0 
+            - The grand median for chicago is getting fixed at 20
+        - 5.1 Make sure linecircle interpretation OK
+            - Linecircle must be plotted with bars not boxplot
+                - First thing is keep boxplot but optimize the results: there should be no variance!
+        - 5.2
+            - Double-check the point-tangents plot
+            - Sometimes circle plots the point sizes get really big; make em fixed
+              on screen no matter the scale
+    - Milestone v7.0 alpha
+        - The loading of the data is way too slow, I'd like it to be faster.
+        - A measure of robustness: percentage of time it found a solution
