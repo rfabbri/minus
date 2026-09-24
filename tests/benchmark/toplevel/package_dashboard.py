@@ -100,7 +100,8 @@ def main():
         y_data_robustness = [h.get("robustness", {}).get(p) or 0 for h in plot_history]
         has_robustness = any(y > 0 for y in y_data_robustness)
         
-        def get_injected_html(current_view_hash, top_href):
+        def get_injected_html(current_view_hash, top_href, p=p, x_data=x_data, y_data=y_data, 
+                              y_data_robustness=y_data_robustness, has_robustness=has_robustness):
             buttons = []
             for h in history:
                 c = h["commit"]
