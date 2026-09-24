@@ -446,6 +446,7 @@ cat << 'EOF' > index.html
                 anchor: 'x',
                 autorange: false,
                 range: [-5, 105],
+                zeroline: false,
                 titlefont: { color: 'orange' },
                 tickfont: { color: 'orange' }
             },
@@ -453,6 +454,7 @@ cat << 'EOF' > index.html
                 title: 'Configuration',
                 titlefont: { size: 20 },
                 tickangle: -90,
+                zeroline: false,
                 tickfont: { size: 10 }
             },
             shapes: medianShapes,
