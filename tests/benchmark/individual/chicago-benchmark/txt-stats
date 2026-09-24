@@ -3,7 +3,7 @@
 # Generate Version 2.0.1 Summaries
 . common
 
-set -x
+set +x
 
 cd "$exp" || exit 1
 
@@ -25,7 +25,7 @@ generate_stats() {
         C_MED=""
     fi
 
-    printf "%b\n" "${C_TITLE}MINUS Benchmark Results Summary${C_RESET}"
+    printf "%b\n" "${C_TITLE}MINUS Chicago Benchmark Results Summary${C_RESET}"
     echo "-------------------------------"
     echo ""
     printf "%b\n" "${C_TITLE}Per Configuration:${C_RESET}"
@@ -36,15 +36,14 @@ generate_stats() {
     for id in $dirs; do
         step_file="frpt-P${id}/sol_step-P${id}.txt"
         if [ -f "$step_file" ]; then
-            s=$(st --sum --no-header "$step_file" | awk '{print $1}')
-            m=$(st --median --no-header "$step_file" | awk '{print $1}')
+          read -r s m <<< $(sort -n $step_file | awk '{sum+=$1; vals[NR]=$1} END {n=NR; if (n==0) {print 0, 0} else if (n%2==1) {print sum, vals[(n+1)/2]} else {print sum, (vals[n/2]+vals[n/2+1])/2}}')
             
             printf "%b\n" "  Config ${C_ID}P${id}${C_RESET} Steps: Sum = ${C_SUM}${s}${C_RESET}, Median = ${C_MED}${m}${C_RESET}"
         fi
     done
 
     grand_sum=`awk '{sum += $1} END {print sum}' all_steps.txt`
-    grand_median=$(st --median --no-header all_steps.txt | awk '{print $1}')
+    grand_median=$(sort -n all_steps.txt | awk '{vals[NR]=$1} END {n=NR; if (n==0) print 0; else if (n%2==1) print vals[(n+1)/2]; else print (vals[n/2]+vals[n/2+1])/2}')
 
     echo ""
     printf "%b\n" "${C_TITLE}Grand Totals:${C_RESET}"

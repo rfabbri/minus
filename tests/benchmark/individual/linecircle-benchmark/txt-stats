@@ -25,26 +25,26 @@ generate_stats() {
     C_MED=""
   fi
 
-  printf "%b\n" "${C_TITLE}MINUS Linecircle Benchmark Results Summary (v2.1 alpha)${C_RESET}"
-  echo "--------------------------------------------------------"
-  echo ""
+  printf "%b\n" "${C_TITLE}MINUS Linecircle Benchmark Results Summary${C_RESET}"
+  echo                    "------------------------------------------"
+  echo
   printf "%b\n" "${C_TITLE}Per Configuration:${C_RESET}"
 
-  grand_sum=0
   dirs=$(ls -d licir-P*/ 2>/dev/null | awk -F'[-/]' '{print $2}' | sed 's/P//' | sort -n)
 
   for id in $dirs; do
     step_file="licir-P${id}/sol_step-P${id}.txt"
     if [ -f "$step_file" ]; then
-      read -r s m <<< $(awk '{sum+=$1; vals[NR]=$1} END {n=NR; if (n==0) {print 0, 0} else if (n%2==1) {print sum, vals[(n+1)/2]} else {print sum, (vals[n/2]+vals[n/2+1])/2}}' "$step_file")
+      read -r s m <<< $(sort -n "$step_file" | awk '{sum+=$1; vals[NR]=$1} END {n=NR; if (n==0) {print 0, 0} else if (n%2==1) {print sum, vals[(n+1)/2]} else {print sum, (vals[n/2]+vals[n/2+1])/2}}')
       printf "%b\n" "  Config ${C_ID}P${id}${C_RESET} Steps: Sum = ${C_SUM}${s}${C_RESET}, Median = ${C_MED}${m}${C_RESET}"
-      grand_sum=$((grand_sum + s))
     fi
   done
 
+  
+  grand_sum=`awk '{sum += $1} END {print sum}' all_steps.txt`
   grand_median=$(sort -n all_steps.txt | awk '{vals[NR]=$1} END {n=NR; if (n==0) print 0; else if (n%2==1) print vals[(n+1)/2]; else print (vals[n/2]+vals[n/2+1])/2}')
 
-  echo ""
+  echo
   printf "%b\n" "${C_TITLE}Grand Totals:${C_RESET}"
   printf "%b\n" "  Total Iteration Steps: ${C_SUM}${grand_sum}${C_RESET}"
   printf "%b\n" "  Grand Median Steps: ${C_MED}${grand_median}${C_RESET}"

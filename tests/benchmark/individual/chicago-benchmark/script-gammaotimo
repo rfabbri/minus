@@ -15,11 +15,11 @@ cd $exp
 if [[ "`uname`" != Linux ]]; then
   MYOS="OSX"
   mysed=gsed
-  myst=st
+  # myst=st
 else
   MYOS="Linux"
   mysed=sed
-  myst=st-console
+  # myst=st-console
 fi
 
 #Script para rodar os primeiros 140 problemas aleatórios gerados a partir dos dados sintéticos
