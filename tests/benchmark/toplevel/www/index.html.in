@@ -43,13 +43,22 @@
         .thumbnail {
             width: 100%;
             height: 200px;
-            background-color: #e9ecef;
+/*            background-color: #e9ecef; */
+            background-color: white;
+            background-color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             border-bottom: 1px solid #eee;
             font-size: 48px;
             color: #adb5bd;
+            box-sizing: border-box;
+            padding: 10px;
+        }
+        .thumbimg{
+          witdh: 100%;
+          height: 100%;
+          object-fit: contain;  /* Keeps proportions, prevents cropping, and centers */
         }
         .card-content {
             padding: 20px;
@@ -89,8 +98,8 @@
         <!-- Chicago Benchmark -->
         <a href="{{CHICAGO_HREF}}" class="benchmark-card">
             <div class="thumbnail">
-                <!-- Fallback icon/text since we don't have real images yet -->
-                📷
+            <img class="thumbimg" src="figs/chicago14a.png" alt="Chicago trifocal problem"/>
+            <!--    📷 -->
             </div>
             <div class="card-content">
                 <h2>Chicago</h2>
