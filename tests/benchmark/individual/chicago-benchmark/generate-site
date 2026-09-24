@@ -293,6 +293,7 @@ cat << 'EOF' > index.html
                 }, 
                 fillcolor: 'blue',
                 hoverinfo: 'y',
+                showlegend: false,
                 customdata: [item.config, item.points]
             });
             
@@ -345,9 +346,23 @@ cat << 'EOF' > index.html
                     }
                 },
                 hoverinfo: 'y',
+                showlegend: false,
                 customdata: [item.config, item.points]
             });
         });
+
+        const blueLegendTrace = {
+            x: [null],
+            y: [null],
+            name: 'Number of Iterations',
+            marker: { color: 'blue', size: 12, symbol: 'square' },
+            mode: 'markers',
+            type: 'scatter',
+            showlegend: true,
+            hoverinfo: 'none'
+        };
+        traces.push(blueLegendTrace);
+        barTraces.push(blueLegendTrace);
 
         const successX = [];
         const successY = [];
