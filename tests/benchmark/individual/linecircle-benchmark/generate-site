@@ -32,6 +32,18 @@ for d in dirs:
     line_data = {"d": 0, "e": 1, "f": 0}
     pts_data = []
 
+    # Check if ground-truth was found (gt* file: 1 = found, 0 = failed)
+    gt_val = 1
+    gt_files = [f for f in os.listdir(d) if f.startswith('gt')]
+    if gt_files:
+        try:
+            with open(os.path.join(d, gt_files[0]), 'r') as gf:
+                content = gf.read().strip()
+                if content.isdigit():
+                    gt_val = int(content)
+        except Exception as e:
+            pass
+
     if os.path.exists(cfg_file):
         with open(cfg_file, 'r') as cf:
             config_str = cf.read().strip()
@@ -72,6 +84,7 @@ for d in dirs:
     plot_data.append({
         "x": config_name,
         "y": steps,
+        "gt": gt_val,
         "config": config_str,
         "circle": circle_data,
         "line": line_data,
@@ -287,6 +300,7 @@ cat << 'EOF' > index.html
             }
             const runs = (typeof numRuns !== 'undefined' && numRuns > 0) ? numRuns : 1;
             const avgSteps = totalSteps / runs;
+            const isFailed = (item.gt === 0);
 
             barTraces.push({
                 x: [item.x],
@@ -295,9 +309,9 @@ cat << 'EOF' > index.html
                 type: 'bar',
                 width: 0.3,
                 marker: {
-                    color: '#3498db',
+                    color: isFailed ? '#e74c3c' : '#3498db',
                     line: {
-                        color: '#2980b9',
+                        color: isFailed ? '#c0392b' : '#2980b9',
                         width: 1
                     }
                 },
@@ -339,6 +353,14 @@ cat << 'EOF' > index.html
             }
         ];
 
+        const tickVals = benchmarkData.map(item => item.x);
+        const tickText = benchmarkData.map(item => {
+            if (item.gt === 0) {
+                return '<span style="color: #e74c3c; font-weight: bold;">' + item.x + '</span>';
+            }
+            return item.x;
+        });
+
         const layout = {
             title: '<b>Iterations per Root for Linecircle Problem</b>',
             titlefont: { size: 22 },
@@ -354,7 +376,10 @@ cat << 'EOF' > index.html
                 title: 'Problem Configuration',
                 titlefont: { size: 18 },
                 tickangle: -90,
-                tickfont: { size: 9 }
+                tickfont: { size: 9 },
+                tickmode: 'array',
+                tickvals: tickVals,
+                ticktext: tickText
             },
             shapes: medianShapes,
             annotations: medianAnnotations,
