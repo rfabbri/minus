@@ -145,7 +145,7 @@ cat << 'EOF' > index.html
 <!DOCTYPE html>
 <html>
 <head>
-    <title>MINUS Benchmark Results v5.1</title>
+    <title>MINUS Linecircle Interactive Benchmark</title>
     <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
     <style>
         body { font-family: sans-serif; margin: 20px; background-color: #fafafa; }
