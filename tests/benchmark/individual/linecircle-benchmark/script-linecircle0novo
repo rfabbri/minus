@@ -12,7 +12,7 @@ cd "$exp" || exit 1
 
 set +e
 
-for i in $(seq 1 140); do
+for i in $(seq 1 $nconfigs); do
   cfg_dir="licir-P${i}"
   mkdir -p "$cfg_dir"
 

@@ -2,8 +2,10 @@
 set -e
 set -uo pipefail
 
+# User: edit here --------------------------------------------------------------
 nconfigs=3
 nruns_per_config=5
+# ------------------------------------------------------------------------------
 
 . ../../common.incl
 synthdata=$minusdir/scripts/synthdata/synthdata
