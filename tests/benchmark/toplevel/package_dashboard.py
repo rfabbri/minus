@@ -40,7 +40,8 @@ def main():
                 if match_m:
                     m = float(match_m.group(1))
                 # e.g., "Grand robustness / ground-truth found within all runs: 85%"
-                match_r = re.search(r"Grand robustness.*?:\s*([\d\.]+)%", content)
+                # or "Grand Successs Rate / ground-truth found within all runs & all configs: 95.0%"
+                match_r = re.search(r"Grand (?:robustness|Successs Rate).*?:\s*([\d\.]+)%", content)
                 if match_r:
                     r = float(match_r.group(1))
         medians[p] = m

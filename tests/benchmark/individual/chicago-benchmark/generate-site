@@ -90,11 +90,23 @@ for d in dirs:
             except Exception as e:
                 print(f"Error fetching synthdata for {config_name}: {e}")
 
+        # Compute Success Rate
+        success_rate = 0.0
+        gt_file = os.path.join(d, f"gt_sol-{config_name}.txt")
+        if os.path.exists(gt_file):
+            with open(gt_file, 'r') as gf:
+                gt_lines = [line.strip() for line in gf if line.strip()]
+                total_runs = len(gt_lines)
+                if total_runs > 0:
+                    successes = sum(1 for line in gt_lines if line != '313')
+                    success_rate = (successes / total_runs) * 100.0
+
         plot_data.append({
             "x": config_name,
             "y": steps,
             "config": config_str,
-            "points": point_data
+            "points": point_data,
+            "successRate": success_rate
         })
 
 try:
@@ -337,6 +349,34 @@ cat << 'EOF' > index.html
             });
         });
 
+        const successX = [];
+        const successY = [];
+        const successHover = [];
+        benchmarkData.forEach(item => {
+            if (item.successRate !== undefined) {
+                successX.push(item.x);
+                successY.push(item.successRate);
+                successHover.push(`Success: ${item.successRate.toFixed(1)}%<br>Failure: ${(100 - item.successRate).toFixed(1)}%`);
+            }
+        });
+
+        if (successX.length > 0) {
+            const successTrace = {
+                x: successX,
+                y: successY,
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Success Rate (%)',
+                yaxis: 'y2',
+                line: { color: 'orange', width: 2 },
+                marker: { size: 6, color: 'orange' },
+                hovertemplate: '<b>Config %{x}</b><br>%{text}<extra></extra>',
+                text: successHover
+            };
+            traces.push(successTrace);
+            barTraces.push(successTrace);
+        }
+
         const medianShapes = [
             {
                 type: 'line',
@@ -373,7 +413,8 @@ cat << 'EOF' > index.html
         const layout = {
             title: '<b>Time spent in paths leading to undesired roots</b>',
             titlefont: { size: 24 },
-            showlegend: false,
+            showlegend: true,
+            legend: { orientation: 'h', y: 1.1 },
             yaxis: {
                 title: 'Number of iterations per root',
                 titlefont: { size: 20 },
@@ -381,6 +422,14 @@ cat << 'EOF' > index.html
                 range: [0, 1050],
                 dtick: 100,
                 gridcolor: '#eee'
+            },
+            yaxis2: {
+                title: 'Success Rate (%)',
+                overlaying: 'y',
+                side: 'right',
+                range: [-5, 105],
+                titlefont: { color: 'orange' },
+                tickfont: { color: 'orange' }
             },
             xaxis: {
                 title: 'Configuration',
@@ -392,7 +441,7 @@ cat << 'EOF' > index.html
             annotations: medianAnnotations,
             plot_bgcolor: 'white',
             paper_bgcolor: '#fafafa',
-            margin: { l: 80, r: 50, b: 80, t: 80 },
+            margin: { l: 80, r: 80, b: 80, t: 80 },
             hoverdistance: 50
         };
 
