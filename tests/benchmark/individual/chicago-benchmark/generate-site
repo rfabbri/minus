@@ -158,7 +158,8 @@ cat << 'EOF' > index.html
 <html>
 <head>
     <title>MINUS Chicago Interactive Benchmark</title>
-    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <script src="../../../toplevel/www/js/plotly-2.32.0.min.js"></script>
+    <script>window.Plotly || document.write('<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"><\/script>')</script>
     <style>
         body { font-family: sans-serif; margin: 20px; background-color: #fafafa; }
         #myDiv { background-color: white; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }

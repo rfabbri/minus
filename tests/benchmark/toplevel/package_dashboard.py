@@ -145,7 +145,7 @@ def main():
             <script>
               if(typeof Plotly === 'undefined') {{
                   var s = document.createElement('script');
-                  s.src = "https://cdn.plot.ly/plotly-2.32.0.min.js";
+                  s.src = "../../../toplevel/www/js/plotly-2.32.0.min.js";
                   s.onload = function() {{ renderPlot(); }};
                   document.head.appendChild(s);
               }} else {{ renderPlot(); }}
@@ -411,6 +411,11 @@ def main():
     if os.path.exists(figs_src):
         shutil.copytree(figs_src, os.path.join(public_dir, "figs"))
         
+    # Copy js/ directory to public/js
+    js_src = os.path.join(toplevel_dir, "www", "js")
+    if os.path.exists(js_src):
+        shutil.copytree(js_src, os.path.join(public_dir, "js"))
+        
     # 6.c Copy problem directories cleanly preserving tmp and archives identically
     for p in problems:
         pub_p = os.path.join(public_dir, f"{p}-benchmark")
@@ -435,6 +440,7 @@ def main():
                     with open(fpath, "r") as f:
                         f_html = f.read()
                     f_html = f_html.replace("../../../toplevel/www/index.html", "../../index.html")
+                    f_html = f_html.replace("../../../toplevel/www/js/", "../../js/")
                     with open(fpath, "w") as f:
                         f.write(f_html)
                         
