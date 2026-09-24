@@ -98,7 +98,7 @@ cat << 'EOF' > index.html
 <!DOCTYPE html>
 <html>
 <head>
-    <title>MINUS Linecircle Benchmark Results v5.0 alpha</title>
+    <title>MINUS Linecircle Benchmark Results v5.1</title>
     <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
     <style>
         body { font-family: sans-serif; margin: 20px; background-color: #fafafa; }
@@ -132,10 +132,58 @@ cat << 'EOF' > index.html
             margin-right: 6px;
             vertical-align: middle;
         }
+        .btn-toggle {
+            padding: 9px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            background: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            transition: background 0.2s;
+        }
+        .btn-toggle:hover {
+            background: #1c5980;
+        }
     </style>
 </head>
 <body>
-    <h1>MINUS Linecircle Benchmark Results (Version 5.0 alpha)</h1>
+    <h1>MINUS Linecircle Benchmark Results (Version 5.1)</h1>
+
+    <div style="background: white; border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <h3 style="margin-top: 0; margin-bottom: 15px;">Formulation: linecircle2a</h3>
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+            <thead>
+                <tr style="background-color: #f8f9fa; border-bottom: 2px solid #ddd;">
+                    <th style="padding: 8px; border: 1px solid #ddd;">Category</th>
+                    <th style="padding: 8px; border: 1px solid #ddd;">Specification</th>
+                    <th style="padding: 8px; border: 1px solid #ddd;">Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td rowspan="3" style="padding: 8px; border: 1px solid #ddd; vertical-align: top;"><strong>General specs</strong></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">Number of complex solutions</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">2</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd;">System size</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">2x2</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd;">Number of complex parameters</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">6</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-bottom: 12px; display: flex; gap: 12px; align-items: center;">
+        <button id="togglePlotBtn" class="btn-toggle">Switch to Barplot (Sum of Roots)</button>
+        <span style="font-size: 13px; color: #555;">Clicking on a box or bar displays configuration details below</span>
+    </div>
     <div id="myDiv" style="width: 100%; height: 700px;"></div>
     
     <div id="infoPanel">
@@ -174,6 +222,7 @@ cat << 'EOF' > index.html
     <script src="data.js"></script>
     <script>
         const traces = [];
+        const barTraces = [];
         
         benchmarkData.forEach(item => {
             traces.push({
@@ -221,7 +270,59 @@ cat << 'EOF' > index.html
                 hoverinfo: 'skip',
                 showlegend: false
             });
+
+            // Thin barplot for sum of roots
+            const sumRoots = item.y.reduce((acc, v) => acc + v, 0);
+            barTraces.push({
+                x: [item.x],
+                y: [sumRoots],
+                name: item.x,
+                type: 'bar',
+                width: 0.3,
+                marker: {
+                    color: '#3498db',
+                    line: {
+                        color: '#2980b9',
+                        width: 1
+                    }
+                },
+                hoverinfo: 'y',
+                customdata: [item.config, item.circle, item.line, item.points]
+            });
         });
+
+        const medianShapes = [
+            {
+                type: 'line',
+                xref: 'paper',
+                x0: 0,
+                x1: 1,
+                yref: 'y',
+                y0: grandMedian,
+                y1: grandMedian,
+                line: {
+                    color: 'lime',
+                    width: 3.5
+                }
+            }
+        ];
+
+        const medianAnnotations = [
+            {
+                x: 1,
+                y: grandMedian,
+                xref: 'paper',
+                yref: 'y',
+                text: '<b>Grand Median: ' + grandMedian + '</b>',
+                showarrow: false,
+                xanchor: 'right',
+                yanchor: 'bottom',
+                font: { size: 14, color: '#1b5e20' },
+                bgcolor: '#dcfce7',
+                bordercolor: '#22c55e',
+                borderwidth: 1.5
+            }
+        ];
 
         const layout = {
             title: '<b>Iterations per Root for Linecircle Problem</b>',
@@ -240,43 +341,38 @@ cat << 'EOF' > index.html
                 tickangle: -90,
                 tickfont: { size: 9 }
             },
-            shapes: [
-                {
-                    type: 'line',
-                    xref: 'paper',
-                    x0: 0,
-                    x1: 1,
-                    yref: 'y',
-                    y0: grandMedian,
-                    y1: grandMedian,
-                    line: {
-                        color: 'lime',
-                        width: 3.5
-                    }
-                }
-            ],
-            annotations: [
-                {
-                    x: 1,
-                    y: grandMedian,
-                    xref: 'paper',
-                    yref: 'y',
-                    text: '<b>Grand Median: ' + grandMedian + '</b>',
-                    showarrow: false,
-                    xanchor: 'right',
-                    yanchor: 'bottom',
-                    font: { size: 14, color: '#1b5e20' },
-                    bgcolor: '#dcfce7',
-                    bordercolor: '#22c55e',
-                    borderwidth: 1.5
-                }
-            ],
+            shapes: medianShapes,
+            annotations: medianAnnotations,
             plot_bgcolor: 'white',
             paper_bgcolor: '#fafafa',
-            margin: { l: 80, r: 50, b: 80, t: 80 }
+            margin: { l: 80, r: 50, b: 80, t: 80 },
+            hoverdistance: 50
         };
 
         Plotly.newPlot('myDiv', traces, layout, {responsive: true});
+
+        let isBarplot = false;
+        const toggleBtn = document.getElementById('togglePlotBtn');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                isBarplot = !isBarplot;
+                if (isBarplot) {
+                    toggleBtn.innerText = 'Switch to Boxplot';
+                    layout.title = '<b>Total Iteration Steps (Sum of Both Roots)</b>';
+                    layout.yaxis.title = 'Sum of iterations across both roots';
+                    layout.shapes = [];
+                    layout.annotations = [];
+                    Plotly.react('myDiv', barTraces, layout, {responsive: true});
+                } else {
+                    toggleBtn.innerText = 'Switch to Barplot (Sum of Roots)';
+                    layout.title = '<b>Iterations per Root for Linecircle Problem</b>';
+                    layout.yaxis.title = 'Number of iterations per root';
+                    layout.shapes = medianShapes;
+                    layout.annotations = medianAnnotations;
+                    Plotly.react('myDiv', traces, layout, {responsive: true});
+                }
+            });
+        }
 
         (function() {
             const myPlot = document.getElementById('myDiv');
@@ -494,39 +590,85 @@ cat << 'EOF' > index.html
             });
         }
 
-        // Add Interactivity
+        // Display details for selected configuration
+        function showConfigDetails(configId, configStr, circle, line, points) {
+            const panel = document.getElementById('infoPanel');
+            document.getElementById('configId').innerText = configId;
+            document.getElementById('configStr').innerText = configStr;
+
+            if (circle) {
+                document.getElementById('circleEq').innerText = 
+                    `${circle.a.toFixed(2)}(x² + y²) + (${circle.b.toFixed(2)})x + (${circle.c.toFixed(2)}) = 0`;
+                document.getElementById('circleCenter').innerText = `${circle.xc.toFixed(3)}, ${circle.yc.toFixed(3)}`;
+                document.getElementById('circleRadius').innerText = circle.r.toFixed(3);
+            }
+
+            if (line) {
+                document.getElementById('lineEq').innerText = 
+                    `(${line.d.toFixed(2)})x + (${line.e.toFixed(2)})y + (${line.f.toFixed(2)}) = 0`;
+            }
+
+            if (points && points.length >= 2) {
+                document.getElementById('gtP1').innerText = `${points[0].x.toFixed(4)}, ${points[0].y.toFixed(4)}`;
+                document.getElementById('gtP2').innerText = `${points[1].x.toFixed(4)}, ${points[1].y.toFixed(4)}`;
+            }
+
+            if (circle && line) {
+                renderGeometry(circle, line, points || []);
+            }
+
+            panel.style.display = 'block';
+        }
+
+        // Add Interactivity via Plotly Click
         document.getElementById('myDiv').on('plotly_click', function(data){
-            if (data.points.length > 0) {
+            if (data.points && data.points.length > 0) {
                 const pt = data.points[0];
                 const configId = pt.data.name;
                 const custom = pt.data.customdata;
-                const configStr = custom[0];
-                const circle = custom[1];
-                const line = custom[2];
-                const points = custom[3];
-
-                const panel = document.getElementById('infoPanel');
-                document.getElementById('configId').innerText = configId;
-                document.getElementById('configStr').innerText = configStr;
-
-                document.getElementById('circleEq').innerText = 
-                    `${circle.a.toFixed(2)}(x² + y²) + (${circle.b.toFixed(2)})x + (${circle.c.toFixed(2)}) = 0`;
-                document.getElementById('lineEq').innerText = 
-                    `(${line.d.toFixed(2)})x + (${line.e.toFixed(2)})y + (${line.f.toFixed(2)}) = 0`;
-
-                document.getElementById('circleCenter').innerText = `${circle.xc.toFixed(3)}, ${circle.yc.toFixed(3)}`;
-                document.getElementById('circleRadius').innerText = circle.r.toFixed(3);
-
-                if (points && points.length >= 2) {
-                    document.getElementById('gtP1').innerText = `${points[0].x.toFixed(4)}, ${points[0].y.toFixed(4)}`;
-                    document.getElementById('gtP2').innerText = `${points[1].x.toFixed(4)}, ${points[1].y.toFixed(4)}`;
+                if (custom) {
+                    showConfigDetails(configId, custom[0], custom[1], custom[2], custom[3]);
                 }
+            }
+        });
 
-                if (circle && line) {
-                    renderGeometry(circle, line, points || []);
+        // Enlarge mouse distance neighborhood region for clicking, using precise visual bins
+        const myPlotContainer = document.getElementById('myDiv');
+        myPlotContainer.addEventListener('click', function(e) {
+            if (!myPlotContainer._fullLayout || !myPlotContainer._fullLayout.xaxis) return;
+            const b = myPlotContainer.getBoundingClientRect();
+            const fl = myPlotContainer._fullLayout;
+            const clickX = e.clientX - b.left;
+            const clickY = e.clientY - b.top;
+
+            // Only respond inside plotting area
+            if (clickX < fl.margin.l || clickX > (fl.width - fl.margin.r) ||
+                clickY < fl.margin.t || clickY > (fl.height - fl.margin.b)) {
+                return;
+            }
+
+            let binWidth = 20; // fallback spacing
+            if (benchmarkData.length > 1) {
+                binWidth = Math.abs(fl.xaxis.c2p(1) - fl.xaxis.c2p(0));
+            }
+            const hitZone = binWidth / 2.0;
+
+            // Find closest configuration
+            let closestIdx = -1;
+            let minDist = Infinity;
+            for (let i = 0; i < benchmarkData.length; i++) {
+                const px = fl.xaxis.c2p(i) + fl.margin.l;
+                const d = Math.abs(clickX - px);
+                if (d < minDist) {
+                    minDist = d;
+                    closestIdx = i;
                 }
+            }
 
-                panel.style.display = 'block';
+            // Snap only if we are strictly inside the visual column domain for that bin
+            if (closestIdx >= 0 && minDist < hitZone) {
+                const item = benchmarkData[closestIdx];
+                showConfigDetails(item.x, item.config, item.circle, item.line, item.points);
             }
         });
     </script>

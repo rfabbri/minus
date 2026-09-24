@@ -98,7 +98,14 @@ for d in dirs:
         })
 
 try:
-    grand_median = subprocess.check_output(["st", "--median", "--no-header", "all_steps.txt"]).decode().strip()
+    with open("all_steps.txt", "r") as af:
+        steps_all = [int(line.strip()) for line in af if line.strip().isdigit()]
+    if steps_all:
+        steps_all.sort()
+        mid = len(steps_all) // 2
+        grand_median = steps_all[mid] if len(steps_all) % 2 == 1 else (steps_all[mid - 1] + steps_all[mid]) / 2.0
+    else:
+        grand_median = 0
 except Exception:
     grand_median = 0
 
@@ -115,7 +122,7 @@ cat << 'EOF' > index.html
 <!DOCTYPE html>
 <html>
 <head>
-    <title>MINUS Benchmark Results v5.0 alpha</title>
+    <title>MINUS Benchmark Results v5.1</title>
     <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
     <style>
         body { font-family: sans-serif; margin: 20px; background-color: #fafafa; }
@@ -132,10 +139,75 @@ cat << 'EOF' > index.html
             width: 125px; /* ~1.3 inches based on standard DPI, scaled from 500 */
             height: 100px; /* scaled from 400 */
         }
+        .btn-toggle {
+            padding: 9px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            background: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            transition: background 0.2s;
+        }
+        .btn-toggle:hover {
+            background: #1c5980;
+        }
     </style>
 </head>
 <body>
-    <h1>MINUS Benchmark Results (Version 5.0 alpha)</h1>
+    <h1>MINUS Benchmark Results (Version 5.1)</h1>
+    
+    <div style="background: white; border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        <h3 style="margin-top: 0; margin-bottom: 15px;">Formulation: chicago14a</h3>
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+            <thead>
+                <tr style="background-color: #f8f9fa; border-bottom: 2px solid #ddd;">
+                    <th style="padding: 8px; border: 1px solid #ddd;">Category</th>
+                    <th style="padding: 8px; border: 1px solid #ddd;">Specification</th>
+                    <th style="padding: 8px; border: 1px solid #ddd;">Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td rowspan="4" style="padding: 8px; border: 1px solid #ddd; vertical-align: top;"><strong>General specs</strong></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">Number of complex solutions</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">312</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd;">System size</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">14x14</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd;">Number of complex parameters</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">56 (39 point config + 17 random numbers)</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd;">Variables</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">14 (2 quaternions up to scale + 2 translations up to global scale)</td>
+                </tr>
+                <tr>
+                    <td rowspan="3" style="padding: 8px; border: 1px solid #ddd; vertical-align: top;"><strong>Problem-specific</strong></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">Number of views</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">3</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd;">Number of points per view</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">3</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd;">Number of tangents per view</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">2</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-bottom: 12px; display: flex; gap: 12px; align-items: center;">
+        <button id="togglePlotBtn" class="btn-toggle">Switch to Barplot (Sum of Roots)</button>
+        <span style="font-size: 13px; color: #555;">Clicking on a box or bar displays configuration details below</span>
+    </div>
     <div id="myDiv" style="width: 100%; height: 800px;"></div>
     
     <div id="infoPanel">
@@ -153,6 +225,7 @@ cat << 'EOF' > index.html
     <script src="data.js"></script>
     <script>
         const traces = [];
+        const barTraces = [];
         
         benchmarkData.forEach(item => {
             traces.push({
@@ -203,7 +276,59 @@ cat << 'EOF' > index.html
                 hoverinfo: 'skip',
                 showlegend: false
             });
+
+            // Thin barplot for sum of paths
+            const sumSteps = item.y.reduce((acc, v) => acc + v, 0);
+            barTraces.push({
+                x: [item.x],
+                y: [sumSteps],
+                name: item.x,
+                type: 'bar',
+                width: 0.2,
+                marker: {
+                    color: 'blue',
+                    line: {
+                        color: '#000080',
+                        width: 1
+                    }
+                },
+                hoverinfo: 'y',
+                customdata: [item.config, item.points]
+            });
         });
+
+        const medianShapes = [
+            {
+                type: 'line',
+                xref: 'paper',
+                x0: 0,
+                x1: 1,
+                yref: 'y',
+                y0: grandMedian,
+                y1: grandMedian,
+                line: {
+                    color: 'lime',
+                    width: 3.5
+                }
+            }
+        ];
+
+        const medianAnnotations = [
+            {
+                x: 1,
+                y: grandMedian,
+                xref: 'paper',
+                yref: 'y',
+                text: '<b>Grand Median: ' + grandMedian + '</b>',
+                showarrow: false,
+                xanchor: 'right',
+                yanchor: 'bottom',
+                font: { size: 14, color: '#1b5e20' },
+                bgcolor: '#dcfce7',
+                bordercolor: '#22c55e',
+                borderwidth: 1.5
+            }
+        ];
 
         const layout = {
             title: '<b>Time spent in paths leading to undesired roots</b>',
@@ -223,43 +348,40 @@ cat << 'EOF' > index.html
                 tickangle: -90,
                 tickfont: { size: 10 }
             },
-            shapes: [
-                {
-                    type: 'line',
-                    xref: 'paper',
-                    x0: 0,
-                    x1: 1,
-                    yref: 'y',
-                    y0: grandMedian,
-                    y1: grandMedian,
-                    line: {
-                        color: 'lime',
-                        width: 3.5
-                    }
-                }
-            ],
-            annotations: [
-                {
-                    x: 1,
-                    y: grandMedian,
-                    xref: 'paper',
-                    yref: 'y',
-                    text: '<b>Grand Median: ' + grandMedian + '</b>',
-                    showarrow: false,
-                    xanchor: 'right',
-                    yanchor: 'bottom',
-                    font: { size: 14, color: '#1b5e20' },
-                    bgcolor: '#dcfce7',
-                    bordercolor: '#22c55e',
-                    borderwidth: 1.5
-                }
-            ],
+            shapes: medianShapes,
+            annotations: medianAnnotations,
             plot_bgcolor: 'white',
             paper_bgcolor: '#fafafa',
-            margin: { l: 80, r: 50, b: 80, t: 80 }
+            margin: { l: 80, r: 50, b: 80, t: 80 },
+            hoverdistance: 50
         };
 
         Plotly.newPlot('myDiv', traces, layout, {responsive: true});
+
+        let isBarplot = false;
+        const toggleBtn = document.getElementById('togglePlotBtn');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                isBarplot = !isBarplot;
+                if (isBarplot) {
+                    toggleBtn.innerText = 'Switch to Boxplot';
+                    layout.title = '<b>Total Iteration Steps (Sum of Paths)</b>';
+                    layout.yaxis.title = 'Sum of iterations across all paths';
+                    layout.yaxis.range = null;
+                    layout.shapes = [];
+                    layout.annotations = [];
+                    Plotly.react('myDiv', barTraces, layout, {responsive: true});
+                } else {
+                    toggleBtn.innerText = 'Switch to Barplot (Sum of Roots)';
+                    layout.title = '<b>Time spent in paths leading to undesired roots</b>';
+                    layout.yaxis.title = 'Number of iterations per root';
+                    layout.yaxis.range = [0, 1050];
+                    layout.shapes = medianShapes;
+                    layout.annotations = medianAnnotations;
+                    Plotly.react('myDiv', traces, layout, {responsive: true});
+                }
+            });
+        }
 
         (function() {
             const myPlot = document.getElementById('myDiv');
@@ -460,36 +582,80 @@ cat << 'EOF' > index.html
             });
         }
 
-        // Add Interactivity
+        // Display details for selected configuration
+        function showConfigDetails(configId, configStr, ptsData) {
+            const panel = document.getElementById('infoPanel');
+            document.getElementById('configId').innerText = configId;
+            document.getElementById('configStr').innerText = configStr;
+
+            // Extract active tangents from synthdata string
+            let activeTangents = [];
+            if (configStr) {
+                const parts = configStr.trim().split(/\s+/);
+                if (parts.length >= 2) {
+                    activeTangents.push(parseInt(parts[parts.length - 2], 10));
+                    activeTangents.push(parseInt(parts[parts.length - 1], 10));
+                }
+            }
+            
+            if (ptsData) {
+                renderPoints('view1', ptsData.f1 || [], activeTangents);
+                renderPoints('view2', ptsData.f2 || [], activeTangents);
+                renderPoints('view3', ptsData.f3 || [], activeTangents);
+            }
+            
+            panel.style.display = 'block';
+        }
+
+        // Add Interactivity via Plotly Click
         document.getElementById('myDiv').on('plotly_click', function(data){
-            if(data.points.length > 0) {
+            if (data.points && data.points.length > 0) {
                 const pt = data.points[0];
                 const configId = pt.data.name;
                 const custom = pt.data.customdata;
-                const configStr = custom[0];
-                const ptsData = custom[1];
-                
-                const panel = document.getElementById('infoPanel');
-                document.getElementById('configId').innerText = configId;
-                document.getElementById('configStr').innerText = configStr;
+                if (custom) {
+                    showConfigDetails(configId, custom[0], custom[1]);
+                }
+            }
+        });
 
-                // Extract active tangents from synthdata string
-                let activeTangents = [];
-                if (configStr) {
-                    const parts = configStr.trim().split(/\s+/);
-                    if (parts.length >= 2) {
-                        activeTangents.push(parseInt(parts[parts.length - 2], 10));
-                        activeTangents.push(parseInt(parts[parts.length - 1], 10));
-                    }
+        // Enlarge mouse distance neighborhood region for clicking, using precise visual bins
+        const myPlotContainer = document.getElementById('myDiv');
+        myPlotContainer.addEventListener('click', function(e) {
+            if (!myPlotContainer._fullLayout || !myPlotContainer._fullLayout.xaxis) return;
+            const b = myPlotContainer.getBoundingClientRect();
+            const fl = myPlotContainer._fullLayout;
+            const clickX = e.clientX - b.left;
+            const clickY = e.clientY - b.top;
+
+            // Only respond inside plotting area
+            if (clickX < fl.margin.l || clickX > (fl.width - fl.margin.r) ||
+                clickY < fl.margin.t || clickY > (fl.height - fl.margin.b)) {
+                return;
+            }
+
+            let binWidth = 20; // fallback spacing
+            if (benchmarkData.length > 1) {
+                binWidth = Math.abs(fl.xaxis.c2p(1) - fl.xaxis.c2p(0));
+            }
+            const hitZone = binWidth / 2.0;
+
+            // Find closest configuration
+            let closestIdx = -1;
+            let minDist = Infinity;
+            for (let i = 0; i < benchmarkData.length; i++) {
+                const px = fl.xaxis.c2p(i) + fl.margin.l;
+                const d = Math.abs(clickX - px);
+                if (d < minDist) {
+                    minDist = d;
+                    closestIdx = i;
                 }
-                
-                if (ptsData) {
-                    renderPoints('view1', ptsData.f1 || [], activeTangents);
-                    renderPoints('view2', ptsData.f2 || [], activeTangents);
-                    renderPoints('view3', ptsData.f3 || [], activeTangents);
-                }
-                
-                panel.style.display = 'block';
+            }
+
+            // Snap only if we are strictly inside the visual column domain for that bin
+            if (closestIdx >= 0 && minDist < hitZone) {
+                const item = benchmarkData[closestIdx];
+                showConfigDetails(item.x, item.config, item.points);
             }
         });
     </script>
