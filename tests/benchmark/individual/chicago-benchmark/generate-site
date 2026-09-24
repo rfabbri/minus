@@ -356,7 +356,7 @@ cat << 'EOF' > index.html
             if (item.successRate !== undefined) {
                 successX.push(item.x);
                 successY.push(item.successRate);
-                successHover.push(`Success: ${item.successRate.toFixed(1)}%<br>Failure: ${(100 - item.successRate).toFixed(1)}%`);
+                successHover.push(`Success: ${item.successRate.toFixed(1)}%`);
             }
         });
 
