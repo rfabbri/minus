@@ -109,9 +109,32 @@ try:
 except Exception:
     grand_median = 0
 
+num_runs = 1
+try:
+    for script_candidate in ["../script-gammaotimo", "script-gammaotimo"]:
+        if os.path.exists(script_candidate):
+            with open(script_candidate, "r") as sf:
+                for line in sf:
+                    if "# number of runs" in line or "number of runs" in line:
+                        m = re.search(r'seq\s+\d+\s+(\d+)', line)
+                        if m:
+                            num_runs = int(m.group(1))
+                            break
+            if num_runs > 1:
+                break
+except Exception:
+    pass
+
+# Fallback: if steps in plot_data, each run has 312 solutions
+if num_runs <= 1 and plot_data and len(plot_data[0]["y"]) >= 312:
+    detected_runs = len(plot_data[0]["y"]) // 312
+    if detected_runs > 0:
+        num_runs = detected_runs
+
 with open("data.js", "w") as f:
     f.write(f"const benchmarkData = {json.dumps(plot_data)};\n")
     f.write(f"const grandMedian = {grand_median};\n")
+    f.write(f"const numRuns = {num_runs};\n")
 
 EOF
 
@@ -200,12 +223,17 @@ cat << 'EOF' > index.html
                     <td style="padding: 8px; border: 1px solid #ddd;">Number of tangents per view</td>
                     <td style="padding: 8px; border: 1px solid #ddd;">2</td>
                 </tr>
+                <tr>
+                    <td rowspan="1" style="padding: 8px; border: 1px solid #ddd; vertical-align: top;"><strong>Experiment specs</strong></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">Number of runs per configuration</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;" id="numRunsSpec">5</td>
+                </tr>
             </tbody>
         </table>
     </div>
 
     <div style="margin-bottom: 12px; display: flex; gap: 12px; align-items: center;">
-        <button id="togglePlotBtn" class="btn-toggle">Switch to Barplot (Sum of Roots)</button>
+        <button id="togglePlotBtn" class="btn-toggle">Switch to Barplot (Avg Iterations per Run)</button>
         <span style="font-size: 13px; color: #555;">Clicking on a box or bar displays configuration details below</span>
     </div>
     <div id="myDiv" style="width: 100%; height: 800px;"></div>
@@ -224,6 +252,10 @@ cat << 'EOF' > index.html
 
     <script src="data.js"></script>
     <script>
+        if (typeof numRuns !== 'undefined' && document.getElementById('numRunsSpec')) {
+            document.getElementById('numRunsSpec').innerText = numRuns;
+        }
+
         const traces = [];
         const barTraces = [];
         
@@ -277,11 +309,17 @@ cat << 'EOF' > index.html
                 showlegend: false
             });
 
-            // Thin barplot for sum of paths
-            const sumSteps = item.y.reduce((acc, v) => acc + v, 0);
+            // Barplot: iterations divided by number of runs (guard against overflow with Number)
+            let totalSteps = 0;
+            for (let i = 0; i < item.y.length; i++) {
+                totalSteps += Number(item.y[i]);
+            }
+            const runs = (typeof numRuns !== 'undefined' && numRuns > 0) ? numRuns : 1;
+            const avgStepsPerRun = totalSteps / runs;
+
             barTraces.push({
                 x: [item.x],
-                y: [sumSteps],
+                y: [avgStepsPerRun],
                 name: item.x,
                 type: 'bar',
                 width: 0.2,
@@ -365,15 +403,15 @@ cat << 'EOF' > index.html
                 isBarplot = !isBarplot;
                 if (isBarplot) {
                     toggleBtn.innerText = 'Switch to Boxplot';
-                    layout.title = '<b>Total Iteration Steps (Sum of Paths)</b>';
-                    layout.yaxis.title = 'Sum of iterations across all paths';
+                    layout.title = '<b>Average Iteration Steps per Run (Sum of Paths / Runs)</b>';
+                    layout.yaxis.title = 'Average iterations per run (all paths)';
                     layout.yaxis.range = null;
                     layout.yaxis.dtick = null;
                     layout.shapes = [];
                     layout.annotations = [];
                     Plotly.react('myDiv', barTraces, layout, {responsive: true});
                 } else {
-                    toggleBtn.innerText = 'Switch to Barplot (Sum of Roots)';
+                    toggleBtn.innerText = 'Switch to Barplot (Avg Iterations per Run)';
                     layout.title = '<b>Time spent in paths leading to undesired roots</b>';
                     layout.yaxis.title = 'Number of iterations per root';
                     layout.yaxis.range = [0, 1050];

@@ -90,6 +90,7 @@ if os.path.exists("all_steps.txt"):
 with open("data.js", "w") as f:
     f.write(f"const benchmarkData = {json.dumps(plot_data)};\n")
     f.write(f"const grandMedian = {grand_median};\n")
+    f.write(f"const numRuns = 1;\n")
 EOF
 
 python3 update_data.py
@@ -164,9 +165,13 @@ cat << 'EOF' > index.html
             </thead>
             <tbody>
                 <tr>
-                    <td rowspan="3" style="padding: 8px; border: 1px solid #ddd; vertical-align: top;"><strong>General specs</strong></td>
+                    <td rowspan="4" style="padding: 8px; border: 1px solid #ddd; vertical-align: top;"><strong>General specs</strong></td>
                     <td style="padding: 8px; border: 1px solid #ddd;">Number of complex solutions</td>
                     <td style="padding: 8px; border: 1px solid #ddd;">2</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #ddd;">Number of runs per configuration</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;" id="numRunsSpec">1</td>
                 </tr>
                 <tr>
                     <td style="padding: 8px; border: 1px solid #ddd;">System size</td>
@@ -221,6 +226,10 @@ cat << 'EOF' > index.html
 
     <script src="data.js"></script>
     <script>
+        if (typeof numRuns !== 'undefined' && document.getElementById('numRunsSpec')) {
+            document.getElementById('numRunsSpec').innerText = numRuns;
+        }
+
         const traces = [];
         const barTraces = [];
         
@@ -271,11 +280,17 @@ cat << 'EOF' > index.html
                 showlegend: false
             });
 
-            // Thin barplot for sum of roots
-            const sumRoots = item.y.reduce((acc, v) => acc + v, 0);
+            // Thin barplot for sum of roots divided by runs (prevent overflow with Number)
+            let totalSteps = 0;
+            for (let i = 0; i < item.y.length; i++) {
+                totalSteps += Number(item.y[i]);
+            }
+            const runs = (typeof numRuns !== 'undefined' && numRuns > 0) ? numRuns : 1;
+            const avgSteps = totalSteps / runs;
+
             barTraces.push({
                 x: [item.x],
-                y: [sumRoots],
+                y: [avgSteps],
                 name: item.x,
                 type: 'bar',
                 width: 0.3,

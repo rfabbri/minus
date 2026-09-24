@@ -35,13 +35,13 @@ generate_stats() {
   for id in $dirs; do
     step_file="licir-P${id}/sol_step-P${id}.txt"
     if [ -f "$step_file" ]; then
-      read -r s m <<< $(sort -n "$step_file" | awk '{sum+=$1; vals[NR]=$1} END {n=NR; if (n==0) {print 0, 0} else if (n%2==1) {print sum, vals[(n+1)/2]} else {print sum, (vals[n/2]+vals[n/2+1])/2}}')
+      read -r s m <<< $(sort -n "$step_file" | awk 'BEGIN{CONVFMT="%.0f"; OFMT="%.0f"} {sum+=$1; vals[NR]=$1} END {n=NR; if (n==0) {print 0, 0} else if (n%2==1) {printf "%.0f %g\n", sum, vals[(n+1)/2]} else {printf "%.0f %g\n", sum, (vals[n/2]+vals[n/2+1])/2}}')
       printf "%b\n" "  Config ${C_ID}P${id}${C_RESET} Steps: Sum = ${C_SUM}${s}${C_RESET}, Median = ${C_MED}${m}${C_RESET}"
     fi
   done
 
   
-  grand_sum=`awk '{sum += $1} END {print sum}' all_steps.txt`
+  grand_sum=$(awk 'BEGIN{CONVFMT="%.0f"; OFMT="%.0f"} {sum += $1} END {printf "%.0f\n", sum}' all_steps.txt)
   grand_median=$(sort -n all_steps.txt | awk '{vals[NR]=$1} END {n=NR; if (n==0) print 0; else if (n%2==1) print vals[(n+1)/2]; else print (vals[n/2]+vals[n/2+1])/2}')
 
   echo
