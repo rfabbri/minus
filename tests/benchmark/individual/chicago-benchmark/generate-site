@@ -436,9 +436,7 @@ cat << 'EOF' > index.html
                 title: 'Number of iterations per root',
                 titlefont: { size: 20 },
                 zeroline: false,
-                autorange: false,
-                range: [0, 1050],
-                dtick: 100,
+                autorange: true,
                 gridcolor: '#eee'
             },
             yaxis2: {
@@ -477,8 +475,9 @@ cat << 'EOF' > index.html
                     toggleBtn.innerText = 'Switch to Boxplot';
                     layout.title = '<b>Average Iteration Steps per Run (Sum of Paths / Runs)</b>';
                     layout.yaxis.title = 'Average iterations per run (all paths)';
-                    layout.yaxis.range = null;
-                    layout.yaxis.dtick = null;
+                    layout.yaxis.autorange = true;
+                    delete layout.yaxis.range;
+                    delete layout.yaxis.dtick;
                     layout.shapes = [];
                     layout.annotations = [];
                     Plotly.react('myDiv', barTraces, layout, {responsive: true});
@@ -486,8 +485,9 @@ cat << 'EOF' > index.html
                     toggleBtn.innerText = 'Click for Barplot';
                     layout.title = '<b>Time spent in paths leading to any root</b>';
                     layout.yaxis.title = 'Number of iterations per root';
-                    layout.yaxis.range = [0, 1050];
-                    layout.yaxis.dtick = 100;
+                    layout.yaxis.autorange = true;
+                    delete layout.yaxis.range;
+                    delete layout.yaxis.dtick;
                     layout.shapes = medianShapes;
                     layout.annotations = medianAnnotations;
                     Plotly.react('myDiv', traces, layout, {responsive: true});
