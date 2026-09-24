@@ -571,7 +571,7 @@ cat << 'EOF' > index.html
                 const hitCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                 hitCircle.setAttribute('cx', p.x);
                 hitCircle.setAttribute('cy', p.y);
-                hitCircle.setAttribute('r', Math.max(width * 0.06, 14));
+                hitCircle.setAttribute('r', width * 0.06);
                 hitCircle.setAttribute('fill', 'transparent');
                 hitCircle.setAttribute('pointer-events', 'all');
                 g.appendChild(hitCircle);
@@ -580,21 +580,21 @@ cat << 'EOF' > index.html
                 const ptElem = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                 ptElem.setAttribute('cx', p.x);
                 ptElem.setAttribute('cy', p.y);
-                ptElem.setAttribute('r', Math.max(width * 0.025, 4));
+                ptElem.setAttribute('r', width * 0.025);
                 ptElem.setAttribute('fill', idx === 0 ? '#27ae60' : '#8e44ad');
                 ptElem.setAttribute('stroke', '#fff');
-                ptElem.setAttribute('stroke-width', Math.max(width * 0.005, 1));
+                ptElem.setAttribute('stroke-width', width * 0.005);
                 g.appendChild(ptElem);
 
                 const label = `<strong>Point ${idx + 1}</strong>: [${p.x.toFixed(4)}, ${p.y.toFixed(4)}]`;
 
                 g.addEventListener('mouseenter', (e) => {
-                    ptElem.setAttribute('r', Math.max(width * 0.035, 6));
+                    ptElem.setAttribute('r', width * 0.035);
                     showTip(e, label);
                 });
                 g.addEventListener('mousemove', moveTip);
                 g.addEventListener('mouseleave', () => {
-                    ptElem.setAttribute('r', Math.max(width * 0.025, 4));
+                    ptElem.setAttribute('r', width * 0.025);
                     hideTip();
                 });
 
