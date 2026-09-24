@@ -6,27 +6,27 @@
 . common  # Define your folder here <<<<<<
 #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-rm -rf $exp
-mkdir  $exp
-cd $exp
+rm -rf "$exp"
+mkdir  "$exp"
+cd "$exp"
 
 # TODO: make sure st or st-console installed
 
-if [[ "`uname`" != Linux ]]; then
-  MYOS="OSX"
-  mysed=gsed
-  # myst=st
-else
-  MYOS="Linux"
-  mysed=sed
-  # myst=st-console
-fi
+# if [[ "`uname`" != Linux ]]; then
+#   MYOS="OSX"
+#   mysed=gsed
+#   # myst=st
+# else
+#   MYOS="Linux"
+#   mysed=sed
+#   # myst=st-console
+# fi
 
 #Script para rodar os primeiros 140 problemas aleatórios gerados a partir dos dados sintéticos
 #MAIO 2025
 
 echo Running chicago14a benchmark
-for i in $(seq 1 10) # each configuration
+for i in $(seq 1 3) # each configuration
 do 
   echo Running configuration $i
     mkdir frpt-P$i
@@ -41,31 +41,23 @@ do
       set +e
       # Capture stderr from both synthdata and minus-chicago into temp.txt
       # and stdout of minus-chicago into out.txt
-      bash -c "{ $synthdata $fr1 $fr2 $fr3 $pt1 $pt2 $pt3 0 1 2>&3 | $minus -i -gt --prefilter_degeneracy=no > out.txt 2>&3; } 3> temp.txt"
+      bash -c "{ $synthdata $fr1 $fr2 $fr3 $pt1 $pt2 $pt3 0 1 2>&3 | $minus -i -gt --prefilter_degeneracy=no > frpt-P$i/out.txt 2>&3; } 3> frpt-P$i/temp.txt"
       set -e
 
-      #script temp.txt bash -c "$synthdata $fr1 $fr2 $fr3 $pt1 $pt2 $pt3 0 1 |$minus -i -gt  --prefilter_degeneracy=no > out.txt"  >/dev/null
-       # Read commands from the terminal and evaluate them in the current context
-#       while read -r -e -p "debug_prompt> " cmd </dev/tty; do
-#         [[ -z "$cmd" ]] && break
-#         eval "$cmd"
-#       done
-
-#	cat ut.txt | cut -d '(' -f 2| cut -d ")" -f 1| sed -n '1,114p'>> frpt-P$i/vec_gamma-P$i.txt
-      grep -E "^LOG [0-9]+ " temp.txt | cut -d' ' -f 3 >> frpt-P$i/sol_step-P$i.txt || :
-      grep "isvalid)" temp.txt | cut -d')' -f2 >> frpt-P$i/realsol-P$i.txt || :
+      grep -E "^LOG [0-9]+ " frpt-P$i/temp.txt | cut -d' ' -f 3 >> frpt-P$i/sol_step-P$i.txt || :
+      grep "isvalid)" frpt-P$i/temp.txt | cut -d')' -f2 >> frpt-P$i/realsol-P$i.txt || :
       echo '313,10'>> frpt-P$i/realsol-P$i.txt
-      solution=$(grep index temp.txt | cut -d : -f 2) || :
+      solution=$(grep index frpt-P$i/temp.txt | cut -d : -f 2) || :
       if [ -z "$solution" ]
       then
           solution=313
       fi
       echo $solution>> frpt-P$i/gt_sol-P$i.txt
-      cat temp.txt | grep -E '^LOG\(synthdata\) frames:|^LOG\(synthdata\) lines:' | cut -d':' -f 2 | $mysed -n '1,2p' >> frpt-P$i/frpt-$i.txt || :
+      cat frpt-P$i/temp.txt | grep -E '^LOG\(synthdata\) frames:|^LOG\(synthdata\) lines:' | cut -d':' -f 2 | sed -n '1,2p' >> frpt-P$i/frpt-$i.txt || :
     done
 done
 
 # backup the script
-mkdir $exp/bak
-cp "$0" $exp/bak
+mkdir -p bak
+cp "$0" bak/
 echo "Chicago benchmark completed"

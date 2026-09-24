@@ -8,11 +8,12 @@
 
 rm -rf "$exp"
 mkdir "$exp"
+cd "$exp" || exit 1
 
 set +e
 
 for i in $(seq 1 140); do
-  cfg_dir="$exp/licir-P${i}"
+  cfg_dir="licir-P${i}"
   mkdir -p "$cfg_dir"
 
   # Extract line $i from configurations and ground-truth
@@ -55,6 +56,6 @@ for i in $(seq 1 140); do
 done
 
 # backup the script
-mkdir $exp/bak
-cp "$0" $exp/bak
+mkdir -p bak
+cp "$0" bak/
 echo "Linecircle benchmark completed"
