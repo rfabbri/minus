@@ -159,8 +159,8 @@ def main():
                     y: {json.dumps(y_data)},
                     type: 'scatter',
                     mode: 'lines+markers',
-                    marker: {{size: 10, color: '#e74c3c'}},
-                    line: {{width: 3, color: '#c0392b'}},
+                    marker: {{size: 8, color: 'rgba(52, 152, 219, 0.7)'}},
+                    line: {{width: 4, color: 'rgba(41, 128, 185, 0.7)'}},
                     name: 'Grand Median Steps',
                     hovertemplate: '<b>Commit %{{x}}</b><br>Grand Median: %{{y:.1f}}<extra></extra>'
                   }});
@@ -171,16 +171,16 @@ def main():
                         y: {json.dumps(y_data_robustness)},
                         type: 'scatter',
                         mode: 'lines+markers',
-                        marker: {{size: 8, color: '#3498db'}},
-                        line: {{width: 3, color: '#2980b9'}},
-                        name: 'Total Reliability',
+                        marker: {{size: 8, color: 'rgba(230, 126, 34, 0.7)'}},
+                        line: {{width: 2.5, color: 'rgba(211, 84, 0, 0.7)'}},
+                        name: 'Reliability',
                         yaxis: 'y2',
                         hovertemplate: '<b>Commit %{{x}}</b><br>Reliability: %{{y:.1f}}%<extra></extra>'
                       }});
                   }}
                   
                   var layout = {{
-                    title: hasRobustness ? '<b>Trend: Grand Median Steps & Total Reliability per Commit</b>' : '<b>Trend: Grand Median Steps per Commit</b>',
+                    title: hasRobustness ? '<b>Trend: Grand Median Steps & Reliability per Commit</b>' : '<b>Trend: Grand Median Steps per Commit</b>',
                     margin: {{ t: 40, b: 50, l: 85, r: hasRobustness ? 85 : 30 }},
                     paper_bgcolor: 'rgba(0,0,0,0)',
                     plot_bgcolor: 'rgba(0,0,0,0)',
@@ -197,7 +197,9 @@ def main():
                           side: 'right',
                           range: [0, 105],
                           showgrid: false,
-                          automargin: true
+                          automargin: true,
+                          titlefont: {{ color: 'rgb(211, 84, 0)' }},
+                          tickfont: {{ color: 'rgb(211, 84, 0)' }}
                       }};
                   }}
                   
