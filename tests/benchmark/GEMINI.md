@@ -230,9 +230,39 @@ Individual shell scripts
 
 ##### What I want from AI agent NOW TODO
     - Milestone v6.0
-        - 5.1 Make sure linecircle interpretation OK
-            - Linecircle must be plotted with bars not boxplot
-                - First thing is keep boxplot but optimize the results: there should be no variance!
+        - 5.1
+            - For Linecircle: give an button atop the boxplot to switch to
+              barplot if desired:
+                - Relevant site generator file: bench/individual/linecircle-benchmark
+                - The barplot option should substitute the boxplot with a
+                  barplot: the sum of both roots as a thin barplot: x is the
+                  same as the boxplot (configuration), y is the barplot
+            - For all boxplots: enlarge the neighborhood region where I can click on a box
+            to get its details. Right now, I have to click on a boxplot with the mouse exactl over
+              it, which messes up
+            - Same for the barplot; I should be able to click on the bars and
+              get the exact same callback as the boxplot.
+            - Simpler changes
+                - Bump the version where necessary
+                - Chicago specific page should list formulation details right
+                  after the top bars. 
+                   - Formulation tag for chicago: chicago14a 
+                        General specs
+                            Number of complex solutions:
+                            System size: 14x14
+                            Number of complex parameters: 56 = 39 point configuration + 17 random numbers
+                            Variables: 14 = 2 quaternions (each up to scale) + 2 translations (up to global scale)
+                        Problem-specific specs
+                            Number of views: 3
+                            Number of points per view: 3
+                            Number of tangents per view: 2
+                      
+                   - Formulation tag for linecircle: linecircle2a
+                        General specs
+                          Number of complex solutions: 2
+                          System size: 2x2 
+                          Number of complex parameters: 6
+                            
         - 5.2
             - Double-check the point-tangents plot
             - Sometimes circle plots the point sizes get really big; make em fixed
