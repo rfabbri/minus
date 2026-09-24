@@ -228,10 +228,8 @@ Individual shell scripts
       - Aggregate all the statistics using st-console directly.
       - Output both index.html (for your web browser) and summary.txt (for console/programmatic reading).
 
-##### What I want from AI agent NOW (mostly already done)
+##### What I want from AI agent NOW TODO
     - Milestone v6.0
-        - 5.0 
-            - The grand median for chicago is getting fixed at 20
         - 5.1 Make sure linecircle interpretation OK
             - Linecircle must be plotted with bars not boxplot
                 - First thing is keep boxplot but optimize the results: there should be no variance!

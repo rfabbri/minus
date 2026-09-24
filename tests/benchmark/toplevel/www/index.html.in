@@ -108,7 +108,7 @@
             <div class="card-content">
                 <h2>Linecircle</h2>
                 <p>Minimal problem intersection solver tracking configurations and ground-truth validation across experiments.</p>
-                <div class="status">Phase 1 Ready (v2.1 alpha)</div>
+                <div class="status">Phase 1 Ready</div>
             </div>
         </a>
 
