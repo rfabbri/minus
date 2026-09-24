@@ -165,7 +165,7 @@ cat << 'EOF' > index.html
     </style>
 </head>
 <body>
-    <h1>MINUS Linecircle Benchmark Results/h1>
+    <h1>MINUS Linecircle Benchmark Results</h1>
 
     <div style="background: white; border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
         <h3 style="margin-top: 0; margin-bottom: 15px;">Formulation: linecircle2a</h3>
@@ -179,13 +179,9 @@ cat << 'EOF' > index.html
             </thead>
             <tbody>
                 <tr>
-                    <td rowspan="4" style="padding: 8px; border: 1px solid #ddd; vertical-align: top;"><strong>General specs</strong></td>
+                    <td rowspan="3" style="padding: 8px; border: 1px solid #ddd; vertical-align: top;"><strong>General specs</strong></td>
                     <td style="padding: 8px; border: 1px solid #ddd;">Number of complex solutions</td>
                     <td style="padding: 8px; border: 1px solid #ddd;">2</td>
-                </tr>
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #ddd;">Number of runs per configuration</td>
-                    <td style="padding: 8px; border: 1px solid #ddd;" id="numRunsSpec">1</td>
                 </tr>
                 <tr>
                     <td style="padding: 8px; border: 1px solid #ddd;">System size</td>
@@ -194,6 +190,11 @@ cat << 'EOF' > index.html
                 <tr>
                     <td style="padding: 8px; border: 1px solid #ddd;">Number of complex parameters</td>
                     <td style="padding: 8px; border: 1px solid #ddd;">6</td>
+                </tr>
+                <tr>
+                    <td rowspan="1" style="padding: 8px; border: 1px solid #ddd; vertical-align: top;"><strong>Experiment specs</strong></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">Number of runs per configuration</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;" id="numRunsSpec">1</td>
                 </tr>
             </tbody>
         </table>
