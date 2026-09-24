@@ -405,6 +405,11 @@ def main():
     with open(os.path.join(public_dir, "index.html"), "w") as f:
         f.write(pub_html)
         
+    # Copy figs/ directory to public/figs
+    figs_src = os.path.join(toplevel_dir, "www", "figs")
+    if os.path.exists(figs_src):
+        shutil.copytree(figs_src, os.path.join(public_dir, "figs"))
+        
     # 6.c Copy problem directories cleanly preserving tmp and archives identically
     for p in problems:
         pub_p = os.path.join(public_dir, f"{p}-benchmark")
