@@ -165,7 +165,7 @@ cat << 'EOF' > index.html
     </style>
 </head>
 <body>
-    <h1>MINUS Linecircle Benchmark Results (Version 5.1)</h1>
+    <h1>MINUS Linecircle Benchmark Results/h1>
 
     <div style="background: white; border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
         <h3 style="margin-top: 0; margin-bottom: 15px;">Formulation: linecircle2a</h3>
@@ -364,7 +364,7 @@ cat << 'EOF' > index.html
         });
 
         const layout = {
-            title: '<b>Iterations per Root for Linecircle Problem</b>',
+            title: '<b>Iterations per Root for LineCircle</b>',
             titlefont: { size: 22 },
             showlegend: false,
             yaxis: {
@@ -408,7 +408,7 @@ cat << 'EOF' > index.html
                     Plotly.react('myDiv', barTraces, layout, {responsive: true});
                 } else {
                     toggleBtn.innerText = 'Click for Barplot';
-                    layout.title = '<b>Iterations per Root for Linecircle Problem</b>';
+                    layout.title = '<b>Iterations per Root for LineCircle</b>';
                     layout.yaxis.title = 'Number of iterations per root';
                     layout.yaxis.dtick = 50;
                     layout.shapes = medianShapes;
