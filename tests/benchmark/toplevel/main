@@ -1,7 +1,7 @@
 #!/bin/sh
 . ../common.incl
 # may use & if desired:
-(cd $benchmarkdir/individual/chicago-benchmark/ && ./main) 
 (cd $benchmarkdir/individual/linecircle-benchmark/ && ./main)
+(cd $benchmarkdir/individual/chicago-benchmark/ && ./main) 
 wait
 python3 "$benchmarkdir/toplevel/package_dashboard.py"
