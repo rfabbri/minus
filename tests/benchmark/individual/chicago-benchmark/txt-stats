@@ -54,7 +54,6 @@ generate_stats() {
     printf "%b\n" "${C_TITLE}Grand Totals:${C_RESET}"
     printf "%b\n" "  Total Iteration Steps: ${C_SUM}${grand_sum}${C_RESET}"
     printf "%b\n" "  Grand Median Steps: ${C_MED}${grand_median}${C_RESET}"
-    printf "%b\n" "  Grand Median Steps: ${C_MED}${grand_median}${C_RESET}"
     printf "%b\n" "  Grand Successs Rate / ground-truth found within all runs & all configs: ${C_MED}${grand_success}${C_RESET}%"
 }
 
