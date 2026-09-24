@@ -368,6 +368,7 @@ cat << 'EOF' > index.html
                     layout.title = '<b>Total Iteration Steps (Sum of Paths)</b>';
                     layout.yaxis.title = 'Sum of iterations across all paths';
                     layout.yaxis.range = null;
+                    layout.yaxis.dtick = null;
                     layout.shapes = [];
                     layout.annotations = [];
                     Plotly.react('myDiv', barTraces, layout, {responsive: true});
@@ -376,6 +377,7 @@ cat << 'EOF' > index.html
                     layout.title = '<b>Time spent in paths leading to undesired roots</b>';
                     layout.yaxis.title = 'Number of iterations per root';
                     layout.yaxis.range = [0, 1050];
+                    layout.yaxis.dtick = 100;
                     layout.shapes = medianShapes;
                     layout.annotations = medianAnnotations;
                     Plotly.react('myDiv', traces, layout, {responsive: true});

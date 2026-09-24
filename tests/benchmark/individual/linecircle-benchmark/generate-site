@@ -360,6 +360,7 @@ cat << 'EOF' > index.html
                     toggleBtn.innerText = 'Switch to Boxplot';
                     layout.title = '<b>Total Iteration Steps (Sum of Both Roots)</b>';
                     layout.yaxis.title = 'Sum of iterations across both roots';
+                    layout.yaxis.dtick = null;
                     layout.shapes = [];
                     layout.annotations = [];
                     Plotly.react('myDiv', barTraces, layout, {responsive: true});
@@ -367,6 +368,7 @@ cat << 'EOF' > index.html
                     toggleBtn.innerText = 'Switch to Barplot (Sum of Roots)';
                     layout.title = '<b>Iterations per Root for Linecircle Problem</b>';
                     layout.yaxis.title = 'Number of iterations per root';
+                    layout.yaxis.dtick = 50;
                     layout.shapes = medianShapes;
                     layout.annotations = medianAnnotations;
                     Plotly.react('myDiv', traces, layout, {responsive: true});
