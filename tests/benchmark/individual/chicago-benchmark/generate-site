@@ -278,6 +278,7 @@ cat << 'EOF' > index.html
                 y: item.y,
                 name: item.x,
                 type: 'box',
+                yaxis: 'y',
                 boxpoints: 'outliers',
                 jitter: 0,
                 pointpos: 0,
@@ -434,6 +435,7 @@ cat << 'EOF' > index.html
                 title: 'Number of iterations per root',
                 titlefont: { size: 20 },
                 zeroline: false,
+                autorange: false,
                 range: [0, 1050],
                 dtick: 100,
                 gridcolor: '#eee'
@@ -442,6 +444,8 @@ cat << 'EOF' > index.html
                 title: 'Success Rate (%)',
                 overlaying: 'y',
                 side: 'right',
+                anchor: 'x',
+                autorange: false,
                 range: [-5, 105],
                 titlefont: { color: 'orange' },
                 tickfont: { color: 'orange' }
@@ -461,6 +465,7 @@ cat << 'EOF' > index.html
         };
 
         Plotly.newPlot('myDiv', traces, layout, {responsive: true});
+        Plotly.react('myDiv', traces, layout, {responsive: true});
 
         let isBarplot = false;
         const toggleBtn = document.getElementById('togglePlotBtn');
