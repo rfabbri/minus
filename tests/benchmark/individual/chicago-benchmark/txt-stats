@@ -39,7 +39,8 @@ generate_stats() {
         if [ -f "$step_file" ]; then
           read -r s m <<< $(sort -n "$step_file" | awk 'BEGIN{CONVFMT="%.0f"; OFMT="%.0f"} {sum+=$1; vals[NR]=$1} END {n=NR; if (n==0) {print 0, 0} else if (n%2==1) {printf "%.0f %g\n", sum, vals[(n+1)/2]} else {printf "%.0f %g\n", sum, (vals[n/2]+vals[n/2+1])/2}}')
             
-          printf "%b\n" "  Config ${C_ID}P${id}${C_RESET} Steps: Sum = ${C_SUM}${s}${C_RESET}, Median = ${C_MED}${m}${C_RESET}, Successes = $(grep -v 313 $config_dir/gt_sol*|wc -l)/$(wc -l $config_dir/gt_sol*)"
+          nsuccesses=$(grep -v 313 $config_dir/gt_sol*|wc -l|xargs echo)
+          printf "%b\n" "  Config ${C_ID}P${id}${C_RESET} Steps: Sum = ${C_SUM}${s}${C_RESET}, Median = ${C_MED}${m}${C_RESET}, Successes = $nsuccesses/$nruns_per_config ($(echo "100.0*$nsuccesses/$nruns_per_config"|bc)%)"
         fi
     done
 
