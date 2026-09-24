@@ -25,19 +25,26 @@ def main():
         
     problems = ["chicago", "linecircle"]
     medians = {}
+    robustness = {}
     
-    # 2. Extract Grand Median Steps from currently generated summary.txt inside tmp/
+    # 2. Extract Grand Median Steps and Robustness from currently generated summary.txt inside tmp/
     for p in problems:
         sum_file = os.path.join(repo_root, f"tests/benchmark/individual/{p}-benchmark/tmp/summary.txt")
         m = None
+        r = None
         if os.path.exists(sum_file):
             with open(sum_file, "r") as f:
                 content = f.read()
                 # e.g., "Grand Median Steps: 179.5"
-                match = re.search(r"Grand Median Steps:\s*([\d\.]+)", content)
-                if match:
-                    m = float(match.group(1))
+                match_m = re.search(r"Grand Median Steps:\s*([\d\.]+)", content)
+                if match_m:
+                    m = float(match_m.group(1))
+                # e.g., "Grand robustness / ground-truth found within all runs: 85%"
+                match_r = re.search(r"Grand robustness.*?:\s*([\d\.]+)%", content)
+                if match_r:
+                    r = float(match_r.group(1))
         medians[p] = m
+        robustness[p] = r
         
     # 3. Load & Process History (keep up to 5 latest distinct hashes)
     history = []
@@ -53,7 +60,8 @@ def main():
     history.insert(0, {
         "commit": commit_6,
         "date": update_date,
-        "medians": medians
+        "medians": medians,
+        "robustness": robustness
     })
     history = history[:5] # keep max 5 commits
     
@@ -88,6 +96,8 @@ def main():
         plot_history = list(reversed(history))
         x_data = [h["commit"] for h in plot_history]
         y_data = [h["medians"].get(p) or 0 for h in plot_history]
+        y_data_robustness = [h.get("robustness", {}).get(p) or 0 for h in plot_history]
+        has_robustness = any(y > 0 for y in y_data_robustness)
         
         def get_injected_html(current_view_hash, top_href):
             buttons = []
@@ -140,24 +150,57 @@ def main():
               }} else {{ renderPlot(); }}
               
               function renderPlot() {{
-                  var trace = {{
+                  var traces = [];
+                  var hasRobustness = {json.dumps(has_robustness)};
+                  
+                  traces.push({{
                     x: {json.dumps(x_data)},
                     y: {json.dumps(y_data)},
                     type: 'scatter',
                     mode: 'lines+markers',
                     marker: {{size: 10, color: '#e74c3c'}},
                     line: {{width: 3, color: '#c0392b'}},
-                    name: 'Grand Median',
+                    name: 'Grand Median Steps',
                     hovertemplate: '<b>Commit %{{x}}</b><br>Grand Median: %{{y:.1f}}<extra></extra>'
-                  }};
-                  Plotly.newPlot('trendPlot', [trace], {{
-                    title: '<b>Trend: Grand Median Steps per Commit</b>',
-                    margin: {{ t: 40, b: 50, l: 85, r: 30 }},
+                  }});
+                  
+                  if (hasRobustness) {{
+                      traces.push({{
+                        x: {json.dumps(x_data)},
+                        y: {json.dumps(y_data_robustness)},
+                        type: 'scatter',
+                        mode: 'lines+markers',
+                        marker: {{size: 8, color: '#3498db'}},
+                        line: {{width: 3, color: '#2980b9'}},
+                        name: 'Total Reliability',
+                        yaxis: 'y2',
+                        hovertemplate: '<b>Commit %{{x}}</b><br>Reliability: %{{y:.1f}}%<extra></extra>'
+                      }});
+                  }}
+                  
+                  var layout = {{
+                    title: hasRobustness ? '<b>Trend: Grand Median Steps & Total Reliability per Commit</b>' : '<b>Trend: Grand Median Steps per Commit</b>',
+                    margin: {{ t: 40, b: 50, l: 85, r: hasRobustness ? 85 : 30 }},
                     paper_bgcolor: 'rgba(0,0,0,0)',
                     plot_bgcolor: 'rgba(0,0,0,0)',
                     xaxis: {{ title: 'Commit Hash', type: 'category' }},
-                    yaxis: {{ title: {{ text: 'Grand Median Steps', standoff: 20 }}, automargin: true }}
-                  }});
+                    yaxis: {{ title: {{ text: 'Grand Median Steps', standoff: 20 }}, automargin: true }},
+                    showlegend: hasRobustness,
+                    legend: hasRobustness ? {{ orientation: 'h', y: -0.2 }} : undefined
+                  }};
+                  
+                  if (hasRobustness) {{
+                      layout.yaxis2 = {{
+                          title: 'Reliability (%)',
+                          overlaying: 'y',
+                          side: 'right',
+                          range: [0, 105],
+                          showgrid: false,
+                          automargin: true
+                      }};
+                  }}
+                  
+                  Plotly.newPlot('trendPlot', traces, layout);
               }}
             </script>
             <!-- INJECTED_UI_END -->

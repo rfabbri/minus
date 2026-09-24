@@ -229,44 +229,13 @@ Individual shell scripts
       - Output both index.html (for your web browser) and summary.txt (for console/programmatic reading).
 
 ##### What I want from AI agent NOW TODO
-    - Milestone v6.0
-        - 5.1
-            - For Linecircle: give an button atop the boxplot to switch to
-              barplot if desired:
-                - Relevant site generator file: bench/individual/linecircle-benchmark
-                - The barplot option should substitute the boxplot with a
-                  barplot: the sum of both roots as a thin barplot: x is the
-                  same as the boxplot (configuration), y is the barplot
-            - For all boxplots: enlarge the neighborhood region where I can click on a box
-            to get its details. Right now, I have to click on a boxplot with the mouse exactl over
-              it, which messes up
-            - Same for the barplot; I should be able to click on the bars and
-              get the exact same callback as the boxplot.
-            - Simpler changes
-                - Bump the version where necessary
-                - Chicago specific page should list formulation details right
-                  after the top bars. 
-                   - Formulation tag for chicago: chicago14a 
-                        General specs
-                            Number of complex solutions:
-                            System size: 14x14
-                            Number of complex parameters: 56 = 39 point configuration + 17 random numbers
-                            Variables: 14 = 2 quaternions (each up to scale) + 2 translations (up to global scale)
-                        Problem-specific specs
-                            Number of views: 3
-                            Number of points per view: 3
-                            Number of tangents per view: 2
-                      
-                   - Formulation tag for linecircle: linecircle2a
-                        General specs
-                          Number of complex solutions: 2
-                          System size: 2x2 
-                          Number of complex parameters: 6
-                            
-        - 5.2
-            - Double-check the point-tangents plot
-            - Sometimes circle plots the point sizes get really big; make em fixed
-              on screen no matter the scale
     - Milestone v7.0 alpha
         - The loading of the data is way too slow, I'd like it to be faster.
         - A measure of robustness: percentage of time it found a solution
+    - Milestone v8.0 alpha
+        - 7.2 Report total reliability for linecircle in site
+        - 7.3 Report total reliability for chicago in txt
+        - 7.4 Report total reliability for chicago in site
+        - 7.5 Reliability plot for linecircle per config
+        - 7.5 Reliability plot for chicago per config
+        - 7.6 Reliabilitty history per commit

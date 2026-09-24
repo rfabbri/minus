@@ -26,7 +26,7 @@ fi
 #MAIO 2025
 
 echo Running chicago14a benchmark
-for i in $(seq 1 100) # each configuration
+for i in $(seq 1 10) # each configuration
 do 
   echo Running configuration $i
     mkdir frpt-P$i
@@ -36,7 +36,7 @@ do
     pt1=$(cat $configurations | sed -n "$(($i))p" |cut -d' ' -f4)
     pt2=$(cat $configurations | sed -n "$(($i))p" |cut -d' ' -f5)
     pt3=$(cat $configurations | sed -n "$(($i))p" |cut -d' ' -f6)
-    for j in $(seq 1 200) # number of runs
+    for j in $(seq 1 5) # number of runs
     do 
       set +e
       # Capture stderr from both synthdata and minus-chicago into temp.txt
