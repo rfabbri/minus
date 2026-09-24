@@ -147,7 +147,8 @@ cat << 'EOF' > index.html
             vertical-align: middle;
         }
         .btn-toggle {
-            padding: 9px 18px;
+ /*            padding: 9px 18px; */
+            padding: 15px 340px;
             font-size: 13px;
             font-weight: 600;
             background: #2980b9;
@@ -155,7 +156,7 @@ cat << 'EOF' > index.html
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
             transition: background 0.2s;
         }
         .btn-toggle:hover {
@@ -199,8 +200,9 @@ cat << 'EOF' > index.html
     </div>
 
     <div style="margin-bottom: 12px; display: flex; gap: 12px; align-items: center;">
-        <button id="togglePlotBtn" class="btn-toggle">Switch to Barplot (Sum of Roots)</button>
-        <span style="font-size: 13px; color: #555;">Clicking on a box or bar displays configuration details below</span>
+        <button id="togglePlotBtn" class="btn-toggle">Click for Barplot</button>
+        <span style="font-size: 20px; color: #555;">Clicking on a box or bar
+          displays configuration details below &#10549;</span>
     </div>
     <div id="myDiv" style="width: 100%; height: 700px;"></div>
     
@@ -397,15 +399,15 @@ cat << 'EOF' > index.html
             toggleBtn.addEventListener('click', function() {
                 isBarplot = !isBarplot;
                 if (isBarplot) {
-                    toggleBtn.innerText = 'Switch to Boxplot';
-                    layout.title = '<b>Total Iteration Steps (Sum of Both Roots)</b>';
+                    toggleBtn.innerText = 'Click for Boxplot';
+                    layout.title = '<b>Total Iteration Steps (Sum for Both Roots)</b>';
                     layout.yaxis.title = 'Sum of iterations across both roots';
                     layout.yaxis.dtick = null;
                     layout.shapes = [];
                     layout.annotations = [];
                     Plotly.react('myDiv', barTraces, layout, {responsive: true});
                 } else {
-                    toggleBtn.innerText = 'Switch to Barplot (Sum of Roots)';
+                    toggleBtn.innerText = 'Click for Barplot';
                     layout.title = '<b>Iterations per Root for Linecircle Problem</b>';
                     layout.yaxis.title = 'Number of iterations per root';
                     layout.yaxis.dtick = 50;
@@ -640,7 +642,7 @@ cat << 'EOF' > index.html
 
             if (circle) {
                 document.getElementById('circleEq').innerText = 
-                    `${circle.a.toFixed(2)}(x² + y²) + (${circle.b.toFixed(2)})x + (${circle.c.toFixed(2)}) = 0`;
+                    `${circle.a.toFixed(2)}(x^2 + y^2) + (${circle.b.toFixed(2)})x + (${circle.c.toFixed(2)}) = 0`;
                 document.getElementById('circleCenter').innerText = `${circle.xc.toFixed(3)}, ${circle.yc.toFixed(3)}`;
                 document.getElementById('circleRadius').innerText = circle.r.toFixed(3);
             }
