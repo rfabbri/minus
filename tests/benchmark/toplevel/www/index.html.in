@@ -98,7 +98,7 @@
         <!-- Chicago Benchmark -->
         <a href="{{CHICAGO_HREF}}" class="benchmark-card">
             <div class="thumbnail">
-            <img class="thumbimg" src="figs/chicago14a.png" alt="Chicago trifocal problem"/>
+            <img class="thumbimg" src="figs/chicago.png" alt="Chicago trifocal problem"/>
             <!--    📷 -->
             </div>
             <div class="card-content">
@@ -112,7 +112,7 @@
         <a href="{{LINECIRCLE_HREF}}" class="benchmark-card">
 
             <div class="thumbnail">
-                ⭕
+            <img class="thumbimg" src="figs/linecircle.png" alt="Chicago trifocal problem"/>
             </div>
             <div class="card-content">
                 <h2>Linecircle</h2>
