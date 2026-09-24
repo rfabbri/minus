@@ -4,3 +4,6 @@ main_run_experiments=script-gammaotimo
 ./$main_run_experiments
 ./txt-stats
 ./generate-site
+
+set +x
+cp ./$main_run_experiments $exp/bak-$main_run_experiments

@@ -64,3 +64,8 @@ do
       cat temp.txt | grep -E '^LOG\(synthdata\) frames:|^LOG\(synthdata\) lines:' | cut -d':' -f 2 | $mysed -n '1,2p' >> frpt-P$i/frpt-$i.txt || :
     done
 done
+
+# backup the script
+mkdir $exp/bak
+cp "$0" $exp/bak
+echo "Chicago benchmark completed"

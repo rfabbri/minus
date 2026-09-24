@@ -27,7 +27,7 @@ generate_stats() {
 
     printf "%b\n" "${C_TITLE}MINUS Chicago Benchmark Results Summary${C_RESET}"
     echo "-------------------------------"
-    echo ""
+    echo
     printf "%b\n" "${C_TITLE}Per Configuration:${C_RESET}"
 
     # sort numerically by config id
@@ -45,7 +45,7 @@ generate_stats() {
     grand_sum=$(awk 'BEGIN{CONVFMT="%.0f"; OFMT="%.0f"} {sum += $1} END {printf "%.0f\n", sum}' all_steps.txt)
     grand_median=$(sort -n all_steps.txt | awk '{vals[NR]=$1} END {n=NR; if (n==0) print 0; else if (n%2==1) print vals[(n+1)/2]; else print (vals[n/2]+vals[n/2+1])/2}')
 
-    echo ""
+    echo
     printf "%b\n" "${C_TITLE}Grand Totals:${C_RESET}"
     printf "%b\n" "  Total Iteration Steps: ${C_SUM}${grand_sum}${C_RESET}"
     printf "%b\n" "  Grand Median Steps: ${C_MED}${grand_median}${C_RESET}"

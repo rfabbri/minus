@@ -54,4 +54,7 @@ for i in $(seq 1 140); do
   fi
 done
 
-echo "Linecircle benchmark completed 140 configurations."
+# backup the script
+mkdir $exp/bak
+cp "$0" $exp/bak
+echo "Linecircle benchmark completed"
