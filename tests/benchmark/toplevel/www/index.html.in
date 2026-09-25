@@ -103,6 +103,15 @@
         Commit: <code style="background:#e2e8f0; padding:2px 6px; border-radius:4px; color:#1a202c; font-weight:bold;">{{COMMIT_SHA_6}}</code> &bull; Last updated: <span>{{LAST_UPDATED}}</span>
     </p>
 
+    <div style="max-width: 820px; margin: -15px auto 40px auto; text-align: center; color: #4b5563; font-size: 15px; line-height: 1.6;">
+        <p style="margin: 0 0 10px 0;">
+            <a href="https://github.com/rfabbri/minus" target="_blank" style="color: #2563eb; font-weight: 600; text-decoration: none;">MiNuS</a> is the Minimal Problem Numerical Continuation Solver.
+        </p>
+        <p style="margin: 0; color: #6b7280; font-size: 14px;">
+            This benchmark is run upon every change made to branch <code>master</code> of MINUS. The goal is to compare different formulations, implementation strategies, hardware, and compilers.
+        </p>
+    </div>
+
     <div class="dashboard-container">
         
         <!-- Chicago Benchmark -->
@@ -115,7 +124,7 @@
                 <h2>Chicago</h2>
                 <p>Trifocal problem, 14x14 system with 312 degrees of nonlinearity. Tracks time spent in paths leading to undesired roots.</p>
                 <div class="status reliability-status">Reliability: {{CHICAGO_RELIABILITY}}%</div>
-                <div class="status time-status">{{CHICAGO_TIME}}</div>
+                <div class="status time-status">Time: {{CHICAGO_TIME}}</div>
             </div>
         </a>
 
@@ -130,12 +139,34 @@
                 <p>Minimal problem intersection solver tracking configurations and ground-truth validation across experiments.</p>
                 <div class="status reliability-status">Reliability:
                   {{LINECIRCLE_RELIABILITY}}%</div> 
-                <div class="status time-status">{{LINECIRCLE_TIME}}</div>
+                <div class="status time-status">Time: {{LINECIRCLE_TIME}}</div>
             </div>
         </a>
 
         <!-- Add more problem cards here as needed -->
         
+    </div>
+
+    <!-- References Section -->
+    <div style="max-width: 900px; margin: 55px auto 20px auto; background: white; border-radius: 12px; padding: 25px 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+        <h3 style="margin-top: 0; margin-bottom: 18px; color: #1e293b; font-size: 18px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">References</h3>
+        <ul style="list-style-type: none; padding-left: 0; margin: 0;">
+            <li style="font-size: 13.5px; line-height: 1.65; color: #334155; margin-bottom: 12px;">
+                <b><a class="publink" href="https://arxiv.org/abs/1903.09755" target="_blank" style="color: #1d4ed8; text-decoration: none;">Trifocal Relative Pose from Lines at Points</a></b>, 
+                <i>IEEE Transactions on Pattern Analysis and Machine Intelligence</i>, 2022, <i>CVPR 2020</i> (online March 23, 2019 4:29 UTC), 
+                Ricardo Fabbri, Timothy Duff, Hongyi Fan, Margaret Regan, David de Pinho (former MSc student), Elias Tsigaridas, Charles Wampler, Jonathan Hauenstein, Peter Giblin, Benjamin Kimia, Anton Leykin and Tomas Pajdla 
+                (<a href="stuff/fabbri-etal-trifocal-PAMI2022-accepted-arxiv.pdf" style="color: #2563eb;">pdf</a> |  
+                 <a href="https://github.com/rfabbri/minus" target="_blank" style="color: #2563eb;">code</a> | 
+                 <a href="http://multiview-3d-drawing.sf.net" target="_blank" style="color: #2563eb;">datasets</a> | 
+                 <a href="stuff/fabbri-kimia-etal-CVPR2020-bib.txt" style="color: #2563eb;">bib</a>)
+                <div style="margin-top: 6px;">
+                    <span style="display: inline-block; background-color: #dcfce7; color: #166534; font-weight: 700; font-size: 11px; padding: 2px 8px; border-radius: 4px; border: 1px solid #86efac; margin-right: 6px;">PAMI</span>
+                    <span style="font-size: 12.5px; color: #15803d; font-weight: 500;">
+                        Awarded: <a href="https://www.mathinstitutes.org/highlights/algebraic-computer-vision-advances-the-3d-reconstruction-of-curves-and-surfaces-from-multiple-views" target="_blank" style="color: #15803d; font-weight: 600; text-decoration: underline;">NSF Research Institute Highlight</a>
+                    </span>
+                </div>
+            </li>
+        </ul>
     </div>
 
 </body>
