@@ -3,8 +3,8 @@ set -e
 set -uo pipefail
 
 # User: edit here --------------------------------------------------------------
-nconfigs=3
-nruns_per_config=5
+nconfigs=100
+nruns_per_config=4
 # ------------------------------------------------------------------------------
 
 . ../../common.incl

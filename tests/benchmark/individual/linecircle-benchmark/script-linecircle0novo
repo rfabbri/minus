@@ -57,5 +57,5 @@ done
 
 # backup the script
 mkdir -p bak
-cp "$0" bak/
+cp ".$0" bak/
 echo "Linecircle benchmark completed"

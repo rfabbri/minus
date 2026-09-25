@@ -383,7 +383,7 @@ cat << 'EOF' > index.html
                 y: successY,
                 type: 'scatter',
                 mode: 'lines+markers',
-                name: 'Success Rate (%)',
+                name: 'Reliability (%)',
                 yaxis: 'y2',
                 line: { color: 'orange', width: 2 },
                 marker: { size: 6, color: 'orange' },
@@ -440,7 +440,7 @@ cat << 'EOF' > index.html
                 gridcolor: '#eee'
             },
             yaxis2: {
-                title: 'Success Rate (%)',
+                title: 'Reliability (%)',
                 overlaying: 'y',
                 side: 'right',
                 anchor: 'x',

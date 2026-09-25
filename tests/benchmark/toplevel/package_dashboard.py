@@ -173,7 +173,7 @@ def main():
                         type: 'scatter',
                         mode: 'lines+markers',
                         marker: {{size: 8, color: 'rgba(230, 126, 34, 0.7)'}},
-                        line: {{width: 2.5, color: 'rgba(211, 84, 0, 0.7)'}},
+                        line: {{width: 4, color: 'rgba(242, 169, 59, 0.8)'}},
                         name: 'Reliability',
                         yaxis: 'y2',
                         hovertemplate: '<b>Commit %{{x}}</b><br>Reliability: %{{y:.1f}}%<extra></extra>'
@@ -199,8 +199,8 @@ def main():
                           range: [0, 105],
                           showgrid: false,
                           automargin: true,
-                          titlefont: {{ color: 'rgb(211, 84, 0)' }},
-                          tickfont: {{ color: 'rgb(211, 84, 0)' }}
+                          titlefont: {{ color: 'organge' }},
+                          tickfont: {{ color: 'orange' }}
                       }};
                   }}
                   
@@ -406,9 +406,9 @@ def main():
         # 1 step ~ 1 microsecond (10^-6 s)
         time_us = med * num_solutions
         if time_us >= 1000:
-            return f"Time: ~{time_us / 1000.0:.1f}ms"
+            return f"~{time_us / 1000.0:.1f}ms"
         else:
-            return f"Time: ~{time_us:.0f}&mu;s"
+            return f"~{time_us:.0f}&mu;s"
 
     chicago_time_str = compute_time_str("chicago", 312)
     linecircle_time_str = compute_time_str("linecircle", 4)
