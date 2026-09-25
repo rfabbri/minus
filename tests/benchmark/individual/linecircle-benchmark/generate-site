@@ -320,9 +320,44 @@ cat << 'EOF' > index.html
                     }
                 },
                 hoverinfo: 'y',
+                showlegend: false,
                 customdata: [item.config, item.circle, item.line, item.points]
             });
         });
+
+        const blueLegendTrace = {
+            x: [null],
+            y: [null],
+            name: 'Number of runs',
+            marker: { 
+                color: '#3498db', 
+                size: 12, 
+                symbol: 'square',
+                line: { color: '#2980b9', width: 1 }
+            },
+            mode: 'markers',
+            type: 'scatter',
+            showlegend: true,
+            hoverinfo: 'none'
+        };
+
+        const redLegendTrace = {
+            x: [null],
+            y: [null],
+            name: 'Problem failed',
+            marker: { 
+                color: '#e74c3c', 
+                size: 12, 
+                symbol: 'square',
+                line: { color: '#c0392b', width: 1 }
+            },
+            mode: 'markers',
+            type: 'scatter',
+            showlegend: true,
+            hoverinfo: 'none'
+        };
+        barTraces.push(blueLegendTrace);
+        barTraces.push(redLegendTrace);
 
         const medianShapes = [
             {
@@ -407,6 +442,8 @@ cat << 'EOF' > index.html
                     layout.yaxis.dtick = null;
                     layout.shapes = [];
                     layout.annotations = [];
+                    layout.showlegend = true;
+                    layout.legend = { orientation: 'h', y: 1.1 };
                     Plotly.react('myDiv', barTraces, layout, {responsive: true});
                 } else {
                     toggleBtn.innerText = 'Click for Barplot';
@@ -415,6 +452,7 @@ cat << 'EOF' > index.html
                     layout.yaxis.dtick = 50;
                     layout.shapes = medianShapes;
                     layout.annotations = medianAnnotations;
+                    layout.showlegend = false;
                     Plotly.react('myDiv', traces, layout, {responsive: true});
                 }
             });
