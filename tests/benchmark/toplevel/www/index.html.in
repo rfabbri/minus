@@ -104,7 +104,7 @@
             <div class="card-content">
                 <h2>Chicago</h2>
                 <p>Trifocal problem, 14x14 system with 312 degrees of nonlinearity. Tracks time spent in paths leading to undesired roots.</p>
-                <div class="status">Phase 0 Ready</div>
+                <div class="status">Reliability: {{CHICAGO_RELIABILITY}}%</div>
             </div>
         </a>
 
@@ -117,7 +117,7 @@
             <div class="card-content">
                 <h2>Linecircle</h2>
                 <p>Minimal problem intersection solver tracking configurations and ground-truth validation across experiments.</p>
-                <div class="status">Phase 1 Ready</div>
+                <div class="status">Reliability: {{LINECIRCLE_RELIABILITY}}%</div>
             </div>
         </a>
 

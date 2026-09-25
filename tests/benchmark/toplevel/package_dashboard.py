@@ -400,12 +400,16 @@ def main():
     # 6.a Local Generation (write back to www/index.html)
     local_html = template.replace('{{CHICAGO_HREF}}', '../../individual/chicago-benchmark/tmp/index.html')
     local_html = local_html.replace('{{LINECIRCLE_HREF}}', '../../individual/linecircle-benchmark/tmp/index.html')
+    local_html = local_html.replace('{{CHICAGO_RELIABILITY}}', f"{robustness.get('chicago', 0):.1f}")
+    local_html = local_html.replace('{{LINECIRCLE_RELIABILITY}}', f"{robustness.get('linecircle', 0):.1f}")
     with open(os.path.join(toplevel_dir, "www", "index.html"), "w") as f:
         f.write(local_html)
         
     # 6.b Public Generation (write to public/index.html)
     pub_html = template.replace('{{CHICAGO_HREF}}', './chicago-benchmark/tmp/index.html')
     pub_html = pub_html.replace('{{LINECIRCLE_HREF}}', './linecircle-benchmark/tmp/index.html')
+    pub_html = pub_html.replace('{{CHICAGO_RELIABILITY}}', f"{robustness.get('chicago', 0):.1f}")
+    pub_html = pub_html.replace('{{LINECIRCLE_RELIABILITY}}', f"{robustness.get('linecircle', 0):.1f}")
     with open(os.path.join(public_dir, "index.html"), "w") as f:
         f.write(pub_html)
         
