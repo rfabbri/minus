@@ -5,6 +5,7 @@ import json
 import shutil
 import subprocess
 import re
+import gzip
 
 def main():
     repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
@@ -224,6 +225,16 @@ def main():
                     djs = re.sub(r'const grandMedian\s*=\s*[\d\.]+;', f'const grandMedian = {rec_med};', djs)
                     with open(djs_path, "w") as f:
                         f.write(djs)
+                dgz_path = os.path.join(p_dir, d_name, "data.json.gz")
+                if os.path.exists(dgz_path):
+                    try:
+                        with gzip.open(dgz_path, "rt", encoding="utf-8") as gf:
+                            djson = json.load(gf)
+                        djson["grandMedian"] = rec_med
+                        with gzip.open(dgz_path, "wt", encoding="utf-8") as gf:
+                            json.dump(djson, gf)
+                    except Exception:
+                        pass
 
             idx_path = os.path.join(p_dir, d_name, "index.html")
             if os.path.exists(idx_path):
