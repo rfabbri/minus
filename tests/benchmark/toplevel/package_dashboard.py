@@ -397,19 +397,35 @@ def main():
     template = template.replace('{{COMMIT_SHA_6}}', commit_6)
     template = template.replace('{{LAST_UPDATED}}', update_date)
     
+    # Helper to calculate estimated time: Grand median steps * complex solutions * 10^-6 (seconds)
+    # Then express in microseconds (or ms if >= 1000us)
+    def compute_time_str(problem_name, num_solutions):
+        med = medians.get(problem_name)
+        if not med:
+            return ""
+        # 1 step ~ 1 microsecond (10^-6 s)
+        time_us = med * num_solutions
+        if time_us >= 1000:
+            return f" &bull; Time: ~{time_us / 1000.0:.1f}ms"
+        else:
+            return f" &bull; Time: ~{time_us:.0f}&mu;s"
+
+    chicago_time_str = compute_time_str("chicago", 312)
+    linecircle_time_str = compute_time_str("linecircle", 4)
+
     # 6.a Local Generation (write back to www/index.html)
     local_html = template.replace('{{CHICAGO_HREF}}', '../../individual/chicago-benchmark/tmp/index.html')
     local_html = local_html.replace('{{LINECIRCLE_HREF}}', '../../individual/linecircle-benchmark/tmp/index.html')
-    local_html = local_html.replace('{{CHICAGO_RELIABILITY}}', f"{robustness.get('chicago', 0):.1f}")
-    local_html = local_html.replace('{{LINECIRCLE_RELIABILITY}}', f"{robustness.get('linecircle', 0):.1f}")
+    local_html = local_html.replace('{{CHICAGO_RELIABILITY}}%', f"{robustness.get('chicago', 0):.1f}%{chicago_time_str}")
+    local_html = local_html.replace('{{LINECIRCLE_RELIABILITY}}%', f"{robustness.get('linecircle', 0):.1f}%{linecircle_time_str}")
     with open(os.path.join(toplevel_dir, "www", "index.html"), "w") as f:
         f.write(local_html)
         
     # 6.b Public Generation (write to public/index.html)
     pub_html = template.replace('{{CHICAGO_HREF}}', './chicago-benchmark/tmp/index.html')
     pub_html = pub_html.replace('{{LINECIRCLE_HREF}}', './linecircle-benchmark/tmp/index.html')
-    pub_html = pub_html.replace('{{CHICAGO_RELIABILITY}}', f"{robustness.get('chicago', 0):.1f}")
-    pub_html = pub_html.replace('{{LINECIRCLE_RELIABILITY}}', f"{robustness.get('linecircle', 0):.1f}")
+    pub_html = pub_html.replace('{{CHICAGO_RELIABILITY}}%', f"{robustness.get('chicago', 0):.1f}%{chicago_time_str}")
+    pub_html = pub_html.replace('{{LINECIRCLE_RELIABILITY}}%', f"{robustness.get('linecircle', 0):.1f}%{linecircle_time_str}")
     with open(os.path.join(public_dir, "index.html"), "w") as f:
         f.write(pub_html)
         
