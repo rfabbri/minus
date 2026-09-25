@@ -105,7 +105,7 @@
 
     <div style="max-width: 820px; margin: -15px auto 40px auto; text-align: center; color: #4b5563; font-size: 15px; line-height: 1.6;">
         <p style="margin: 0 0 10px 0;">
-            <a href="https://github.com/rfabbri/minus" target="_blank" style="color: #2563eb; font-weight: 600; text-decoration: none;">MiNuS</a> is the Minimal Problem Numerical Continuation Solver.
+            <a href="https://github.com/rfabbri/minus" target="_blank" style="color: #2563eb; font-weight: 600; text-decoration: none;">MiNuS</a> is the Minimal Problem Numerical Continuation Solver
         </p>
         <p style="margin: 0; color: #6b7280; font-size: 14px;">
             This interactive benchmark is run upon every change made to branch
@@ -127,7 +127,12 @@
             </div>
             <div class="card-content">
                 <h2>Chicago</h2>
-                <p>Trifocal problem, 14x14 system with 312 degrees of nonlinearity. Tracks time spent in paths leading to undesired roots.</p>
+                <p>Trifocal 14x14 system with 312 degrees of nonlinearity,
+                in terms of two homogeneous quaternions (Cayley) and
+                two translation vectors up to a global scale. Fully randomized
+                and algebraic.<br />
+                <i>Ideal goal:</i> hundreds of &mu;s per solve keeping reliability
+                above 95%.</p>
                 <div class="status reliability-status">Reliability: {{CHICAGO_RELIABILITY}}%</div>
                 <div class="status time-status">Time: {{CHICAGO_TIME}}</div>
             </div>
@@ -141,15 +146,18 @@
             </div>
             <div class="card-content">
                 <h2>Linecircle</h2>
-                <p>Minimal problem intersection solver tracking configurations and ground-truth validation across experiments.</p>
-                <div class="status reliability-status">Reliability:
+                <p>A 2x2 system intersecting a line and a circle. The circle is
+                restricted to lie on the x axis to simulate equal coefficients,
+                which correspond to a single parameter. 
+                Only a simple, non-randomized and non-normalized
+                straightforward implementation is currently tested, as a baseline.</p> <div class="status
+                  reliability-status">Reliability:
                   {{LINECIRCLE_RELIABILITY}}%</div> 
                 <div class="status time-status">Time: {{LINECIRCLE_TIME}}</div>
             </div>
         </a>
 
         <!-- Add more problem cards here as needed -->
-        
     </div>
 
     <!-- References Section -->
