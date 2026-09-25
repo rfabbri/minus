@@ -83,6 +83,16 @@
             border-radius: 20px;
             font-size: 12px;
             font-weight: bold;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        .time-status {
+            background-color: #eff6ff;
+            color:#1d4ed8;
+        }
+        .reliability-status {
+            background-color: #e8f5e9;
+            color: #2e7d32;
         }
     </style>
 </head>
@@ -104,7 +114,8 @@
             <div class="card-content">
                 <h2>Chicago</h2>
                 <p>Trifocal problem, 14x14 system with 312 degrees of nonlinearity. Tracks time spent in paths leading to undesired roots.</p>
-                <div class="status">Reliability: {{CHICAGO_RELIABILITY}}%</div>
+                <div class="status reliability-status">Reliability: {{CHICAGO_RELIABILITY}}%</div>
+                <div class="status time-status">{{CHICAGO_TIME}}</div>
             </div>
         </a>
 
@@ -117,7 +128,9 @@
             <div class="card-content">
                 <h2>Linecircle</h2>
                 <p>Minimal problem intersection solver tracking configurations and ground-truth validation across experiments.</p>
-                <div class="status">Reliability: {{LINECIRCLE_RELIABILITY}}%</div>
+                <div class="status reliability-status">Reliability:
+                  {{LINECIRCLE_RELIABILITY}}%</div> 
+                <div class="status time-status">{{LINECIRCLE_TIME}}</div>
             </div>
         </a>
 
