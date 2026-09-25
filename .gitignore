@@ -227,3 +227,6 @@ tests/benchmark/toplevel/history.json
 tests/benchmark/individual/*-benchmark/*-run
 tests/benchmark/toplevel/www/index.html
 
+*.swn
+tests/benchmark/toplevel/www/figs/linecircle2.png
+test_chicago.sh
